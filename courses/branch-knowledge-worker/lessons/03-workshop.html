@@ -1,0 +1,102 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从会议原句到六字段行动表</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">知识工作分支 · 知识工作者延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="从会议原句到六字段行动表"></span><h1 data-heading-alias="从会议原句到六字段行动表" id="h03476cb48ca5">从会议原句到六字段行动表</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h8a4803a76954">单元一：按原练习资料处理</a></li><li><a href="#hf007f03222b7">单元二：完整答案和核对过程</a></li><li><a href="#h2bdb07fc05db">单元三：连接器的完整工作过程</a></li><li><a href="#h3fae46e278cc">单元四：自动化为何需要人工关卡</a></li><li><a href="#hc6e63aff78cc">课末提交与验收</a></li></ul></aside>
+<span id="单元一按原练习资料处理"></span><h2 data-heading-alias="单元一按原练习资料处理" id="h8a4803a76954">单元一：按原练习资料处理</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>原题包含周五发布说明页、小林整理常见问题但期限未定、客服主管9月3日前确认回复范本，以及是否全客户寄信待定。完整答案的 original_meeting 保留这些原句和四行结果。报名表版本是换场景练习；完成原题时，以这里的会议原句为准。</p>
+<p>Decision 是已经决定的事，ActionItem 是要做的工作，Owner 是明确负责人，DueDate 是确切或未确认的期限，SourceSentence 是原句，NeedsConfirmation 列尚缺信息。小林整理 FAQ 的期限不能从上一句“周五发布”自动继承；9月3日缺年份不能擅自补今年；尚未决定寄信不能变成已批准发送。</p>
+<span id="单元二完整答案和核对过程"></span><h2 data-heading-alias="单元二完整答案和核对过程" id="hf007f03222b7">单元二：完整答案和核对过程</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-json">{
+  &quot;actions&quot;: [
+    {
+      &quot;Decision&quot;: &quot;先做原型、不发布正式版本&quot;,
+      &quot;ActionItem&quot;: &quot;整理报名字段&quot;,
+      &quot;Owner&quot;: &quot;小林&quot;,
+      &quot;DueDate&quot;: &quot;周五，具体年月日待确认&quot;,
+      &quot;SourceSentence&quot;: &quot;m1,m2,m3&quot;,
+      &quot;NeedsConfirmation&quot;: [
+        &quot;会议日期&quot;,
+        &quot;周五对应日期&quot;
+      ]
+    },
+    {
+      &quot;Decision&quot;: &quot;预算尚未确认&quot;,
+      &quot;ActionItem&quot;: &quot;确认预算结果&quot;,
+      &quot;Owner&quot;: &quot;待确认&quot;,
+      &quot;DueDate&quot;: &quot;待确认&quot;,
+      &quot;SourceSentence&quot;: &quot;m3&quot;,
+      &quot;NeedsConfirmation&quot;: [
+        &quot;财务确认人&quot;,
+        &quot;预算金额&quot;,
+        &quot;完成时间&quot;
+      ]
+    }
+  ],
+  &quot;conflict_case&quot;: {
+    &quot;record_a&quot;: &quot;虚构补充 A：周五交付&quot;,
+    &quot;record_b&quot;: &quot;虚构补充 B：周四交付&quot;,
+    &quot;result&quot;: &quot;记录冲突，保留两条来源，请负责人确认；不根据文件名新旧决定&quot;
+  },
+  &quot;review&quot;: [
+    &quot;小林是负责人，小周是接收人，不能交换&quot;,
+    &quot;未将预算写成已批准&quot;,
+    &quot;没有发送或创建任务&quot;
+  ],
+  &quot;original_meeting&quot;: {
+    &quot;source&quot;: &quot;团队决定周五先发布说明页。小林会整理常见问题，但没有写期限。客服主管要在9月3日前确认回复范本。是否寄信给全部客户，会议后再决定。&quot;,
+    &quot;table&quot;: [
+      {
+        &quot;Decision&quot;: &quot;周五先发布说明页&quot;,
+        &quot;ActionItem&quot;: &quot;准备发布说明页&quot;,
+        &quot;Owner&quot;: &quot;未知&quot;,
+        &quot;DueDate&quot;: &quot;周五，具体日期未知&quot;,
+        &quot;SourceSentence&quot;: &quot;团队决定周五先发布说明页。&quot;,
+        &quot;NeedsConfirmation&quot;: &quot;是：负责人、周五具体日期&quot;
+      },
+      {
+        &quot;Decision&quot;: &quot;整理常见问题&quot;,
+        &quot;ActionItem&quot;: &quot;整理常见问题&quot;,
+        &quot;Owner&quot;: &quot;小林&quot;,
+        &quot;DueDate&quot;: &quot;未知&quot;,
+        &quot;SourceSentence&quot;: &quot;小林会整理常见问题，但没有写期限。&quot;,
+        &quot;NeedsConfirmation&quot;: &quot;是：期限&quot;
+      },
+      {
+        &quot;Decision&quot;: &quot;确认回复范本&quot;,
+        &quot;ActionItem&quot;: &quot;确认回复范本&quot;,
+        &quot;Owner&quot;: &quot;客服主管&quot;,
+        &quot;DueDate&quot;: &quot;9月3日前，年份未知&quot;,
+        &quot;SourceSentence&quot;: &quot;客服主管要在9月3日前确认回复范本。&quot;,
+        &quot;NeedsConfirmation&quot;: &quot;是：年份与负责人身份&quot;
+      },
+      {
+        &quot;Decision&quot;: &quot;是否全客户寄信尚未决定&quot;,
+        &quot;ActionItem&quot;: &quot;会议后确认是否寄信&quot;,
+        &quot;Owner&quot;: &quot;未知&quot;,
+        &quot;DueDate&quot;: &quot;未知&quot;,
+        &quot;SourceSentence&quot;: &quot;是否寄信给全部客户，会议后再决定。&quot;,
+        &quot;NeedsConfirmation&quot;: &quot;是：决定、负责人和期限&quot;
+      }
+    ],
+    &quot;human_review&quot;: [
+      &quot;逐句核对来源&quot;,
+      &quot;负责人未补猜&quot;,
+      &quot;周五与年份未推断&quot;,
+      &quot;无真实敏感资料&quot;,
+      &quot;收件人未确定且未发送&quot;
+    ]
+  }
+}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>2</td><td><code>  &quot;actions&quot;: [</code></td><td>保存当前对象的 actions 字段，按本例题目或配置读取。</td></tr><tr><td>3</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>4</td><td><code>      &quot;Decision&quot;: &quot;先做原型、不发布正式版本&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>5</td><td><code>      &quot;ActionItem&quot;: &quot;整理报名字段&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>6</td><td><code>      &quot;Owner&quot;: &quot;小林&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>7</td><td><code>      &quot;DueDate&quot;: &quot;周五，具体年月日待确认&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>8</td><td><code>      &quot;SourceSentence&quot;: &quot;m1,m2,m3&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>9</td><td><code>      &quot;NeedsConfirmation&quot;: [</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>10</td><td><code>        &quot;会议日期&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>11</td><td><code>        &quot;周五对应日期&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>12</td><td><code>      ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>13</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>14</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>15</td><td><code>      &quot;Decision&quot;: &quot;预算尚未确认&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>16</td><td><code>      &quot;ActionItem&quot;: &quot;确认预算结果&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>17</td><td><code>      &quot;Owner&quot;: &quot;待确认&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>18</td><td><code>      &quot;DueDate&quot;: &quot;待确认&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>19</td><td><code>      &quot;SourceSentence&quot;: &quot;m3&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>20</td><td><code>      &quot;NeedsConfirmation&quot;: [</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>21</td><td><code>        &quot;财务确认人&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>22</td><td><code>        &quot;预算金额&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>23</td><td><code>        &quot;完成时间&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>24</td><td><code>      ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>25</td><td><code>    }</code></td><td>结束当前对象或数组。</td></tr><tr><td>26</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>27</td><td><code>  &quot;conflict_case&quot;: {</code></td><td>保存当前对象的 conflict_case 字段，按本例题目或配置读取。</td></tr><tr><td>28</td><td><code>    &quot;record_a&quot;: &quot;虚构补充 A：周五交付&quot;,</code></td><td>保存当前对象的 record_a 字段，按本例题目或配置读取。</td></tr><tr><td>29</td><td><code>    &quot;record_b&quot;: &quot;虚构补充 B：周四交付&quot;,</code></td><td>保存当前对象的 record_b 字段，按本例题目或配置读取。</td></tr><tr><td>30</td><td><code>    &quot;result&quot;: &quot;记录冲突，保留两条来源，请负责人确认；不根据文件名新旧决定&quot;</code></td><td>保存当前对象的 result 字段，按本例题目或配置读取。</td></tr><tr><td>31</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>32</td><td><code>  &quot;review&quot;: [</code></td><td>保存当前对象的 review 字段，按本例题目或配置读取。</td></tr><tr><td>33</td><td><code>    &quot;小林是负责人，小周是接收人，不能交换&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>34</td><td><code>    &quot;未将预算写成已批准&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>35</td><td><code>    &quot;没有发送或创建任务&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>36</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>37</td><td><code>  &quot;original_meeting&quot;: {</code></td><td>保存当前对象的 original_meeting 字段，按本例题目或配置读取。</td></tr><tr><td>38</td><td><code>    &quot;source&quot;: &quot;团队决定周五先发布说明页。小林会整理常见问题，但没有写期限。客服主管要在9月3日前确认回复范本。是否寄信给全部客户，会议后再决定。&quot;,</code></td><td>保存当前对象的 source 字段，按本例题目或配置读取。</td></tr><tr><td>39</td><td><code>    &quot;table&quot;: [</code></td><td>保存当前对象的 table 字段，按本例题目或配置读取。</td></tr><tr><td>40</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>41</td><td><code>        &quot;Decision&quot;: &quot;周五先发布说明页&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>42</td><td><code>        &quot;ActionItem&quot;: &quot;准备发布说明页&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>43</td><td><code>        &quot;Owner&quot;: &quot;未知&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>44</td><td><code>        &quot;DueDate&quot;: &quot;周五，具体日期未知&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>45</td><td><code>        &quot;SourceSentence&quot;: &quot;团队决定周五先发布说明页。&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>46</td><td><code>        &quot;NeedsConfirmation&quot;: &quot;是：负责人、周五具体日期&quot;</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>47</td><td><code>      },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>48</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>49</td><td><code>        &quot;Decision&quot;: &quot;整理常见问题&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>50</td><td><code>        &quot;ActionItem&quot;: &quot;整理常见问题&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>51</td><td><code>        &quot;Owner&quot;: &quot;小林&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>52</td><td><code>        &quot;DueDate&quot;: &quot;未知&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>53</td><td><code>        &quot;SourceSentence&quot;: &quot;小林会整理常见问题，但没有写期限。&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>54</td><td><code>        &quot;NeedsConfirmation&quot;: &quot;是：期限&quot;</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>55</td><td><code>      },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>56</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>57</td><td><code>        &quot;Decision&quot;: &quot;确认回复范本&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>58</td><td><code>        &quot;ActionItem&quot;: &quot;确认回复范本&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>59</td><td><code>        &quot;Owner&quot;: &quot;客服主管&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>60</td><td><code>        &quot;DueDate&quot;: &quot;9月3日前，年份未知&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>61</td><td><code>        &quot;SourceSentence&quot;: &quot;客服主管要在9月3日前确认回复范本。&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>62</td><td><code>        &quot;NeedsConfirmation&quot;: &quot;是：年份与负责人身份&quot;</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>63</td><td><code>      },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>64</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>65</td><td><code>        &quot;Decision&quot;: &quot;是否全客户寄信尚未决定&quot;,</code></td><td>记录明确作出的决定。</td></tr><tr><td>66</td><td><code>        &quot;ActionItem&quot;: &quot;会议后确认是否寄信&quot;,</code></td><td>记录待执行的动作。</td></tr><tr><td>67</td><td><code>        &quot;Owner&quot;: &quot;未知&quot;,</code></td><td>记录明确的负责人。</td></tr><tr><td>68</td><td><code>        &quot;DueDate&quot;: &quot;未知&quot;,</code></td><td>记录截止日期；资料不足时保留待确认。</td></tr><tr><td>69</td><td><code>        &quot;SourceSentence&quot;: &quot;是否寄信给全部客户，会议后再决定。&quot;,</code></td><td>保留支持此项的原句。</td></tr><tr><td>70</td><td><code>        &quot;NeedsConfirmation&quot;: &quot;是：决定、负责人和期限&quot;</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>71</td><td><code>      }</code></td><td>结束当前对象或数组。</td></tr><tr><td>72</td><td><code>    ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>73</td><td><code>    &quot;human_review&quot;: [</code></td><td>保存当前对象的 human_review 字段，按本例题目或配置读取。</td></tr><tr><td>74</td><td><code>      &quot;逐句核对来源&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>75</td><td><code>      &quot;负责人未补猜&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>76</td><td><code>      &quot;周五与年份未推断&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>77</td><td><code>      &quot;无真实敏感资料&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>78</td><td><code>      &quot;收件人未确定且未发送&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>79</td><td><code>    ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>80</td><td><code>  }</code></td><td>结束当前对象或数组。</td></tr><tr><td>81</td><td><code>}</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details><p>每一行回到来源：先确认是不是决定，再找动作、执行人和期限。缺的填未知，在待确认中写清缺什么；不能为了表格美观补齐。标题为“收件人”的名字也不一定是负责人。资料冲突时同时保留两条来源，请责任人决定，不用文件名排序替代事实判断。</p>
+<span id="单元三连接器的完整工作过程"></span><h2 data-heading-alias="单元三连接器的完整工作过程" id="h2bdb07fc05db">单元三：连接器的完整工作过程</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>手工贴一段授权资料适合一次性任务。重复需要搜索组织文件时，再由组织允许的连接器接入。连接包含身份授权、内容可见范围、同步或实时检索、引用与更新。ChatGPT Apps、Claude 连接目录、Gemini Connected Apps 与 Copilot connectors 的入口不同，但都要核对已有权限、管理员设置、所需许可和来源时效，不能从“连接成功”推导“能读所有资料”。</p>
+<p>查不到资料按顺序检查：能否在原系统直接打开；项目/标题/日期是否限定清楚；连接器是否启用；索引是否已同步。找不到就报告，不能凭模型记忆补组织事实。撤销连接不一定自动删除先前保存的摘要，需检查副本。</p>
+<p>MCP Registry 提供服务器发现与元数据，不替每个程序做可信认证。只有确需自定义或跨客户端连接才加 MCP，简单会议整理不用额外部署服务器。</p>
+<span id="单元四自动化为何需要人工关卡"></span><h2 data-heading-alias="单元四自动化为何需要人工关卡" id="h3fae46e278cc">单元四：自动化为何需要人工关卡</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>Zapier、Make、n8n、Power Automate 等流程通常由 trigger 启动，然后做字段映射和一个或多个 action。先用虚构样本逐步测试：读取消息 → 生成表格草稿 → 验证字段和来源 → 人审 → 才考虑写入。没有通过人审时，只保存草稿。</p>
+<p>重复事件需要唯一事件 ID，避免同一消息写两次；写回原系统可能再次触发自己，必须排除自发事件或限制循环。失败要能指出在哪一步和如何重试，不把整个链从头无条件再执行。自托管只说明运行平台在自己控制下；模型、embedding 或连接器仍可能把资料发到其他服务。</p>
+<span id="课末提交与验收"></span><h2 data-heading-alias="课末提交与验收" id="hc6e63aff78cc">课末提交与验收</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-knowledge-worker/examples/check_work.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-knowledge-worker/examples/check_work.py /tmp/meeting-work.json
+</code></pre>
+<p>必过条件：原题四项信息均保留；每行有原句；负责人和期限不补猜；寄信状态仍待定；有来源/负责人/期限/敏感数据/收件人的人审清单；没有真实发送。程序只检结构，最终按这六项逐行确认。延迟复习换成周报汇总，仍分事实、建议、待确认。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 知识工作者分支阅读整合</a><a href="99-exercises.html">知识工作者分支课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

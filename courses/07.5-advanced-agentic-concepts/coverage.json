@@ -1,0 +1,38 @@
+[
+  {
+    "requirement": "Harness工程：原则与本地任务链",
+    "lesson": "lessons/03-workshop.html#hf1fba43652d6",
+    "example": "text/03-workshop.md",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  },
+  {
+    "requirement": "四个核心概念",
+    "lesson": "lessons/03-workshop.html#he64e66b2cfd0",
+    "example": "examples/ablation.py",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  },
+  {
+    "requirement": "失败注入与删除实验",
+    "lesson": "lessons/03-workshop.html#h29a06a884aa1",
+    "example": "examples/ablation.py",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  },
+  {
+    "requirement": "决策记录完整答案",
+    "lesson": "lessons/03-workshop.html#h848d4baf083e",
+    "example": "examples/decision.py",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  },
+  {
+    "requirement": "长期任务与研究边界：概念判断",
+    "lesson": "lessons/03-workshop.html#h77faaa6968c2",
+    "example": "text/02-readings.md",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  },
+  {
+    "requirement": "迁移与验收",
+    "lesson": "lessons/03-workshop.html#h8489468240b6",
+    "example": "examples/ablation.py",
+    "assessment": "lessons/03-workshop.html#h8489468240b6"
+  }
+]

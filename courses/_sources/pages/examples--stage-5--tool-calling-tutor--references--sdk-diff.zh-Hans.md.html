@@ -1,0 +1,140 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>sdk-diff.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="sdk-diffanthropic-与-openai-compatible"></span><h1 data-heading-alias="sdk-diffanthropic-与-openai-compatible" id="h9213e785cde6">SDK Diff：Anthropic 与 OpenAI-compatible</h1>
+<blockquote>
+<p>同一个 tool loop，外包装不同。先认清字段，再验证 model 提供的 args。</p>
+</blockquote>
+<span id="先看差在哪里"></span><h2 data-heading-alias="先看差在哪里" id="h172732ee27e2">先看差在哪里</h2>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>Anthropic SDK</th>
+<th>OpenAI-compatible SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool schema</td>
+<td><code>{name, description, input_schema}</code></td>
+<td><code>{&quot;type&quot;:&quot;function&quot;,&quot;function&quot;:{name, description, parameters}}</code></td>
+</tr>
+<tr>
+<td>Tool call</td>
+<td><code>tool_use</code> content block</td>
+<td><code>message.tool_calls</code></td>
+</tr>
+<tr>
+<td>Args</td>
+<td><code>call.input</code> 是 dict</td>
+<td><code>call.function.arguments</code> 是 JSON string</td>
+</tr>
+<tr>
+<td>Tool result ID</td>
+<td><code>tool_use_id</code></td>
+<td><code>tool_call_id</code></td>
+</tr>
+<tr>
+<td>常见完成信号</td>
+<td><code>stop_reason == &quot;end_turn&quot;</code></td>
+<td><code>finish_reason == &quot;stop&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>不同 provider 或版本可能增加其他值。使用前要查看当前官方文档，并保存原始 response 方便 debug。</p>
+<span id="两边都要有的安全护栏"></span><h2 data-heading-alias="两边都要有的安全护栏" id="h459a43c8b946">两边都要有的安全护栏</h2>
+<p>Schema 是提示，不是防火墙。先做 <strong>allowlist（只准名单）</strong> 和参数验证，再执行工具。</p>
+<pre><code class="language-python">import json
+
+MAX_STEPS = 5
+ALLOWED_TOOLS = {&quot;get_weather&quot;}
+
+def validate_args(name, args):
+    if name not in ALLOWED_TOOLS:
+        raise ValueError(f&quot;tool not allowed: {name}&quot;)
+    if not isinstance(args, dict):
+        raise ValueError(&quot;args must be an object&quot;)
+    city = args.get(&quot;city&quot;)
+    if not isinstance(city, str) or not city.strip():
+        raise ValueError(&quot;city must be a non-empty string&quot;)
+    return {&quot;city&quot;: city.strip()}
+
+def call_tool(name, args):
+    clean_args = validate_args(name, args)
+    return TOOL_IMPL[name](**clean_args)
+
+def expected_error(exc):
+    return json.dumps({&quot;ok&quot;: False, &quot;error&quot;: str(exc)}, ensure_ascii=False)
+</code></pre>
+<p>只把预期的输入错误转换成结构化结果。未预期的异常要记录并清楚失败，不能偷偷吞掉。</p>
+<span id="anthropic有上限的-loop"></span><h2 data-heading-alias="anthropic有上限的-loop" id="h8fffeb97b07c">Anthropic：有上限的 loop</h2>
+<pre><code class="language-python">messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;台北现在有下雨吗？&quot;}]
+
+for step in range(MAX_STEPS):
+    resp = client.messages.create(
+        model=MODEL, max_tokens=1024, tools=TOOLS, messages=messages
+    )
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: resp.content})
+
+    calls = [block for block in resp.content if block.type == &quot;tool_use&quot;]
+    if resp.stop_reason == &quot;end_turn&quot; and not calls:
+        break
+
+    tool_results = []
+    for call in calls:
+        try:
+            result = call_tool(call.name, call.input)
+            content = json.dumps({&quot;ok&quot;: True, &quot;result&quot;: result}, ensure_ascii=False)
+        except ValueError as exc:
+            content = expected_error(exc)
+        tool_results.append({
+            &quot;type&quot;: &quot;tool_result&quot;,
+            &quot;tool_use_id&quot;: call.id,
+            &quot;content&quot;: content,
+        })
+
+    if not tool_results:
+        raise RuntimeError(f&quot;unexpected stop_reason: {resp.stop_reason}&quot;)
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+else:
+    raise RuntimeError(&quot;tool loop reached MAX_STEPS&quot;)
+</code></pre>
+<span id="openai-compatible有上限的-loop"></span><h2 data-heading-alias="openai-compatible有上限的-loop" id="had3e13bc1901">OpenAI-compatible：有上限的 loop</h2>
+<pre><code class="language-python">messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;台北现在有下雨吗？&quot;}]
+
+for step in range(MAX_STEPS):
+    resp = client.chat.completions.create(
+        model=MODEL, tools=TOOLS, messages=messages
+    )
+    msg = resp.choices[0].message
+    messages.append(msg.model_dump(exclude_none=True))
+
+    if not msg.tool_calls:
+        if resp.choices[0].finish_reason == &quot;stop&quot;:
+            break
+        raise RuntimeError(
+            f&quot;unexpected finish_reason: {resp.choices[0].finish_reason}&quot;
+        )
+
+    for call in msg.tool_calls:
+        try:
+            args = json.loads(call.function.arguments)
+            result = call_tool(call.function.name, args)
+            content = json.dumps({&quot;ok&quot;: True, &quot;result&quot;: result}, ensure_ascii=False)
+        except (json.JSONDecodeError, ValueError) as exc:
+            content = expected_error(exc)
+        messages.append({
+            &quot;role&quot;: &quot;tool&quot;,
+            &quot;tool_call_id&quot;: call.id,
+            &quot;content&quot;: content,
+        })
+else:
+    raise RuntimeError(&quot;tool loop reached MAX_STEPS&quot;)
+</code></pre>
+<span id="最容易混淆的四点"></span><h2 data-heading-alias="最容易混淆的四点" id="hfd96973a2d3e">最容易混淆的四点</h2>
+<ol>
+<li><code>parameters</code> 和 <code>input_schema</code> 不是同一个外包装。</li>
+<li>OpenAI-compatible 的 arguments 要先 <code>json.loads</code>；两边都要再验证。</li>
+<li>每个结果必须带回对应的 <code>tool_call_id</code> 或 <code>tool_use_id</code>。</li>
+<li>Loop 必须保留完整 assistant history，并设置 <code>MAX_STEPS</code>。</li>
+</ol>
+<p>可运行对照：<a href="../../reference/source-readings.html#sba1ab4452b4e">Stage 3 multi-tool selection</a> 到 <a href="../../reference/source-readings.html#s53a33b44c3ea">schema design</a>。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

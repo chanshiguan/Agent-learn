@@ -1,0 +1,2055 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mcp-skills-catalog.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="mcp--skills-集成目录"></span><h1 data-heading-alias="mcp--skills-集成目录" id="h43faf57d8482">MCP / Skills 集成目录</h1>
+<blockquote>
+<p>这是按需查找工具的分类目录，不是安装清单。先选一个官方起点；只有工作确实需要时，才展开一类。</p>
+</blockquote>
+<span id="-怎么使用这份目录"></span><h2 data-heading-alias="-怎么使用这份目录" id="h4923c0f14d02">📌 怎么使用这份目录</h2>
+<ol>
+<li>先说清楚你要读取数据，还是要写入真实服务。</li>
+<li>优先选择官方 hosted / reference 入口，再检查维护、授权和权限。</li>
+<li>先连接测试数据、read-only 和最小权限。write、send、delete 前保留人工批准。</li>
+</ol>
+<p>完整安装与测试放在 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5</a>；这一页只帮你找到候选项目。</p>
+<span id="-先分清五个词"></span><h2 data-heading-alias="-先分清五个词" id="h36ee338d5579">🧩 先分清五个词</h2>
+<ul>
+<li><strong>MCP Server</strong>：把数据或动作变成 MCP 工具的程序或 hosted service。</li>
+<li><strong>Skill</strong>：可重复使用的指令、脚本、模板和参考资料；不同 host 的加载方式可能不同。</li>
+<li><strong>Plugin</strong>：某个 host 的安装包，可以一起带入 Skill、命令、hook 或 MCP 设置；不是 MCP 规范本身。</li>
+<li><strong>Remote MCP</strong>：由服务商运行的 MCP Server，通常用 OAuth 登录，不需要你在本机启动程序。</li>
+<li><strong>Permission Boundary（权限边界）</strong>：Agent 真正能读、写、发送或删除的范围。工具能做，不代表每次都应该做。</li>
+</ul>
+<span id="-五个安全起点"></span><h2 data-heading-alias="-五个安全起点" id="hd70ea759a47a">📚 五个安全起点</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">起点</th>
+<th style="text-align:left">先学什么</th>
+<th style="text-align:left">编辑评分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sd8397b2e8faf">Official MCP Registry</a></td>
+<td style="text-align:left">找已发布的 MCP Server；安装前仍要检查维护者、权限和来源</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#scb8f252ccaaf">servers</a></td>
+<td style="text-align:left">看 MCP 功能如何实现；这是教学用 reference implementations，不等于 production 推荐</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s6328c9f616a7">Notion MCP</a></td>
+<td style="text-align:left">看 hosted OAuth MCP 如何沿用用户 workspace 权限</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sfaa318861b48">GitHub MCP Server</a></td>
+<td style="text-align:left">通过官方实现了解 OAuth、工具组和 repository 权限</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s82a901da1b9b">skills</a></td>
+<td style="text-align:left">看 Agent Skill 的文件夹、指令和资源如何组合</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ MCP Server 可能碰到真实数据。即使来源是官方，也要确认登录账号、scope、可写工具与批准画面。</p>
+</blockquote>
+<span id="新增工具怎么选"></span><h3 data-heading-alias="新增工具怎么选" id="hc821770dc549">新增工具怎么选</h3>
+<p><small>新增项目核查：2026-10-15 UTC</small></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">需求</th>
+<th style="text-align:left">建议入口</th>
+<th style="text-align:left">编辑评分</th>
+<th style="text-align:left">先确认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">查找、安装或更新 Agent Skills</td>
+<td style="text-align:left"><a href="#vercel-skills">Vercel Skills</a></td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+<td style="text-align:left">它不是 MCP server 或模型；安装前检查来源、权限与 host 支持</td>
+</tr>
+</tbody>
+</table>
+<span id="目录"></span><h3 data-heading-alias="目录" id="h52daa71ebc31">目录</h3>
+<ol>
+<li><a href="#1-笔记--知识库">笔记 / 知识库</a></li>
+<li><a href="#2-办公文件word--excel--powerpoint--pdf">办公文件（Word / Excel / PowerPoint / PDF）</a></li>
+<li><a href="#3-google-workspace">Google Workspace</a></li>
+<li><a href="#4-microsoft-365">Microsoft 365</a></li>
+<li><a href="#5-开发协作github--atlassian--slack">开发协作（GitHub / Atlassian / Slack…）</a></li>
+<li><a href="#6-数据库">数据库</a></li>
+<li><a href="#7-浏览器自动化--网页抓取">浏览器自动化 / 网页抓取</a></li>
+<li><a href="#8-设计figma--excalidraw">设计（Figma / Excalidraw）</a></li>
+<li><a href="#9-监控--observability">监控 / Observability</a></li>
+<li><a href="#10-媒体--流媒体youtube--spotify">媒体 / 流媒体（YouTube / Spotify）</a></li>
+<li><a href="#11-中文生态专用">中文生态专用</a></li>
+<li><a href="#12-其他常用cloudflare--stripe">其他常用（Cloudflare / Stripe…）</a></li>
+<li><a href="#13-研究工作流-skills学术--paper--文献">研究工作流 Skills（学术 / paper / 文献）</a></li>
+<li><a href="#14-multi-llm-delegation-skills">Multi-LLM Delegation Skills</a></li>
+<li><a href="#15-金融--交易-agents">金融 / 交易 Agents</a></li>
+<li><a href="#16-网页搜索--检索web-search--retrieval">网页搜索 / 检索（Web Search / Retrieval）</a></li>
+<li><a href="#17-安全--mcp-安全治理">安全 / MCP 安全治理</a></li>
+</ol>
+<hr />
+<span id="1-笔记--知识库"></span><h2 data-heading-alias="1-笔记--知识库" id="hd413e720e1e2">1. 笔记 / 知识库</h2>
+<details markdown="1">
+<summary>展开第 1 类精选项目</summary>
+<span id="notion-mcphttpsdevelopersnotioncomguidesmcpoverview-"></span><h3 data-heading-alias="notion-mcphttpsdevelopersnotioncomguidesmcpoverview-" id="h1ef819e850f1"><a href="../../reference/source-readings.html#s6328c9f616a7">Notion MCP</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Notion hosted remote MCP；OAuth</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Notion 官方 hosted MCP，可搜索、读取、创建和更新用户本来就能访问的内容。
+<strong>适合谁</strong>：日常用 Notion 写笔记、管项目或维护 wiki，想从支持 MCP 的 client 操作 workspace 的人。
+<strong>备注</strong>：用 OAuth 登录并沿用用户权限；写入前仍要看清批准画面。旧的开源 <code>makenotion/notion-mcp-server</code> 已不再积极维护，不作为新安装起点。</p>
+<span id="markuspfundsteinmcp-obsidianhttpsgithubcommarkuspfundsteinmcp-obsidian-"></span><h3 data-heading-alias="markuspfundsteinmcp-obsidianhttpsgithubcommarkuspfundsteinmcp-obsidian-" id="h933529bc8369"><a href="../../reference/source-readings.html#sa5204a5cbb36">MarkusPfundstein/mcp-obsidian</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（社群维护）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：透过 Obsidian REST API community plugin 让 LLM 读写你的 Obsidian vault。
+<strong>适合谁</strong>：Obsidian 重度用户，想用 Claude Code 整理 daily note、自动 link、跨文件搜索。
+<strong>备注</strong>：要先在 Obsidian 装 <a href="../../reference/source-readings.html#s624a6a805df6">Local REST API</a> plugin。</p>
+<span id="pleasepromptonotebooklm-skillhttpsgithubcompleasepromptonotebooklm-skill-"></span><h3 data-heading-alias="pleasepromptonotebooklm-skillhttpsgithubcompleasepromptonotebooklm-skill-" id="h17664abc0010"><a href="../../reference/source-readings.html#sc8ab77e4c5a6">PleasePrompto/notebooklm-skill</a> ⭐⭐⭐⭐</h3>
+<p><strong>状态（2026-09-10 UTC）</strong>：已归档，作者不再提供更新或支持。保留作历史学习范例；新流程不要从它开始。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Claude Code Skill，用浏览器自动化操作 Gemini Notebook（旧名 NotebookLM）、查询上传文件，回复带 citation。
+<strong>适合谁</strong>：想研究早期浏览器自动化 Skill 设计的人；实际使用请先看官方网页或下方仍需自行评估的 <code>notebooklm-py</code>。
+<strong>备注</strong>：需要 Google 账号登录授权。</p>
+<span id="teng-linnotebooklm-pyhttpsgithubcomteng-linnotebooklm-py-"></span><h3 data-heading-alias="teng-linnotebooklm-pyhttpsgithubcomteng-linnotebooklm-py-" id="h44ac6befa6a6"><a href="../../reference/source-readings.html#s9e0892762e05">teng-lin/notebooklm-py</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：非官方 Gemini Notebook（旧名 NotebookLM）Python API + CLI + agentic skill；功能比上面 skill 多，包含一些 web UI 没开放的能力。
+<strong>适合谁</strong>：要程序化批量操作 Gemini Notebook（旧名 NotebookLM）的人（例如自动建 notebook、批量导入文件）。
+<strong>备注</strong>：非官方、Google 政策变动可能会坏；用前看一下 issue tracker。</p>
+<span id="ergutmcp-logseqhttpsgithubcomergutmcp-logseq-"></span><h3 data-heading-alias="ergutmcp-logseqhttpsgithubcomergutmcp-logseq-" id="h550d110dc995"><a href="../../reference/source-readings.html#s4f19bfdba3dc">ergut/mcp-logseq</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：透过 Logseq Local HTTP API 让 LLM 读写 Logseq graph。
+<strong>适合谁</strong>：Logseq 用户要自动化 daily journal、跨页 link、查询 backlinks。
+<strong>备注</strong>：需要 Logseq 开启 HTTP API（Settings → Features → HTTP API）。</p>
+<span id="skridlevskygraphthulhu-已归档历史范例"></span><h3 data-heading-alias="skridlevskygraphthulhu-已归档历史范例" id="hd57f0edfc00f">skridlevsky/graphthulhu ⭐⭐⭐（已归档／历史范例）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">先前记录为 MIT；目前无法重新核对</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（历史评分；目前无法公开获取）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：一组 tool，覆盖 navigation、search、analysis、writing、journals、flashcards、whiteboards。
+<strong>适合谁</strong>：想研究早期 Logseq + Obsidian MCP 设计的人；新项目应改找仍在维护的替代方案。
+<strong>备注（2026-09-10 UTC）</strong>：原 GitHub 入口返回 404，已移除失效链接。不推测它是删除、转为私有或迁移；此处只保留历史名称与评分，不再当作可获取的学习资源。</p>
+<span id="ankimcpanki-mcp-serverhttpsgithubcomankimcpanki-mcp-server-"></span><h3 data-heading-alias="ankimcpanki-mcp-serverhttpsgithubcomankimcpanki-mcp-server-" id="hfbe63cd4724d"><a href="../../reference/source-readings.html#s4442debbeedf">ankimcp/anki-mcp-server</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：透过 AnkiConnect 让 LLM 建卡、查卡、批改 deck。
+<strong>适合谁</strong>：用 Anki 学语言 / 医学 / 法律的人——叫 LLM 从教材自动产卡。
+<strong>备注</strong>：需要 Anki 桌面版装 <a href="../../reference/source-readings.html#s7097aed2695c">AnkiConnect</a> addon。</p>
+<hr />
+</details>
+<span id="2-办公文件word--excel--powerpoint--pdf"></span><h2 data-heading-alias="2-办公文件word--excel--powerpoint--pdf" id="h85a678b5b81b">2. 办公文件（Word / Excel / PowerPoint / PDF）</h2>
+<details markdown="1">
+<summary>展开第 2 类精选项目</summary>
+<span id="anthropicsskillshttpsgithubcomanthropicsskills-"></span><h3 data-heading-alias="anthropicsskillshttpsgithubcomanthropicsskills-" id="hcc270b5c546e"><a href="../../reference/source-readings.html#s82a901da1b9b">anthropics/skills</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">各 Skill 分别授权；许多为 Apache-2.0，docx／pdf／pptx／xlsx 为 source-available，依各文件夹条款</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>官方示例</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Anthropic 官方 Agent Skills 示例仓库，包含 docx / xlsx / pptx / pdf 处理 skill。
+<strong>适合谁</strong>：想了解标准 Skill 文件夹、<code>SKILL.md</code>、scripts 与 resources 怎样配合的人。
+<strong>备注</strong>：这是 Skills 集合，不是 MCP。不同 Claude / Agent surface 的预载、安装与支持方式不完全相同；使用前先看仓库与当前 host 文档。</p>
+<span id="haris-musaexcel-mcp-serverhttpsgithubcomharis-musaexcel-mcp-server-"></span><h3 data-heading-alias="haris-musaexcel-mcp-serverhttpsgithubcomharis-musaexcel-mcp-server-" id="h48046f4f074d"><a href="../../reference/source-readings.html#s34b046567ec9">haris-musa/excel-mcp-server</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（社群维护的 Excel MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Excel 档操作 MCP server——读 / 写 / 改 cell、formula、sheet。
+<strong>适合谁</strong>：日常处理 Excel 报表、要 LLM 自动填表 / 整理数据的人。
+<strong>备注</strong>：Python 写的，依赖 openpyxl。</p>
+<span id="gongrzheoffice-powerpoint-mcp-serverhttpsgithubcomgongrzheoffice-powerpoint-mcp-server--已封存-2025-12可改用-anthropicsskills-pptx"></span><h3 data-heading-alias="gongrzheoffice-powerpoint-mcp-serverhttpsgithubcomgongrzheoffice-powerpoint-mcp-server--已封存-2025-12可改用-anthropicsskills-pptx" id="h707b0f8fad3f"><a href="../../reference/source-readings.html#s7688f7f765fc">GongRzhe/Office-PowerPoint-MCP-Server</a> ⭐⭐⭐（⚠️ 已封存 2025-12、可改用 anthropics/skills pptx）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（⚠️ 已封存）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：用 python-pptx 操作 PPT——建简报、改 slide、插图、改 layout。
+<strong>适合谁</strong>：要 LLM 从大纲 / Markdown 自动生 PPT 的人（顾问、讲师、学生）。
+<strong>备注</strong>：跟 anthropics/skills 的 pptx skill 重叠；那边不够用再来这边。</p>
+<span id="open-slideopen-slidehttpsgithubcomopen-slideopen-slide-"></span><h3 data-heading-alias="open-slideopen-slidehttpsgithubcomopen-slideopen-slide-" id="h6885a11cfb20"><a href="../../reference/source-readings.html#s75feda43b250">open-slide/open-slide</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（agent-native 简报框架）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：为 coding agent 打造的 React 简报框架——用自然语言描述简报、让 Claude Code / Codex / Cursor 写出 React slides；内附 <code>/create-slide</code>、<code>/slide-authoring</code> 两个 Claude Code Skill。
+<strong>适合谁</strong>：想让 agent 直接产出“代码即简报、可进 git 版控”的人，跟 PowerPoint-MCP 走 .pptx 不同路。
+<strong>备注</strong>：TypeScript / React / Vite，<code>npx @open-slide/cli init</code> 起手。它是 agent-native 工具（agent 来写），不是 Stage 4 那种构建 agent 的编排框架。</p>
+<span id="tfriedelclaude-office-skillshttpsgithubcomtfriedelclaude-office-skills-"></span><h3 data-heading-alias="tfriedelclaude-office-skillshttpsgithubcomtfriedelclaude-office-skills-" id="hf36914772265"><a href="../../reference/source-readings.html#s5ed847656b3c">tfriedel/claude-office-skills</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">NOASSERTION</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（补强版 Office skill）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：补强 anthropics/skills 没覆盖到的 Office workflow（automation、进阶格式）。
+<strong>适合谁</strong>：觉得官方 docx/xlsx/pptx skill 不够细的人。
+<strong>备注</strong>：跟 anthropics/skills 是补充关系，不是替代。</p>
+<span id="xberg-ioxberghttpsgithubcomxberg-ioxberg-"></span><h3 data-heading-alias="xberg-ioxberghttpsgithubcomxberg-ioxberg-" id="h0f2280189ccc"><a href="../../reference/source-readings.html#s5a7e81d78863">xberg-io/xberg</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">NOASSERTION</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：解析 PDF、Office、图片与其他常见文件格式的 Rust 框架，提供 MCP server、REST API 与 CLI。
+<strong>适合谁</strong>：跨格式批量处理文件、要 throughput 的工程师。
+<strong>备注</strong>：不只是 PDF / Office——还支持冷门格式如 HWP、ODT 等。</p>
+<hr />
+</details>
+<span id="3-google-workspace"></span><h2 data-heading-alias="3-google-workspace" id="h720cdb1b7161">3. Google Workspace</h2>
+<details markdown="1">
+<summary>展开第 3 类精选项目</summary>
+<span id="google-workspace-mcphttpsdevelopersgooglecomworkspaceguidesconfigure-mcp-servers-"></span><h3 data-heading-alias="google-workspace-mcphttpsdevelopersgooglecomworkspaceguidesconfigure-mcp-servers-" id="hd8c61c5eb0b3"><a href="../../reference/source-readings.html#s7c05c0605a20">Google Workspace MCP</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Google hosted remote MCP；OAuth 2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>官方</strong>，<strong>Developer Preview</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Google 为 Gmail、Drive、Docs、Sheets、Slides、Calendar、Chat 和 People 提供的 remote MCP server。
+<strong>适合谁</strong>：想用官方入口让 Agent 读取 Workspace 数据，或创建草稿、更新文档与安排会议的人。
+<strong>备注</strong>：目前是 <strong>Developer Preview</strong>。使用 OAuth 2.0，沿用用户与组织的数据治理；只启用工作确实需要的 API 和 scope。</p>
+<span id="taylorwilsdongoogle_workspace_mcphttpsgithubcomtaylorwilsdongoogle_workspace_mcp-"></span><h3 data-heading-alias="taylorwilsdongoogle_workspace_mcphttpsgithubcomtaylorwilsdongoogle_workspace_mcp-" id="hf296fff0b1bf"><a href="../../reference/source-readings.html#s76296a88a946">taylorwilsdon/google_workspace_mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（社群维护的广泛 Workspace MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Gmail、Calendar、Docs、Sheets、Slides、Drive、Chat、Forms、Tasks 与 Search 放进一个社群 MCP server。
+<strong>适合谁</strong>：需要官方 Preview 尚未覆盖的社群功能，并愿意自行维护 OAuth 设置的人。
+<strong>备注</strong>：社群维护；功能面较广也代表权限面较大，先开 read-only 与最小 scope。</p>
+<span id="xing5mcp-google-sheetshttpsgithubcomxing5mcp-google-sheets-"></span><h3 data-heading-alias="xing5mcp-google-sheetshttpsgithubcomxing5mcp-google-sheets-" id="h3972a16e4514"><a href="../../reference/source-readings.html#s238edf7afbf9">xing5/mcp-google-sheets</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（单纯 Sheets 用）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：专门 Google Sheets / Drive 集成，建 sheet、改 cell、查 formula。
+<strong>适合谁</strong>：只用 Google Sheets、不想装整套 Workspace MCP 的人。
+<strong>备注</strong>：scope 比 google_workspace_mcp 窄，但设置简单。</p>
+<hr />
+</details>
+<span id="4-microsoft-365"></span><h2 data-heading-alias="4-microsoft-365" id="he77c7c74c17d">4. Microsoft 365</h2>
+<details markdown="1">
+<summary>展开第 4 类精选项目</summary>
+<span id="softeriams-365-mcp-serverhttpsgithubcomsofteriams-365-mcp-server-"></span><h3 data-heading-alias="softeriams-365-mcp-serverhttpsgithubcomsofteriams-365-mcp-server-" id="hb42b622a2df3"><a href="../../reference/source-readings.html#s822bc318206a">Softeria/ms-365-mcp-server</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（M365 全套）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：透过 Microsoft Graph API 操作 M365——Outlook、Teams、OneDrive、SharePoint。
+<strong>适合谁</strong>：用 M365 的企业用户——要 LLM 回信、查行事历、捞 OneDrive 档。
+<strong>备注</strong>：需要 Azure AD app registration；公司 IT 政策可能挡。</p>
+<span id="ryakeroutlook-mcphttpsgithubcomryakeroutlook-mcp-"></span><h3 data-heading-alias="ryakeroutlook-mcphttpsgithubcomryakeroutlook-mcp-" id="h0d705a5b462e"><a href="../../reference/source-readings.html#s4b6943d6d690">ryaker/outlook-mcp</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">NOASSERTION</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（只 Outlook）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：透过 Graph API 读写 Outlook mail / calendar。
+<strong>适合谁</strong>：只要操作 Outlook 不需要其他 M365 服务的人。
+<strong>备注</strong>：scope 比上面的 ms-365 server 窄。</p>
+<span id="merilllokkahttpsgithubcommerilllokka-"></span><h3 data-heading-alias="merilllokkahttpsgithubcommerilllokka-" id="h73abeb0fe98b"><a href="../../reference/source-readings.html#s6b2d5af48934">merill/lokka</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：M365 + Microsoft Graph 全套，含 Entra（AD）、Intune 等管理用 API。
+<strong>适合谁</strong>：M365 系统管理员、要操作 Tenant / 用户 / 策略的人。
+<strong>备注</strong>：对 IT admin 比 end user 更有用。</p>
+<hr />
+</details>
+<span id="5-开发协作github--atlassian--slack"></span><h2 data-heading-alias="5-开发协作github--atlassian--slack" id="hb4e7d67d1ef5">5. 开发协作（GitHub / Atlassian / Slack…）</h2>
+<details markdown="1">
+<summary>展开第 5 类精选项目</summary>
+<span id="githubgithub-mcp-serverhttpsgithubcomgithubgithub-mcp-server-"></span><h3 data-heading-alias="githubgithub-mcp-serverhttpsgithubcomgithubgithub-mcp-server-" id="h3ce7e8df5614"><a href="../../reference/source-readings.html#sfaa318861b48">github/github-mcp-server</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：GitHub 官方 MCP——issue / PR / repo / Actions / Codespaces 操作。
+<strong>适合谁</strong>：需要查 repository、整理 issue 或协助 PR review 的 GitHub 用户。
+<strong>备注</strong>：优先使用 OAuth 或最小权限 token；创建 issue、修改 PR 和触发 workflow 前保留人工批准。Track A 的 A3 动手练习 CLI-9 会使用这个入口。</p>
+<span id="soopersetmcp-atlassianhttpsgithubcomsoopersetmcp-atlassian-"></span><h3 data-heading-alias="soopersetmcp-atlassianhttpsgithubcomsoopersetmcp-atlassian-" id="hf29b4df83916"><a href="../../reference/source-readings.html#sfb062c5edd2b">sooperset/mcp-atlassian</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（社群维护的 Atlassian MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Confluence 与 Jira 接成可自行部署的社群 MCP server。
+<strong>适合谁</strong>：需要 self-hosted、自定义认证，或官方 remote MCP 尚未支持之部署形状的团队。
+<strong>备注</strong>：社群维护；与下方 Atlassian 官方 remote MCP 择一，先看公司 IT 政策与权限需求。</p>
+<span id="atlassian-rovo-mcphttpssupportatlassiancomatlassian-rovo-mcp-serverdocsgetting-started-with-the-atlassian-remote-mcp-server-"></span><h3 data-heading-alias="atlassian-rovo-mcphttpssupportatlassiancomatlassian-rovo-mcp-serverdocsgetting-started-with-the-atlassian-remote-mcp-server-" id="h5cb1439ee50a"><a href="../../reference/source-readings.html#s81d0da3191c1">Atlassian Rovo MCP</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Atlassian hosted remote MCP；OAuth 2.1</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Atlassian 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：让支持 MCP 的 client 按用户权限读写 Jira、Confluence 与 Bitbucket Cloud。
+<strong>适合谁</strong>：公司使用 Atlassian Cloud，并希望由 Atlassian 托管连接与授权的人。
+<strong>备注</strong>：使用 OAuth 2.1；能看到或修改什么取决于登录者原有权限。创建或更新 issue、page 与 repository 前要查看批准内容。</p>
+<span id="slack-mcp-serverhttpsdocsslackdevaimcp-overview-"></span><h3 data-heading-alias="slack-mcp-serverhttpsdocsslackdevaimcp-overview-" id="h00f6b7de531f"><a href="../../reference/source-readings.html#sa8f7a8f2ff93">Slack MCP Server</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Slack 官方 MCP Server</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Slack 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：让 AI app 搜索 Slack 频道、发送消息、管理 canvas，并执行其他 Slack 动作。
+<strong>适合谁</strong>：想从支持 MCP 的 client 查找团队讨论或协助处理 Slack 工作的人。
+<strong>备注</strong>：这不是只读搜索工具；发送消息与修改 canvas 会影响真实工作区，先确认组织政策并保留人工批准。</p>
+<span id="linear-mcphttpslinearappdocsmcp-"></span><h3 data-heading-alias="linear-mcphttpslinearappdocsmcp-" id="hd6e6ed3b0fcd"><a href="../../reference/source-readings.html#se75585340ec9">Linear MCP</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Linear hosted remote MCP；Streamable HTTP</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Linear 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：用 Streamable HTTP 连接 Linear，查询或更新 issue、project 与 comment。
+<strong>适合谁</strong>：用 Linear 管 sprint 或 backlog，想从 Agent 查找与整理工作的人。
+<strong>备注</strong>：需要只读时使用官方 read-only 入口；写入模式会沿用登录者权限，修改状态或留言前要核准。</p>
+<span id="saseqdiscord-mcphttpsgithubcomsaseqdiscord-mcp-"></span><h3 data-heading-alias="saseqdiscord-mcphttpsgithubcomsaseqdiscord-mcp-" id="hed0c9fae9c76"><a href="../../reference/source-readings.html#sb711210b94b3">SaseQ/discord-mcp</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Discord MCP——读写频道消息、管理服务器。
+<strong>适合谁</strong>：用 Discord 跑社群 / 开源项目的 maintainer。
+<strong>备注</strong>：要 Discord bot token；要小心 rate limit。</p>
+<span id="graphify-labsgraphifyhttpsgithubcomgraphify-labsgraphify-"></span><h3 data-heading-alias="graphify-labsgraphifyhttpsgithubcomgraphify-labsgraphify-" id="hd58bf2131718"><a href="../../reference/source-readings.html#sc290a2acf859">Graphify-Labs/graphify</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 codebase / SQL schemas / R scripts / shell scripts / docs / papers / images / videos 变成 queryable knowledge graph 的 AI coding skill。Claude Code、Codex、OpenCode、Cursor、Gemini CLI 都能接。
+<strong>适合谁</strong>：要对大型 codebase 做架构分析、跨档追 reference、把&quot;app code + DB schema + infra&quot;放一起问的工程师 / 研究者。
+<strong>备注</strong>：跨界——既是 dev collab tool（理解既有 codebase）也算 research workflow（把任意素材转成 graph）。撞墙时用 graphify 抽结构、再丢回 Claude 推论。</p>
+<span id="upstashcontext7httpsgithubcomupstashcontext7-"></span><h3 data-heading-alias="upstashcontext7httpsgithubcomupstashcontext7-" id="h1717df4a1225"><a href="../../reference/source-readings.html#s16a7277d62ee">upstash/context7</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（coding context）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：按库与版本查找文档片段，放进 Agent 当下的 context，减少套用旧 API 的机会。
+<strong>适合谁</strong>：常跨不同版本的库写 code，想先找到相关文档再动手的开发者。
+<strong>备注</strong>：检索结果仍要核对版本与原始官方文档；它能帮你找资料，不保证每一段都是最新或完整答案。</p>
+<span id="deusdatacodebase-memory-mcphttpsgithubcomdeusdatacodebase-memory-mcp-"></span><h3 data-heading-alias="deusdatacodebase-memory-mcphttpsgithubcomdeusdatacodebase-memory-mcp-" id="hfb5253988716"><a href="../../reference/source-readings.html#sf74d5b6b78b8">DeusData/codebase-memory-mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（code intelligence）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 codebase 索引成可查询的 knowledge graph，让 coding agent 先查结构、符号与调用路径，再回到实际代码验证。
+<strong>适合谁</strong>：在大型或不熟的 repo 上跑 coding agent、想快速定位又想省 token 的人。
+<strong>备注</strong>：大改后要重新索引（graph 会 stale）；把它的回答当“快速第一手”、load-bearing 的结论（谁调用 X / 这段是不是死码）再用实际代码验证。</p>
+<hr />
+</details>
+<span id="6-数据库"></span><h2 data-heading-alias="6-数据库" id="h89b424dbafbf">6. 数据库</h2>
+<details markdown="1">
+<summary>展开第 6 类精选项目</summary>
+<span id="googleapismcp-toolboxhttpsgithubcomgoogleapismcp-toolbox-"></span><h3 data-heading-alias="googleapismcp-toolboxhttpsgithubcomgoogleapismcp-toolbox-" id="h833dba565836"><a href="../../reference/source-readings.html#s0a027f0b4f2e">googleapis/mcp-toolbox</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Google 官方</strong>，多 DB）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：跨 DB 的 MCP server——MySQL / PostgreSQL / Cloud SQL / Spanner / BigQuery 一次包。
+<strong>适合谁</strong>：在 Google Cloud 上跑 DB 的工程师、要支持多 DB 引擎的开发者。
+<strong>备注</strong>：开源 + Google 官方维护，是可上线使用的选择。</p>
+<span id="bytebasedbhubhttpsgithubcombytebasedbhub-"></span><h3 data-heading-alias="bytebasedbhubhttpsgithubcombytebasedbhub-" id="he6f58f896093"><a href="../../reference/source-readings.html#s46b716d893c5">bytebase/dbhub</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（社群多 DB MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：zero-dependency、token-efficient 的多 DB MCP——Postgres、MySQL、SQL Server、MariaDB、SQLite。
+<strong>适合谁</strong>：不想装 Google Cloud SDK、要跨多种 OSS DB 的工程师。
+<strong>备注</strong>：跟 googleapis/mcp-toolbox 重叠，但更轻量。</p>
+<span id="supabasemcphttpsgithubcomsupabasemcp-"></span><h3 data-heading-alias="supabasemcphttpsgithubcomsupabasemcp-" id="hd836d6349fd3"><a href="../../reference/source-readings.html#sd6af4d2d99bd">supabase/mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Supabase 官方社群</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Supabase（含 Postgres、Auth、Storage、Edge Functions）接到 LLM。
+<strong>适合谁</strong>：用 Supabase 跑后端的全栈开发者。
+<strong>备注</strong>：官方 community 维护。</p>
+<span id="timescalepg-aiguidehttpsgithubcomtimescalepg-aiguide-"></span><h3 data-heading-alias="timescalepg-aiguidehttpsgithubcomtimescalepg-aiguide-" id="h88a999b222c9"><a href="../../reference/source-readings.html#sec0418c7e54e">timescale/pg-aiguide</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（Postgres 写代码辅助）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：MCP server + Claude plugin，帮 LLM 生成更好的 PostgreSQL 代码。
+<strong>适合谁</strong>：写 Postgres heavy SQL / DBA 工程师。
+<strong>备注</strong>：偏“LLM 写 SQL 辅助”，不只是 query 执行。</p>
+<span id="benborlamcp-server-mysqlhttpsgithubcombenborlamcp-server-mysql-"></span><h3 data-heading-alias="benborlamcp-server-mysqlhttpsgithubcombenborlamcp-server-mysql-" id="he854ea172193"><a href="../../reference/source-readings.html#s3cc72101b09d">benborla/mcp-server-mysql</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（read-only MySQL）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：read-only MySQL MCP，让 LLM 看 schema、跑 query。
+<strong>适合谁</strong>：要让 LLM 分析 production DB 但不能改的场景。
+<strong>备注</strong>：故意 read-only 是 safety feature，不是限制。</p>
+<span id="mongodb-jsmongodb-mcp-serverhttpsgithubcommongodb-jsmongodb-mcp-server-"></span><h3 data-heading-alias="mongodb-jsmongodb-mcp-serverhttpsgithubcommongodb-jsmongodb-mcp-server-" id="h4a70b3e573b2"><a href="../../reference/source-readings.html#s2118aa6129f9">mongodb-js/mongodb-mcp-server</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>MongoDB 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：MongoDB 跟 MongoDB Atlas Cluster MCP server。
+<strong>适合谁</strong>：用 MongoDB / Atlas 的工程师。
+<strong>备注</strong>：mongodb-js 是 MongoDB 官方 GitHub org。</p>
+<span id="redismcp-redishttpsgithubcomredismcp-redis-"></span><h3 data-heading-alias="redismcp-redishttpsgithubcomredismcp-redis-" id="h4273d19be17a"><a href="../../reference/source-readings.html#s19b2756f7a98">redis/mcp-redis</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>Redis 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Redis 官方 MCP，自然语言操作 Redis 跟 Redis Stack（Vector / Search / JSON）。
+<strong>适合谁</strong>：用 Redis 当 cache / vector DB / queue 的人。
+<strong>备注</strong>：官方维护；包含 vector search 集成。</p>
+<span id="awslabsmcphttpsgithubcomawslabsmcp-"></span><h3 data-heading-alias="awslabsmcphttpsgithubcomawslabsmcp-" id="h08a102a9ed3a"><a href="../../reference/source-readings.html#s56cb969b4f4e">awslabs/mcp</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>AWS 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：AWS 官方 MCP server（Lambda / S3 / DynamoDB / CloudWatch / Cost Explorer 等）。
+<strong>适合谁</strong>：在 AWS 上、想让 agent 查询 / 操作云端资源的团队。
+<strong>备注</strong>：AWS 官方维护；沿用你现有的 AWS 登录（CLI profile / IAM role），不用另外管 token。</p>
+<hr />
+</details>
+<span id="7-浏览器自动化--网页抓取"></span><h2 data-heading-alias="7-浏览器自动化--网页抓取" id="ha39c746f5746">7. 浏览器自动化 / 网页抓取</h2>
+<details markdown="1">
+<summary>展开第 7 类精选项目</summary>
+<span id="microsoftplaywright-mcphttpsgithubcommicrosoftplaywright-mcp-"></span><h3 data-heading-alias="microsoftplaywright-mcphttpsgithubcommicrosoftplaywright-mcp-" id="ha9534c18fdac"><a href="../../reference/source-readings.html#sba31bde2dfc2">microsoft/playwright-mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Microsoft 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Playwright MCP server——让 LLM 开浏览器、点按钮、填表单、抓网页。
+<strong>适合谁</strong>：要做 E2E 自动化、跨网站集成、抓需要登录的网页的人。
+<strong>备注</strong>：Playwright 是官方项目；请结合任务需要的浏览器权限与登录流程评估。</p>
+<span id="chromedevtoolschrome-devtools-mcphttpsgithubcomchromedevtoolschrome-devtools-mcp-"></span><h3 data-heading-alias="chromedevtoolschrome-devtools-mcphttpsgithubcomchromedevtoolschrome-devtools-mcp-" id="hbaca2fbd58b1"><a href="../../reference/source-readings.html#s379642deb53f">ChromeDevTools/chrome-devtools-mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Chrome 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Chrome DevTools 接给 coding agent——performance、network、console 直接给 LLM 看。
+<strong>适合谁</strong>：调试前端 bug、做 web performance 分析的开发者。
+<strong>备注</strong>：搭配 Playwright MCP 用最强——一个跑、一个观察。</p>
+<span id="firecrawlfirecrawl-mcp-serverhttpsgithubcomfirecrawlfirecrawl-mcp-server-"></span><h3 data-heading-alias="firecrawlfirecrawl-mcp-serverhttpsgithubcomfirecrawlfirecrawl-mcp-server-" id="h75467dfcd2fb"><a href="../../reference/source-readings.html#s96f88187cd30">firecrawl/firecrawl-mcp-server</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Firecrawl 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Firecrawl 官方 MCP——大规模网页抓取 + search + 结构化提取。
+<strong>适合谁</strong>：要抓大量网页当训练数据 / 做 RAG / 做研究的人。
+<strong>备注</strong>：需要 Firecrawl API key（有 free tier）。</p>
+<span id="browserbasemcp-server-browserbasehttpsgithubcombrowserbasemcp-server-browserbase--已封存"></span><h3 data-heading-alias="browserbasemcp-server-browserbasehttpsgithubcombrowserbasemcp-server-browserbase--已封存" id="he84bd569481e"><a href="../../reference/source-readings.html#s6ca1a8c40bcb">browserbase/mcp-server-browserbase</a> ⭐⭐⭐⭐（⚠️ 已封存）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>Browserbase 官方</strong>、⚠️ 已封存）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Browserbase 官方 MCP，配 Stagehand 跑 cloud-based 浏览器。
+<strong>适合谁</strong>：本地跑浏览器太重 / 要在 cloud 并行跑多个 session 的人。
+<strong>备注</strong>：商业服务（有免费额度），跟 Playwright MCP 互补（local vs cloud）。</p>
+<hr />
+</details>
+<span id="8-设计figma--excalidraw"></span><h2 data-heading-alias="8-设计figma--excalidraw" id="h8bd3f0d2756a">8. 设计（Figma / Excalidraw）</h2>
+<details markdown="1">
+<summary>展开第 8 类精选项目</summary>
+<span id="canva-mcphttpswwwcanvadevdocsmcp-"></span><h3 data-heading-alias="canva-mcphttpswwwcanvadevdocsmcp-" id="h90fea7817bc3"><a href="../../reference/source-readings.html#sbc0f48f48b73">Canva MCP</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">提供方式</td>
+<td style="text-align:left">Canva hosted remote MCP；<code>https://mcp.canva.com/mcp</code></td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Canva 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：让 AI assistant 创建、编辑、搜索、导出 Canva 设计，也能处理 asset、brand 与 comment。
+<strong>适合谁</strong>：想从支持 MCP 的工具操作 Canva，又希望沿用每位用户既有设计权限的人。
+<strong>备注</strong>：每位用户都要登录；可用操作取决于该用户对设计与资产的权限，部分功能也取决于 Canva plan。高影响编辑前先查看批准画面。</p>
+<span id="glipsfigma-context-mcphttpsgithubcomglipsfigma-context-mcp-"></span><h3 data-heading-alias="glipsfigma-context-mcphttpsgithubcomglipsfigma-context-mcp-" id="h2a3eb148c6d0"><a href="../../reference/source-readings.html#s6a29cb753be6">GLips/Figma-Context-MCP</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（社群维护的 design-to-code MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Figma layout 信息送给 coding agent——读设计稿、提组件结构，给 Cursor / Claude Code 写对应的 React component。
+<strong>适合谁</strong>：前端开发者，要 LLM 从 Figma 设计稿生成 component code。
+<strong>备注</strong>：要 Figma access token；先用测试文件与最小权限评估它是否符合你的 design-to-code workflow。</p>
+<span id="excalidrawexcalidraw-mcphttpsgithubcomexcalidrawexcalidraw-mcp-"></span><h3 data-heading-alias="excalidrawexcalidraw-mcphttpsgithubcomexcalidrawexcalidraw-mcp-" id="h2f865c32ec37"><a href="../../reference/source-readings.html#s01b17834425e">excalidraw/excalidraw-mcp</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">NOASSERTION</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Excalidraw 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：streamable Excalidraw MCP，让 LLM 直接画架构图、流程图。
+<strong>适合谁</strong>：写设计文档 / 系统架构 / 流程图的人——叫 Claude 从文字描述画图。
+<strong>备注</strong>：Excalidraw 官方出，输出可直接导入 Excalidraw 编辑。</p>
+<span id="yctimlinmcp_excalidrawhttpsgithubcomyctimlinmcp_excalidraw-"></span><h3 data-heading-alias="yctimlinmcp_excalidrawhttpsgithubcomyctimlinmcp_excalidraw-" id="h11a0ff383cdd"><a href="../../reference/source-readings.html#s9cbd5e287528">yctimlin/mcp_excalidraw</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（替代版 Excalidraw）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：MCP server + Claude Code Skill，real-time canvas sync，可创建 / 编辑 / 导出。
+<strong>适合谁</strong>：需要 real-time canvas sync 跟编程化操作的人。
+<strong>备注</strong>：跟官方版互补，社群维护。</p>
+<span id="pbakausimpeccablehttpsgithubcompbakausimpeccable-"></span><h3 data-heading-alias="pbakausimpeccablehttpsgithubcompbakausimpeccable-" id="he7e993e1174a"><a href="../../reference/source-readings.html#sec673bd7694d">pbakaus/impeccable</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：&quot;<strong>让你 AI harness 在 design 上更强的 design language</strong>&quot;——一套设计 vocabulary / pattern，帮 AI 在生成 UI / 视觉成品时跳出常见的&quot;AI 感&quot;生硬风格。
+<strong>适合谁</strong>：用 AI 生 UI / mockup / visual design 但结果都很 generic 的开发者；前端 + AI workflow。
+<strong>备注</strong>：不是 MCP server 也不是 Skill 包——是一份&quot;<strong>design language</strong>&quot;reference。让 AI 看到比较高质量的设计词汇才生得出比较好的东西。</p>
+<hr />
+</details>
+<span id="9-监控--observability"></span><h2 data-heading-alias="9-监控--observability" id="h081729d4a770">9. 监控 / Observability</h2>
+<details markdown="1">
+<summary>展开第 9 类精选项目</summary>
+<span id="grafanamcp-grafanahttpsgithubcomgrafanamcp-grafana-"></span><h3 data-heading-alias="grafanamcp-grafanahttpsgithubcomgrafanamcp-grafana-" id="hec4a3afbb5cf"><a href="../../reference/source-readings.html#s9e46c3d7e189">grafana/mcp-grafana</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Grafana 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Grafana 官方 MCP，从 LLM 直接查 dashboard、metric、alert。
+<strong>适合谁</strong>：用 Grafana 看 metric 的 SRE / DevOps。
+<strong>备注</strong>：“dashboard 那条线为什么掉？”直接问，LLM 捞 metric 给答案。</p>
+<span id="getsentrytoolkithttpsgithubcomgetsentrytoolkit-"></span><h3 data-heading-alias="getsentrytoolkithttpsgithubcomgetsentrytoolkit-" id="hea1e3061aa71"><a href="../../reference/source-readings.html#s68ed35d4a7db">getsentry/toolkit</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">FSL-1.1-Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>Sentry 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：从 LLM 查 Sentry error event、issue、trace。
+<strong>适合谁</strong>：用 Sentry 接 production error 的工程师。
+<strong>备注</strong>：“上周这个 error 的 stack trace 给我看”直接问 Claude Code。
+原 <code>getsentry/sentry-mcp</code> 已改名为 <code>getsentry/toolkit</code>。这是同一个项目（2026-10-02 核对）。Sentry MCP 的名称仍是 <code>sentry-mcp</code>，软件包仍是 <code>@sentry/mcp-server</code>。
+授权限制 Competing Use；不是目前全面采用 Apache-2.0，须按该版本 LICENSE 判断。</p>
+<span id="winor30mcp-server-datadoghttpsgithubcomwinor30mcp-server-datadog-"></span><h3 data-heading-alias="winor30mcp-server-datadoghttpsgithubcomwinor30mcp-server-datadog-" id="h9a430ad112c4"><a href="../../reference/source-readings.html#s1eaa96b0cf8e">winor30/mcp-server-datadog</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（社群版 Datadog）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Datadog API MCP——查 monitor、log、metric。
+<strong>适合谁</strong>：用 Datadog 但 Datadog 还没出官方 MCP 的人。
+<strong>备注</strong>：等 Datadog 官方 MCP 出来可能换掉这个。</p>
+<hr />
+</details>
+<p><a id="10-媒体--流媒体youtube--spotify"></a></p>
+<span id="10-媒体--串流youtube--spotify"></span><h2 data-heading-alias="10-媒体--串流youtube--spotify" id="h2b93259df38a">10. 媒体 / 串流（YouTube / Spotify）</h2>
+<details markdown="1">
+<summary>展开第 10 类精选项目</summary>
+<span id="varunnealspotify-mcphttpsgithubcomvarunnealspotify-mcp-"></span><h3 data-heading-alias="varunnealspotify-mcphttpsgithubcomvarunnealspotify-mcp-" id="hd30e09d0755c"><a href="../../reference/source-readings.html#s735cbaa5abec">varunneal/spotify-mcp</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 LLM 接到 Spotify——播歌、加歌单、查历史。
+<strong>适合谁</strong>：想用 Claude Code 控播放列表、做语音 / 文字 → 音乐的集成者。
+<strong>备注</strong>：要 Spotify Premium 账号（API 限制）。</p>
+<span id="kimtaeyoon83mcp-server-youtube-transcripthttpsgithubcomkimtaeyoon83mcp-server-youtube-transcript-"></span><h3 data-heading-alias="kimtaeyoon83mcp-server-youtube-transcripthttpsgithubcomkimtaeyoon83mcp-server-youtube-transcript-" id="hae578b55b7de"><a href="../../reference/source-readings.html#sb459296b0b92">kimtaeyoon83/mcp-server-youtube-transcript</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（YouTube 字幕）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：直接抓 YouTube 视频字幕给 LLM 摘要、翻译、做 RAG。
+<strong>适合谁</strong>：用视频当学习材料、要批量摘要 YouTube 内容的人。
+<strong>备注</strong>：依赖 YouTube auto-caption；非英文视频字幕质量参差。</p>
+<span id="zubeidhendricksyoutube-mcp-serverhttpsgithubcomzubeidhendricksyoutube-mcp-server-"></span><h3 data-heading-alias="zubeidhendricksyoutube-mcp-serverhttpsgithubcomzubeidhendricksyoutube-mcp-server-" id="hf5aaa440c861"><a href="../../reference/source-readings.html#sf4d44461adeb">ZubeidHendricks/youtube-mcp-server</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（YouTube 完整 API）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：完整 YouTube API MCP——除了 transcript，还能管 video、Shorts、analytics。
+<strong>适合谁</strong>：YouTube 创作者要自动化频道管理。
+<strong>备注</strong>：需要 YouTube Data API key + OAuth。</p>
+<hr />
+</details>
+<p><a id="11-中文生态专用"></a></p>
+<span id="11-中文圈专属"></span><h2 data-heading-alias="11-中文圈专属" id="h55d65b22a997">11. 中文圈专属</h2>
+<details markdown="1">
+<summary>展开第 11 类精选项目</summary>
+<span id="leemyswfeishu-docxhttpsgithubcomleemyswfeishu-docx-"></span><h3 data-heading-alias="leemyswfeishu-docxhttpsgithubcomleemyswfeishu-docx-" id="hab84011f8d1f"><a href="../../reference/source-readings.html#s66e7686c80b9">leemysw/feishu-docx</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：飞书（Lark）docs / sheet / bitable ↔ Markdown 双向转换，含 OAuth 2.0、CLI、TUI、Claude Skills。
+<strong>适合谁</strong>：用飞书 / Lark 写文档的中文用户，要把 Lark 内容跟 Claude Code 串起来。
+<strong>备注</strong>：社群维护；飞书 / Lark API、OAuth scope 与支持功能可能改变，使用前先看当前文档并从测试空间开始。</p>
+<span id="netease-youdaolobsteraihttpsgithubcomnetease-youdaolobsterai-"></span><h3 data-heading-alias="netease-youdaolobsteraihttpsgithubcomnetease-youdaolobsterai-" id="h0d90e9ef959c"><a href="../../reference/source-readings.html#s12919814a601">netease-youdao/LobsterAI</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：网易有道的产品式 Agent，示范工作流自动化、跨应用协作与文件处理。
+<strong>适合谁</strong>：想评估中文界面与中国大陆服务集成的用户。
+<strong>备注</strong>：它是完整 Agent 产品，不是 Skill 或 MCP server；支持的集成、权限与部署方式以项目当前文档为准。</p>
+<span id="qwenlmqwen-agenthttpsgithubcomqwenlmqwen-agent-"></span><h3 data-heading-alias="qwenlmqwen-agenthttpsgithubcomqwenlmqwen-agent-" id="h9f4ca0d2c9be"><a href="../../reference/source-readings.html#s065e41b49c90">QwenLM/Qwen-Agent</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：阿里巴巴官方 Qwen agent framework——RAG、tool use、code interpreter、multi-agent、MCP 兼容，默认搭配 Qwen 系列模型但可换其他 LLM。
+<strong>适合谁</strong>：用 Qwen / 通义千问 为主 LLM 的开发者；想要中文 native 的 agent framework（范例、文档都中文齐全）。
+<strong>备注</strong>：MCP 兼容与可替换模型是主要教学点；采用前核对当前 release、示例与支持的 host。</p>
+<span id="coze-devcoze-studiohttpsgithubcomcoze-devcoze-studio-"></span><h3 data-heading-alias="coze-devcoze-studiohttpsgithubcomcoze-devcoze-studio-" id="h1c0385b3f6c0"><a href="../../reference/source-readings.html#s46981ed75ce9">coze-dev/coze-studio</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：字节跳动 Coze 的开源版——no-code agent builder（workflow / plugin / knowledge / memory），可自部署或上云。
+<strong>适合谁</strong>：不想写 code 但要做 agent 的团队；想看 enterprise agent platform 内部设计（RAG、工作流、Memory、Plugin 系统的 reference 实现）。
+<strong>备注</strong>：底层 framework 是 Coze 自家的 Eino；可接 OpenAI / Claude / Qwen / 国产 LLM。国际版（coze.com）跟中国版（coze.cn）共用此 codebase。</p>
+<span id="coze-devcoze-loophttpsgithubcomcoze-devcoze-loop-"></span><h3 data-heading-alias="coze-devcoze-loophttpsgithubcomcoze-devcoze-loop-" id="h78589b29a458"><a href="../../reference/source-readings.html#sa2157b4b5a6c">coze-dev/coze-loop</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Coze 出的 agent observability + evaluation 平台——trace、debug、eval、prompt management，agent dev lifecycle 的下半场。
+<strong>适合谁</strong>：agent 已经跑起来、要 production 监控的团队；想看&quot;agent eval / observability&quot;可以怎么做的人。
+<strong>备注</strong>：跟 LangSmith / Arize Phoenix 同类；开源版可自部署。</p>
+<span id="liaokongvfxlangchain-chinese-getting-started-guidehttpsgithubcomliaokongvfxlangchain-chinese-getting-started-guide-"></span><h3 data-heading-alias="liaokongvfxlangchain-chinese-getting-started-guidehttpsgithubcomliaokongvfxlangchain-chinese-getting-started-guide-" id="h873a3697310a"><a href="../../reference/source-readings.html#se5ab9d7f45cb">liaokongVFX/LangChain-Chinese-Getting-Started-Guide</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">未标注</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：LangChain 中文入门指南——从 LangChain 基础、Prompt、Memory、Agent、Chains 到实作应用，是一份结构清晰的中文学习资源。
+<strong>适合谁</strong>：想用 LangChain 但英文文档吃不下去的中文用户；想理解 LangChain 设计脉络再决定要不要走这条路的人。
+<strong>备注</strong>：没有正式 license（内容开放阅读）；LangChain 框架本身演进很快，书中部分 API 可能跟最新版有出入。</p>
+<span id="chatchat-spacelangchain-chatchathttpsgithubcomchatchat-spacelangchain-chatchat-"></span><h3 data-heading-alias="chatchat-spacelangchain-chatchathttpsgithubcomchatchat-spacelangchain-chatchat-" id="h10d07e5aaff5"><a href="../../reference/source-readings.html#s9d686af681d7">chatchat-space/Langchain-Chatchat</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：基于 LangChain 的开源知识库问答系统——本地化部署、支持多种向量数据库、RAG 端到端范例。
+<strong>适合谁</strong>：想做 RAG 又不想全部自己刻的中文团队；要本地部署（不能用云端 LLM）的场景。
+<strong>备注</strong>：适合阅读本地化 RAG 的端到端结构；维护节奏放缓，新项目使用前先核对当前 branch、依赖与 issue，优先当作参考实现。</p>
+<span id="usewhalewhalehttpsgithubcomusewhalewhale-"></span><h3 data-heading-alias="usewhalewhalehttpsgithubcomusewhalewhale-" id="h09f6bb4260b0"><a href="../../reference/source-readings.html#s89b687538049">usewhale/whale</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：专为 DeepSeek 模型优化的终端 AI 编码助手——支持 MCP server 接入、Claude-style Skills、对话缓存优化，Go 实现。
+<strong>适合谁</strong>：以 DeepSeek 为主力 LLM 的中文开发者；想用终端工具但不需要 Claude Code 全家桶的人。
+<strong>备注</strong>：开源同类中少见的 DeepSeek 专属优化；MCP + Skills 双支持让它可以逐步扩充能力。</p>
+<span id="simonlin1212a-stock-datahttpsgithubcomsimonlin1212a-stock-data-"></span><h3 data-heading-alias="simonlin1212a-stock-datahttpsgithubcomsimonlin1212a-stock-data-" id="h68f4b31882fb"><a href="../../reference/source-readings.html#s6813645d2edf">simonlin1212/a-stock-data</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：A 股数据 Skill，把 mootdx、东财、akshare、iwencai 等来源包成 AI 编码助手可调用的数据入口。
+<strong>适合谁</strong>：用 Claude Code / Codex / OpenClaw 做投研或量化分析的中文开发者；不想自己刻数据抓取逻辑的人。
+<strong>备注</strong>：社群实现；数据来源的条款、稳定性与字段可能改变，投研前要验证原始数据与授权。兼容 host 以项目当前文档为准。</p>
+<blockquote>
+<p>想找微信 / 钉钉集成？目前主流是用 chat bot framework（如 zhayujie/CowAgent）而不是纯 MCP server。等正规 MCP 出现再加进来。</p>
+</blockquote>
+<span id="moonshotaikimi-k2httpsgithubcommoonshotaikimi-k2-"></span><h3 data-heading-alias="moonshotaikimi-k2httpsgithubcommoonshotaikimi-k2-" id="h037e2be0755f"><a href="../../reference/source-readings.html#s9a02b17dd09c">MoonshotAI/Kimi-K2</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Modified MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：月之暗面 Moonshot 的 Kimi K2 开源大模型系列——开源权重 + OpenAI / Anthropic 兼容 API，主打 agentic / coding / 长程任务，可当 agent stack 的后端模型。
+<strong>适合谁</strong>：想用国产开源模型跑 agent / coding 工作流、或要在自部署环境跑开源权重的中文开发者。
+<strong>备注</strong>：License 是 Modified MIT（标准 MIT + 大规模商用附加条款）——商用前先读原始 LICENSE；weights 另在 Hugging Face。</p>
+<span id="zai-orgglm-45httpsgithubcomzai-orgglm-45-"></span><h3 data-heading-alias="zai-orgglm-45httpsgithubcomzai-orgglm-45-" id="h169bdee85130"><a href="../../reference/source-readings.html#sb4f8cc49d5d2">zai-org/GLM-4.5</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：智谱 Zhipu（Z.ai）的 GLM-4.5 开源模型——定位 Agentic / Reasoning / Coding（ARC）基础模型，开源权重 + API，可当 agent / tool use / coding 的后端。
+<strong>适合谁</strong>：想评估国产开源 agentic 模型、或需要 Apache-2.0 宽松许可权重的中文开发者。
+<strong>备注</strong>：zai-org 是智谱开源 org；同系列另有 GLM-4（）可一起参考；weights 在 Hugging Face。</p>
+<hr />
+</details>
+<span id="12-其他常用cloudflare--stripe"></span><h2 data-heading-alias="12-其他常用cloudflare--stripe" id="heba0895c2db7">12. 其他常用（Cloudflare / Stripe…）</h2>
+<details markdown="1">
+<summary>展开第 12 类精选项目</summary>
+<span id="cloudflaremcp-server-cloudflarehttpsgithubcomcloudflaremcp-server-cloudflare-"></span><h3 data-heading-alias="cloudflaremcp-server-cloudflarehttpsgithubcomcloudflaremcp-server-cloudflare-" id="hcb5fefdaff8e"><a href="../../reference/source-readings.html#s57ccfa678b7f">cloudflare/mcp-server-cloudflare</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Cloudflare 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Cloudflare 官方 MCP——Workers、Pages、R2、KV、D1、DNS、Zero Trust 全包。
+<strong>适合谁</strong>：用 Cloudflare 跑 edge / serverless 的人。
+<strong>备注</strong>：官方维护；请结合需要的 edge workflow、权限与支持的操作评估。</p>
+<span id="stripeaihttpsgithubcomstripeai-"></span><h3 data-heading-alias="stripeaihttpsgithubcomstripeai-" id="hd5bd9d8a0f64"><a href="../../reference/source-readings.html#s669f6a0bb252">stripe/ai</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>Stripe 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Stripe 官方 AI agent toolkit，含 MCP server，操作付款、订阅、退款、客户。
+<strong>适合谁</strong>：要在 agent 内处理付款 / billing 的开发者。
+<strong>备注</strong>：⚠️ 涉及金流，务必用 sandbox 测试够了再接 production。</p>
+<span id="composiohqcomposiohttpsgithubcomcomposiohqcomposio-"></span><h3 data-heading-alias="composiohqcomposiohttpsgithubcomcomposiohqcomposio-" id="h678c7132fc72"><a href="../../reference/source-readings.html#s6885ba6c5ca2">ComposioHQ/composio</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（多服务整合枢纽）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：一个用 SDK 与 MCP server 把 Agent 连到多种应用的平台，并集中处理服务登录，不用每个服务都自行写连接器。
+<strong>适合谁</strong>：agent 要跨大量工具、但不想维护几十个独立 MCP server 的团队。
+<strong>备注</strong>：提供 MCP server + Python / TypeScript SDK；可通过 MCP 接到 Claude Code。属&quot;工具聚合器&quot;（跟 n8n / Zapier 自动化平台同类）。</p>
+<p><a id="vercel-skills"></a></p>
+<span id="vercel-skillshttpsgithubcomvercel-labsskills-"></span><h3 data-heading-alias="vercel-skillshttpsgithubcomvercel-labsskills-" id="hf4788a63fb13"><a href="../../reference/source-readings.html#s3888c0e32096">Vercel Skills</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：<strong>CLI（命令行接口）</strong> 让你在终端用文字命令操作程序。
+Vercel Skills 用这种方式管理 skills。
+你可以用 <code>npx skills find</code>、<code>add</code> 与 <code>update</code> 查找、安装和更新 Agent Skills。
+它不是 MCP server 或模型。
+<strong>适合谁</strong>：需要在支持的 coding agent 间管理 skills，并愿意逐项检查来源与权限的人。
+<strong>备注</strong>：安装或更新不等于完成安全审查。也不保证每个 host 都支持。
+本页核查固定在以下 commit：
+<a href="../../reference/source-readings.html#se8b4c10c3b09">13e4063a1cf913f5606d57d42ab83a86f5001e04</a>。
+更新后要重新审查。
+CLI 根据官方 README 会收集匿名使用记录（usage telemetry）。
+可用 <code>DISABLE_TELEMETRY=1</code> 或 <code>DO_NOT_TRACK=1</code> 关闭。</p>
+<hr />
+<span id="morlutojacobianhttpsgithubcommorlutojacobian--作者本人投稿"></span><h3 data-heading-alias="morlutojacobianhttpsgithubcommorlutojacobian--作者本人投稿" id="hc654cadb098a"><a href="../../reference/source-readings.html#s6321253f4e53">morluto/jacobian</a> ⭐⭐⭐（⚠️ 作者本人投稿）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：用一个可直接安装的数学 MCP server，练习让 agent 调用可组合的精确计算工具；涵盖 polynomial maps、linear algebra 和 graph algorithms。
+<strong>适合谁</strong>：想在 MCP 工作流中加入数学计算，或需要让 agent 处理结构化数学问题的研究者与开发者。
+<strong>备注</strong>：Python 项目，但通过 npm 发布启动器，所以用 <code>npx</code> 起 server。同时提供 MCP server、CLI 和 Python library；可以从一个简单的本地 MCP 配置开始，再按需使用原生 Python API。
+<strong>怎么运行</strong>：</p>
+<pre><code class="language-bash">npx -y jacobian mcp
+</code></pre>
+<hr />
+</details>
+<span id="13-研究工作流-skills学术--paper--文献"></span><h2 data-heading-alias="13-研究工作流-skills学术--paper--文献" id="h47c9ef2fe822">13. 研究工作流 Skills（学术 / paper / 文献）</h2>
+<p>研究 Skill 能整理文献与写作流程；引用、数据来源和学术诚信仍由研究者负责。</p>
+<details markdown="1">
+<summary>展开第 13 类精选项目</summary>
+<blockquote>
+<p>⚠️ <strong>maintainer 自家项目区</strong>：以下是本 repo 维护者 <a href="../../reference/source-readings.html#sa809a577a54b">@WenyuChiou</a> 日常使用并公开的研究工具。选收理由是“能解决哪一段研究流程”，不是 popularity；请按你的研究规范、数据与 host 自行评估。</p>
+</blockquote>
+<span id="wenyuchiouai-research-skillshttpsgithubcomwenyuchiouai-research-skills-"></span><h3 data-heading-alias="wenyuchiouai-research-skillshttpsgithubcomwenyuchiouai-research-skills-" id="ha9c8dfa916c4"><a href="../../reference/source-readings.html#s08b129c9d81a">WenyuChiou/ai-research-skills</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（研究流程一整套）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：用一组研究 Skills 涵盖文献分流、研究设计、project context、论文写作与 multi-AI delegation，并以 marketplace 方式提供。
+<strong>适合谁</strong>：研究生 / 博后想一次获取“研究全流程”skill set。
+<strong>备注</strong>：marketplace 形式，跟 Stage 5.4 教的 plugin/marketplace 概念对齐。</p>
+<span id="wenyuchiouacademic-writing-skillshttpsgithubcomwenyuchiouacademic-writing-skills-"></span><h3 data-heading-alias="wenyuchiouacademic-writing-skillshttpsgithubcomwenyuchiouacademic-writing-skills-" id="ha387693b7bd7"><a href="../../reference/source-readings.html#saf7f77904dae">WenyuChiou/academic-writing-skills</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（窄但深）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：严谨学术论文写作 / 修改 / 投稿的 Claude Code skill。Field-agnostic，可用 per-paper journal_format.md 跟 style_overrides.md 客制规则。
+<strong>适合谁</strong>：在写 / 改 paper 的研究者，想把 banned-word audit、figure-text coupling、submission checklist 自动化。
+<strong>备注</strong>：可从完整 marketplace 使用，也可按当前官方说明单独安装。</p>
+<span id="wenyuchiouzotero-skillshttpsgithubcomwenyuchiouzotero-skills-"></span><h3 data-heading-alias="wenyuchiouzotero-skillshttpsgithubcomwenyuchiouzotero-skills-" id="h411f4625a66a"><a href="../../reference/source-readings.html#sac6b7dd812cd">WenyuChiou/zotero-skills</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Zotero CLI skill——程序化搜索 / 添加 / 分类 / 标记文献。
+<strong>适合谁</strong>：用 Zotero 管理文献、想让 Claude Code 直接整理 library 的研究者。
+<strong>备注</strong>：跟 <a href="../../reference/source-readings.html#s42baabd1d22f"><code>MuiseDestiny/zotero-gpt</code></a> 的区别——后者是 Zotero plugin（在 Zotero 里 chat），这份是 CLI / Skill（从 Claude Code 操作 Zotero）。</p>
+<span id="wenyuchiouresearch-hubhttpsgithubcomwenyuchiouresearch-hub-"></span><h3 data-heading-alias="wenyuchiouresearch-hubhttpsgithubcomwenyuchiouresearch-hub-" id="h3104d60649d1"><a href="../../reference/source-readings.html#s1837f989d824">WenyuChiou/research-hub</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：AI-operable research workspace，集成 Zotero、Obsidian 与 Gemini Notebook（旧名 NotebookLM），并提供多种操作接口。
+<strong>适合谁</strong>：同时用 Zotero / Obsidian / Gemini Notebook（旧名 NotebookLM）的研究者，想把它们绑成一个 workspace 给 LLM 操作。
+<strong>备注</strong>：跟单一工具的 MCP（mcp-obsidian、notion-mcp 等）互补——这份是 hub，可集成多个工具。</p>
+<hr />
+</details>
+<span id="14-multi-llm-delegation-skills"></span><h2 data-heading-alias="14-multi-llm-delegation-skills" id="h9c8d3e36cc23">14. Multi-LLM Delegation Skills</h2>
+<p>委派工具要锁定文件、预算、验收与停止条件；另一个模型不会自动变成正确答案。</p>
+<details markdown="1">
+<summary>展开第 14 类精选项目</summary>
+<blockquote>
+<p>⚠️ <strong>maintainer 自家项目区</strong>：以下是维护者把 daily workflow 抽出来公开的 delegation skills。选收标准是能否锁定责任、输入、输出与验收，不看 popularity。Multi-LLM 工具变化快，请和 Stage 7 的 production framework 一起评估。</p>
+</blockquote>
+<span id="delegation-skills-的组合composition"></span><h3 data-heading-alias="delegation-skills-的组合composition" id="h107fd434ef58">Delegation skills 的组合（composition）</h3>
+<p>下面的 skill 可以组合，但每一个都要有清楚的任务边界与验收：</p>
+<p><img src="../upstream/resources/diagrams/multi-llm-delegation-composition.zh-Hans.png" alt="Claude + 3 个 delegate skill 分工" /></p>
+<p>不要把模型名称当固定职位。先看当前模型、工具与成本，再把 <strong>design / review、implementation、long-form synthesis</strong> 分给适合的执行者；最后仍由同一份 acceptance criteria 验收。</p>
+<span id="wenyuchioucodex-delegatehttpsgithubcomwenyuchioucodex-delegate-"></span><h3 data-heading-alias="wenyuchioucodex-delegatehttpsgithubcomwenyuchioucodex-delegate-" id="hd01f4dd3d6b1"><a href="../../reference/source-readings.html#s541fa6779834">WenyuChiou/codex-delegate</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Claude Code skill 把 Codex CLI 当作 execution specialist——大量文件 refactor、batch edits、boilerplate 生成、wrapper-based 实现密集任务。Claude 写 plan + review，Codex 执行。
+<strong>适合谁</strong>：要省 token / 提速大规模机械式编辑的开发者；想验证“multi-agent 不只是 buzzword”的学习者。
+<strong>何时用</strong>：跨多个文件做同一种 transform、生成 test scaffold、移植现有 pattern 或写 migration script。
+<strong>何时不用</strong>：责任范围不清、没有 acceptance criteria，或需要独立 security review 的任务。
+<strong>备注</strong>：把它当作有界 executor，不要把模型名称当永久职位；最后仍要由同一份 acceptance criteria 验收。</p>
+<span id="wenyuchiougemini-delegate-skillhttpsgithubcomwenyuchiougemini-delegate-skill--已封存-2026-07"></span><h3 data-heading-alias="wenyuchiougemini-delegate-skillhttpsgithubcomwenyuchiougemini-delegate-skill--已封存-2026-07" id="h8877354bae07"><a href="../../reference/source-readings.html#s46edd37ba254">WenyuChiou/gemini-delegate-skill</a> ⭐⭐⭐（⚠️ 已封存 2026-07）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐（⚠️ 已封存）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：历史上的 Claude Code delegation skill，示范把长文、跨文档或 CJK 任务交给另一个 CLI executor。
+<strong>适合谁</strong>：维护旧设置、研究早期 multi-LLM delegation pattern 的读者。
+<strong>何时用</strong>：只作历史与迁移参考。
+<strong>何时不用</strong>：新工作；仓库已封存，不能作为当前安装起点。
+<strong>备注</strong>：不要沿用旧的固定模型分工；改用目前仍维护、可验收且符合 host 的 delegation 入口。</p>
+<span id="wenyuchiouagent-collab-skillshttpsgithubcomwenyuchiouagent-collab-skills-"></span><h3 data-heading-alias="wenyuchiouagent-collab-skillshttpsgithubcomwenyuchiouagent-collab-skills-" id="he76302267fdf"><a href="../../reference/source-readings.html#s26dcd713721b">WenyuChiou/agent-collab-skills</a> ⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐（experimental，当作 reference 看就好）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Claude Code marketplace for multi-agent collaboration——task splitter、output reconciler、adversarial debate、shared memory、acceptance gate。
+<strong>适合谁</strong>：要协调多个 delegate、想看 multi-agent coordination 怎么打包成 marketplace 的人。
+<strong>备注</strong>：experimental——别把它当作生产级 framework，当作维护者把自己 setup 公开的 reference 看就好。要可上线部署的请看 Stage 7 的 LangGraph / Microsoft Agent Framework / CrewAI。</p>
+<hr />
+</details>
+<span id="15-金融--交易-agents"></span><h2 data-heading-alias="15-金融--交易-agents" id="ha38b3725a756">15. 金融 / 交易 Agents</h2>
+<blockquote>
+<p>⚠️ <strong>应用领域区</strong>：agent 在量化交易 / hedge fund 模拟 / 自动下单的应用。本节两个 entry 分别是 Apache-2.0 与 MIT，但这类 repo 授权状态普遍混杂，使用前仍请自行查清楚。<strong>警示</strong>：trading agent 跑真实资金有显著风险，本目录列入是为了学习 agent 设计模式、不是投资建议。</p>
+</blockquote>
+<details markdown="1">
+<summary>展开第 15 类精选项目</summary>
+<span id="tauricresearchtradingagentshttpsgithubcomtauricresearchtradingagents-"></span><h3 data-heading-alias="tauricresearchtradingagentshttpsgithubcomtauricresearchtradingagents-" id="h7568a7008eaa"><a href="../../reference/source-readings.html#s626a5e4fcb23">TauricResearch/TradingAgents</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：多 agent LLM 框架做金融交易决策，bull / bear / fundamentals / technicals / risk 各 agent 分工。
+<strong>适合谁</strong>：想看 multi-agent 在分析性任务怎么分工的学习者；量化研究者想实验 LLM 增强既有 pipeline。
+<strong>备注</strong>：Apache-2.0、允许修改与商用（保留授权声明）；<strong>非投资建议，别直接拿来下实单</strong>。</p>
+<span id="viratttai-hedge-fundhttpsgithubcomviratttai-hedge-fund-"></span><h3 data-heading-alias="viratttai-hedge-fundhttpsgithubcomviratttai-hedge-fund-" id="h9bac144b9474"><a href="../../reference/source-readings.html#s93b2cfb4f882">virattt/ai-hedge-fund</a> ⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：多角色 AI hedge fund 模拟，bull / bear / 基本面 / 技术面 / 风控 agent 协作产生 trade recommendation。
+<strong>适合谁</strong>：看过 Stage 7 multi-agent 想要一个完整应用案例的学习者；对 agent + 金融交叉领域有兴趣的人。
+<strong>备注</strong>：MIT 授权；<strong>模拟性质、非投资建议</strong>。</p>
+<hr />
+</details>
+<span id="16-网页搜索--检索web-search--retrieval"></span><h2 data-heading-alias="16-网页搜索--检索web-search--retrieval" id="h85de59a837e0">16. 网页搜索 / 检索（Web Search / Retrieval）</h2>
+<details markdown="1">
+<summary>展开第 16 类精选项目</summary>
+<span id="exa-labsexa-mcp-serverhttpsgithubcomexa-labsexa-mcp-server-"></span><h3 data-heading-alias="exa-labsexa-mcp-serverhttpsgithubcomexa-labsexa-mcp-server-" id="h4d1e285cea09"><a href="../../reference/source-readings.html#s084da3f43141">exa-labs/exa-mcp-server</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>Exa 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：Exa 官方 MCP——为 LLM / agent 设计的网页搜索（neural + keyword 两种），回传干净结果直接喂进 prompt。
+<strong>适合谁</strong>：要做研究 / fact-check / 在线 RAG 检索的人——语义搜索在“概念相关”场景特别强，纯 keyword 反而没那么吃香。
+<strong>备注</strong>：需要 Exa API key。</p>
+<span id="tavily-aitavily-mcphttpsgithubcomtavily-aitavily-mcp-"></span><h3 data-heading-alias="tavily-aitavily-mcphttpsgithubcomtavily-aitavily-mcp-" id="h11fa7db9728e"><a href="../../reference/source-readings.html#s81fe53041ca8">tavily-ai/tavily-mcp</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">MIT</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（LLM 搜索 MCP）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把 Tavily search API 包成 MCP，让 Agent 取得搜索结果与来源。
+<strong>适合谁</strong>：想练习让 Agent 搜索网页，并另外核对来源内容的新手。
+<strong>备注</strong>：需要 Tavily API key；方案与额度可能改变，使用前看当前官方文档。</p>
+<hr />
+</details>
+<span id="17-安全--mcp-安全治理"></span><h2 data-heading-alias="17-安全--mcp-安全治理" id="h07f1d8c05e96">17. 安全 / MCP 安全治理</h2>
+<details markdown="1">
+<summary>展开第 17 类精选项目</summary>
+<span id="trailofbitsskillshttpsgithubcomtrailofbitsskills-"></span><h3 data-heading-alias="trailofbitsskillshttpsgithubcomtrailofbitsskills-" id="hee97a0cc31e9"><a href="../../reference/source-readings.html#s7ec7a50e9fd9">trailofbits/skills</a> ⭐⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">CC-BY-SA-4.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐⭐（<strong>Trail of Bits 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：安全公司 Trail of Bits 官方的 Claude Code plugin marketplace，收的是他们自己在用的安全分析、测试与漏洞研究 skills。
+<strong>适合谁</strong>：想让 agent 帮忙做 code audit、漏洞分析、安全测试的人；也适合想看“专业安全团队怎么把方法论写成 skill”的人。
+<strong>备注</strong>：用 <code>/plugin marketplace add trailofbits/skills</code> 安装，Codex 也直接支持同一套 marketplace。授权是 <strong>CC-BY-SA-4.0</strong>（share-alike），改作后要用相同授权发布，商用集成前先确认。注意它跟 Stage 5 那张表里的 <a href="../../reference/source-readings.html#s5e19efafb659"><code>trailofbits/skills-curated</code></a> 是<strong>两个不同的 repo</strong>：后者是由 Trail of Bits 审核、内容来自社区贡献的策展 marketplace，这一个是 Trail of Bits 自家的安全 skills。</p>
+<span id="stackloktoolhivehttpsgithubcomstackloktoolhive-"></span><h3 data-heading-alias="stackloktoolhivehttpsgithubcomstackloktoolhive-" id="h6c3fb0f64fab"><a href="../../reference/source-readings.html#sc84d080928cf">stacklok/toolhive</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：把每一个 MCP server 跑在隔离容器里，用最小权限文件取代本机凭证，并提供 audit log 与可配置的身份／访问策略；另附 Kubernetes operator。
+<strong>适合谁</strong>：团队里已经有人各自装了一堆 MCP server，开始需要回答“谁装了什么、它能拿到哪些凭证”的人。
+<strong>备注</strong>：Go 项目，桌面版与 CLI 都有。开源的 ToolHive 与 Stacklok 的企业版是分开的，评估功能时注意分界在哪。</p>
+<span id="nvidiaopenshellhttpsgithubcomnvidiaopenshell-"></span><h3 data-heading-alias="nvidiaopenshellhttpsgithubcomnvidiaopenshell-" id="h90488aa699a8"><a href="../../reference/source-readings.html#s6eb73169f84c">NVIDIA/OpenShell</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐（<strong>NVIDIA 官方</strong>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：给自动化 agent 用的沙箱化执行环境，用声明式策略管住文件、网络与进程；Claude Code 与 Codex 不改任何代码就能跑在里面（OpenClaw 要另外通过下面那则 NemoClaw）。
+<strong>适合谁</strong>：要让 agent 真的能执行命令、但不想把整台机器交出去的人。
+<strong>备注</strong>：Rust 项目。需要 Docker / Podman 或主机虚拟化（MicroVM sandbox 用）；Windows 走 WSL 2 且标为 experimental。<strong>⚠️ 项目自述仍是 alpha</strong>，拿来读与试可以，正式依赖前先自行评估。与 <code>toolhive</code> 的分工是：toolhive 管 MCP server，这个管 Agent 本身的执行边界。</p>
+<span id="nolabs-ainonohttpsgithubcomnolabs-ainono-"></span><h3 data-heading-alias="nolabs-ainonohttpsgithubcomnolabs-ainono-" id="hbd3eca12ea7f"><a href="../../reference/source-readings.html#s0cb19841a4a1">nolabs-ai/nono</a> ⭐⭐⭐⭐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">栏位</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">License</td>
+<td style="text-align:left">Apache-2.0</td>
+</tr>
+<tr>
+<td style="text-align:left">推荐度</td>
+<td style="text-align:left">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教什么</strong>：用操作系统自己的隔离机制（Linux Landlock、macOS Seatbelt）挡住 agent，不需要 daemon 也不需要容器。
+<strong>适合谁</strong>：想要沙箱但不想为此装一整套 container runtime 的人。
+<strong>备注</strong>：Rust 项目，由做 Sigstore 的团队维护。零容器是它跟 OpenShell 最大的取舍差异：启动快、但隔离强度受限于操作系统提供的机制。</p>
+<span id="还有什么没收录"></span><h2 data-heading-alias="还有什么没收录" id="hcad2ae3692f9">还有什么没收录？</h2>
+<p>如果你需要的集成不在上面，先看这些 catalog：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#sd8397b2e8faf">Official MCP Registry</a> — 找已发布的 MCP server，再检查维护者、权限、授权与当前状态</li>
+<li><a href="../../reference/source-readings.html#s131c6958203d"><code>wong2/awesome-mcp-servers</code></a> — 社群分类整理 MCP server 清单，按分类浏览许多项目</li>
+<li><a href="../../reference/source-readings.html#s61a57c93de29"><code>punkpeye/awesome-mcp-servers</code></a> — 另一份 MCP server 清单，跟上面互补</li>
+<li><a href="../../reference/source-readings.html#scb8f252ccaaf"><code>modelcontextprotocol/servers</code></a> — 官方 reference implementations，用来学习 MCP 如何实现；不是 production 推荐清单。</li>
+<li><a href="../../reference/source-readings.html#s9d1ddd1a7f4f"><code>travisvn/awesome-claude-skills</code></a> — Claude Skills 清单</li>
+</ul>
+<span id="要加新的"></span><h3 data-heading-alias="要加新的" id="hcf64bb5a87be">要加新的？</h3>
+<ol>
+<li>开 issue，附 repo 链接 + 为什么要加 + 属于哪个分类</li>
+<li>或直接送 PR：在对应分类下加一个 entry，按上面的格式写（来源、授权或服务状态、编辑评分、教什么、适合谁、权限与限制）</li>
+<li>说明它填补了什么学习缺口；受欢迎程度本身不能证明质量或安全性</li>
+</ol>
+<p>PR 送出前看一下 <a href="resources--style-guide.zh-Hans.md.html"><code>resources/style-guide.zh-Hans.md</code></a> 跟 <a href="CONTRIBUTING.zh-Hans.md.html"><code>CONTRIBUTING.zh-Hans.md</code></a>。</p>
+<hr />
+<span id="维护备注给未来想帮忙的人"></span><h2 data-heading-alias="维护备注给未来想帮忙的人" id="h4dd549fbf820">维护备注（给未来想帮忙的人）</h2>
+<p>不是 SLA，是“能做就做”的方向：</p>
+<ul>
+<li>官方状态、授权、权限与 hosted endpoint 以供应商文档或 canonical repo 为准</li>
+<li>CI 定期扫描 repository redirect、archive、HTTP error 与 freshness 信号；警告后仍要人工判断，不能只因很久没 release 就删除稳定工具</li>
+<li>新分类先说清楚读者任务与安全边界，再收录可核对的官方或优质社群入口</li>
+<li>中文社群工具也使用同一套规则：新收录的第三方 GitHub repo 至少要有 1,000 stars，并继续检查教学价值、维护、授权和权限；官方文档、标准规范与不可替代的 canonical source 不受这个门槛限制</li>
+<li>用词与格式先修到五岁也能理解，同时保留精确术语、限制与来源</li>
+</ul>
+</details>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

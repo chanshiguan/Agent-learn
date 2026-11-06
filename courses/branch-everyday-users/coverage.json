@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "原小安消息题",
+    "lesson": "lessons/03-workshop.html#h0e015b25bce8",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h6d39b69524c0"
+  },
+  {
+    "requirement": "Prompt 与事实核对",
+    "lesson": "lessons/03-workshop.html#hfaf483ee2cf2",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h6d39b69524c0"
+  },
+  {
+    "requirement": "官方入门、连接器、隐私与本地模型",
+    "lesson": "lessons/03-workshop.html#h7dd7e4ba147b",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h6d39b69524c0"
+  },
+  {
+    "requirement": "个人 Agent 与持续任务",
+    "lesson": "lessons/03-workshop.html#h9a435fbb159e",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h6d39b69524c0"
+  },
+  {
+    "requirement": "提交、变式与验收",
+    "lesson": "lessons/03-workshop.html#h6d39b69524c0",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h6d39b69524c0"
+  }
+]

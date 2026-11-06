@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Engineering 中文完整课程</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <p class="eyebrow">Self-contained Course · 2026</p>
+  <h1>Prompt Engineering<br>中文完整课程</h1>
+  <p class="lede">
+    这套课程用中文重新组织 Anthropic 交互式教程、OpenAI Prompt Engineering 指南和 Google Prompt Design Strategies 的全部核心内容。你可以只学这套课，不需要在三份英文资料之间来回跳转。
+  </p>
+  <p class="meta">目标：从“会问模型”进阶到“会设计、测试和维护 Prompt 系统”</p>
+
+  <div class="callout warning">
+    <strong>内容边界：</strong>课程完整覆盖三份资料的知识点，但不是原文翻译或逐字复制。所有讲解、比喻、案例和练习均为中文重写，并对旧版、供应商特定或已不适用的内容做了标注。
+  </div>
+  <div class="callout success">
+    <strong>学习方式：</strong>请直接按下方第 1–7 课学习。你不需要访问 Anthropic、OpenAI 或 Google 的原始网页；课程中出现三家公司名称，只是在说明某个知识点的来源。
+  </div>
+
+  <h2>学习路线</h2>
+  <ol class="lesson-list">
+    <li><a href="0001-three-prompt-guides.html">三份资料的总地图</a><br><span class="small">先看清 Anthropic、OpenAI、Google 各自在解决什么问题。</span></li>
+    <li><a href="0002-foundations-roles-and-boundaries.html">基础结构、角色、输入与边界</a><br><span class="small">学会组织消息，选模型，区分指令和资料。</span></li>
+    <li><a href="0003-output-and-few-shot.html">输出控制、预填充与 Few-Shot</a><br><span class="small">让格式可解析，让范例真正展示边界。</span></li>
+    <li><a href="0004-reasoning-grounding-and-reliability.html">推理、幻觉、上下文与 Grounding</a><br><span class="small">判断何时补理由、何时补资料、何时应该调工具。</span></li>
+    <li><a href="0005-complex-prompts-tools-and-agents.html">复杂 Prompt、链式流程、工具与 Agent</a><br><span class="small">从单次问答走到计划、执行、验证和恢复。</span></li>
+    <li><a href="0006-parameters-iteration-and-evals.html">参数、迭代、Eval 与生产维护</a><br><span class="small">把 Prompt 从“感觉不错”变成可测试、可回归的工程资产。</span></li>
+    <li><a href="0007-modern-model-guidance.html">现代模型、长上下文与厂商差异</a><br><span class="small">理解 GPT、推理模型、Gemini 3 和旧版 Claude 建议为何不能混用。</span></li>
+  </ol>
+
+  <h2>课程之外的两张表</h2>
+  <div class="two-col">
+    <div>
+      <h3><a href="../reference/prompt-glossary.html">术语表</a></h3>
+      <p>快速查 Prompt、Instruction、Context、Few-Shot、RAG、Grounding、Eval、Tool Use 等概念。</p>
+    </div>
+    <div>
+      <h3><a href="../reference/source-coverage.html">知识覆盖矩阵</a></h3>
+      <p>逐章列出三份原资料的所有主题，以及它们在课程中的位置。</p>
+    </div>
+  </div>
+
+  <h2>怎样才算学会</h2>
+  <ul class="checklist">
+    <li>能从失败现象判断该改 Prompt、上下文、参数、模型还是工具。</li>
+    <li>能用一套稳定结构写出目标、输入、约束、范例和输出格式。</li>
+    <li>能用固定 Eval 比较两个 Prompt，而不是只说“新版感觉更好”。</li>
+    <li>能设计一个需要查资料、调工具、校验结果的小型 Agent 流程。</li>
+  </ul>
+
+  <div class="callout success">
+    <strong>建议节奏：</strong>每次只学一课，完成页底检索题后再继续。“看完”不等于“会用”，主动回忆和动手修改 Prompt 才会建立长期记忆。
+  </div>
+
+  <footer>
+    <p class="small">知识来源：Anthropic Interactive Prompt Engineering Tutorial、OpenAI Prompt Engineering、Google AI Studio Prompt Design Strategies。资料核对日期：2026-11-03。</p>
+  </footer>
+</main>
+</body>
+</html>

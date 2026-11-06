@@ -1,0 +1,124 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-4cross-provider-比较claude--gpt--gemini"></span><h1 data-heading-alias="练习-4cross-provider-比较claude--gpt--gemini" id="h0626ea0e2141">练习 4：Cross-Provider 比较（Claude / GPT / Gemini）</h1>
+<p>对应 <a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1 — LLM 基础</a> 练习 4。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<span id="为什么要比较"></span><h2 data-heading-alias="为什么要比较" id="h3201950842bc">为什么要比较</h2>
+<p>同样是“解释 AGI vs narrow AI”这个 prompt、三家 LLM 回得不一样：</p>
+<ul>
+<li><strong>Claude</strong>：通常倾向先给结构（定义 → 例子）、语气中性</li>
+<li><strong>GPT</strong>：倾向先给简短答案、再展开（type-A 风格）</li>
+<li><strong>Gemini</strong>：倾向 list / bullet 排列、example 多</li>
+</ul>
+<p>跑一次自己看、比读论文有感。顺便量 token / 成本 / latency 三维。</p>
+<span id="怎么跑"></span><h2 data-heading-alias="怎么跑" id="hf52310faaecc">怎么跑</h2>
+<pre><code class="language-bash">pip install -r requirements.txt
+
+# 至少设一个。没设的会 skip、不会 crash
+export ANTHROPIC_API_KEY=sk-ant-...
+export OPENAI_API_KEY=sk-...
+export GOOGLE_API_KEY=...
+
+python starter.py
+</code></pre>
+<p>预期看到（样本）：</p>
+<pre><code>prompt: 用 1-2 句话解释 AGI 跟 narrow AI 的差别。
+============================================================
+⚠ skip call_gemini（没有对应 API key）
+
+[Anthropic / claude-haiku-4-5]  latency=823ms  in=21 out=58
+AGI（通用人工智能）能跨领域学习与解题；narrow AI 只擅长单一任务...
+
+[OpenAI / gpt-5-mini]  latency=612ms  in=24 out=49
+Narrow AI 专精于特定任务（如下棋、辨识）、AGI 则具备...
+
+✅ 练习 4 通过 — 收到 2 家 provider 回应、可比较风格 / 长度 / 成本
+</code></pre>
+<span id="不花钱验证程序逻辑"></span><h2 data-heading-alias="不花钱验证程序逻辑" id="h4571f575b19e">不花钱验证程序逻辑</h2>
+<pre><code class="language-bash">python test.py
+</code></pre>
+<p>4 个 test 都用 <code>unittest.mock.patch</code> 取代 SDK：</p>
+<pre><code>✅ test_skip_when_no_key
+✅ test_compare_returns_only_valid_replies
+✅ test_reply_dataclass_shape
+✅ test_compare_one_provider_set
+
+🎉 全部通過 — Cross-provider 邏輯正確（skip-on-missing-key 已驗）
+</code></pre>
+<span id="程序结构走查"></span><h2 data-heading-alias="程序结构走查" id="h96d111b95171">程序结构走查</h2>
+<table>
+<thead>
+<tr>
+<th>段</th>
+<th>在做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Reply</code> dataclass</td>
+<td>统一三家 SDK 各自 Response 对象、抽出 4 个共通字段（text/in/out/latency）</td>
+</tr>
+<tr>
+<td><code>call_claude / call_openai / call_gemini</code></td>
+<td>各家 SDK 包装、没 key 就 return <code>None</code></td>
+</tr>
+<tr>
+<td><code>compare(prompt)</code></td>
+<td>跑三个 caller、跳过 None、回 valid replies list</td>
+</tr>
+<tr>
+<td><code>__main__</code></td>
+<td>印对照表、自我验证</td>
+</tr>
+</tbody>
+</table>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ol>
+<li><strong>三家 SDK API shape 差很多</strong>：Anthropic 用 <code>messages.create</code>、OpenAI 用 <code>chat.completions.create</code>、Google 用 <code>models.generate_content</code>。<strong>用 dataclass 统一才能比较</strong></li>
+<li><strong>Token 计算字段名不一样</strong>：Anthropic 是 <code>input_tokens / output_tokens</code>、OpenAI 是 <code>prompt_tokens / completion_tokens</code>、Google 是 <code>prompt_token_count / candidates_token_count</code></li>
+<li><strong>没设 key 应该 skip 而非 raise</strong>：production code 一定要做这层 guard、production agent 不能因为一家 down 就全死</li>
+<li><strong>没抓 latency</strong>：跑完才知道哪家慢、production routing 需要这 data</li>
+</ol>
+<span id="想加更多家"></span><h2 data-heading-alias="想加更多家" id="h3affde6dc728">想加更多家？</h2>
+<p>OpenRouter、Mistral、Cohere、Groq 等服务可以提供 OpenAI-compatible endpoint，但不能假设只改 <code>base_url</code> 就完全兼容。至少还要确认 model ID、认证、支持的参数、tool schema、response／usage 字段、rate limit 和错误格式：</p>
+<pre><code class="language-python">client = OpenAI(
+    base_url=&quot;https://api.groq.com/openai/v1&quot;,
+    api_key=os.environ[&quot;GROQ_API_KEY&quot;],
+)
+</code></pre>
+<span id="-path-b--加上本机-ollama-当第-4-家对照"></span><h2 data-heading-alias="-path-b--加上本机-ollama-当第-4-家对照" id="h5229a8f1d271">🦙 Path B — 加上本机 Ollama 当第 4 家对照</h2>
+<p><code>call_openai</code> 已经使用 OpenAI-compatible client。换成 Ollama 时要改 <code>base_url</code> 和 <code>model</code>，也要用本题测试确认 response、usage 和 tool support：</p>
+<pre><code class="language-python">def call_ollama(prompt: str) -&gt; Reply | None:
+    &quot;&quot;&quot;本机 Ollama (gemma4:e4b 或 qwen2.5:3b)。没装就 return None、不 crash。&quot;&quot;&quot;
+    import requests
+    try:
+        requests.get(&quot;http://localhost:11434/api/tags&quot;, timeout=2)
+    except Exception:
+        return None  # Ollama 没跑
+    from openai import OpenAI
+    client = OpenAI(base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;)
+    t0 = time.time()
+    r = client.chat.completions.create(
+        model=&quot;gemma4:e4b&quot;,
+        max_tokens=200,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+    )
+    return Reply(
+        provider=&quot;Ollama-local&quot;,
+        model=&quot;gemma4:e4b&quot;,
+        text=r.choices[0].message.content or &quot;&quot;,
+        in_tokens=r.usage.prompt_tokens,
+        out_tokens=r.usage.completion_tokens,
+        latency_ms=int((time.time() - t0) * 1000),
+    )
+</code></pre>
+<p>把 <code>call_ollama</code> 加进 <code>compare()</code> 的 caller list，就能看 4 家对照。本地路径没有供应商模型 API 账单，但仍有下载、硬件、电力和等待成本；latency 与质量要用同一组固定测试在你的电脑上实测。</p>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>成本对照</strong> → 接 <a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1 的计价练习</a> 的 PRICING dict、印 dollar cost column</li>
+<li><strong>同 prompt 跑 N 次取平均</strong> → 在 <code>compare()</code> 内加 for-loop、看 latency stdev</li>
+<li><strong>加 quality eval</strong> → 加第四家 LLM 当 judge、给每家的响应打分（这在 Stage 7 练习 2 会教）</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

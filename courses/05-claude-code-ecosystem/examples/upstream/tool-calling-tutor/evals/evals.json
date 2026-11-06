@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "description": "tool-calling-tutor 的简体中文离线行为验收题；只核对路由、检查要点和本地资料定位，不代表模型质量分数。",
+  "cases": [
+    {
+      "id": "symptom_a_llm_not_calling",
+      "locale": "zh-Hans",
+      "input": "我写了 get_weather 工具，也传入了 tools，但模型只返回文字，没有调用工具。",
+      "expected_route": "a",
+      "reference": "references/debug-flowchart.zh-Hans.md#section-a-symptom-allm-完全不触发-toolcalls",
+      "must_cover": [
+        "先确认当前 SDK、模型与工具调用支持情况",
+        "检查 tool description、边界、query 是否真的需要工具，以及 schema wrapper",
+        "不要捏造原因比例或保证换 model 就会成功"
+      ]
+    },
+    {
+      "id": "symptom_b_wrong_args",
+      "locale": "zh-Hans",
+      "input": "工具被调用了，但 value 收到的是“32 摄氏度”这个字符串，而不是数字 32。",
+      "expected_route": "b",
+      "reference": "references/schema-evolution.zh-Hans.md#iteration-0原始坏-schema",
+      "must_cover": [
+        "检查类型、必填字段、枚举，以及应用侧参数验证",
+        "按四次 Schema 改进逐步说明，不声称有固定成功率",
+        "不执行未经验证的模型参数"
+      ]
+    },
+    {
+      "id": "symptom_c_loop_no_end",
+      "locale": "zh-Hans",
+      "input": "ReAct loop 一直调用同一个 tool，跑到最大轮数也没有结束。",
+      "expected_route": "c",
+      "reference": "references/debug-flowchart.zh-Hans.md#section-c-symptom-creact-loop-跑不停",
+      "must_cover": [
+        "检查 assistant history、call ID、tool result 和停止条件",
+        "保留最大轮数并让失败清楚可见",
+        "只要求可检查的短计划，不索取隐藏推理"
+      ]
+    },
+    {
+      "id": "symptom_d_design_from_scratch",
+      "locale": "zh-Hans",
+      "input": "我想做一个查询 GitHub 仓库资料的工具，但还没有写 Schema。",
+      "expected_route": "d",
+      "reference": "references/schema-evolution.zh-Hans.md#iteration-0原始坏-schema",
+      "must_cover": [
+        "依次明确用途、描述、类型、取值约束与错误处理",
+        "先确认所用 SDK，再选择对应的 Schema 外形",
+        "加入工具白名单与参数验证"
+      ]
+    },
+    {
+      "id": "route_away_langgraph",
+      "locale": "zh-Hans",
+      "input": "我的 LangGraph StateGraph 连线有问题，这个工具调用教学助手能修吗？",
+      "expected_route": "away",
+      "reference": "",
+      "must_cover": [
+        "把框架特有的调试问题引导到第四课",
+        "MCP、上线运维与通用提示工程分别按对应课程处理"
+      ]
+    }
+  ]
+}

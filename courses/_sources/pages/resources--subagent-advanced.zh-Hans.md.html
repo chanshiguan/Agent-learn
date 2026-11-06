@@ -1,0 +1,262 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>subagent-advanced.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="subagent-进阶使用--description-写法--composition--debug"></span><h1 data-heading-alias="subagent-进阶使用--description-写法--composition--debug" id="h3563b9dbf0fb">Subagent 进阶使用 — Description 写法 / Composition / Debug</h1>
+<blockquote>
+<p>📋 <strong>这份是给谁看的</strong>：你已经会用内置 subagent（<a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5</a> + <a href="resources--subagent-cookbook.zh-Hans.md.html">cookbook</a> 走完了），准备：(1) <strong>自己写一个</strong> subagent、(2) <strong>组合多个</strong> subagent，或 (3) <strong>debug</strong> 跑坏的 subagent。</p>
+<p>⚠️ <strong>先决条件</strong>：读完 Stage 5.5 §易混淆概念厘清 + cookbook 15 个 recipe 之后再来。没读 cookbook 直接看这份，会卡在“subagent 是什么”这一层。</p>
+</blockquote>
+<hr />
+<span id="怎么读这份文件"></span><h2 data-heading-alias="怎么读这份文件" id="h63731bde1751">怎么读这份文件</h2>
+<p>3 个独立的进阶主题，按需要查：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你的问题</th>
+<th style="text-align:left">看哪节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">写了一个 subagent，但 Claude 从来不主动派遣它——为什么？</td>
+<td style="text-align:left"><a href="#1-description-怎么写才会被主-session-主动-spawn">§1 Description 怎么写才会被主 session 主动 spawn</a></td>
+</tr>
+<tr>
+<td style="text-align:left">想跑 2-3 个 subagent 串成 pipeline / parallel——怎么设计？</td>
+<td style="text-align:left"><a href="#2-composition-pattern-怎么设计">§2 Composition pattern 怎么设计</a></td>
+</tr>
+<tr>
+<td style="text-align:left">subagent 跑坏 / 报错 / 行为跟设置的不一样——怎么 debug？</td>
+<td style="text-align:left"><a href="#3-自制-subagent-的-debug-工具">§3 自制 subagent 的 debug 工具</a></td>
+</tr>
+</tbody>
+</table>
+<p>每节独立，可以跳读。</p>
+<hr />
+<span id="1-description-怎么写才会被主-session-主动-spawn"></span><h2 data-heading-alias="1-description-怎么写才会被主-session-主动-spawn" id="h070a4c82c1bb">§1 Description 怎么写才会被主 session 主动 spawn</h2>
+<p>主 session 怎么决定派遣哪个 subagent？看 <code>.claude/agents/&lt;name&gt;.md</code> 开头 frontmatter（<strong>frontmatter</strong> = 文件最开头的 YAML 设置区，用 <code>---</code> 包起来）的 <strong><code>description</code></strong> 字段。<strong>写法影响被选概率</strong>——下面是 4 个常见 bug + 修正：</p>
+<span id="bug-1-description-太抽象claude-不知道何时派遣"></span><h3 data-heading-alias="bug-1-description-太抽象claude-不知道何时派遣" id="h67a980573dc3">Bug 1: Description 太抽象，Claude 不知道何时派遣</h3>
+<p>❌ <strong>坏写法</strong>：</p>
+<pre><code class="language-yaml">description: A helpful code reviewer.
+</code></pre>
+<p><strong>问题</strong>：“helpful”是空词，reviewer 是泛词。Claude 看不到“什么情境下我该派遣这个”，只能等用户明说名字。</p>
+<p>✅ <strong>改成</strong>（具体触发条件 + 范围）：</p>
+<pre><code class="language-yaml">description: Use PROACTIVELY when the user has staged ≥ 50 lines of changes and is about to commit. Reviews staged diff for security issues, style violations, missing error handling, and test gaps. Returns per-category PASS/FAIL + concrete fix list.
+</code></pre>
+<p><strong>为什么好</strong>：(1) <code>PROACTIVELY</code> 是强信号词，(2) 明确触发条件“staged ≥ 50 lines + about to commit”，(3) 列了会做的 4 件事，(4) 讲清楚返回格式。</p>
+<hr />
+<span id="bug-2-用了-proactively但条件太宽"></span><h3 data-heading-alias="bug-2-用了-proactively但条件太宽" id="ha7838fec9f48">Bug 2: 用了 <code>PROACTIVELY</code>，但条件太宽</h3>
+<p>❌ <strong>坏写法</strong>：</p>
+<pre><code class="language-yaml">description: Use PROACTIVELY for all code-related tasks.
+</code></pre>
+<p><strong>问题</strong>：“all code-related”太宽，Claude 会在每个 coding task 都派遣——用户输入“fix this typo”也派 = 打扰。</p>
+<p>✅ <strong>改成</strong>（缩窄条件）：</p>
+<pre><code class="language-yaml">description: Use PROACTIVELY when a commit is about to land that modifies authentication, database queries, or API routes — these are high-risk surface areas needing extra review.
+</code></pre>
+<p><strong>为什么好</strong>：限定<strong>高风险范围</strong>（auth / DB / API），避免 over-trigger。</p>
+<hr />
+<span id="bug-3-完全没写-proactively只能被动等"></span><h3 data-heading-alias="bug-3-完全没写-proactively只能被动等" id="h9067bb936413">Bug 3: 完全没写 <code>PROACTIVELY</code>，只能被动等</h3>
+<p>❌ <strong>坏写法</strong>：</p>
+<pre><code class="language-yaml">description: Reviews code when asked.
+</code></pre>
+<p><strong>问题</strong>：没有 <code>PROACTIVELY</code>——Claude 只会在用户明说“review this”时才派遣；如果用户没想到要 review，就漏掉了。</p>
+<p>✅ <strong>改成</strong>（加 PROACTIVELY + 触发场景）：</p>
+<pre><code class="language-yaml">description: Code reviewer. Use PROACTIVELY when staged changes touch test files but the test count didn't increase — likely missing test coverage for new logic.
+</code></pre>
+<blockquote>
+<p>💡 <strong>被动 vs 主动的选择</strong>：</p>
+<ul>
+<li><strong>想 always-on safety net</strong>（例如安全 review）→ 用 <code>PROACTIVELY</code> + 明确 trigger</li>
+<li><strong>只在用户明说要求才跑</strong>（例如比较费 token 的 deep research）→ 不写 <code>PROACTIVELY</code>，改用 <code>use when user asks for ...</code></li>
+</ul>
+</blockquote>
+<hr />
+<span id="bug-4-description-过长超过-picker-偏好"></span><h3 data-heading-alias="bug-4-description-过长超过-picker-偏好" id="h086c7a280a58">Bug 4: Description 过长，超过 picker 偏好</h3>
+<p>❌ <strong>坏写法</strong>（500+ 字，讲太多无关细节）：</p>
+<pre><code class="language-yaml">description: This subagent performs comprehensive code review including security analysis, performance profiling, style enforcement, type checking, dependency auditing, license compliance, documentation completeness verification, test coverage assessment, accessibility validation, internationalization checks... (continues for paragraphs)
+</code></pre>
+<p><strong>问题</strong>：虽然 Anthropic <strong>目前没公告字符上限</strong>（截至 2026-05），但 description 过长：(1) 占 context budget，(2) Claude 在 dispatch 决策时读到后段已经失去重点，(3) 多个 subagent 竞争时，长的反而输给短而精准的。</p>
+<p>✅ <strong>改成</strong>（精简到 2-3 句，留最重要的 trigger + 范围）：</p>
+<pre><code class="language-yaml">description: Use PROACTIVELY before commits touching auth or payment code. Checks: hardcoded secrets, missing input validation, SQL injection risk. Returns issue list with file:line.
+</code></pre>
+<blockquote>
+<p>📌 <strong>Description 写法 cheatsheet</strong>：</p>
+<ol>
+<li>开头 <code>Use PROACTIVELY when X</code> 或 <code>Use when user asks for Y</code></li>
+<li>列 2-4 个<strong>具体会做的事</strong>（不是“helpful”“comprehensive”这种空词）</li>
+<li>讲<strong>返回格式</strong>（让主 session 知道接到的会是什么形状）</li>
+<li><strong>2-3 句就好</strong>——精准 &gt; 完整</li>
+<li><strong>Description 是语义匹配，不是精确关键词匹配</strong>——关键词有帮助，但触发条件要写清楚</li>
+</ol>
+<p>💡 <strong>语言选择</strong>：description 字段<strong>建议用英文</strong>——Claude 用英文训练，英文 trigger keyword（<code>PROACTIVELY</code> 等）效果最稳定。</p>
+</blockquote>
+<hr />
+<span id="2-composition-pattern-怎么设计"></span><h2 data-heading-alias="2-composition-pattern-怎么设计" id="h577c6f477d03">§2 Composition pattern 怎么设计</h2>
+<p>要跑 2+ subagent 一起时，怎么组合？下面 3 种 pattern 是社群归纳的常见组合：</p>
+<p><img src="../upstream/resources/diagrams/subagent-composition-patterns.zh-Hans.png" alt="Subagent Composition — 3 种组合 Pattern" /></p>
+<blockquote>
+<p>📊 <strong>上图</strong>：A 并行（最常用）/ B Pipeline（多 LLM 编排）/ C Meta-Agent（不推荐避坑）—— 先看全貌再读细节。</p>
+</blockquote>
+<span id="pattern-a--平行隔离最常用最简单"></span><h3 data-heading-alias="pattern-a--平行隔离最常用最简单" id="hdb77ee95af57">Pattern A — 平行隔离（最常用、最简单）</h3>
+<p><strong>何时用</strong>：3 个任务<strong>独立</strong>，不需要互相沟通。例：</p>
+<ul>
+<li>4 个 file 都要做同样的 audit（spawn 4 个 <code>general-purpose</code>）</li>
+<li>同时跑“code review”+“找相关 paper”+“写 changelog”3 个独立任务</li>
+</ul>
+<p><strong>怎么跑</strong>：在同一条 prompt 列出独立任务，请 Claude 用不同 subagent 并行处理。再查看运行状态，确认是否真的同时进行。连续发送多条消息不保证并行；能同时运行多少个，取决于工具和设置。</p>
+<p><strong>成本</strong>：低（不需要 coordination）</p>
+<p><strong>陷阱</strong>：3 个 subagent 看不到对方结果——如果有依赖关系要走 Pattern B；另外<strong>也不能让多个 subagent 同时写到同一份文件</strong>，会造成 write conflict / 文件损坏。</p>
+<hr />
+<span id="pattern-b--pipeline-串接多步骤协作"></span><h3 data-heading-alias="pattern-b--pipeline-串接多步骤协作" id="h146bdcf4bde1">Pattern B — Pipeline 串接（多步骤协作）</h3>
+<p><strong>何时用</strong>：任务需要<strong>步骤顺序</strong>，前一个的 output 是后一个的 input。例：</p>
+<ul>
+<li>Multi-LLM workflow：Claude planner → Codex implementer → Gemini reviewer</li>
+<li>文献研究 pipeline：splitter 切题 → 多 researcher 跑各 sub-query → reconciler 合稿</li>
+</ul>
+<p><strong>怎么跑</strong>：写一个 skill / orchestrator（例如 <a href="../../reference/source-readings.html#s26dcd713721b">agent-collab-workspace</a> plugin），它帮你按序派遣 subagent。<strong>主 session 自己一个一个叫太累，也会出错</strong>。</p>
+<p><strong>成本</strong>：中（要 coordination 逻辑，要管 <code>.coord/</code> 中介文件）</p>
+<p><strong>陷阱</strong>：(1) 每多一步，容错 surface 变大，(2) 一个 subagent 出错，整个 pipeline 卡住——所以每步都要写 acceptance criteria。</p>
+<hr />
+<span id="pattern-c--meta-agent不推荐列出来避坑"></span><h3 data-heading-alias="pattern-c--meta-agent不推荐列出来避坑" id="h090b4197ce3d">Pattern C — Meta-Agent（<strong>不推荐</strong>，列出来避坑）</h3>
+<p><strong>为什么存在</strong>：理论上“一个 subagent 写出更多 subagent”听起来很 elegant。</p>
+<p><strong>为什么不推荐</strong>：</p>
+<ol>
+<li><strong>Context explosion 风险</strong>——subagent 写的 subagent 写的 subagent... 失控</li>
+<li><strong>没人 audit 新建的 agent</strong>——可能写出危险的 tools allowlist</li>
+<li><strong>Anthropic 官方示例都不这样用</strong>——社群也未发展出可靠 pattern</li>
+<li><strong>debug 噩梦</strong>——出错时不知道该怪原始 prompt、meta-agent，还是被生成的 agent</li>
+</ol>
+<p><strong>该怎么办</strong>：你发现 task 重复很多，觉得“该写个 meta”——<strong>请用 skill 或 template 取代</strong>，不要走 meta-agent 路线。</p>
+<hr />
+<span id="3-个-pattern-怎么选"></span><h3 data-heading-alias="3-个-pattern-怎么选" id="hc9979f1782a1">3 个 pattern 怎么选</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你的情境</th>
+<th style="text-align:left">用哪个</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">3 个独立任务，结果各回主 session</td>
+<td style="text-align:left"><strong>Pattern A</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">多步骤协作，有 input → output 依赖</td>
+<td style="text-align:left"><strong>Pattern B</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">想“自动生成 subagent”</td>
+<td style="text-align:left"><strong>不要做</strong>（去想为什么，通常 skill / template 更合适）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>90% 的使用情境是 Pattern A</strong>——上 Pattern B 之前先确认“真的需要 coordination”，别 over-engineer。</p>
+<hr />
+<span id="3-自制-subagent-的-debug-工具"></span><h2 data-heading-alias="3-自制-subagent-的-debug-工具" id="hfd613b408685">§3 自制 subagent 的 debug 工具</h2>
+<blockquote>
+<p>📌 <strong>跟 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5 §易混淆 5 条 Gotcha</a> 角度不同</strong>——
+5.5 Gotcha 是 &quot;<strong>best-practice-oriented</strong>&quot;：写 subagent 时就要注意的事
+这节 5 切点是 &quot;<strong>debug-oriented</strong>&quot;：subagent <strong>已经跑坏了</strong>该从哪里查
+内容有 3 条重叠（tools / model / memory）但视角不同，可分开读</p>
+</blockquote>
+<p>写了 <code>.claude/agents/&lt;name&gt;.md</code>，结果不如预期——下面是 debug 的 5 个切点：</p>
+<span id="切点-1-确认-claude-code-看得到你的-agent"></span><h3 data-heading-alias="切点-1-确认-claude-code-看得到你的-agent" id="hd74a560d07bd">切点 1: 确认 Claude Code 看得到你的 agent</h3>
+<pre><code class="language-bash"># 在 Claude Code 对话框内跑：
+/agents
+</code></pre>
+<p><strong>预期</strong>：列表里有你写的那个 name。<strong>没有</strong>：</p>
+<ul>
+<li>文件位置错（应该在 <code>~/.claude/agents/&lt;name&gt;.md</code> global 或 <code>&lt;repo&gt;/.claude/agents/&lt;name&gt;.md</code> project-level；<strong>同名时 project-level 覆盖 global</strong>）</li>
+<li>YAML frontmatter 语法错（例如 <code>---</code> 没包好、<code>name:</code> 字段拼错）</li>
+<li>名字冲突（同名 agent 被覆盖）</li>
+</ul>
+<hr />
+<span id="切点-2-确认-description-写得会被选"></span><h3 data-heading-alias="切点-2-确认-description-写得会被选" id="hc3722bedd78c">切点 2: 确认 description 写得会被选</h3>
+<p>跑这个 prompt 测 Claude 会不会自主派遣：</p>
+<pre><code>描述 1 个会触发你 subagent 的情境（不要直接叫名字），看 Claude 派的是谁。
+</code></pre>
+<p><strong>Claude 没派遣你 agent</strong>：description 写得让 Claude 看不出“我该派遣这个”。</p>
+<ul>
+<li>缺 <code>PROACTIVELY</code> keyword → 加上</li>
+<li>条件太抽象 → 改成具体 trigger</li>
+<li>跟其他 agent 描述重叠 → 写出<strong>独特性</strong></li>
+</ul>
+<hr />
+<span id="切点-3-确认工具权限正确"></span><h3 data-heading-alias="切点-3-确认工具权限正确" id="h3031f08359f4">切点 3: 确认工具权限正确</h3>
+<p>subagent 派完报“I don't have access to X tool”——<code>tools:</code> 白名单漏写。</p>
+<pre><code class="language-yaml"># 常忘的工具：
+tools:
+  - Read
+  - Grep
+  - Glob       # 找文件
+  - Bash       # 跑 git / pytest
+  - WebFetch   # 读外部 URL
+  - WebSearch  # 上网搜
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>陷阱</strong>：<code>tools:</code> 写<strong>空字符串</strong> <code>tools: &quot;&quot;</code> 或<strong>省略整个字段</strong>，都不等于“没工具”——两种情况都<strong>继承主 session 全部工具</strong>。要限制就<strong>明写清单</strong>。</p>
+</blockquote>
+<hr />
+<span id="切点-4-确认-model-不会默默烧大钱"></span><h3 data-heading-alias="切点-4-确认-model-不会默默烧大钱" id="h5aa4b210e834">切点 4: 确认 model 不会默默烧大钱</h3>
+<p>subagent 没指定 <code>model:</code> = 跟主 session 用同一个。主 session 是 Opus，subagent 也 Opus，token 烧 4x。</p>
+<pre><code class="language-yaml"># 大多数任务 sonnet 就够：
+model: sonnet
+
+# 简单任务（找文件、跑 grep）用 haiku 更省：
+model: haiku
+
+# 真的需要强推理才用 opus（自己评估）：
+# model: opus
+</code></pre>
+<p>看 session 结束后 Claude Code 显示的 token 统计（右下角 status bar 或 session summary），或用 <code>/clear</code> 后对比前后用量。</p>
+<hr />
+<span id="切点-5-确认-prompt-是-self-contained"></span><h3 data-heading-alias="切点-5-确认-prompt-是-self-contained" id="h3033251d7e51">切点 5: 确认 prompt 是 self-contained</h3>
+<p>subagent <strong>看不到主 session 对话</strong>——每次派遣都是<strong>全新 context</strong>。</p>
+<p>❌ <strong>错的 prompt</strong>：</p>
+<pre><code>Review the changes we discussed.
+</code></pre>
+<p>subagent 看不到“我们讨论的”是什么，会自己乱猜。</p>
+<p>✅ <strong>对的 prompt</strong>：</p>
+<pre><code>Review the staged changes in this repo (git diff --cached). Focus: security
+issues, error handling gaps. Per-issue: file:line + suggested fix.
+</code></pre>
+<p><strong>全 self-contained</strong>——subagent 可以靠这段 prompt 跑起来，不需要“之前的 context”。</p>
+<hr />
+<span id="5-切点-quick-check"></span><h3 data-heading-alias="5-切点-quick-check" id="h50415b748adf">5 切点 quick check</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">症状</th>
+<th style="text-align:left">切点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>/agents</code> 看不到</td>
+<td style="text-align:left">切点 1（文件位置 / YAML 语法）</td>
+</tr>
+<tr>
+<td style="text-align:left">Claude 不主动派遣</td>
+<td style="text-align:left">切点 2（description 写法）</td>
+</tr>
+<tr>
+<td style="text-align:left">subagent 报“no access to X tool”</td>
+<td style="text-align:left">切点 3（tools 白名单）</td>
+</tr>
+<tr>
+<td style="text-align:left">Token 账单暴增</td>
+<td style="text-align:left">切点 4（model 没指定）</td>
+</tr>
+<tr>
+<td style="text-align:left">subagent 跑乱、行为怪</td>
+<td style="text-align:left">切点 5（prompt 不 self-contained）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<span id="接下来"></span><h2 data-heading-alias="接下来" id="ha52d704cc3ac">接下来</h2>
+<ul>
+<li><strong>想看更多 dispatch recipe</strong> → <a href="resources--subagent-cookbook.zh-Hans.md.html"><code>subagent-cookbook.zh-Hans.md</code></a>（15 个复制粘贴即用的派遣 prompt）</li>
+<li><strong>想理解 subagent 跟 skill / MCP 的层次关系</strong> → <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5</a></li>
+<li><strong>想跑 multi-agent coordination</strong>（Pattern B）→ <a href="../../reference/source-readings.html#s26dcd713721b">agent-collab-skills</a> plugin</li>
+<li><strong>词汇快查</strong> → <a href="resources--glossary.zh-Hans.md.html#subagent子-agent"><code>glossary.zh-Hans.md</code> § 5. Claude Code 生态</a></li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

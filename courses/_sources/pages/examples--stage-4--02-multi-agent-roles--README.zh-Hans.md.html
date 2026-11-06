@@ -1,0 +1,140 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-2多-agent-角色分配crewai"></span><h1 data-heading-alias="练习-2多-agent-角色分配crewai" id="hb574c516864e">练习 2：多 agent 角色分配（CrewAI）</h1>
+<p>对应 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a> 练习 2。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 multi-agent roles / Crew 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s6f6fb733bd91">CrewAI Examples repo</a>（官方 sequential / hierarchical 范本；⚠️ 已封存 2026-04、仍可当参考）</li>
+<li>完整 references 见 <a href="stages--04-agent-frameworks.zh-Hans.md.html#-精选-projects">Stage 4 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="任务"></span><h2 data-heading-alias="任务" id="h5253040db864">任务</h2>
+<p>3 个 agent 各自负责一段、合作完成一篇 blog intro：</p>
+<pre><code>Researcher → Writer → Critic
+  (找资料) (写稿) (审稿、PASS/ISSUES)
+</code></pre>
+<p>这是 <strong>role-based pipeline（角色式流水线）</strong>：你描述每个角色、目标与任务，CrewAI 依顺序传递结果。</p>
+<span id="怎么跑--两条路径"></span><h2 data-heading-alias="怎么跑--两条路径" id="hcfbfbec15e1b">怎么跑 — 两条路径</h2>
+<blockquote>
+<p>⚠️ <strong>每个练习都要有自己的 Python 3.11 <code>.venv</code>。</strong> 不要把 Stage 4 五个 <code>requirements.txt</code> 混装。</p>
+</blockquote>
+<span id="path-a默认本机免费"></span><h3 data-heading-alias="path-a默认本机免费" id="hb0c1e438cbd6">Path A（默认、本机免费）</h3>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>预算：模型 API 是 <strong>$0</strong>；执行时间依 CPU、记忆体、模型与 prompt 而变，请在自己的电脑量测。</p>
+<span id="path-banthropic比较云端结果"></span><h3 data-heading-alias="path-banthropic比较云端结果" id="h0e3c77158554">Path B（Anthropic、比较云端结果）</h3>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>预设固定型号：<code>anthropic/claude-haiku-4-5-20251001</code>。以 2,000 input + 1,000 output tokens 的单次模型请求为例：<code>2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007</code>。三个角色可能各调用一次或重试；本练习先设供应商支出上限 <strong>$0.10</strong>。</p>
+<details markdown="1">
+<summary>macOS／Linux 指令与查核资讯</summary>
+<pre><code class="language-bash">python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+</code></pre>
+<p>官方来源：<a href="../../reference/source-readings.html#s959fcba3f7dc">CrewAI docs</a>｜<a href="../../reference/source-readings.html#sb124a988b930">LiteLLM docs</a>｜<a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic pricing</a></p>
+<p><small>套件、model ID、价格与官方连结查核：2026-08-28 UTC。</small></p>
+</details>
+<span id="不花钱验证程序逻辑"></span><h2 data-heading-alias="不花钱验证程序逻辑" id="h4571f575b19e">不花钱验证程序逻辑</h2>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py # 角色、任务、handoff 与停止条件
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 路径行为
+</code></pre>
+<p>离线测试不调用真模型，但会检查 3 个 agent、3 个 task、sequential process、context dependency、handoff 与可观察的停止条件。模型质量仍要另外实测。</p>
+<span id="crewai-multi-agent-核心观念"></span><h2 data-heading-alias="crewai-multi-agent-核心观念" id="hbdcbf6cc2314">CrewAI multi-agent 核心观念</h2>
+<span id="agent"></span><h3 data-heading-alias="agent" id="h11b39c93777e">Agent</h3>
+<pre><code class="language-python">researcher = Agent(
+    role=&quot;Researcher&quot;,
+    goal=&quot;...&quot;, # 一句话讲「成功」长什么样
+    backstory=&quot;...&quot;, # 提供 persona context、影响 prompt
+    tools=[search],
+    llm=MODEL,
+)
+</code></pre>
+<p><strong>重点</strong>：<code>role</code> 跟 <code>goal</code> 影响 prompt 质量很大。不要写“Agent”、要写“Researcher who finds factual data”。</p>
+<span id="task"></span><h3 data-heading-alias="task" id="h4bc74b21357c">Task</h3>
+<pre><code class="language-python">research_task = Task(
+    description=&quot;Search for X and report findings.&quot;,
+    expected_output=&quot;A 1-2 sentence factual entry.&quot;,
+    agent=researcher,
+)
+</code></pre>
+<p><strong>重点</strong>：<code>expected_output</code> 是给 LLM 看的“合格范本”。写成“两句、主动语态的开场”比“一些文字”更清楚；改善幅度要用自己的任务评测。</p>
+<span id="context-dependency"></span><h3 data-heading-alias="context-dependency" id="h29829bd9b47e">Context dependency</h3>
+<pre><code class="language-python">write_task = Task(..., context=[research_task]) # writer 看 researcher 结果
+critic_task = Task(..., context=[research_task, write_task]) # critic 同时看两个
+</code></pre>
+<p><strong>重点</strong>：<code>context</code> 是 CrewAI 的 dataflow 机制。<code>critic_task.context=[a, b]</code> 表示 critic 看到 a, b 两个 task 的 output。</p>
+<span id="sequential-vs-hierarchical-process"></span><h3 data-heading-alias="sequential-vs-hierarchical-process" id="hd5a43caac1be">Sequential vs Hierarchical Process</h3>
+<pre><code class="language-python">Crew(..., process=Process.sequential) # 线性走完
+Crew(..., process=Process.hierarchical) # 多个 manager+worker、需设 manager_llm
+</code></pre>
+<p>这题用 sequential，因为顺序最容易看懂。Hierarchical 会由 manager 分派任务，适合需要动态分工、而且已有评测与停止条件的场景。</p>
+<span id="两个-path-观察重点"></span><h2 data-heading-alias="两个-path-观察重点" id="h83012a0e47ab">两个 path 观察重点</h2>
+<table>
+<thead>
+<tr>
+<th>观察项</th>
+<th>Anthropic Claude haiku</th>
+<th>Ollama qwen2.5:3b</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Researcher 是否调用 tool</td>
+<td>看 log 与输出验证</td>
+<td>看 log 与输出验证</td>
+</tr>
+<tr>
+<td>Writer 是否使用研究结果</td>
+<td>用测试案例检查</td>
+<td>用相同测试案例检查</td>
+</tr>
+<tr>
+<td>Critic 是否抓到错误</td>
+<td>不预设一定成功</td>
+<td>不预设一定成功</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>在自己的网络与任务量测</td>
+<td>在自己的硬体与模型量测</td>
+</tr>
+<tr>
+<td>模型 API 成本</td>
+<td>依 tokens 与调用次数计算</td>
+<td>$0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教学 punchline</strong>：multi-agent 多了交接点；任何角色漏掉资讯，错误都可能往后传。模型大小不是唯一答案，还要测角色 prompt、工具结果、handoff 与停止条件。</p>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ul>
+<li><strong><code>expected_output</code> 太笼统</strong>：写“Some output”没有清楚成功条件。改成“A 2-sentence blog intro paragraph in active voice”，再用测试案例比较</li>
+<li><strong><code>context</code> 漏设</strong>：Writer 没设 <code>context=[research_task]</code>、就拿不到 researcher 结果、会凭空写</li>
+<li><strong>小 model + 3 agent</strong>：可能比较慢或漏步。先看 log；需要时再比较 <code>qwen2.5:7b</code> 或 Claude</li>
+<li><strong><code>allow_delegation=True</code> 慎用</strong>：开启后 agent 可以叫其他 agent 帮忙、容易 loop。雏形阶段建议 <code>False</code></li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<pre><code class="language-powershell">$env:MODEL=&quot;anthropic/claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;ollama/qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+</code></pre>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>加 manager</strong>：<code>process=Process.hierarchical</code> + <code>manager_llm=...</code>、让 manager agent 动态分配</li>
+<li><strong>加 memory</strong>：CrewAI 有 <code>memory=True</code>、让 agent 跨 task 记住 context</li>
+<li><strong>批次或异步执行</strong>：<code>crew.kickoff_for_each(...)</code> 处理一批输入，<code>crew.kickoff_async(...)</code> 异步执行；两者都不是 streaming</li>
+<li><strong>加 streaming</strong>：创建 <code>Crew(..., stream=True)</code>，再调用 <code>crew.kickoff()</code></li>
+<li><strong>加 human-in-the-loop</strong>：本题用练习 3 的 LangGraph 示范；CrewAI 也有自己的 human-feedback triggers</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

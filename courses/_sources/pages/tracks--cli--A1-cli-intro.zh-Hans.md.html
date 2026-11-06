@@ -1,0 +1,181 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A1-cli-intro.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="a1--选一个-cli-agent安全地完成第一个小任务"></span><h1 data-heading-alias="a1--选一个-cli-agent安全地完成第一个小任务" id="hf672337da181">A1 — 选一个 CLI agent，安全地完成第一个小任务</h1>
+<p><strong>CLI</strong>（Command-Line Interface）：用终端机文字指令操作的界面。</p>
+<blockquote>
+<p><a href="README.zh-Hans.md.html">← 回主线路 README</a> · <strong>Track A: CLI Power User</strong> 第 1 站 · <a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html">下一站：A2</a></p>
+</blockquote>
+<p>这一站会把“终端里的 AI”讲清楚，然后让你在一个可丢弃的 demo repo（由 Git 管理的练习项目文件夹）里安全地跑一次。你会先让工具读文件、找测试指令、提出计划；确认计划后，它才会做一个可以用 <code>git diff</code> 看到、也能撤销的小改动。</p>
+<p>如果你想用现成工具做事，暂时不想自己写 agent 程序，这一站就是你的入口。</p>
+<span id="你现在只要做这件事"></span><h2 data-heading-alias="你现在只要做这件事" id="h75457cfd43ef">你现在只要做这件事</h2>
+<p>准备一个不含秘密、可以随时删除的 demo repo。还没安装工具时，先在下面的短表选一个，点官方入口完成安装和登录；接着直接复制这段请求：</p>
+<pre><code class="language-text">请只读取当前的 demo repo，说明它的用途，找出测试指令，并提出一个小型文档改动计划。先不要修改文件、不要删除文件，也不要执行会改变数据的命令。
+</code></pre>
+<p>完成后，你应该能看到 repo 摘要、测试指令、待确认的计划，以及工具请求权限时的提示。这就是本章的第一个可验证成果。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<ul>
+<li>分清 <strong>LLM</strong>（Large Language Model，能读写语言的模型）、<strong>Provider API（Application Programming Interface，让程序调用服务的接口）</strong>、<strong>Router</strong>、<strong>Coding agent</strong> 和 <strong>Local runtime</strong>。</li>
+<li>根据你已有的账号、provider 或本机环境选择入口，不做总排名。</li>
+<li>在 demo repo 中完成一次“先读取 → 看计划 → 确认 → 小改动 → <code>git diff</code> → 撤销”的循环。</li>
+</ul>
+<details markdown="1">
+<summary>展开时间、先备条件、账号和费用</summary>
+<ul>
+<li><strong>时间</strong>：第一次只读取并查看计划，通常一个短时段就能完成；CLI-1 到 CLI-4 可以分几天慢慢做，不必一次做完。</li>
+<li><strong>先备条件</strong>：会进入文件夹、查看 <code>git status</code> 和 <code>git diff</code>；手边有一个可丢弃的 demo repo。</li>
+<li><strong>账号</strong>：准备一个所选工具支持的登录方式，或把 agent 接到本机模型 runtime。没有账号时，先看下面的选择表和官方 Quickstart。</li>
+<li><strong>费用</strong>：不要猜。开始前查看当天的官方 pricing / usage 页面；只有整条流程都留在本机时，才不会产生这次练习的模型 API 费用。</li>
+</ul>
+</details>
+<span id="-先认识五个核心词"></span><h2 data-heading-alias="-先认识五个核心词" id="h7fb0ba501d50">🧩 先认识五个核心词</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">核心词</th>
+<th style="text-align:left">它是什么、像什么</th>
+<th style="text-align:left">A1 怎么用</th>
+<th style="text-align:left">不是什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>LLM（大型语言模型）</strong></td>
+<td style="text-align:left">生成文字或代码的模型，像工作台里负责想答案的大脑</td>
+<td style="text-align:left">Claude、GPT、Gemini 都是模型家族</td>
+<td style="text-align:left">不会自己管理 repo、文件权限或账单</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Provider API（模型服务入口）</strong></td>
+<td style="text-align:left">让工具向一家模型服务发送请求的门</td>
+<td style="text-align:left">Anthropic API、OpenAI API、Gemini API 会处理认证和计费</td>
+<td style="text-align:left">不是会改文件的 coding agent</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Router（路由器）</strong></td>
+<td style="text-align:left">把同一个请求转给不同 provider 的中转站</td>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter</a> 可集中 API、routing 和 usage</td>
+<td style="text-align:left">不是 LLM，也不管理你的文件权限</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Coding agent（编程工作台）</strong></td>
+<td style="text-align:left">能在终端里读文件、改文件和执行命令的工作台</td>
+<td style="text-align:left">Claude Code、Codex、OpenCode、Pi 都属于这一类</td>
+<td style="text-align:left">里面使用的模型、provider 和 sandbox 要另外确认</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Local runtime（本地模型引擎）</strong></td>
+<td style="text-align:left">在自己的电脑上运行模型的引擎，像启动模型的马达</td>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s77b4be38215d">Ollama</a> 可以让支持它的 agent 调用本地模型</td>
+<td style="text-align:left">不是 coding agent，不会自己读取 repo</td>
+</tr>
+</tbody>
+</table>
+<span id="根据已有条件选择入口"></span><h2 data-heading-alias="根据已有条件选择入口" id="hef2f96184b1f">根据已有条件选择入口</h2>
+<table align="center">
+<thead>
+<tr><th scope="col">你已有的条件</th><th scope="col">可以先看的入口</th><th scope="col">先确认什么</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">Anthropic 账号或 API</th><td><a href="../../reference/source-readings.html#sa21b84bdeaaf">Claude Code</a></td><td>登录和 permission prompt</td></tr>
+<tr><th scope="row">ChatGPT 或 OpenAI API</th><td><a href="../../reference/source-readings.html#sf4af708c206a">Codex CLI</a></td><td>approval、sandbox、工作目录</td></tr>
+<tr><th scope="row">Google 账号、API 或 Vertex AI</th><td><a href="../../reference/source-readings.html#sa4e5a049653d">Gemini CLI</a></td><td>认证和 sandbox</td></tr>
+<tr><th scope="row">想换 provider 或使用本地模型</th><td><a href="../../reference/source-readings.html#s521c67e0751a">OpenCode</a>、<a href="../../reference/source-readings.html#s8b6461a92465">goose</a>、<a href="../../reference/source-readings.html#s5365bfeb95ff">Aider</a>、<a href="../../reference/source-readings.html#sbaf6812c9f44">Pi</a></td><td>provider 和权限边界</td></tr>
+<tr><th scope="row">想用 Router 或本机 runtime</th><td><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter</a> 或 <a href="../../reference/source-readings.html#s1d9fc6d98824">Ollama</a></td><td>它们需要搭配 coding agent</td></tr>
+</tbody>
+</table>
+<span id="-必读"></span><h2 data-heading-alias="-必读" id="h2e6a2159493e">📚 必读</h2>
+<ul>
+<li><a href="../../reference/source-readings.html#sa21b84bdeaaf">Claude Code Quickstart</a> 和 <a href="../../reference/source-readings.html#s7b0e64d48534">permissions</a></li>
+<li><a href="../../reference/source-readings.html#sf4af708c206a">Codex CLI</a></li>
+<li><a href="../../reference/source-readings.html#sa58b417a11ca">Gemini CLI authentication</a> 和 <a href="../../reference/source-readings.html#s484f374343f0">sandbox 设置</a></li>
+<li><a href="../../reference/source-readings.html#s521c67e0751a">OpenCode 文档</a> 和 <a href="../../reference/source-readings.html#s8b6461a92465">goose 文档</a></li>
+<li><a href="../../reference/source-readings.html#s5365bfeb95ff">Aider 文档</a>、<a href="../../reference/source-readings.html#s057e50f8d39c">Hermes Agent 文档</a>、<a href="../../reference/source-readings.html#scc7d258f82fc">Grok Build repo</a>、<a href="../../reference/source-readings.html#sbaf6812c9f44">Pi 文档</a></li>
+<li><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter FAQ</a> 和 <a href="../../reference/source-readings.html#s1d9fc6d98824">Ollama</a></li>
+</ul>
+<p>每次 cloud 请求的单次费用和本章总费用，都会因账号、provider、模型、输入输出 token 和订阅额度而变化；练习前查看当天的官方价格或 usage 页面。只有 agent 和 provider 都设置为只连接本机 Ollama，且没有另外调用云端服务时，这次练习才不会产生模型 API 费用；文件和命令权限仍要照常检查。</p>
+<span id="-动手练习"></span><h2 data-heading-alias="-动手练习" id="heaf7ce6df8e7">🛠 动手练习</h2>
+<p><a id="cli-1"></a></p>
+<span id="动手练习-cli-1在-demo-repo-里先读取再做一个可撤销的小改动"></span><h3 data-heading-alias="动手练习-cli-1在-demo-repo-里先读取再做一个可撤销的小改动" id="hf17057458712">动手练习 CLI-1：在 demo repo 里先读取，再做一个可撤销的小改动</h3>
+<p><strong>成果：</strong> 你能看到 repo 说明、测试指令和待确认的计划；确认后留下一个可以用 <code>git diff</code> 检查的小改动。</p>
+<details markdown="1">
+<summary>展开 CLI-1 的准备、操作和撤销步骤</summary>
+<ol>
+<li>创建或复制一个可丢弃的 demo repo。只放 README、少量源代码和测试；不要放 API key、个人数据、合同或 production 设置。开始前先运行 <code>git status --short</code>，确认没有别人的未完成改动。</li>
+<li>先使用上面的“只读取”请求。对照工具列出的文件、测试指令和计划；不清楚的地方先问，不要直接批准。</li>
+<li>你确认计划后，只允许一个小文档改动，例如在 <code>README.md</code> 增加一段“如何运行测试”。要求工具先展示 diff，再由你批准。</li>
+<li>在终端运行 <code>git diff -- README.md</code>，确认只有预期内容。只有第 1 步已确认文件原本干净时，才运行 <code>git restore -- README.md</code>；最后再用 <code>git status --short</code> 确认小改动已经撤销。</li>
+</ol>
+<p>如果工具没有 git，仍要保留原文件备份并逐行比较；不要把同一个 demo repo 同时交给两个会写文件的 agent。</p>
+</details>
+<p><a id="cli-2"></a></p>
+<span id="动手练习-cli-2让项目规则被正确读取"></span><h3 data-heading-alias="动手练习-cli-2让项目规则被正确读取" id="h08aec9c81190">动手练习 CLI-2：让项目规则被正确读取</h3>
+<p><strong>成果：</strong> 你能用一个短规则文件说明项目用途、禁止事项、测试指令和交付格式，并验证工具确实遵守了它。</p>
+<details markdown="1">
+<summary>展开各 CLI 的项目规则位置和验证方式</summary>
+<ul>
+<li>Claude Code 读取项目的 <code>CLAUDE.md</code>；Codex 使用 <code>AGENTS.md</code>。</li>
+<li>OpenCode 以 <code>AGENTS.md</code> 优先；没有 <code>AGENTS.md</code> 时，<code>CLAUDE.md</code> 是兼容 fallback。不要把 <code>OPENCODE.md</code> 当成通用规则文件。</li>
+<li>Gemini CLI 常用 <code>GEMINI.md</code>；goose、Aider、Hermes Agent、Pi 和 Grok Build 的文件名及加载范围以各自官方文档为准。</li>
+<li>规则只保留会改变行为的内容：项目用途、不能做的事、测试指令和交付格式。不要把长篇 API 参考资料塞进每次都会加载的规则文件。</li>
+</ul>
+<p>在 demo repo 里加入一条可观察的规则，例如“先提出计划，不修改 <code>data/</code>”，再提出一个会触发它的请求。最后检查 agent 的回复和 <code>git diff</code>。</p>
+</details>
+<p><a id="cli-3"></a></p>
+<span id="动手练习-cli-3用第二个-harness-重跑同一个请求"></span><h3 data-heading-alias="动手练习-cli-3用第二个-harness-重跑同一个请求" id="hfb2b7d9ad3e3">动手练习 CLI-3：用第二个 harness 重跑同一个请求</h3>
+<p><strong>成果：</strong> 你能记录两个工具在模型 / provider、权限提示、sandbox 和输出格式上的差异，而不是用主观分数选赢家。</p>
+<details markdown="1">
+<summary>展开第二个 CLI 的公平比较步骤</summary>
+<p>在同一个干净的 demo repo、同一份 prompt、同一组文件上各运行一次。记录日期、CLI 版本、LLM、provider、登录方式、approval / sandbox 设置、是否真的改了文件，以及 <code>git diff</code> 结果。不要同时启动两个会写文件的 session；每次完成后撤销，再开始下一次。</p>
+</details>
+<p><a id="cli-4"></a></p>
+<span id="动手练习-cli-4用假凭证观察认证失败"></span><h3 data-heading-alias="动手练习-cli-4用假凭证观察认证失败" id="h3b339d0cc546">动手练习 CLI-4：用假凭证观察认证失败</h3>
+<p><strong>成果：</strong> 你能区分“登录失败”“provider API key 失败”“模型名称不存在”和“权限 / sandbox 阻挡”，而且不会把真正的秘密贴进 prompt 或 log。</p>
+<details markdown="1">
+<summary>展开安全的认证错误实验</summary>
+<p>在一次性终端 session 中使用明确标为假的值，例如 <code>not-a-real-key</code>；不要改动正式的 shell 设置或共享 <code>.env</code>。先观察未登录错误，再在已登录的 CLI 中输入一个官方不存在的模型名称，记下错误类型和补救指引。测试完立刻清除假值，并确认 shell history、工作目录和 log 里没有真 key。</p>
+<p>使用有效凭证的请求可能产生费用；第一次练习可以使用本机 Ollama 或 provider 明确提供的免费额度，并以当天官方价格和实际 usage 为准。</p>
+</details>
+<span id="-精选-projects"></span><h2 data-heading-alias="-精选-projects" id="h44aee77132c0">🎯 精选 Projects</h2>
+<p>A1 只教你安全开始，不在两个页面重复维护同一份易变数据。9 个工具的登录、provider、sandbox 和官方来源集中放在 <a href="resources--cli-agents-guide.zh-Hans.md.html"><code>CLI Agents 参考指南</code></a>。官方资料查核日：<strong>2026-08-30 UTC</strong>。</p>
+<p>推荐度是本学习地图的编辑建议，不是 GitHub stars 或总排名。<code>⭐⭐⭐⭐⭐</code> 表示：如果你选择这条工具路径，这一行应先看；不是让你安装所有五星工具。</p>
+<table align="center">
+<thead>
+<tr><th scope="col">分类</th><th scope="col">Project</th><th scope="col">推荐度</th><th scope="col">适合谁</th><th scope="col">先注意什么</th></tr>
+</thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">官方模型生态</th><td><a href="../../reference/source-readings.html#s13d96f6971ff">claude-code</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>使用 Anthropic 生态的人</td><td>保留 permission prompt，先用 demo repo</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s8c3dc2a0187c">codex</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>已有 ChatGPT 或 OpenAI API 的人</td><td>确认 approval、sandbox 和工作目录</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s24684c1ecca2">gemini-cli</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>已有 Google 认证或 Vertex AI 的人</td><td>先确认认证方式和 sandbox</td></tr>
+<tr><td><a href="../../reference/source-readings.html#scc7d258f82fc">grok-build</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>已在使用 xAI 生态、想比较新工具的人</td><td>先在 demo repo 观察，不作第一个 production 工具</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="5" align="center" valign="middle">可换 provider</th><td><a href="../../reference/source-readings.html#sffccace0ba14">opencode</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>想切换 provider 或接兼容 endpoint 的人</td><td><code>AGENTS.md</code> 优先；另查 permission 设置</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s8782e21ebeda">goose</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>想同时使用 CLI、desktop 和 extensions 的人</td><td>先只开低权限 extension</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s27b0817e8f72">aider</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>重视 git diff 和 commit 流程的人</td><td>先理解它的 git auto-commit 行为</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sc133b93b912d">pi</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>想从小核心加 extensions、skills 或 RPC 的人</td><td>没有内建 sandbox；需要隔离时用容器或 VM</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sec2b8bd43eef">hermes-agent</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>想在 terminal、desktop 或聊天平台使用同一 agent 的人</td><td>逐项开启 provider、Skill 和 MCP 权限</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">Router／本地引擎</th><td><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>想用一个 API 入口切换 provider 的人</td><td>它是 Router，仍要搭配 agent</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s77b4be38215d">ollama</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>想在自己电脑上运行模型的人</td><td>它是 local runtime，仍要搭配 agent</td></tr>
+</tbody>
+</table>
+<details markdown="1">
+<summary>展开“工具、Router、local runtime”的最短辨识法</summary>
+<ul>
+<li>Claude Code、Codex、Gemini CLI、OpenCode、goose、Aider、Hermes Agent、Grok Build、Pi：会接收任务并操作工作目录的 CLI agent / harness。</li>
+<li>OpenRouter：替 agent 把请求送到 provider 的 Router，不会替你管理文件权限。</li>
+<li>Ollama：在本机运行模型的 runtime，不会自己读取 repo；要由支持它的 agent 调用。</li>
+<li>不确定时，只问三句：谁运行模型？谁转发请求？谁能读写我的文件？</li>
+</ul>
+</details>
+<span id="-进-a2-前的自我检查"></span><h2 data-heading-alias="-进-a2-前的自我检查" id="h50477c92ac57">✅ 进 A2 前的自我检查</h2>
+<ul>
+<li>[ ] 我能用自己的话分清五种身份，知道 OpenRouter 不是 LLM、Ollama 不是 coding agent。</li>
+<li>[ ] 我在 demo repo 完成了一次只读取的说明和计划，没有把秘密交给工具。</li>
+<li>[ ] 我检查过一个小改动的 diff，并能把它撤销。</li>
+<li>[ ] 我知道所选 CLI 的登录方式、provider、approval / sandbox 设置。</li>
+</ul>
+<p>完成后进入 <a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html">A2 — 建立可重复使用的 CLI 工作流程</a>。想再比较工具的官方状态，回看 <a href="resources--cli-agents-guide.zh-Hans.md.html"><code>resources/cli-agents-guide.zh-Hans.md</code></a>。</p>
+<blockquote>
+<p>安全底线：不要在含有秘密或 production 权限的目录中做第一次实验；不要使用跳过所有确认的模式；不要把 API key、浏览器 token 或 auth 文件贴进 prompt、issue、log 或 git。</p>
+</blockquote>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,171 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="tool-calling-tutor--claude-code-skill"></span><h1 data-heading-alias="tool-calling-tutor--claude-code-skill" id="h256a0442a873">tool-calling-tutor — Claude Code skill</h1>
+<blockquote>
+<p>Skill 用途：当你卡在 tool calling（LLM 不调用、args 错、ReAct loop 跑不停、schema 不知道怎么写），可直接输入 <code>/tool-calling-tutor</code> 打开；在相关情境中也可能自动载入，带你完成 4-symptom 诊断与 5-step 修法。</p>
+</blockquote>
+<p>对应 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 — 工具使用与第一个 Agent Loop</a>，同时是 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5 — Claude Code Ecosystem</a> 5.3 的<strong>自带 skill 范例</strong>。</p>
+<span id="为什么这个-skill-存在"></span><h2 data-heading-alias="为什么这个-skill-存在" id="h2420e9fe0977">为什么这个 skill 存在</h2>
+<p>Tool calling 是整个 curriculum 最陡的学习曲线——schema 设计、SDK response shape、ReAct loop 三个 mental model 叠在一起。Stage 3 doc 已经把概念讲清楚，但<strong>遇到“我这份就是不会跑”的时候、需要互动式 debug</strong>。</p>
+<p>这个 skill 补的就是这块缺：</p>
+<table>
+<thead>
+<tr>
+<th>已有资源</th>
+<th>不足</th>
+<th>这个 skill 补的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stages/03-tool-use-and-hello-agent.zh-Hans.md</code></td>
+<td>讲 6 个练习、不互动</td>
+<td>互动式 triage：你卡哪个 symptom？</td>
+</tr>
+<tr>
+<td><code>resources/schema-design-cheatsheet.zh-Hans.md</code></td>
+<td>5 条规则 + 5 anti-pattern、prescriptive</td>
+<td>走步骤版：bad → good schema 怎么 4 步改</td>
+</tr>
+<tr>
+<td><code>resources/glossary.zh-Hans.md</code> 2</td>
+<td>1 行定义</td>
+<td>不重复定义、引用为主</td>
+</tr>
+<tr>
+<td><code>examples/stage-3/02-06/</code></td>
+<td>完整可跑 starter</td>
+<td>Skill 指过去当 fork template</td>
+</tr>
+</tbody>
+</table>
+<span id="双重用途"></span><h2 data-heading-alias="双重用途" id="h7380ca462589">双重用途</h2>
+<ol>
+<li><strong>学习者用</strong>：安装后当 personal debug 助手。直接输入 <code>/tool-calling-tutor</code> 打开；相关问题也可能让 skill 自动载入。</li>
+<li><strong>Stage 5 5.3 meta-example</strong>：学 SKILL.md 怎么写的时候，直接看这份。包含完整 frontmatter（含 trigger phrases + Do NOT use for）、<code>references/</code> 设计、<code>evals/evals.json</code> 范例。</li>
+</ol>
+<span id="怎么安装"></span><h2 data-heading-alias="怎么安装" id="h0aa86734f6db">怎么安装</h2>
+<p>以下命令都从这个 repository 的根目录执行。</p>
+<span id="option-auser-级所有-project-共用"></span><h3 data-heading-alias="option-auser-级所有-project-共用" id="h40eabcaa43c9">Option A：user 级（所有 project 共用）</h3>
+<pre><code class="language-powershell">$repoRoot = Get-Location
+$skillSource = Join-Path $repoRoot &quot;examples\stage-5\tool-calling-tutor&quot;
+$skillTarget = Join-Path $env:USERPROFILE &quot;.claude\skills\tool-calling-tutor&quot;
+New-Item -ItemType Directory -Force -Path $skillTarget | Out-Null
+Copy-Item -Force -LiteralPath (Join-Path $skillSource &quot;translations\SKILL.zh-Hans.md&quot;) -Destination (Join-Path $skillTarget &quot;SKILL.md&quot;)
+Copy-Item -Recurse -Force -LiteralPath (Join-Path $skillSource &quot;references&quot;) -Destination $skillTarget
+Copy-Item -Recurse -Force -LiteralPath (Join-Path $skillSource &quot;evals&quot;) -Destination $skillTarget
+</code></pre>
+<p>繁体中文请改为复制 <code>SKILL.md</code>；英文请改为复制 <code>translations/SKILL.en.md</code>。</p>
+<span id="option-bproject-级只在这个-repo-触发"></span><h3 data-heading-alias="option-bproject-级只在这个-repo-触发" id="haf01c36a862f">Option B：project 级（只在这个 repo 触发）</h3>
+<pre><code class="language-powershell">$repoRoot = Get-Location
+$skillSource = Join-Path $repoRoot &quot;examples\stage-5\tool-calling-tutor&quot;
+$skillTarget = Join-Path $repoRoot &quot;.claude\skills\tool-calling-tutor&quot;
+New-Item -ItemType Directory -Force -Path $skillTarget | Out-Null
+Copy-Item -Force -LiteralPath (Join-Path $skillSource &quot;translations\SKILL.zh-Hans.md&quot;) -Destination (Join-Path $skillTarget &quot;SKILL.md&quot;)
+Copy-Item -Recurse -Force -LiteralPath (Join-Path $skillSource &quot;references&quot;) -Destination $skillTarget
+Copy-Item -Recurse -Force -LiteralPath (Join-Path $skillSource &quot;evals&quot;) -Destination $skillTarget
+</code></pre>
+<details markdown="1">
+<summary>macOS/Linux 命令</summary>
+<pre><code class="language-bash">skill_source=&quot;examples/stage-5/tool-calling-tutor&quot;
+mkdir -p ~/.claude/skills/tool-calling-tutor
+cp &quot;$skill_source/translations/SKILL.zh-Hans.md&quot; ~/.claude/skills/tool-calling-tutor/SKILL.md
+cp -R &quot;$skill_source/references&quot; &quot;$skill_source/evals&quot; ~/.claude/skills/tool-calling-tutor/
+
+mkdir -p .claude/skills/tool-calling-tutor
+cp &quot;$skill_source/translations/SKILL.zh-Hans.md&quot; .claude/skills/tool-calling-tutor/SKILL.md
+cp -R &quot;$skill_source/references&quot; &quot;$skill_source/evals&quot; .claude/skills/tool-calling-tutor/
+</code></pre>
+</details>
+<span id="验证安装"></span><h3 data-heading-alias="验证安装" id="h6a4b543d1811">验证安装</h3>
+<p>在 Claude Code 中输入：</p>
+<pre><code>/tool-calling-tutor
+</code></pre>
+<p>预期：skill 会打开，并询问或确认对应的 symptom 路线。这是确定性的安装检查。自动载入取决于上下文，不能作为安装成功的证明。</p>
+<p>Claude Code 会在当前 session 中侦测已有 personal 或 project skills 目录里的变更。只有在 session 开始时顶层 skills 目录不存在时，才需要重启。</p>
+<span id="包含什么"></span><h2 data-heading-alias="包含什么" id="h2718ad1bff9a">包含什么</h2>
+<pre><code>tool-calling-tutor/
+├── SKILL.md # 主 skill 档（zh-TW canonical）
+├── README.md / .en.md / .zh-Hans.md # 你正在看的这份
+├── references/
+│ ├── debug-flowchart.md # 4-symptom 诊断流程
+│ ├── schema-evolution.md # bad → good schema 4-step worked example
+│ └── sdk-diff.md # Anthropic vs OpenAI-compat 并排对照
+│ （以上每份都有 .en.md / .zh-Hans.md 翻译）
+├── translations/
+│ ├── SKILL.en.md # SKILL.md 英文版（给英语用户装）
+│ └── SKILL.zh-Hans.md # SKILL.md 简体版
+└── evals/
+    ├── evals.json # 5 个离线 contract case
+    └── check_evals.py # 不调用 model 的检查器
+</code></pre>
+<span id="跑-evals选择性"></span><h2 data-heading-alias="跑-evals选择性" id="hd6537cb15b92">跑 evals（选择性）</h2>
+<pre><code class="language-powershell">python evals/check_evals.py
+</code></pre>
+<p>这是五个 case 的<strong>离线 contract 检查</strong>：不询问 model，只检查每条约定是否写完整、链接是否能找到。<code>evals.json</code> 不是 promptfoo 配置文件。若日后要加入 model-graded eval，<a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a> 是一个常见的可选路径；本范例没有提供 provider 配置，也没有质量分数。</p>
+<span id="跟其他资源的关系"></span><h2 data-heading-alias="跟其他资源的关系" id="h971021b4e8eb">跟其他资源的关系</h2>
+<pre><code>        ┌─────────────────────────────────┐
+        │ Stage 3 doc + 练习 1-6 inline │
+        │ (学 tool calling 概念) │
+        └────────────────┬─────────────────┘
+                         │
+                         ▼
+        ┌─────────────────────────────────┐
+        │ examples/stage-3/02-06/ │
+        │ (完整可跑 starter + test) │
+        └────────────────┬─────────────────┘
+                         │ fork template
+                         ▼
+        ┌─────────────────────────────────┐
+        │ 你的 tool-calling agent │
+        │ ❓ 卡住了 │
+        └────────────────┬─────────────────┘
+                         │ 载入
+                         ▼
+        ┌─────────────────────────────────┐
+        │ tool-calling-tutor skill (这个) │
+        │ → 4-symptom triage │
+        │ → references/ deep dive │
+        │ → 路由到 cookbook / Stage 4/7 │
+        └─────────────────────────────────┘
+</code></pre>
+<span id="不处理什么"></span><h2 data-heading-alias="不处理什么" id="h98aacde7dfff">不处理什么</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>路</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LangChain / LangGraph / CrewAI / Pydantic AI</td>
+<td>Stage 4</td>
+</tr>
+<tr>
+<td>写 MCP server / client</td>
+<td><code>resources/cookbook.zh-Hans.md</code> 2</td>
+</tr>
+<tr>
+<td>Production observability / cost tracking</td>
+<td>Stage 7</td>
+</tr>
+<tr>
+<td>一般 prompt engineering</td>
+<td>Stage 2</td>
+</tr>
+</tbody>
+</table>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>改 trigger phrases</strong>：在 SKILL.md frontmatter <code>description</code> 加你自己常用的触发句</li>
+<li><strong>加你的 case 到 references/</strong>：debug-flowchart 里开新 Section、把你碰到的 weird case 记下来</li>
+<li><strong>fork 成你的版本</strong>：这个 skill 设计就是 Stage 5 5.3 的 meta-example、欢迎 fork</li>
+</ul>
+<details markdown="1">
+<summary>当前来源</summary>
+<p>简短的当前参考（检查于 2026-08-28 UTC）：<a href="../../reference/source-readings.html#s542f21c1085b">Claude Code skills</a>、<a href="../../reference/source-readings.html#scd295fab837b">Agent Skills</a>、<a href="../../reference/source-readings.html#s82a901da1b9b">Anthropic skills</a> 与 <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a>。</p>
+</details>
+<span id="license"></span><h2 data-heading-alias="license" id="hc011d6097bfb">License</h2>
+<p>跟 repo 一致（MIT）。Skill body 改写、fork、商用都 OK。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

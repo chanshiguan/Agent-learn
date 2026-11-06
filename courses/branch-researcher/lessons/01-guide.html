@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>研究人员分支：从摘要走到可核查的研究记录</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">研究分支 · 研究人员延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="研究人员分支从摘要走到可核查的研究记录"></span><h1 data-heading-alias="研究人员分支从摘要走到可核查的研究记录" id="h66b27d916170">研究人员分支：从摘要走到可核查的研究记录</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h2691b7718714">本分支的成果</a></li><li><a href="#h0b13788dad1d">八个核心概念</a></li><li><a href="#h6fc0471670e5">原练习：Attention Is All You Need 的三个问题</a></li><li><a href="#h018ea00be403">文献 inbox</a></li><li><a href="#hbc42f0ea4dad">跨论文 synthesis</a></li><li><a href="#h9c65578ddacc">代码与实验</a></li><li><a href="#h3538c8eed838">投稿前检查</a></li><li><a href="#hba61dabc012a">运行完整案例</a></li></ul></aside>
+<p>本分支按“读懂问题 → 核对论文证据 → 完成证据表 → 记录可复现实验”学习。先用本地材料完成三问，不必先写 Agent；代码实验使用给定数据，之后再换自己的研究问题。</p>
+<span id="本分支的成果"></span><h2 data-heading-alias="本分支的成果" id="h2691b7718714">本分支的成果</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>形成“问题 → 来源 → 断言 → 证据 → 不确定性 → 实验”的记录。Agent 可以找候选论文、整理段落、生成代码草稿，但不能替你确认引用存在、研究结论适用或实验已成功。先做一篇论文的核对，再跨论文综合。</p>
+<span id="八个核心概念"></span><h2 data-heading-alias="八个核心概念" id="h0b13788dad1d">八个核心概念</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>Research question 是具体问题；Literature search 找候选；Citation 指向来源；Claim 是可核对断言；Evidence 是支持或反驳材料；Synthesis 比较多来源；Reproducibility 要求别人能按条件重复；Provenance 记录资料与结果从哪里来。引用很多不代表证据强，摘要相似也不代表方法相同。</p>
+<span id="原练习attention-is-all-you-need-的三个问题"></span><h2 data-heading-alias="原练习attention-is-all-you-need-的三个问题" id="h6fc0471670e5">原练习：Attention Is All You Need 的三个问题</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>原题有三个问题：论文解决什么问题，方法包含哪些部分，哪些实验支持结果以及结论有哪些限制。每条答案记录论文版本、章节或表格、原句或准确释义、是否支持以及限制。架构、实验任务和“是否证明所有任务最优”另作补充检查。不要只让模型回答“这篇论文讲什么”，那很难发现具体错误。</p>
+<p>本地 input.json 使用明确标记的论文段落教学概述，让你先练断言核对；原论文结论是 Transformer 及其特定实验，不是“在所有任务上永远最佳”。正式写论文或复现实验时，需要针对原论文精确版本做逐表核对；本练习提供了理解任务所需的概念；其中的教学概述不是原始实验数据。</p>
+<span id="文献-inbox"></span><h2 data-heading-alias="文献-inbox" id="h018ea00be403">文献 inbox</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>把题名、作者、年份、稳定标识、来源、研究问题、方法、数据、主要结果、限制分开保存。搜索工具找到的是候选线索；出版年份、撤稿、更正和版本都要检查。相同论文不同平台链接不应计为两份独立证据。</p>
+<p>先确定哪些论文纳入、哪些排除，再搜索，避免只收藏支持自己观点的文章。每次记录查询式、时间和筛选理由。无法获取全文时明确标记，只基于摘要回答摘要能支持的问题。</p>
+<span id="跨论文-synthesis"></span><h2 data-heading-alias="跨论文-synthesis" id="hbc42f0ea4dad">跨论文 synthesis</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>比较同一维度：数据集、任务、模型、baseline、指标、训练和推理预算、限制。结果不能直接比较时，说明原因，不把不同任务的分数放在一起判断谁更好。</p>
+<p>模型生成的“共识”需要回到逐条来源。把每个综合判断拆成可核对 claim；证据相反时保留分歧，不通过措辞把它们强行合并。检索得不到反例不等于没有反例。</p>
+<span id="代码与实验"></span><h2 data-heading-alias="代码与实验" id="h9c65578ddacc">代码与实验</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>记录代码版本、依赖、数据版本、随机种子、硬件、配置、命令和输出。先复现小样本与 baseline，再改变一个变量。生成代码能运行只证明语法和部分逻辑，不证明论文方法已复现。</p>
+<p>DVC 关注数据和管线版本，MLflow/W&amp;B 等记录实验配置和结果；Git 记录代码，三类记录不能互相完全替代。训练集、验证集、测试集应分离，不能反复根据测试结果选参数后仍叫盲测。</p>
+<span id="投稿前检查"></span><h2 data-heading-alias="投稿前检查" id="h3538c8eed838">投稿前检查</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>逐条核对事实引用、图表数据来源、实验是否真的执行、限制是否完整、作者责任和机构政策。不要用虚构 DOI 补齐参考文献。AI 生成的“评审意见”是检查线索，不能当独立学术同行评审。对研究诚信与期刊规定只采用实际适用的官方政策，不猜。</p>
+<span id="运行完整案例"></span><h2 data-heading-alias="运行完整案例" id="hba61dabc012a">运行完整案例</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-researcher/examples/exercise.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-researcher/examples/exercise.py
+# 运行 courses/branch-researcher/examples/exercise.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/branch-researcher/examples/exercise.py --live
+</code></pre>
+<p>第一条只校验固定参考答案；第二条调用当前本地 gemma4:e4b，生成结果后检查字段和引用 ID。两者都不自动证明语义正确，需要你用 input.json 逐条核对。所有输入、参考输出和程序完整提供。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">研究分支阅读整合 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

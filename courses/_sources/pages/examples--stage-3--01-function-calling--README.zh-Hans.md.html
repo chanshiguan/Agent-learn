@@ -1,0 +1,74 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-1一个工具一次完整来回"></span><h1 data-heading-alias="练习-1一个工具一次完整来回" id="h32194028cb15">练习 1：一个工具、一次完整来回</h1>
+<p>对应 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 — 工具使用与第一个 Agent Loop</a> 练习 1。</p>
+<p>这题只做一件事：模型说“请调用 <code>get_weather</code>”，你的 Python 程序检查参数、执行工具，再把结果交回模型。跑完后，你会亲眼看到：</p>
+<p><code>问题 → Tool Call → 程序检查并执行 → Tool Result → 最后回答</code></p>
+<p><strong>Tool Call</strong> 是模型提出的工具请求。<strong>Tool Result</strong> 是你的程序执行后交回去的结果。模型提出请求，不代表它有权直接执行程序。</p>
+<span id="第一个动作"></span><h2 data-heading-alias="第一个动作" id="hcbcf6edf91ef">第一个动作</h2>
+<p>先在 PowerShell 复制并执行：</p>
+<pre><code class="language-powershell">ollama pull qwen2.5:3b
+</code></pre>
+<span id="path-aollama本机api-费用-0"></span><h2 data-heading-alias="path-aollama本机api-费用-0" id="h6ea18c45153d">Path A：Ollama（本机，API 费用 <code>$0</code>）</h2>
+<pre><code class="language-powershell">cd examples/stage-3/01-function-calling
+python -m pip install -r requirements.txt
+ollama serve
+python starter.py
+</code></pre>
+<p>如果 <code>ollama serve</code> 说端口已被使用，通常代表 Ollama 已经在运行；保留那个窗口，再开一个 PowerShell 执行 <code>python starter.py</code>。</p>
+<p>这条路径使用 OpenAI Python SDK 连接到 <code>http://localhost:11434/v1</code>，数据不会发送到 OpenAI 云端。</p>
+<span id="path-banthropic需要-api-key"></span><h2 data-heading-alias="path-banthropic需要-api-key" id="h8e4b2a7b0bc3">Path B：Anthropic（需要 API key）</h2>
+<pre><code class="language-powershell">cd examples/stage-3/01-function-calling
+python -m pip install -r requirements.txt
+$env:ANTHROPIC_API_KEY = &quot;你的-key&quot;
+python starter_anthropic.py
+</code></pre>
+<p>程序使用固定模型 ID <code>claude-haiku-4-5-20251001</code>，避免模型 alias 之后移动时教学结果悄悄改变。</p>
+<p><strong>预算提醒</strong>：每次正式运行先预留 <code>$0.05</code> 上限。实际费用按 token 数计算：</p>
+<p><code>输入 token × $1 / 1,000,000 + 输出 token × $5 / 1,000,000</code></p>
+<p>Tool Use 还会加入系统提示 token；不要把基于无 token 假设的小数写成保证价格。价格查核日：<code>2026-08-27</code>。</p>
+<details markdown="1">
+<summary>macOS/Linux 命令</summary>
+<pre><code class="language-bash">cd examples/stage-3/01-function-calling
+python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;你的-key&quot;
+python starter_anthropic.py
+</code></pre>
+</details>
+<span id="不花钱的自我检查"></span><h2 data-heading-alias="不花钱的自我检查" id="hafeb528f91e7">不花钱的自我检查</h2>
+<p>这两个测试使用假的模型响应，不连接 Ollama，也不调用 Anthropic API：</p>
+<pre><code class="language-powershell">python test.py
+python test_anthropic.py
+</code></pre>
+<p>你应该看到两次 <code>all pass</code>。测试也会故意送入坏 JSON、多余字段与不存在的工具，确认程序会先挡下它们。</p>
+<span id="你正在保护什么"></span><h2 data-heading-alias="你正在保护什么" id="h133cb398bee9">你正在保护什么</h2>
+<ul>
+<li><strong>Allowlist</strong>：只有 <code>get_weather</code> 可以执行；模型乱说别的工具名称也不行。</li>
+<li><strong>参数验证</strong>：<code>city</code> 不能是空字符串，<code>unit</code> 只能是 <code>celsius</code>，多余字段也会被拒绝。</li>
+<li><strong>结果配对</strong>：每个结果都带回原本的 <code>tool_call_id</code> 或 <code>tool_use_id</code>。</li>
+<li><strong>错误标记</strong>：Anthropic 路径失败时会加上 <code>is_error: true</code>，让模型知道这不是正常结果。</li>
+</ul>
+<span id="完成条件"></span><h2 data-heading-alias="完成条件" id="ha15ac5fba81c">完成条件</h2>
+<ul>
+<li>[ ] Path A 或 Path B 至少成功运行一次。</li>
+<li>[ ] 两个离线测试都显示 <code>all pass</code>。</li>
+<li>[ ] 你能用自己的话说出“模型只提出请求，程序才真正执行”。</li>
+<li>[ ] 你能指出程序在哪里检查工具名称与参数。</li>
+</ul>
+<span id="官方参考"></span><h2 data-heading-alias="官方参考" id="h75cd49f72c0c">官方参考</h2>
+<ul>
+<li><a href="../../reference/source-readings.html#s90f2bf11e4fb">OpenAI Function Calling</a></li>
+<li><a href="../../reference/source-readings.html#sa2c7cb24dc72">Anthropic：How tool use works</a></li>
+<li><a href="../../reference/source-readings.html#s42e907e29544">Anthropic：Handle tool calls</a></li>
+<li><a href="../../reference/source-readings.html#sddcc6cfdf5a8">Ollama OpenAI compatibility</a></li>
+</ul>
+<p>文档与 SDK 查核日：<code>2026-08-27</code>。</p>
+<blockquote>
+<p>📚 <strong>想看完整章节？</strong> 这里仅教学第一个最小循环。接着读：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a>：章节式中文 Agent 课程；把这题当成 tool calling 的起点。</li>
+<li><a href="../../reference/source-readings.html#s54450ef6cd31">Anthropic Tool Use Cookbook</a>：从单一工具走到多工具的官方 notebook。</li>
+<li><a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html#-精选-projects">Stage 3 精选 Projects</a>：回到学习地图选择下一个资源。</li>
+</ul>
+</blockquote>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

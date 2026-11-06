@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>三套 Prompt 知识的统一地图</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><span class="current">01 总地图</span><a href="0002-foundations-roles-and-boundaries.html">02 基础结构</a><a href="../reference/source-coverage.html">覆盖矩阵</a></nav>
+  <header>
+    <p class="eyebrow">Lesson 0001 · Prompt Engineering</p>
+    <h1>三家方法，已经合并成一套完整课程</h1>
+    <p class="lede">
+      Anthropic 贡献“怎么练”，OpenAI 贡献“怎么放进程序”，Google 贡献“遇到问题时有哪些策略”。它们的内容已经被重新讲解并放进本项目；你不需要打开三家网站学习。
+    </p>
+    <p class="meta">建议用时：20–30 分钟 · 先读课程，再做页底自测</p>
+  </header>
+
+  <nav class="toc" aria-label="目录">
+    <strong>本课地图</strong>
+    <ul>
+      <li><a href="#overview">三类知识的分工</a></li>
+      <li><a href="#common">共同的底层逻辑</a></li>
+      <li><a href="#anthropic">Anthropic 详解</a></li>
+      <li><a href="#openai">OpenAI 详解</a></li>
+      <li><a href="#google">Google 详解</a></li>
+      <li><a href="#project">放回你的代码</a></li>
+      <li><a href="#quiz">检索练习</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>1. 先看三类知识如何合成一套方法</h2>
+    <div class="grid">
+      <article class="card anthropic">
+        <p class="eyebrow">Anthropic</p>
+        <h3>实验课</h3>
+        <p>用 Notebook 让你亲自修改 Prompt，看到模型行为如何改变。重点是建立手感。</p>
+      </article>
+      <article class="card openai">
+        <p class="eyebrow">OpenAI</p>
+        <h3>工程手册</h3>
+        <p>把 Prompt 看成程序的一部分：有优先级、版本、模型差异、成本和 Eval。</p>
+      </article>
+      <article class="card google">
+        <p class="eyebrow">Google</p>
+        <h3>策略词典</h3>
+        <p>系统罗列可用技巧，并通过大量前后对照示例说明何时使用。</p>
+      </article>
+    </div>
+
+    <table>
+      <thead><tr><th>知识来源</th><th>主要解决</th><th>项目内课程</th><th>学习方式</th></tr></thead>
+      <tbody>
+        <tr><td>Anthropic</td><td>“我知道概念，但不会写”</td><td>第 2、3、4、5 课</td><td>完成项目内示例和测验</td></tr>
+        <tr><td>OpenAI</td><td>“怎样用 API 正确组织”</td><td>第 2、3、6、7 课</td><td>结合工程结构理解</td></tr>
+        <tr><td>Google</td><td>“输出不对时还能改什么”</td><td>第 3、4、5、6、7 课</td><td>按失败类型选择策略</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="common">
+    <h2>2. 三家真正共同的底层逻辑</h2>
+    <p>三家的 API 名称和示例不同，但都在强调同一个循环：</p>
+    <div class="flow">
+      <span>定义成功</span><b>→</b><span>写清任务</span><b>→</b><span>补资料/范例</span><b>→</b><span>固定测试</span><b>→</b><span>一次改一处</span>
+    </div>
+
+    <div class="formula">
+      好结果 ≠ 好听的 Prompt<br>
+      好结果 = 任务清晰 × 资料足够 × 模型能力 × 可验证流程
+    </div>
+
+    <h3>共识一：指令和资料不是一回事</h3>
+    <p>“将客服留言分类”是指令；“我被扣款两次”是这次要处理的资料。把它们分开，程序才能只替换资料而保持任务不变。</p>
+
+    <h3>共识二：范例不是知识，是行为演示</h3>
+    <p>Few-Shot 不是在训练模型参数。它是在当前请求中告诉模型：“这种输入，我期望这种输出。”范例最有价值的地方是展示边界和格式。</p>
+
+    <h3>共识三：上下文不足，改句式没用</h3>
+    <p>如果模型不知道你公司的退款政策，把“请认真回答”改成“请非常认真地回答”不会创造政策内容。必须把可信资料放进上下文，或让模型调用查询工具。</p>
+
+    <h3>共识四：只有 Eval 能说明“变好了”</h3>
+    <p>看到一次漂亮回答，只能证明这次回答不错。要比较两个 Prompt，必须使用同一模型、同一参数、同一测试集和同一评分标准。</p>
+  </section>
+
+  <section id="anthropic">
+    <h2>3. Anthropic：用一系列小实验建立手感</h2>
+    <p>
+      Anthropic 的交互式教程有 9 章和附录，包括基本结构、清晰直接的指令、角色、数据与指令分隔、输出格式、分步处理、Few-Shot、幻觉和复杂 Prompt。它的核心价值是用小实验观察 Prompt 如何改变模型行为。本项目已将这些实验目标改写成中文示例和页底测验。
+    </p>
+
+    <h3>第 1 章真正在教什么</h3>
+    <ul>
+      <li><strong><code>model</code></strong>：选择哪个模型，它决定了能力、速度和成本的上限。</li>
+      <li><strong><code>max_tokens</code></strong>：生成上限，是硬停止。设得太小会在答案完成前截断。</li>
+      <li><strong><code>messages</code></strong>：保存对话轮次，每条消息有角色和内容。</li>
+      <li><strong><code>system</code></strong>：放稳定的高层行为指导，与当次用户输入分开。</li>
+      <li><strong><code>temperature</code></strong>：影响采样随机性；教程用 0 来减少练习中的随机干扰。</li>
+    </ul>
+    <p>
+      教程还用错误消息结构演示 API 为什么报错，并用自动评分练习让学习者修改 Prompt。本项目将这部分拆进第 2 课的消息结构和第 6 课的结束原因、token 上限与 Eval。
+    </p>
+
+    <div class="callout">
+      <strong>和你刚遇到的问题直接相关：</strong>
+      你之前的 <code>completion_tokens=100</code> 刚好等于 <code>max_tokens=100</code>，而 <code>finish_reason</code> 是 <code>length</code>。这就是教程所说的“硬停止”：不是 Prompt 分类逻辑失败，而是生成额度先用完了。
+    </div>
+
+    <h3>本课程怎样处理旧内容</h3>
+    <p>这套教程的部分模型名、SDK 字段和推荐实践已经不是最新版。本课程保留它的实验方法，并在第 7 课标出旧式思维链、XML 工具调用和 Assistant Prefill 等内容的现代用法。</p>
+  </section>
+
+  <section id="openai">
+    <h2>4. OpenAI：把 Prompt 当成可测试的工程资产</h2>
+    <p>OpenAI 的方法比较像生产手册。它不只问“这句 Prompt 怎么写”，还问：指令放哪里、优先级如何、模型升级怎么不引入回归、固定内容如何复用与缓存。本课程第 2、6、7 课完整展开这些工程问题。</p>
+
+    <h3>4.1 消息角色是“权限层级”，不是 Prompt 技巧的名字</h3>
+    <p>稳定的应用规则和当次用户输入应该分开。高优先级指令规定模型的目标、规则和输出约束；用户输入提供本次要处理的数据。它们是不同层次，不应全部糊成一个无边界字符串。</p>
+
+    <h3>4.2 模型选择也是 Prompt 系统的一部分</h3>
+    <p>不同类型和不同尺寸的模型，对指令显式程度、速度、成本和复杂推理的取舍不同。因此“同一 Prompt 在每个模型上都一样”不是可靠假设。生产应用应固定模型版本，并用 Eval 检查升级。</p>
+
+    <h3>4.3 Few-Shot 的工程含义</h3>
+    <p>文档将 Few-Shot 定义为：在 Prompt 中放少量输入/输出对，让模型拾取模式，而不是修改模型参数。它还特别建议范例要覆盖多样输入，不要只放三个几乎一样的容易案例。</p>
+
+    <h3>4.4 上下文与 RAG</h3>
+    <p>当答案依赖私有资料或特定来源时，要把相关上下文提供给模型。上下文不是越多越好：它受 context window 限制，而且无关内容会增加噪声。</p>
+
+    <h3>4.5 为什么要将 Prompt 纳入代码版本管理</h3>
+    <p>生产 Prompt 应作为应用代码的一部分进行版本控制、评审、测试和部署；动态值通过类型化变量或 schema 传入。对大量重复请求，稳定前缀放在前面还有利于 Prompt Caching。第 6 课会给出完整的实验和发布方法。</p>
+  </section>
+
+  <section id="google">
+    <h2>5. Google：给你一个可操作的策略工具箱</h2>
+    <p>Google 的方法最适合“对着症状查策略”。核心观点是：Prompt Design 是迭代过程，要根据具体任务和实际输出反复实验。本课程已把这些策略分别放进第 2 至第 7 课。</p>
+
+    <h3>5.1 它先把“输入”分成四类</h3>
+    <table>
+      <thead><tr><th>输入类型</th><th>模型在做什么</th><th>例子</th></tr></thead>
+      <tbody>
+        <tr><td>问题</td><td>回答一个问题</td><td>“为什么天是蓝的？”</td></tr>
+        <tr><td>任务</td><td>执行一个动作</td><td>“生成 5 个花店名字”</td></tr>
+        <tr><td>实体</td><td>对给定对象操作</td><td>“将这些动物分大/小”</td></tr>
+        <tr><td>补全</td><td>继续你已经开始的模式</td><td>给出 <code>Output:</code> 开头让模型续写</td></tr>
+      </tbody>
+    </table>
+    <p>这个分类的价值是：当结果不对时，你可以问“我究竟是在提问，还是要求它做任务？”很多模糊 Prompt 混在一起了。</p>
+
+    <h3>5.2 约束和输出格式要明说</h3>
+    <p>模型不会自动知道你想要列表、表格、一句话还是 JSON。只说“帮我整理”是把格式选择交给模型。对简单格式，Prompt 可以规定；对需要机器严格解析的 JSON，应优先使用 Structured Outputs 或 schema，而不只靠自然语言。</p>
+
+    <h3>5.3 Google 对 Few-Shot 的建议更强</h3>
+    <p>文档强调范例可以控制格式、措辞、范围和整体模式，并建议使用具体、多样且格式一致的范例。但这不是“范例越多越好”：过多范例可能增加成本，也可能让输出过度贴合范例。最终数量必须由 Eval 决定。</p>
+
+    <h3>5.4 复杂任务不一定靠一个超长 Prompt</h3>
+    <p>Google 给出三种拆法：</p>
+    <ol>
+      <li><strong>拆指令：</strong>一个 Prompt 只处理一类任务，根据输入路由。</li>
+      <li><strong>链式处理：</strong>上一步输出变成下一步输入。</li>
+      <li><strong>并行后聚合：</strong>对资料的不同部分并行处理，最后合并。</li>
+    </ol>
+    <p>这是从 Prompt Engineering 走向 Agent/Harness Engineering 的过渡：有些问题应该改流程，不是继续加长 Prompt。</p>
+
+    <h3>5.5 参数也是实验变量</h3>
+    <p><code>max output tokens</code>、<code>temperature</code>、<code>topP</code>、<code>topK</code> 和停止序列会影响生成。但要避免一次同时改 Prompt 和参数，否则你不知道是哪个变量导致结果变化。</p>
+  </section>
+
+  <section id="project">
+    <h2>6. 把三份资料放回你的客服分类代码</h2>
+    <p>你当前的 Prompt 已经可以映射到三家文档的共同方法：</p>
+    <pre><code>目标：将客服留言分到 billing、bug 或 other。
+资料：&lt;input_data&gt;{message}&lt;/input_data&gt;
+规则：只根据资料分类；不知道时选 other。
+
+范例：
+输入：信用卡又扣了一次
+输出：billing
+...
+
+输出：只返回一个小写标签。</code></pre>
+
+    <table>
+      <thead><tr><th>代码中的设计</th><th>对应哪个概念</th></tr></thead>
+      <tbody>
+        <tr><td>固定目标、规则和输出</td><td>清晰指令与稳定 Prompt</td></tr>
+        <tr><td><code>{message}</code> 每次替换</td><td>指令与输入数据分离</td></tr>
+        <tr><td>三个输入/输出对</td><td>Few-Shot 行为演示</td></tr>
+        <tr><td>只允许三个标签</td><td>输出约束</td></tr>
+        <tr><td>六条 <code>cases</code> 自动评分</td><td>Eval 和回归测试</td></tr>
+        <tr><td>检查 <code>finish_reason</code></td><td>把参数/截断问题与 Prompt 问题分开</td></tr>
+      </tbody>
+    </table>
+
+    <div class="summary-box">
+      <strong>接下来只在本项目中怎样学习？</strong>
+      <ol>
+        <li>学习第 2 课：消息结构、角色、输入类型与边界。</li>
+        <li>学习第 3、4 课：输出、Few-Shot、推理、幻觉与 Grounding。</li>
+        <li>学习第 5、6 课：工具、Agent、参数、迭代和 Eval。</li>
+        <li>学习第 7 课：现代模型差异，并完成每课页底测验。</li>
+      </ol>
+      <p><a href="../reference/prompt-engineering-map.html">打开 Prompt Engineering 速查地图 →</a></p>
+    </div>
+  </section>
+
+  <section id="quiz">
+    <h2>7. 检索练习：不回看上文，先从记忆回答</h2>
+    <p>这不是考试。先努力回忆，再点“检查”，比重新读一遍更能建立长期记忆。</p>
+
+    <div class="quiz" data-quiz data-answer="b" data-correct="这是生成额度的硬停止问题。" data-incorrect="先检查结束原因，不要先改分类 Prompt。">
+      <fieldset>
+        <legend>1. <code>completion_tokens</code> 恰好等于 <code>max_tokens</code>，且答案为空。最先检查什么？</legend>
+        <label><input type="radio" name="q1" value="a"> 重写任务角色</label>
+        <label><input type="radio" name="q1" value="b"> 检查结束原因</label>
+        <label><input type="radio" name="q1" value="c"> 增加范例数量</label>
+      </fieldset>
+      <button type="button">检查</button>
+      <p data-feedback aria-live="polite"></p>
+    </div>
+
+    <div class="quiz" data-quiz data-answer="c" data-correct="Few-Shot 主要演示边界和输出模式。" data-incorrect="范例不是给模型永久训练新参数。">
+      <fieldset>
+        <legend>2. Few-Shot 范例最准确的作用是什么？</legend>
+        <label><input type="radio" name="q2" value="a"> 扩大模型参数</label>
+        <label><input type="radio" name="q2" value="b"> 替代所有指令</label>
+        <label><input type="radio" name="q2" value="c"> 演示期望模式</label>
+      </fieldset>
+      <button type="button">检查</button>
+      <p data-feedback aria-live="polite"></p>
+    </div>
+
+    <div class="quiz" data-quiz data-answer="a" data-correct="固定其他变量才能归因结果差异。" data-incorrect="换测试题或同时改参数都会破坏对照。">
+      <fieldset>
+        <legend>3. 比较 Prompt v1 和 v2 时，哪种做法最可信？</legend>
+        <label><input type="radio" name="q3" value="a"> 固定题目参数</label>
+        <label><input type="radio" name="q3" value="b"> 更换更易题目</label>
+        <label><input type="radio" name="q3" value="c"> 同时调高温度</label>
+      </fieldset>
+      <button type="button">检查</button>
+      <p data-feedback aria-live="polite"></p>
+    </div>
+
+    <details>
+      <summary>课后小任务：用一句话区分三份资料</summary>
+      <p>不看本页，请回答：Anthropic、OpenAI、Google 这三份资料分别最适合用来做什么？把你的答案发给我，我会根据你的回答调整下一课的难度。</p>
+    </details>
+  </section>
+
+  <section>
+    <h2>内容来源说明</h2>
+    <p>本课程吸收并重组了 Anthropic Interactive Prompt Engineering Tutorial、OpenAI Prompt Engineering 和 Google Prompt Design Strategies。来源仅用于说明知识依据，不是你的课后阅读任务。</p>
+    <p class="small">资料核对日期：2026-11-03。三份资料的逐项覆盖关系已经记录在本项目的“覆盖矩阵”中。</p>
+  </section>
+
+  <div class="next-prev"><a href="index.html">← 课程首页</a><a href="0002-foundations-roles-and-boundaries.html">下一课：基础结构、角色与边界 →</a></div>
+
+  <footer>
+    <p>看不懂任何一段，可以直接把小节标题或截图发给我。我会在本课程中补充中文解释和新例子。</p>
+  </footer>
+</main>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

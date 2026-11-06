@@ -1,0 +1,1007 @@
+[
+  {
+    "id": "4-1",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "练习 1：同一个 agent、两个 framework",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "核心",
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/starter.py",
+      "04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/test.py"
+    ],
+    "acceptance": [
+      "LangGraph 与 CrewAI 使用同一搜索摘要任务",
+      "保存两边实际输出，说明框架隐藏的工作"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "4-2",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "练习 2：多 agent 角色分配",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "核心",
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/upstream/02-multi-agent-roles/starter.py",
+      "04-agent-frameworks/examples/upstream/02-multi-agent-roles/test.py"
+    ],
+    "acceptance": [
+      "researcher/writer/reviewer 输入输出可见",
+      "每次交接职责明确，不能把三个名字当三次独立调用"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "4-3",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "练习 3：图式 workflow",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "核心",
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/upstream/03-graph-workflow/starter.py",
+      "04-agent-frameworks/examples/upstream/03-graph-workflow/test.py"
+    ],
+    "acceptance": [
+      "分支正确，HITL 暂停与恢复",
+      "补充 SQLite 版本在另一进程继续，未批准不输出最终结果"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "4-4",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "练习 4：CodeAct vs JSON tool",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "核心",
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/starter.py",
+      "04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/test.py"
+    ],
+    "acceptance": [
+      "同题对比 CodeAct 和 JSON tool",
+      "模型代码未在主机任意执行，隔离边界有证据"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "4-5",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "练习 5：类型安全 agent",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "核心",
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/upstream/05-typed-agent/starter.py",
+      "04-agent-frameworks/examples/upstream/05-typed-agent/test.py"
+    ],
+    "acceptance": [
+      "输出 answer/confidence/sources",
+      "错类型与越界 confidence 被拒，形状正确不等于事实正确"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "4-project",
+    "course": "04-agent-frameworks",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md",
+    "source_heading": "🎒 推荐小项目：有人先检查的研究摘要流程",
+    "source_sha256": "9e0ed05155b310acca2b295a754cc28b1447dc14310a3e25915a3cac4bfa8c5b",
+    "scope": "推荐综合项目",
+    "lesson": "04-agent-frameworks/lessons/03-workshop.html",
+    "exercise": "04-agent-frameworks/lessons/99-exercises.html",
+    "answers": [
+      "04-agent-frameworks/examples/summary_workflow.py"
+    ],
+    "acceptance": [
+      "researcher 找资料、writer 写摘要，来源可核对",
+      "持久检查点跨进程恢复，无批准不进入最终输出"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "5-1",
+    "course": "05-claude-code-ecosystem",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md",
+    "source_heading": "练习 1：写一张最小项目守则",
+    "source_sha256": "26584f5ba62f88a19f1283ac3ea62dd3dce77e5a32b669754cb2f78320fb828a",
+    "scope": "核心",
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html",
+    "exercise": "05-claude-code-ecosystem/lessons/99-exercises.html",
+    "answers": [
+      "05-claude-code-ecosystem/examples/CLAUDE.md"
+    ],
+    "acceptance": [
+      "规则仅用途/禁止/验证/交付，能被宿主读到",
+      "只读请求没有改文件"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "5-2",
+    "course": "05-claude-code-ecosystem",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md",
+    "source_heading": "练习 2：把重复流程做成 Skill",
+    "source_sha256": "26584f5ba62f88a19f1283ac3ea62dd3dce77e5a32b669754cb2f78320fb828a",
+    "scope": "核心",
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html",
+    "exercise": "05-claude-code-ecosystem/lessons/99-exercises.html",
+    "answers": [
+      "05-claude-code-ecosystem/examples/skills/readme-check/SKILL.md",
+      "05-claude-code-ecosystem/examples/check_readme.py"
+    ],
+    "acceptance": [
+      "用途/安装/可运行例子/许可链接逐项核对",
+      "正反例与文件行号，不把标题存在当内容正确"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "5-3",
+    "course": "05-claude-code-ecosystem",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md",
+    "source_heading": "练习 3：添加一个只观察、不拦截的 Hook",
+    "source_sha256": "26584f5ba62f88a19f1283ac3ea62dd3dce77e5a32b669754cb2f78320fb828a",
+    "scope": "核心",
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html",
+    "exercise": "05-claude-code-ecosystem/lessons/99-exercises.html",
+    "answers": [
+      "05-claude-code-ecosystem/examples/observe_hook.py",
+      "05-claude-code-ecosystem/examples/settings.demo.json"
+    ],
+    "acceptance": [
+      "日志含 UTC 时间、事件、工具名称",
+      "假输入和真实 Write 分开验证，不保存工具内容/凭证"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "5-4",
+    "course": "05-claude-code-ecosystem",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md",
+    "source_heading": "练习 4：连接受限的 MCP server",
+    "source_sha256": "26584f5ba62f88a19f1283ac3ea62dd3dce77e5a32b669754cb2f78320fb828a",
+    "scope": "核心",
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html",
+    "exercise": "05-claude-code-ecosystem/lessons/99-exercises.html",
+    "answers": [
+      "05-claude-code-ecosystem/examples/readonly_server.py",
+      "05-claude-code-ecosystem/examples/mcp_roundtrip.py"
+    ],
+    "acceptance": [
+      "列工具、合法读取、越界拒绝、移除",
+      "如用官方 filesystem 路径，按 A3 检查实际允许目录"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "5-5",
+    "course": "05-claude-code-ecosystem",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md",
+    "source_heading": "练习 5：用 Subagent 做只读检查",
+    "source_sha256": "26584f5ba62f88a19f1283ac3ea62dd3dce77e5a32b669754cb2f78320fb828a",
+    "scope": "核心",
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html",
+    "exercise": "05-claude-code-ecosystem/lessons/99-exercises.html",
+    "answers": [
+      "05-claude-code-ecosystem/examples/agents/evidence-reviewer.md"
+    ],
+    "acceptance": [
+      "独立上下文只读找测试说明路径并说明理由",
+      "不编造路径，不修改或执行 shell"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-1",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "练习 1：把两句话变成 Embedding",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "核心",
+    "lesson": "06-memory-rag/lessons/05-original-labs.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/upstream/01-embeddings/starter.py",
+      "06-memory-rag/examples/upstream/01-embeddings/test.py"
+    ],
+    "acceptance": [
+      "记录真实 embedding 模型、维度和句对相似度",
+      "相反句高相似不误判事实相同"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-2",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "练习 2：把 Embedding 放进 Vector Database",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "核心",
+    "lesson": "06-memory-rag/lessons/05-original-labs.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+      "06-memory-rag/examples/upstream/02-vector-db/test.py"
+    ],
+    "acceptance": [
+      "Chroma 写入并查询",
+      "区分临时/持久存储，不将未知问题近邻当答案"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-3",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "练习 3：比较三种 Chunking 方法",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "核心",
+    "lesson": "06-memory-rag/lessons/05-original-labs.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/upstream/03-chunking-comparison/starter.py",
+      "06-memory-rag/examples/upstream/03-chunking-comparison/test.py"
+    ],
+    "acceptance": [
+      "三种切分的完整片段与同题比较",
+      "识别被切开的条件/例外，标题切分不冒称语义切分"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-4",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "练习 4：串起完整 RAG",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "核心",
+    "lesson": "06-memory-rag/lessons/05-original-labs.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py",
+      "06-memory-rag/examples/upstream/04-full-rag-pipeline/test.py"
+    ],
+    "acceptance": [
+      "检索结果进入模型，引用指向本轮证据",
+      "无证据明确拒答，答案需核对条件"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-5",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "练习 5：记住一项偏好",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "核心",
+    "lesson": "06-memory-rag/lessons/05-original-labs.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+      "06-memory-rag/examples/upstream/05-long-term-memory/test.py"
+    ],
+    "acceptance": [
+      "写入并读回偏好",
+      "补充实现验证更新、删除、隔离与重启"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-project",
+    "course": "06-memory-rag",
+    "source_document": "stages/06-memory-rag.zh-Hans.md",
+    "source_heading": "推荐小项目：会查资料、也会记偏好的助理",
+    "source_sha256": "16b6fc29295cba1d6b4b06b8acf9c5e97ed9212ea02b099ac281bfe992c3277a",
+    "scope": "推荐综合项目",
+    "lesson": "06-memory-rag/lessons/03-workshop.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/grounded_rag.py",
+      "06-memory-rag/examples/memory_store.py"
+    ],
+    "acceptance": [
+      "检索与偏好读取分开，三类授权资料有引用",
+      "无答案/权限外拒答，记忆可更新删除重启读取"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-1",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "核心练习 1：Eval",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "核心",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+      "07-multi-agent-production/examples/upstream/02-eval/test.py"
+    ],
+    "acceptance": [
+      "版本化 5 development+3 holdout，逐题结果与 baseline 对比",
+      "规则/人工/模型评分边界明确"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-2",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "核心练习 2：Observability",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "核心",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+      "07-multi-agent-production/examples/upstream/03-observability/test.py"
+    ],
+    "acceptance": [
+      "记录 trace/spans、时延、用量与错误",
+      "缺失 usage 保持未知，不泄露秘密"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-3",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "核心练习 3：Approval、Checkpoint 与 Recovery",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "核心",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/06-safe-execution/starter.py",
+      "07-multi-agent-production/examples/upstream/06-safe-execution/test.py"
+    ],
+    "acceptance": [
+      "批准/拒绝/重启/重复恢复/损坏状态",
+      "相同幂等键只登记一次本地效果"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-4",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "核心练习 4：Deploy",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "核心",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+      "07-multi-agent-production/examples/upstream/05-deploy/test.py"
+    ],
+    "acceptance": [
+      "health/chat 正常与坏请求、模型不可用",
+      "本机 API 实际响应，Docker 另列可选"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-5",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "选修 A：Multi-Agent 辩论",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "原课选修",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/01-multi-agent-debate/starter.py",
+      "07-multi-agent-production/examples/upstream/01-multi-agent-debate/test.py"
+    ],
+    "acceptance": [
+      "保存每个角色意见与最终结果",
+      "用同一题比较，不把多数赞同当证据"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-6",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "选修 B：Streaming 与 Prompt caching",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "原课选修",
+    "lesson": "07-multi-agent-production/lessons/05-original-labs.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/upstream/04-sdk-advanced/starter.py",
+      "07-multi-agent-production/examples/upstream/04-sdk-advanced/test.py"
+    ],
+    "acceptance": [
+      "流式增量正确拼接，未完成不算最终答案",
+      "缓存用量读取实际字段，不从速度猜命中"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7-project",
+    "course": "07-multi-agent-production",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md",
+    "source_heading": "🧪 推荐小项目：有收据的研究助理",
+    "source_sha256": "e34e87a58a28887836774bf3e377e641f7c5f85af9a4d92f750085919adf4287",
+    "scope": "推荐综合项目",
+    "lesson": "07-multi-agent-production/lessons/06-complete-project.html",
+    "exercise": "07-multi-agent-production/lessons/99-exercises.html",
+    "answers": [
+      "07-multi-agent-production/examples/production_case.py",
+      "07-multi-agent-production/examples/collect_sources.py",
+      "07-multi-agent-production/examples/control_eval.py",
+      "07-multi-agent-production/examples/revision-claims.json"
+    ],
+    "acceptance": [
+      "三来源 URL/取得时间、逐条摘要、暂停与修订",
+      "批准绑定版本、拒绝/恢复/幂等、完整收据",
+      "五 development cases 逐题 outcome/trajectory；真实模型使用 --live"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7.5-1",
+    "course": "07.5-advanced-agentic-concepts",
+    "source_document": "stages/07.5-advanced-agentic-concepts.zh-Hans.md",
+    "source_heading": "🧪 最小决策纪录：加之前先填完",
+    "source_sha256": "e7ad75e6773e03eb6d2915f2019b354445769dada10633dba80d218d98c9b374",
+    "scope": "决策练习",
+    "lesson": "07.5-advanced-agentic-concepts/lessons/03-workshop.html",
+    "exercise": "07.5-advanced-agentic-concepts/lessons/99-exercises.html",
+    "answers": [
+      "07.5-advanced-agentic-concepts/examples/ablation.py",
+      "07.5-advanced-agentic-concepts/examples/decision.py"
+    ],
+    "acceptance": [
+      "真实失败或明确标注的假设，单变量改动与事前门槛",
+      "同题 baseline/候选/撤销结果，关键约束不被费用抵消"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "7.5-2",
+    "course": "07.5-advanced-agentic-concepts",
+    "source_document": "stages/07.5-advanced-agentic-concepts.zh-Hans.md",
+    "source_heading": "⚖️ Model–Harness Fit：用 Eval 决定保留、简化或移除",
+    "source_sha256": "e7ad75e6773e03eb6d2915f2019b354445769dada10633dba80d218d98c9b374",
+    "scope": "决策练习",
+    "lesson": "07.5-advanced-agentic-concepts/lessons/03-workshop.html",
+    "exercise": "07.5-advanced-agentic-concepts/lessons/99-exercises.html",
+    "answers": [
+      "07.5-advanced-agentic-concepts/examples/ablation.py",
+      "07.5-advanced-agentic-concepts/examples/decision.py"
+    ],
+    "acceptance": [
+      "真实失败或明确标注的假设，单变量改动与事前门槛",
+      "同题 baseline/候选/撤销结果，关键约束不被费用抵消"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "8-1",
+    "course": "08-agent-interfaces",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md",
+    "source_heading": "练习 1（Track A）：只打开一个安全示例页",
+    "source_sha256": "0fc9479973eeab522d393f58b6ffb1f4a0c1aa689bbe3fcfc54daa33e2b6cffc",
+    "scope": "Track A 起步",
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html",
+    "exercise": "08-agent-interfaces/lessons/99-exercises.html",
+    "answers": [
+      "08-agent-interfaces/examples/browser_lab.py"
+    ],
+    "acceptance": [
+      "example.com 标题、最终 URL、实际截图",
+      "不登录、不下载、不离域"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "8-2",
+    "course": "08-agent-interfaces",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md",
+    "source_heading": "练习 2（Track B）：先检查，再执行",
+    "source_sha256": "0fc9479973eeab522d393f58b6ffb1f4a0c1aa689bbe3fcfc54daa33e2b6cffc",
+    "scope": "Track B 实作",
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html",
+    "exercise": "08-agent-interfaces/lessons/99-exercises.html",
+    "answers": [
+      "08-agent-interfaces/examples/policy.py"
+    ],
+    "acceptance": [
+      "read ALLOW、send ASK、未知/离域/userinfo/异常端口 BLOCK",
+      "ASK 不可直接交执行器"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "8-3",
+    "course": "08-agent-interfaces",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md",
+    "source_heading": "练习 3：隔离 code",
+    "source_sha256": "0fc9479973eeab522d393f58b6ffb1f4a0c1aa689bbe3fcfc54daa33e2b6cffc",
+    "scope": "Track B 实作",
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html",
+    "exercise": "08-agent-interfaces/lessons/99-exercises.html",
+    "answers": [
+      "08-agent-interfaces/examples/plot_csv.py",
+      "08-agent-interfaces/examples/Dockerfile",
+      "08-agent-interfaces/examples/data.csv"
+    ],
+    "acceptance": [
+      "只读输入、独立输出、禁网、非 root/资源限制",
+      "实际隔离运行日志与图片，主机运行不能替代"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "8-4",
+    "course": "08-agent-interfaces",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md",
+    "source_heading": "练习 4：完整 action loop",
+    "source_sha256": "0fc9479973eeab522d393f58b6ffb1f4a0c1aa689bbe3fcfc54daa33e2b6cffc",
+    "scope": "Track B 实作",
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html",
+    "exercise": "08-agent-interfaces/lessons/99-exercises.html",
+    "answers": [
+      "08-agent-interfaces/examples/browser_loop.py"
+    ],
+    "acceptance": [
+      "observe/propose/policy/approve/execute/verify 全链",
+      "接受、拒绝、过时、执行失败、离域、发送六场景结果正确"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-1",
+    "course": "A1-cli-intro",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md",
+    "source_heading": "动手练习 CLI-1：在 demo repo 里先读取，再做一个可撤销的小改动",
+    "source_sha256": "1413ef290321297d3af75e65a76fd9bc4938478eac9a0122502e58219811e1c9",
+    "scope": "核心",
+    "lesson": "A1-cli-intro/lessons/03-workshop.html",
+    "exercise": "A1-cli-intro/lessons/99-exercises.html",
+    "answers": [
+      "A1-cli-intro/examples/task.md",
+      "A1-cli-intro/examples/reference-readme.md",
+      "A1-cli-intro/examples/demo/check.py"
+    ],
+    "acceptance": [
+      "第一轮只读，批准后只改 README",
+      "检查真实通过，diff 与撤回有证据"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-2",
+    "course": "A1-cli-intro",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md",
+    "source_heading": "动手练习 CLI-2：让项目规则被正确读取",
+    "source_sha256": "1413ef290321297d3af75e65a76fd9bc4938478eac9a0122502e58219811e1c9",
+    "scope": "核心",
+    "lesson": "A1-cli-intro/lessons/03-workshop.html",
+    "exercise": "A1-cli-intro/lessons/99-exercises.html",
+    "answers": [
+      "A1-cli-intro/examples/task.md"
+    ],
+    "acceptance": [
+      "四字段规则来自正确文件",
+      "要求修改禁止范围时不越界"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-3",
+    "course": "A1-cli-intro",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md",
+    "source_heading": "动手练习 CLI-3：用第二个 harness 重跑同一个请求",
+    "source_sha256": "1413ef290321297d3af75e65a76fd9bc4938478eac9a0122502e58219811e1c9",
+    "scope": "核心",
+    "lesson": "A1-cli-intro/lessons/03-workshop.html",
+    "exercise": "A1-cli-intro/lessons/99-exercises.html",
+    "answers": [
+      "A1-cli-intro/examples/task.md"
+    ],
+    "acceptance": [
+      "相同任务/干净输入，两种宿主记录版本模型权限与 diff",
+      "未具备第二工具如实标未执行"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-4",
+    "course": "A1-cli-intro",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md",
+    "source_heading": "动手练习 CLI-4：用假凭证观察认证失败",
+    "source_sha256": "1413ef290321297d3af75e65a76fd9bc4938478eac9a0122502e58219811e1c9",
+    "scope": "核心",
+    "lesson": "A1-cli-intro/lessons/03-workshop.html",
+    "exercise": "A1-cli-intro/lessons/99-exercises.html",
+    "answers": [
+      "A1-cli-intro/examples/auth_failures.py"
+    ],
+    "acceptance": [
+      "区分未登录/API key/模型/权限，并对照连接错误",
+      "假凭证不保存、不改正式环境；mock 与真实记录区分"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-5",
+    "course": "A2-cli-workflow",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md",
+    "source_heading": "动手练习 CLI-5：做一张最小项目规则卡",
+    "source_sha256": "494467e9fa2d97b0ca8a28086e0a697da3ec88b44582b7612577b4c1bc2ba9f4",
+    "scope": "核心",
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html",
+    "exercise": "A2-cli-workflow/lessons/99-exercises.html",
+    "answers": [
+      "A2-cli-workflow/examples/project-rules.md"
+    ],
+    "acceptance": [
+      "四字段包含 git diff --check，不自动 commit/push",
+      "宿主复述实际路径与约束"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-6",
+    "course": "A2-cli-workflow",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md",
+    "source_heading": "动手练习 CLI-6：把重复 review 做成 Skill",
+    "source_sha256": "494467e9fa2d97b0ca8a28086e0a697da3ec88b44582b7612577b4c1bc2ba9f4",
+    "scope": "核心",
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html",
+    "exercise": "A2-cli-workflow/lessons/99-exercises.html",
+    "answers": [
+      "A2-cli-workflow/examples/SKILL.md",
+      "A2-cli-workflow/examples/diff_lab.py",
+      "A2-cli-workflow/examples/diff-reference.md"
+    ],
+    "acceptance": [
+      "只审查真实 Git diff，指出新增命令与链接缺陷",
+      "有行号证据，前后 status 一致"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-7",
+    "course": "A2-cli-workflow",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md",
+    "source_heading": "动手练习 CLI-7：把大任务拆成看得见的小步骤",
+    "source_sha256": "494467e9fa2d97b0ca8a28086e0a697da3ec88b44582b7612577b4c1bc2ba9f4",
+    "scope": "核心",
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html",
+    "exercise": "A2-cli-workflow/lessons/99-exercises.html",
+    "answers": [
+      "A2-cli-workflow/examples/diff_lab.py",
+      "A2-cli-workflow/examples/portable-diff-task.md"
+    ],
+    "acceptance": [
+      "两份 README 的盘点/计划/批准修改/验证齐全",
+      "两个检查通过且只改指定文件，恢复到基线"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-8",
+    "course": "A2-cli-workflow",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md",
+    "source_heading": "动手练习 CLI-8：做一张 portable prompt 对照卡",
+    "source_sha256": "494467e9fa2d97b0ca8a28086e0a697da3ec88b44582b7612577b4c1bc2ba9f4",
+    "scope": "核心",
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html",
+    "exercise": "A2-cli-workflow/lessons/99-exercises.html",
+    "answers": [
+      "A2-cli-workflow/examples/portable-diff-task.md"
+    ],
+    "acceptance": [
+      "共用四字段任务，不照搬专属设置",
+      "两边分别记录环境、结果、权限与未执行项"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-9",
+    "course": "A3-cli-production",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md",
+    "source_heading": "动手练习 CLI-9：只连接一个 MCP server",
+    "source_sha256": "b2585b15894cd6e930157ec0c18644d2c45c8097286a5feba84a5ba01c3fb956",
+    "scope": "核心",
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html",
+    "exercise": "A3-cli-production/lessons/99-exercises.html",
+    "answers": [
+      "A3-cli-production/examples/../text/04-original-delivery.md"
+    ],
+    "acceptance": [
+      "官方 filesystem 仅允许 demo；列实际范围、合法/越界、移除",
+      "不能借其他工具绕过 server 拒绝"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-10",
+    "course": "A3-cli-production",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md",
+    "source_heading": "动手练习 CLI-10：让 PR 多一个只读检查员",
+    "source_sha256": "b2585b15894cd6e930157ec0c18644d2c45c8097286a5feba84a5ba01c3fb956",
+    "scope": "核心",
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html",
+    "exercise": "A3-cli-production/lessons/99-exercises.html",
+    "answers": [
+      "A3-cli-production/examples/review-workflow.yml"
+    ],
+    "acceptance": [
+      "same-repo PR 实际 base/head diff，可信 Skill，只读权限",
+      "artifact 内容对应改动，未远端跑不算集成通过"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-11",
+    "course": "A3-cli-production",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md",
+    "source_heading": "动手练习 CLI-11：看一次运行的收据",
+    "source_sha256": "b2585b15894cd6e930157ec0c18644d2c45c8097286a5feba84a5ba01c3fb956",
+    "scope": "核心",
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html",
+    "exercise": "A3-cli-production/lessons/99-exercises.html",
+    "answers": [
+      "A3-cli-production/examples/receipt.py"
+    ],
+    "acceptance": [
+      "provider/model/input/output/time/result/cost 可追溯",
+      "未知保留 null，停止规则真实有效"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "CLI-12",
+    "course": "A3-cli-production",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md",
+    "source_heading": "动手练习 CLI-12：安全地把 Skill 交给队友",
+    "source_sha256": "b2585b15894cd6e930157ec0c18644d2c45c8097286a5feba84a5ba01c3fb956",
+    "scope": "核心",
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html",
+    "exercise": "A3-cli-production/lessons/99-exercises.html",
+    "answers": [
+      "A3-cli-production/examples/team-plugin/README.md",
+      "A3-cli-production/examples/team-plugin/.claude-plugin/plugin.json",
+      "A3-cli-production/examples/team-plugin/skills/review-changes/SKILL.md"
+    ],
+    "acceptance": [
+      "第二干净 demo 安装同名 review-changes，记录版本",
+      "broken/fixed/baseline 正反例、无修改、卸载后不可用"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "branch-researcher-original",
+    "course": "branch-researcher",
+    "source_document": "branches/for-researcher.zh-Hans.md",
+    "source_heading": "🛠 第一个练习：核对一篇 paper 的三个答案",
+    "source_sha256": "c1966b2bec8139f25db7c56271fb7a401188b7cb0397ee744575b985537a0932",
+    "scope": "核心",
+    "lesson": "branch-researcher/lessons/03-workshop.html",
+    "exercise": "branch-researcher/lessons/99-exercises.html",
+    "answers": [
+      "branch-researcher/examples/reference-work.json",
+      "branch-researcher/examples/check_work.py",
+      "branch-researcher/examples/paper-evidence.json"
+    ],
+    "acceptance": [
+      "原三问逐条回答，来源章节和证据片段可核对",
+      "支持/未支持/推断区分，工具日期和复现状态真实"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "branch-developer-original",
+    "course": "branch-developer",
+    "source_document": "branches/for-developer.zh-Hans.md",
+    "source_heading": "🛠 第一个练习：完成一次可回滚的小改",
+    "source_sha256": "af971321d3317a3723666637b27922939257fb7a922aa58d736acdfea0d392b9",
+    "scope": "核心",
+    "lesson": "branch-developer/lessons/03-workshop.html",
+    "exercise": "branch-developer/lessons/99-exercises.html",
+    "answers": [
+      "branch-developer/examples/reference-work.json",
+      "branch-developer/examples/check_work.py"
+    ],
+    "acceptance": [
+      "先只读计划、批准后 README 单文件小改",
+      "完整 diff、实际检查、只撤回本次修改"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "branch-teacher-original",
+    "course": "branch-teacher",
+    "source_document": "branches/for-teacher.zh-Hans.md",
+    "source_heading": "🛠 第一个练习：做一份可检查的课堂活动草稿",
+    "source_sha256": "30c0f639c86af9e9dd81df0e4e164eabf781c4ce7a75d025c31710df0bba78ed",
+    "scope": "核心",
+    "lesson": "branch-teacher/lessons/03-workshop.html",
+    "exercise": "branch-teacher/lessons/99-exercises.html",
+    "answers": [
+      "branch-teacher/examples/reference-work.json",
+      "branch-teacher/examples/check_work.py"
+    ],
+    "acceptance": [
+      "15分钟小学影子长度活动，材料/两级提示/两题离堂题",
+      "三事实核对与教师复核，不处理真实学生数据"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "branch-knowledge-worker-original",
+    "course": "branch-knowledge-worker",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md",
+    "source_heading": "🛠 第一个练习：把会议记录变成可核对的行动表",
+    "source_sha256": "618960f09a40838cde1c161a16ce1ec94fd91de3939060db960cdab639f5367d",
+    "scope": "核心",
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html",
+    "exercise": "branch-knowledge-worker/lessons/99-exercises.html",
+    "answers": [
+      "branch-knowledge-worker/examples/reference-work.json",
+      "branch-knowledge-worker/examples/check_work.py"
+    ],
+    "acceptance": [
+      "原会议四句对应行动表六字段",
+      "未知负责人日期不补猜，未决定寄信不得执行"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "branch-everyday-users-original",
+    "course": "branch-everyday-users",
+    "source_document": "branches/for-everyday-users.zh-Hans.md",
+    "source_heading": "🛠 第一个练习：把虚构消息变成可核对的提醒",
+    "source_sha256": "5be685405c5b2c05167ce21fab7069f046f2783a06d6f88b0c4a8e57908ca956",
+    "scope": "核心",
+    "lesson": "branch-everyday-users/lessons/03-workshop.html",
+    "exercise": "branch-everyday-users/lessons/99-exercises.html",
+    "answers": [
+      "branch-everyday-users/examples/reference-work.json",
+      "branch-everyday-users/examples/check_work.py"
+    ],
+    "acceptance": [
+      "原消息提醒含 Draft/Facts copied/Needs confirmation",
+      "小安/小美/周五/9月12日正确，具体时间未知，未发送"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "capstone-a",
+    "course": "capstone-a",
+    "source_document": "CAPSTONE.zh-Hans.md",
+    "source_heading": "Track A Capstone — CLI Power User",
+    "source_sha256": "6d106eb01c0f333dc9205fd5ebcde4bcaa3d2b0d882ae146b3955a8dcfb9a819",
+    "scope": "结业项目，参考示范不是唯一答案",
+    "lesson": "capstone-a/lessons/03-workshop.html",
+    "exercise": "capstone-a/lessons/99-exercises.html",
+    "answers": [
+      "capstone-a/examples/task.md",
+      "capstone-a/examples/SKILL.md",
+      "capstone-a/examples/reference-draft.json",
+      "capstone-a/examples/validate.py"
+    ],
+    "acceptance": [
+      "真实重复问题、CLI 核心+Skill/MCP、明确输入输出",
+      "README 可重跑，至少一失败、真实执行证据、四级自评、150字反思"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "capstone-b",
+    "course": "capstone-b",
+    "source_document": "CAPSTONE.zh-Hans.md",
+    "source_heading": "Track B Capstone — Agent Builder",
+    "source_sha256": "6d106eb01c0f333dc9205fd5ebcde4bcaa3d2b0d882ae146b3955a8dcfb9a819",
+    "scope": "结业项目，参考示范不是唯一答案",
+    "lesson": "capstone-b/lessons/03-workshop.html",
+    "exercise": "capstone-b/lessons/99-exercises.html",
+    "answers": [
+      "capstone-b/examples/rag_agent.py",
+      "capstone-b/examples/eval_cases.json",
+      "capstone-b/examples/evaluate.py",
+      "capstone-b/examples/documents.json"
+    ],
+    "acceptance": [
+      "RAG 或双Agent择一，工具与外部接口齐全",
+      "版本化5开发+3新保留题，grader/trial/baseline/regression逐题",
+      "架构、失败分析、README、200字反思；公开示范不算盲测"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-advanced-rag",
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source_heading": "🛠 一个可重复运行的小实验",
+    "source_sha256": "ac03a7c7cd2de34008098992767dc4cec2a356e29ef4799a89cfa954b3bd7643",
+    "scope": "直接支线练习",
+    "lesson": "06-memory-rag/lessons/06-abc-experiment.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/rerank_experiment.py",
+      "06-memory-rag/examples/rerank-reference.json"
+    ],
+    "acceptance": [
+      "20题同一来源标签，A/B/C 各20行结果",
+      "Recall@5/命中/时延/成本，C不改善也如实记录"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "6-memory",
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source_heading": "🛠 一个最小 Memory 练习",
+    "source_sha256": "9372f7d61f6689ba7e63acee540c2be31d672b5034cd9f787441a238949425d1",
+    "scope": "直接支线练习",
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html",
+    "exercise": "06-memory-rag/lessons/99-exercises.html",
+    "answers": [
+      "06-memory-rag/examples/memory_lifecycle.py",
+      "06-memory-rag/examples/memory_store.py",
+      "06-memory-rag/examples/grounded_rag.py"
+    ],
+    "acceptance": [
+      "user/source/time/ttl 同意写入、另一会话读取",
+      "改为表格偏好、删除、隔离五项均有结果"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "teacher-rubric",
+    "course": "branch-teacher",
+    "source_document": "branches/for-teacher.zh-Hans.md",
+    "source_heading": "Rubric 草稿",
+    "source_sha256": "30c0f639c86af9e9dd81df0e4e164eabf781c4ce7a75d025c31710df0bba78ed",
+    "scope": "原课附加模板",
+    "lesson": "branch-teacher/lessons/03-workshop.html",
+    "exercise": "branch-teacher/lessons/99-exercises.html",
+    "answers": [
+      "branch-teacher/examples/reference-work.json"
+    ],
+    "acceptance": [
+      "四级各用可观察行为",
+      "教师决定评分使用方式，不自动给真实学生评分"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  },
+  {
+    "id": "teacher-errors",
+    "course": "branch-teacher",
+    "source_document": "branches/for-teacher.zh-Hans.md",
+    "source_heading": "常见错误整理",
+    "source_sha256": "30c0f639c86af9e9dd81df0e4e164eabf781c4ce7a75d025c31710df0bba78ed",
+    "scope": "原课附加模板",
+    "lesson": "branch-teacher/lessons/03-workshop.html",
+    "exercise": "branch-teacher/lessons/99-exercises.html",
+    "answers": [
+      "branch-teacher/examples/reference-work.json"
+    ],
+    "acceptance": [
+      "三个虚构回答分组，指出缺少概念",
+      "每组提示不直接抄答案，不推断学生身份或能力"
+    ],
+    "boundary": "文件与参考答案已提供；模拟运行、真实宿主/模型与学习者独立完成分别验收。"
+  }
+]

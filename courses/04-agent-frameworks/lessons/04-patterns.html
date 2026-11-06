@@ -1,0 +1,130 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>五种流程与工具接口：从文章概念到可执行模型</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">4 · Workflow Graph 与 Agent 框架</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="五种流程与工具接口从文章概念到可执行模型"></span><h1 data-heading-alias="五种流程与工具接口从文章概念到可执行模型" id="h88f0162129ca">五种流程与工具接口：从文章概念到可执行模型</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hd1a42ca24aa9">为什么不是每项任务都需要 Agent</a></li><li><a href="#h2912d2034de9">五种模式怎样选择</a></li><li><a href="#h39f1b80d9582">完整控制流演示</a></li><li><a href="#h2f9c32bbee6e">从模式到框架 API</a></li><li><a href="#h900dfea5d820">两个应用域与工具设计</a></li><li><a href="#ha70207dde3ca">参考观点的边界与本地自测</a></li></ul></aside>
+<span id="为什么不是每项任务都需要-agent"></span><h2 data-heading-alias="为什么不是每项任务都需要-agent" id="hd1a42ca24aa9">为什么不是每项任务都需要 Agent</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>一次调用已有足够信息且答案能验收时，增加循环只增加费用和不确定性。需要动态探索时才让模型选择下一步。先记录单步方案在哪些题上失败，再判断是缺少处理步骤，还是缺少资料。仅凭模型建议“增加代理”，还不足以决定改架构。</p>
+<p>增强模型通常接检索、工具和记忆：检索补当前证据，工具改变或观察环境，记忆延续有价值状态。它们不能相互代替。工具输出要明确“没找到”“执行失败”“已成功”的区别，避免模型把空字符串当成功。</p>
+<span id="五种模式怎样选择"></span><h2 data-heading-alias="五种模式怎样选择" id="h2912d2034de9">五种模式怎样选择</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>输入输出关系</th>
+<th>合适问题</th>
+<th>停止与失败</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>链式</td>
+<td>前一步产物作为下一步输入</td>
+<td>先提纲再正文再检查</td>
+<td>中间检查不通过就停止</td>
+</tr>
+<tr>
+<td>路由</td>
+<td>类别决定处理器</td>
+<td>格式审查与事实审查分流</td>
+<td>未知类别澄清，不硬猜</td>
+</tr>
+<tr>
+<td>并行</td>
+<td>独立分支后合并</td>
+<td>同一稿件的格式和来源检查</td>
+<td>分支失败单列，不能只合并成功项</td>
+</tr>
+<tr>
+<td>编排者与工作者</td>
+<td>按任务动态分解工作清单</td>
+<td>输入规模不同的资料研究</td>
+<td>控制总任务数、重复与合并责任</td>
+</tr>
+<tr>
+<td>评价与改进</td>
+<td>产物→明确反馈→修订</td>
+<td>能给出可验证改进标准的草稿</td>
+<td>轮数有上限，保留更好版本</td>
+</tr>
+</tbody>
+</table>
+<p>并行还可分成分片处理和投票判断。投票只能提高某些条件下的稳定性，几个模型可能共享同一偏差。动态工作者也不等于无限递归：任务边界、工具权限和失败上报要在委派前明确。</p>
+<span id="完整控制流演示"></span><h2 data-heading-alias="完整控制流演示" id="h39f1b80d9582">完整控制流演示</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<pre><code class="language-bash"># 运行 courses/04-agent-frameworks/examples/patterns.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/04-agent-frameworks/examples/patterns.py
+</code></pre>
+<p>这里用固定函数演示步骤之间如何连接，没有调用模型开展研究。你能看到缺标题、缺引用怎样转成具体反馈。把相应函数替换成模型调用时，仍保留同样的输入输出校验、轮数与错误分支。</p>
+<pre><code class="language-python">&quot;&quot;&quot;五种编排的可运行控制流样例；用固定函数隔离模型随机性。&quot;&quot;&quot;
+
+# 五个函数分别演示五种控制流程；输入和检查均固定，便于先看懂步骤如何连接。
+# 线程池让独立的等待型调用重叠执行；它不能让有前后数据依赖的工具提前运行。
+from concurrent.futures import ThreadPoolExecutor
+import json
+
+
+# 前一步没有产物就停止，避免把空输入继续传给后面的步骤。
+def chain(text):
+    draft=text.strip()
+    if not draft:
+        return {'status':'blocked','reason':'第一阶段没有产物'}
+    return {'status':'done','summary':draft[:30]}
+
+
+# 只处理已登记的任务类别；未知类别返回澄清信息。
+def route(task):
+    handlers={'事实核对':lambda:{'expert':'证据检查','result':'必须附来源'},
+              '格式核对':lambda:{'expert':'格式检查','result':'必须有标题'}}
+    if task not in handlers:
+        return {'expert':None,'result':'未支持的任务，请澄清'}
+    return handlers[task]()
+
+
+# 两项检查彼此独立，分别返回不同字段，再合并结果。
+def parallel(text):
+    checks=[lambda:{'format':text.startswith('# ')},lambda:{'source':'[d1]' in text}]
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results=list(pool.map(lambda fn:fn(),checks))
+    return {key:value for result in results for key,value in result.items()}
+
+
+# 先限制任务数并去重，再给每项任务分配来源标识。
+def orchestrate(topics):
+    if len(topics)&gt;3 or len(topics)!=len(set(topics)):
+        raise ValueError('任务最多三个且不能重复')
+    jobs=[{'topic':topic,'source':'d'+str(i+1)} for i,topic in enumerate(topics)]
+    return [{'topic':job['topic'],'draft':'需核对 '+job['topic'],'source':job['source']} for job in jobs]
+
+
+# 每轮记录具体缺项，再补相应内容；轮数耗尽时返回 stopped。
+def optimize(text, limit=2):
+    history=[]
+    for attempt in range(limit+1):
+        missing=[]
+        if not text.startswith('# '): missing.append('标题')
+        if '[d1]' not in text: missing.append('引用')
+        history.append({'attempt':attempt,'missing':missing})
+        if not missing: return {'status':'done','text':text,'history':history}
+        if attempt==limit: break
+        if '标题' in missing: text='# 摘要\n'+text
+        if '引用' in missing: text+=' [d1]'
+    return {'status':'stopped','text':text,'history':history}
+
+
+if __name__=='__main__':
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    print(json.dumps({'chain':chain('固定资料摘要'),'route':route('事实核对'),
+        'parallel':parallel('# 摘要 [d1]'),'workers':orchestrate(['成本','来源']),
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+        'optimizer':optimize('固定资料')},ensure_ascii=False,indent=2))
+
+</code></pre>
+<span id="从模式到框架-api"></span><h2 data-heading-alias="从模式到框架-api" id="h2f9c32bbee6e">从模式到框架 API</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>LangGraph 的 node 是函数，edge 是控制关系，state 是共享字段，compile 生成执行对象，invoke 运行。静态顺序用 add_edge，分支用 add_conditional_edges，动态工作者需要明确每个工作者的输入；并行输出通过 reducer 或独立字段合并。checkpoint 保存运行位置；store 存跨会话信息。这些 API 的用法见<a href="06-framework-apis.html">动态分工与交接</a>；学完后，在<a href="03-workshop.html">综合摘要流程</a>中练习持久化和跨进程恢复。</p>
+<p>OpenAI Agents SDK 中，主管将专家包装为工具，收到结果后仍由主管回答；handoff 则让接收 Agent 继续。接收方接管后，不保证主管会立即回来总结；这与主管把专家当工具调用的流程不同。代码编排可以和模型选择混合：例如代码强制先检索，模型只在有限候选工具中选一个。</p>
+<p>CrewAI 的 Agent 定义角色、目标和工具，Task 定义任务及预期产物，Crew 安排合作；Flow 处理应用级事件和状态。角色描述不能代替真实资料传递。研究者给写作者的至少包括结论、原证据和未确认项，审查者需要看到同一份证据，才能判定是否编造。</p>
+<span id="两个应用域与工具设计"></span><h2 data-heading-alias="两个应用域与工具设计" id="h900dfea5d820">两个应用域与工具设计</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>客服场景的关键不是“语气像客服”，而是能读取订单事实、知道何时升级人工、执行前确认具体变更。编码场景要能查看文件、运行测试并观察外部结果，测试失败时不能以自然语言宣布完成。两者都需要明确停止点，难题应交人而不是无限循环。</p>
+<p>工具说明写清适用情况、输入单位、输出结构和错误含义。例如发生 timeout 时，返回 error 与 retryable，让调用者知道请求失败，而不是返回空搜索结果；文件工具使用明确路径，避免相对目录猜测。先用少量真实输入观察错误，再修改工具定义。不要通过提示词要求工具具有它没有的权限。</p>
+<span id="参考观点的边界与本地自测"></span><h2 data-heading-alias="参考观点的边界与本地自测" id="ha70207dde3ca">参考观点的边界与本地自测</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>多 Agent 研究适合可分开的广度探索；紧密共享上下文的任务容易因摘要和分工丢约束。AutoGen、CAMEL、ChatDev 和社会模拟研究提供不同消息、角色及协作组织方法，不能据其存在推断你的项目需要多个角色。比较时记录质量、成本、延迟及失败类型，研究论文中的改善比例不是本项目预计收益。</p>
+<p>自测：并行来源检查失败而格式检查通过，整体能通过吗？不能，两项检查必须同时通过。为什么 optimizer 不应只收到“再好一点”？因为没有可观察差距，无法判断修订有没有收益。为什么一个节点里加三个角色名不算三个 Agent？因为没有独立的状态、调用与交接行为。</p>
+<p>实际 Send/reducer 与 as_tool/handoffs API 的完整实现、预期输出和练习见<a href="06-framework-apis.html">必读 API 实作</a>。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 第四课必修与参考知识整合</a><a href="05-original-labs.html">原练习逐题运行与验收 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

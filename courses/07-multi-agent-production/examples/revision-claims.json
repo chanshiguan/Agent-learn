@@ -1,0 +1,5 @@
+[
+  {"text": "工具执行前由执行层检查权限。", "source_id": "permission"},
+  {"text": "工具结果需要用调用 ID 交回模型。", "source_id": "protocol"},
+  {"text": "修改后重新审核。", "source_id": "approval"}
+]

@@ -1,0 +1,133 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="核心练习用-eval-检查-agent"></span><h1 data-heading-alias="核心练习用-eval-检查-agent" id="h9b58f6c33336">核心练习：用 Eval 检查 Agent</h1>
+<p><strong>Eval（评测）</strong> 像一张固定考卷：每次改 Prompt、模型或程序后，都用同一批题目再考一次。</p>
+<p>对应 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 — Agent 上线工程：可测、可看、可停、可恢复</a> 核心练习 1。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<ul>
+<li>说清楚 <strong>Eval case</strong>：一题输入、预期结果和评分方法。</li>
+<li>把 5 题 <strong>development split（开发组）</strong> 和 3 题 <strong>holdout set（保留考卷）</strong> 分开。</li>
+<li>保存 <strong>Baseline（基准）</strong>，看下一版是进步、相同，还是 <strong>Regression（退步）</strong>。</li>
+<li>先用固定规则评分；需要 <strong>LLM-as-judge</strong> 时，只接受完整的 <code>PASS</code>／<code>FAIL</code>。</li>
+</ul>
+<span id="先跑不花模型费的测试"></span><h2 data-heading-alias="先跑不花模型费的测试" id="ha7551010ca68">先跑不花模型费的测试</h2>
+<p>在这个文件夹打开 PowerShell，直接复制：</p>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe test.py
+.\.venv\Scripts\python.exe test_anthropic.py
+</code></pre>
+<p>看到两份 <code>🎉</code>，就代表 8 题版本化数据、5／3 分组、多次 trials、baseline 比较、空回复与 Judge parser 都通过。这一步只用假回复，不联网也不需要 API key。</p>
+<details markdown="1">
+<summary>Path A：用 Ollama 跑 Eval</summary>
+<pre><code class="language-powershell">ollama pull qwen3.5:4b
+ollama serve
+</code></pre>
+<p>另开 PowerShell：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>第一次会跑 5 题开发组、每题 1 次，而且不写文件。要保存可比较的基准，直接复制：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py --split dev --trials 3 --save-report reports/dev-baseline.json
+</code></pre>
+<p>改完 Prompt 或程序后，再跑：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py --split dev --trials 3 --baseline reports/dev-baseline.json --save-report reports/dev-current.json
+</code></pre>
+<p>准备发布时才跑保留考卷：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py --split holdout --trials 3 --save-report reports/holdout.json
+</code></pre>
+<p>Ollama 不收模型 API 费，但电力、硬件、下载与等待时间仍有成本。这 8 题只是教学样本，不能代表模型在你工作上的质量。</p>
+<p>报告会保存 case ID 与模型输出，题目则留在版本化数据集；不要放秘密、个人信息或客户数据，也不要把敏感报告提交到 Git。<code>--trials</code> 限制为 1–20，避免手滑造成无上限的模型调用。</p>
+</details>
+<details markdown="1">
+<summary>Path B：用 Anthropic 跑同一份考卷</summary>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY = &quot;贴上你的金钥&quot;
+$env:MODEL = &quot;claude-haiku-4-5-20251001&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>Anthropic 路径也支持上面的 <code>--split</code>、<code>--trials</code>、<code>--save-report</code> 与 <code>--baseline</code>。</p>
+<p>Haiku 4.5 的单价是 input <code>$1 / 1M</code> tokens、output <code>$5 / 1M</code> tokens：</p>
+<pre><code class="language-text">估算费用 = (input_tokens × $1 / 1M) + (output_tokens × $5 / 1M)
+</code></pre>
+<p>实际费用取决于每题的 token。先在供应商 Console 设置 <code>$1</code> spend limit，再用实际 usage 计算；不要把示例估算当账单。</p>
+</details>
+<span id="五个重要词"></span><h2 data-heading-alias="五个重要词" id="h1fd2dcb34d0e">五个重要词</h2>
+<ul>
+<li><strong>Golden／Reference Set（黄金／参考集）</strong>：一盒经过人工确认的好题目，包含输入、成功条件与评分方法；不是拿来训练模型或塞进 few-shot 的例句库。</li>
+<li><strong>Development split（开发组）</strong>：改 Prompt 或程序时反复使用的题目；失败可以帮你修东西。</li>
+<li><strong>Holdout Set（保留考卷）</strong>：开发时先不看、不反复跑；准备发布时才用来检查是否只背熟开发题。</li>
+<li><strong>Baseline（基准）</strong>：改东西以前保存的成绩单，而且要记住数据版本、split、模型与每题结果。</li>
+<li><strong>Regression（退步）</strong>：新版本在同一份考卷上比基准差；先看失败题与多次 trials，再决定是否阻挡发布。</li>
+</ul>
+<p><strong>Deterministic evaluator（固定规则评分器）</strong> 对同一输出会给同一分数，例如 substring、exact match 或正规表示式。<strong>LLM-as-judge</strong>能评开放式答案，但可能有偏差或格式错误，所以仍要人工抽查。</p>
+<table>
+<thead>
+<tr>
+<th>题目形状</th>
+<th>先用什么</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>答案必须含 <code>Tokyo</code></td>
+<td>substring</td>
+<td>快、便宜、结果固定</td>
+</tr>
+<tr>
+<td>必须符合 JSON schema</td>
+<td>schema validator</td>
+<td>直接检查结构</td>
+</tr>
+<tr>
+<td>语气是否清楚</td>
+<td>LLM-as-judge + 人工抽查</td>
+<td>没有单一固定字符串</td>
+</tr>
+</tbody>
+</table>
+<p>这份练习的 Judge 只接受整份回复等于 <code>PASS</code> 或 <code>FAIL</code>。若它回“PASS because...”，程序会要求重试或停止。</p>
+<span id="只改一件事"></span><h2 data-heading-alias="只改一件事" id="h3e24b238085c">只改一件事</h2>
+<p>打开 <code>eval_cases.json</code>，把一题开发组换成你的真实失败案例。保留唯一 <code>id</code>、成功条件、grader 与不含机密的来源说明；只要 case 内容改了，就更新 <code>dataset_version</code>。再跑：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py
+</code></pre>
+<p>不用先抄到空白文本文件；直接改可执行的数据，确认报告能指出失败的 <code>id</code>。</p>
+<span id="成功检查"></span><h2 data-heading-alias="成功检查" id="h10fc3e9baba8">成功检查</h2>
+<ul>
+<li>[ ] 每一题都有稳定且唯一的 <code>id</code>。</li>
+<li>[ ] 改过题目、成功条件或 grader 后，<code>dataset_version</code> 也有更新。</li>
+<li>[ ] 你知道开发组可以反复跑，holdout 不可边改边偷看。</li>
+<li>[ ] baseline 与当前报告的数据版本、split 和 case IDs 完全相同。</li>
+<li>[ ] 你能说明这题为什么先用固定规则，而不是 LLM Judge。</li>
+<li>[ ] 空答案不会被算成通过。</li>
+<li>[ ] 报告保留 provider、model、trials、分类结果、失败题与 improved／same／regressed。</li>
+</ul>
+<details markdown="1">
+<summary>从 8 题教学数据走向真正的 Eval suite</summary>
+<p>教学流程是：</p>
+<ol>
+<li>Agent 回答问题。</li>
+<li>Evaluator 只看该题规则并打分。</li>
+<li>Runner 保存每题结果与整体 pass rate。</li>
+<li>失败时回到具体 case，不只看一个总分。</li>
+</ol>
+<p>正式专案还要加入真实用户案例、边界条件、安全案例与人工标注。门槛应由你的 baseline 与风险决定，不要照抄别人的固定百分比。</p>
+<p>常见问题：</p>
+<ul>
+<li>cases 都太简单：加入过去真的答错过的问题。</li>
+<li>expected 写整句：只保留必要条件，避免同义句被误杀。</li>
+<li>同一模型回答又评分：至少加入固定规则或人工抽查，降低自我偏好。</li>
+<li>只保存总分：同时保存失败 <code>id</code>、模型 ID、Prompt 版本与日期。</li>
+</ul>
+</details>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a>：可把 cases、providers 和 assertions 放进版本控制。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s39f6b961728f">Anthropic Console Evals</a>：用官方界面创建与比较测试集。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#see7e0e584b26">datawhalechina/hello-agents</a>：章节式中文 Agent 教材，适合补完整背景。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sf08c59381287">LangSmith</a>：适合已使用 LangChain／LangGraph 的团队。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s450288173fa7">Weights &amp; Biases Weave</a>：把 traces、数据与评测放在同一套工作流。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s359449b4c288">Braintrust</a>：适合做多版本实验与结果追踪。</li>
+</ul>
+<p>完整清单见 <a href="stages--07-multi-agent-production.zh-Hans.md.html#-精选-projects范本--sdk--工具-collection">Stage 7 精选 Projects</a>。</p>
+<p><small>模型、价格、套件与链接查核：2026-09-13 UTC。</small></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,150 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>for-researcher.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="研究人员延伸路线for-researchers"></span><h1 data-heading-alias="研究人员延伸路线for-researchers" id="h12dff646fafc">研究人员延伸路线（For Researchers）</h1>
+<p><a href="README.zh-Hans.md.html">← 回到主路线</a></p>
+<p><a id="使用场景研究阶段-ai-怎么帮"></a></p>
+<span id="-这条路帮你做什么"></span><h2 data-heading-alias="-这条路帮你做什么" id="h416a3ef7083f">📌 这条路帮你做什么</h2>
+<p>这页不是让 AI 替你当研究者，而是帮你<strong>找到资料、看懂资料，再确认答案确实有资料支持。</strong></p>
+<ul>
+<li>会用终端或 Python：完成 <a href="tracks--cli--A3-cli-production.zh-Hans.md.html">Track A 的 A3</a> 或 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Track B 的 Stage 7</a> 后再来。</li>
+<li>不写代码：直接做下面的第一个练习，只需浏览器和一篇公开 paper。</li>
+</ul>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<p>完成这一页后，你可以：</p>
+<ol>
+<li>分清“AI 说了什么”和“原文写了什么”。</li>
+<li>逐条核对引用来源，而不是看到引用编号就相信。</li>
+<li>知道哪些数据可以上传，哪些要先问机构或数据拥有者。</li>
+<li>保存足够记录，让自己或同事能重新做一次。</li>
+</ol>
+<span id="-八个核心词"></span><h2 data-heading-alias="-八个核心词" id="h473bd4def876">🧩 八个核心词</h2>
+<ul>
+<li><strong>Source（来源）</strong>：用来查证的原始材料，如 paper、数据集或研究记录。</li>
+<li><strong>Claim（主张）</strong>：可检查的说法，例如“方法 A 在数据集 B 上更好”。</li>
+<li><strong>Citation（引用）</strong>：带你回到来源位置的路标，不保证来源真的支持主张。</li>
+<li><strong>Source Verification（来源核对）</strong>：打开原文，检查内容、范围与限制是否和答案一致。</li>
+<li><strong>Literature RAG（文献 RAG）</strong>：先从获准使用的文献找片段，再交给模型回答。</li>
+<li><strong>Reproducibility（可重复性）</strong>：别人拿到数据、步骤、版本与设置后，可以重新跑出可比较结果。</li>
+<li><strong>Private Data（私人资料）</strong>：不能任意公开或上传的内容，如受试者数据、病历、未公开手稿和公司机密。</li>
+<li><strong>Human Review（人工审查）</strong>：由人对 claim、citation、代码、表格和最终决定负责；AI 不能替你签名或承担责任。</li>
+</ul>
+<p><a id="文献-rag--qa"></a></p>
+<span id="-第一个练习核对一篇-paper-的三个答案"></span><h2 data-heading-alias="-第一个练习核对一篇-paper-的三个答案" id="h8ea2f4ee9a11">🛠 第一个练习：核对一篇 paper 的三个答案</h2>
+<p>上传前先确认<strong>许可或版权</strong>与<strong>工具条款</strong>都允许。paper 公开可读，不代表可以交给另一个服务。</p>
+<p>使用公开 paper：<a href="../../reference/source-readings.html#sa7468c685165">Attention Is All You Need</a>。把 paper 加到能显示 citation 的工具，再复制：</p>
+<pre><code class="language-text">请只根据这篇 paper 回答下面三题。每个答案都要附 citation；找不到证据就写“unsupported／未支持”，不要猜。
+1. 这篇 paper 想解决什么问题？
+2. 作者提出的方法包含哪些主要部分？
+3. 作者用哪些实验支持结果，又说了哪些限制？
+回答后，列出每个 citation 对应的 original text。不要把你的推测写成作者的 claim。
+</code></pre>
+<p>点开每个 citation，把答案和 original text 放在一起读；原文不支持的句子标成 <strong>unsupported／未支持</strong>，不要硬补不相干的引用。</p>
+<p><a id="层级建议"></a></p>
+<span id="-先选一个入口"></span><h2 data-heading-alias="-先选一个入口" id="hab7528548857">📚 先选一个入口</h2>
+<div class="reader-route-table" role="region" tabindex="0" aria-label="研究入口比较">
+<table align="center">
+<thead>
+<tr>
+<th scope="col" align="left">你想做什么</th>
+<th scope="col" align="left" width="340">先用什么</th>
+<th scope="col" align="left">为什么</th>
+<th scope="col" align="left">推荐度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">用浏览器问一篇 paper</td>
+<td align="left"><a href="../../reference/source-readings.html#s2cbd17da7c11">Gemini Notebook</a>（原 NotebookLM）</td>
+<td align="left">上传来源后可从 citation 回到原文</td>
+<td align="left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td align="left">整理自己的文献库</td>
+<td align="left"><a href="../../reference/source-readings.html#sc3d835cdb6f5">Zotero</a></td>
+<td align="left">先整理 PDF、作者、年份和笔记</td>
+<td align="left">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td align="left">用 Python 做可重跑的文献 RAG</td>
+<td align="left"><a href="../../reference/source-readings.html#s107b310c92c3">PaperQA2</a></td>
+<td align="left">以科学文件和引用为中心</td>
+<td align="left">⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p>Gemini Notebook 是 Google 于 2026-07-16 为 NotebookLM 使用的现行名称；旧名称仅用于辨识。citation 是查证入口，不保证答案正确。</p>
+<p><a id="必修阅读"></a></p>
+<span id="-必读材料"></span><h2 data-heading-alias="-必读材料" id="hd0dcd0e13e29">📖 必读材料</h2>
+<p>按顺序阅读。前两份提醒你不要把 citation 当保证，后四份帮助保存来源、代码、数据和研究成果：</p>
+<ol>
+<li><a href="../../reference/source-readings.html#s4c632574fd82">Gemini Notebook citation 说明</a>：点 citation 回到原文并读完整上下文。</li>
+<li><a href="../../reference/source-readings.html#s066a437369fe">Gemini Notebook 隐私与使用条款</a>：上传前了解数据怎样被处理。</li>
+<li><a href="../../reference/source-readings.html#sc31ede40fa08">Zotero 快速入门</a>：整理作者、年份、PDF 和笔记。</li>
+<li><a href="../../reference/source-readings.html#s107b310c92c3">PaperQA2 README</a>：了解文献 RAG 如何把回答连回文件。</li>
+<li><a href="../../reference/source-readings.html#s0415e8e2a25c">DVC 常用流程</a>：用 Git 管理数据版本和可重跑 pipeline。</li>
+<li><a href="../../reference/source-readings.html#sa445da024afb">Zenodo 快速入门</a>：将可公开的数据、代码或材料保存成可引用版本。</li>
+</ol>
+<p><a id="精选-projects"></a><a id="大纲与写作"></a><a id="文献管理集成"></a></p>
+<span id="-精选研究工具与项目"></span><h2 data-heading-alias="-精选研究工具与项目" id="h0765e4537a1e">⭐ 精选研究工具与项目</h2>
+<p><small>工具名称、授权与 repository 状态于 2026-08-29 UTC 依据官方页面与 GitHub API 核查。推荐度是本学习地图的编辑评分，不是 GitHub stars 或排行榜。</small></p>
+<div class="reader-resource-catalog" role="region" tabindex="0" aria-label="资源表（分类、用途与限制）">
+<table align="center"><thead><tr><th scope="col">分类</th><th scope="col">项目／文档</th><th scope="col">评分</th><th scope="col">用途</th><th scope="col">限制</th></tr></thead>
+<tbody><tr><th scope="rowgroup" rowspan="3" align="center" valign="middle" width="80">开始与整理</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s2cbd17da7c11">Gemini Notebook（原 NotebookLM）</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">用来源问答并回到 citation</td><td><div data-field="status">正式可用；云服务<div data-field="limits">引用仍要逐条核对；私人数据先看政策</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sc3d835cdb6f5">Zotero</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">管理 PDF、metadata、笔记与引用</td><td><div data-field="status">正式可用；桌面／Web<div data-field="limits">解决来源管理，不替你判断研究质量</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s107b310c92c3">paper-qa</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">用 Python 建立 citation-grounded literature RAG</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">需设置模型与文献来源，质量仍要自行评测</td></tr></tbody>
+<tbody><tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">探索与写作</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sd2fc47980430">gpt-researcher</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">多来源搜索与 research brief</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">适合找候选来源，不是引用正确性的最后裁判</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sd14c5e41309c">storm</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">整理多种观点，再写大纲与长文</td><td><div data-field="status">可用；MIT；更新较慢<div data-field="limits">使用前确认依赖与数据来源仍兼容</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sf2cb5fd9a61d">ChatPaper</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">中文 paper 摘要、翻译与写作辅助</td><td><div data-field="status">可用；CC BY-NC-ND 4.0<div data-field="limits">禁止商业使用与改作，不是一般开源程序授权</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s42baabd1d22f">zotero-gpt</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">在 Zotero 中与文献互动</td><td><div data-field="status">可用；AGPL-3.0<div data-field="limits">插件与模型设置要另外维护</td></tr></tbody>
+<tbody><tr><th scope="rowgroup" rowspan="5" align="center" valign="middle" width="80">可重复与证据</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s0076a2c10867">asreview</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">用 active learning 辅助系统性回顾筛选文献</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">排序能省时间；纳入／排除理由仍需人工筛选并记录</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sb69962dc14f6">dvc</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">保存数据版本、模型和可重跑 pipeline</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">需要 Git 与数据存储位置；版本不证明结论正确</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s569f39c39ba7">mlflow</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">记录每次 run 的参数、指标、数据和产物</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">有记录不等于实验有效；不要把密钥或受试者数据写入 tracking</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s5e4a033e3cc8">Zenodo</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use">保存并发布数据、代码和研究材料，取得 DOI</td><td><div data-field="status">正式可用；云服务<div data-field="limits">metadata 会公开；私人资料按机构规则去标识或使用核准环境</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sda9c9c46f66f">repo2docker</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">从 repository 设置重建可运行研究环境</td><td><div data-field="status">活跃；BSD-3-Clause<div data-field="limits">container 能保存环境；仍需另存数据、硬件需求与外部服务</td></tr></tbody>
+<tbody><tr><th scope="rowgroup" rowspan="2" align="center" valign="middle" width="80">研究自动化</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#se68436400796">flonat-research</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="use">参考研究 skills、agents、hooks 与 LaTeX 流程</td><td><div data-field="status">活跃；MIT<div data-field="limits">基础设施示例，不适用于所有领域</td></tr><tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sb6bf6d853ba3">AI-Scientist-v2</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use">研究端到端 multi-agent 实验架构</td><td><div data-field="status">研究参考；custom source-code license<div data-field="limits">授权要求披露机器生成的科学稿件；作者仍要人工审查并负责</td></tr></tbody>
+<tbody><tr><th scope="rowgroup" rowspan="1" align="center" valign="middle" width="80">历史</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sca97ebd52438">open_deep_research</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="use">阅读早期 deep-research agent 架构</td><td><div data-field="status">已封存；MIT<div data-field="limits">只作历史参考，不是新项目的现行默认</td></tr></tbody></table>
+<span id="-完成检查与下一站"></span><h2 data-heading-alias="-完成检查与下一站" id="hf28bc5d82ae6">✅ 完成检查与下一站</h2>
+<ul>
+<li>[ ] 我核对了三个答案，不只看 citation 编号。</li>
+<li>[ ] 我找到一个“原文支持”或“未支持”的例子。</li>
+<li>[ ] 我没有上传未获允许的 Private Data。</li>
+<li>[ ] 我保存了来源、问题、工具名称、日期与自己的判断。</li>
+</ul>
+<p>下一站：想做文献 RAG，走 <a href="stages--06-memory-rag.zh-Hans.md.html">Stage 6</a>；想让多个 agent 分工，走 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7</a>；想连接外部工具，看 <a href="resources--mcp-skills-catalog.zh-Hans.md.html">MCP／Skills catalog</a>。</p>
+<details markdown="1"><summary>⏱ 展开：时间、账号、费用与数据安全</summary>
+<p>第一个练习约需 20–40 分钟。私人数据先停下确认 IRB、机构政策、合约、数据拥有者同意与工具条款。<a href="../../reference/source-readings.html#s066a437369fe">Gemini Notebook 隐私说明</a>称，一般内容不会直接用于训练基础模型，除非用户选择提供 feedback；feedback 可能连同内容交由人员查看。这不等于研究资料自动获准上传。付费功能、配额与机构账号规则会变化，开始前查看官方页面，不保存容易过期的固定价格。</p>
+</details>
+<p><a id="研究流程-marketplace"></a><a id="multi-llm-研究组合本-repo-维护者的研究-setup"></a><a id="multi-agent-for-research"></a><a id="必练流程按使用频率"></a></p>
+<details markdown="1"><summary>🧪 展开：把单篇练习变成可重跑研究流程</summary>
+<span id="文献-inbox"></span><h3 data-heading-alias="文献-inbox" id="h018ea00be403">文献 inbox</h3>
+<p>保存 DOI、URL、作者、年份与取得日期；让工具生成摘要但把每个 claim 连回原文；由人工决定“阅读、排除、待确认”并记录理由。</p>
+<span id="跨-paper-synthesis"></span><h3 data-heading-alias="跨-paper-synthesis" id="hcb05c7f6bf58">跨 paper synthesis</h3>
+<p>先问每篇 paper 各自说什么，再比较同意、冲突和不同条件。不要先要求模型写完整故事，再回头找引用。</p>
+<span id="代码与实验"></span><h3 data-heading-alias="代码与实验" id="h9c65578ddacc">代码与实验</h3>
+<p>保存数据版本、environment、seed、prompt、模型／工具版本、输出与人工修改。能重新执行不代表结论正确，但没有记录更难找到错误。</p>
+<span id="投稿前"></span><h3 data-heading-alias="投稿前" id="hffb88b96301c">投稿前</h3>
+<p>逐一核对 claim、citation、表格、图、代码与期刊规范；作者仍须最后判断并按期刊政策披露 AI 使用。</p>
+</details>
+<details markdown="1"><summary>🧯 展开：常见错误、替代方案与排错</summary>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>先怎么做</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>citation 不支持答案</td>
+<td>标为未支持，缩小问题，不要硬补相关引用</td>
+</tr>
+<tr>
+<td>工具读不到扫描 PDF</td>
+<td>先做 OCR，再抽查页码与公式</td>
+</tr>
+<tr>
+<td>多篇 paper 结论混在一起</td>
+<td>要求每个 claim 列 paper 名称、页码或段落，再 synthesis</td>
+</tr>
+<tr>
+<td>数据不能上传云端</td>
+<td>使用机构核准环境；必要时看 <a href="stages--06-memory-rag.zh-Hans.md.html">Stage 6</a> 的本机 RAG 路线</td>
+</tr>
+<tr>
+<td>自动化太复杂</td>
+<td>回到“一篇 paper、三个问题、逐条核对”</td>
+</tr>
+</tbody>
+</table>
+<p>没有工具能代替 IRB、数据治理、作者责任或领域专家判断。</p>
+</details>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,311 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>glossary.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="术语小词典glossary"></span><h1 data-heading-alias="术语小词典glossary" id="he4cbe832d625">术语小词典（Glossary）</h1>
+<p>看到陌生英文时，不用停下整章。先在这里找到一句白话解释，再回原来的 Stage 继续做。</p>
+<span id="-先从-12-个词开始"></span><h2 data-heading-alias="-先从-12-个词开始" id="h96ff25000afb">⚡ 先从 12 个词开始</h2>
+<ul>
+<li><a href="#prompt提示词"><strong>Prompt（提示词）</strong></a> — 你交给模型的完整任务包，包含要做什么、数据、示例和限制。</li>
+<li><a href="#token"><strong>Token</strong></a> — 模型切分文字时使用的小单位；计费和可读长度常用它计算。</li>
+<li><a href="#context-window上下文视窗"><strong>Context Window（上下文视窗）</strong></a> — 模型这一次最多能一起参考的信息空间。</li>
+<li><a href="#agent代理人"><strong>Agent</strong></a> — 能为了人的目标，自己判断下一步并采取行动；只在规则和权限内自动做事的 AI 系统。</li>
+<li><a href="#tool-use--function-calling"><strong>Tool Use（工具使用）</strong></a> — 模型提出工具请求，程序检查后才真正执行。</li>
+<li><a href="#agent-loop"><strong>Agent Loop</strong></a> — Agent 重复“决定、行动、观察”，直到完成或停止的执行循环。</li>
+<li><a href="#ragretrieval-augmented-generation"><strong>RAG</strong>（Retrieval-Augmented Generation）</a> — 先找数据，再把证据交给模型回答。</li>
+<li><a href="#memory记忆-两种正交分类轴"><strong>Memory（记忆）</strong></a> — 把以后还要用的信息保存起来，再在需要时读回。</li>
+<li><a href="#mcpmodel-context-protocol"><strong>MCP</strong>（Model Context Protocol）</a> — 让 AI 应用用共同方式连接工具和数据的开放协议。</li>
+<li><a href="#eval评估"><strong>Eval（评估）</strong></a> — 用固定题目和成功条件检查改动是否真的变好。</li>
+<li><a href="#agent-harness执行工作台"><strong>Agent Harness（执行工作台）</strong></a> — 包住模型并管理工具、权限、状态、记录和停止规则的系统。</li>
+<li><a href="#workflow-graph工作流程图"><strong>Workflow Graph（工作流程图）</strong></a> — 用节点和连接把工作步骤、分支和状态画清楚。</li>
+</ul>
+<span id="-先分清五种工具身份"></span><h2 data-heading-alias="-先分清五种工具身份" id="h444c47e5a906">🧭 先分清五种工具身份</h2>
+<p>同一个界面可能同时出现模型、Router 和 Agent。先问“它负责哪一件事”，就不会把产品名称混在一起。</p>
+<table align="center">
+<thead>
+<tr><th>身份</th><th>白话工作</th><th>示例和边界</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Model Provider／API（Application Programming Interface）</strong></td><td>模型公司的服务入口。</td><td><a href="../../reference/source-readings.html#s0882f00e6258">Anthropic API</a>；它返回模型结果，不是会修改文件的 Agent。</td></tr>
+<tr><td><strong>LLM（Large Language Model） Router</strong></td><td>LLM 是读写语言的模型；Router 用一个入口转接供应商。</td><td><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter</a>；它不是模型，也不是 coding agent。</td></tr>
+<tr><td><strong>Model Runtime</strong></td><td>把模型在本机或服务上运行起来。</td><td><a href="../../reference/source-readings.html#sdff93eba59ed">Ollama</a>；它提供模型 API，本身不会自动修改项目。</td></tr>
+<tr><td><strong>Coding Agent／Harness</strong></td><td>读取文件、修改文件、运行命令并报告结果。</td><td><a href="../../reference/source-readings.html#s3aad23ec44e8">OpenCode</a>、<a href="../../reference/source-readings.html#sc133b93b912d">Pi</a>；里面的模型可以更换。</td></tr>
+<tr><td><strong>Agent Framework</strong></td><td>让开发者组合 Agent、工具、状态和流程。</td><td><a href="../../reference/source-readings.html#s37dfeac14274">Microsoft Agent Framework</a>；它是工具箱，不等于一个模型。</td></tr>
+</tbody>
+</table>
+<details markdown="1">
+<summary>维护者：项目固定术语对照（37 个）</summary>
+<p>这张表用来保持跨 Stage 命名一致。普通读者不用先背。</p>
+<table align="center">
+<thead>
+<tr><th>类型</th><th>英文术语</th><th>中文理解名</th><th>主要 Stage</th></tr>
+</thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">输入和信息</th><td>Prompt Engineering</td><td>Prompt 设计</td><td>Stage 2</td></tr>
+<tr><td>Context Engineering</td><td>上下文管理</td><td>Stage 6／7</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="17" align="center" valign="middle">Agent 执行</th><td>Agent Production Engineering</td><td>Agent 可用化工程</td><td>Stage 7</td></tr>
+<tr><td>Harness Engineering</td><td>Agent 执行系统设计</td><td>Stage 7</td></tr>
+<tr><td>Loop Engineering</td><td>Agent 循环设计</td><td>Stage 7</td></tr>
+<tr><td>Graph Engineering</td><td>Workflow Graph 工程</td><td>Stage 4／7</td></tr>
+<tr><td>Tool Use</td><td>工具使用</td><td>Stage 3</td></tr>
+<tr><td>Function Calling</td><td>函数／工具调用</td><td>Stage 3</td></tr>
+<tr><td>Tool Schema</td><td>工具纲要／工具说明卡</td><td>Stage 3</td></tr>
+<tr><td>Tool Call</td><td>工具请求</td><td>Stage 3</td></tr>
+<tr><td>Tool Result</td><td>工具结果</td><td>Stage 3</td></tr>
+<tr><td>Structured Output</td><td>结构化输出</td><td>Stage 3</td></tr>
+<tr><td>Agent Loop</td><td>Agent 执行循环</td><td>Stage 3</td></tr>
+<tr><td>Framework</td><td>框架／工具箱</td><td>Stage 4</td></tr>
+<tr><td>Orchestration</td><td>协调和编排</td><td>Stage 4／7</td></tr>
+<tr><td>Handoff</td><td>任务交接</td><td>Stage 7</td></tr>
+<tr><td>Supervisor／Worker</td><td>协调者／执行者</td><td>Stage 7</td></tr>
+<tr><td>Runtime</td><td>执行层</td><td>Stage 7</td></tr>
+<tr><td>Scaffolding</td><td>支撑架构</td><td>Stage 7</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="9" align="center" valign="middle">质量和上线</th><td>Observability</td><td>观测和记录</td><td>Stage 7</td></tr>
+<tr><td>Telemetry</td><td>运行记录</td><td>Stage 7</td></tr>
+<tr><td>Eval</td><td>效果评估</td><td>Stage 7</td></tr>
+<tr><td>Evaluation Harness</td><td>评估框架</td><td>Stage 7</td></tr>
+<tr><td>Production</td><td>可稳定使用／上线化</td><td>Stage 7</td></tr>
+<tr><td>Production-grade</td><td>可长期稳定使用的</td><td>Stage 7</td></tr>
+<tr><td>Deployment</td><td>部署</td><td>Stage 7</td></tr>
+<tr><td>Cost Tracking</td><td>成本跟踪</td><td>Stage 7</td></tr>
+<tr><td>Latency</td><td>延迟／等待时间</td><td>Stage 7</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="5" align="center" valign="middle">检索和模型</th><td>Vector DB</td><td>向量数据库</td><td>Stage 6</td></tr>
+<tr><td>Retrieval</td><td>检索</td><td>Stage 6</td></tr>
+<tr><td>Reranking</td><td>重排序</td><td>Stage 6</td></tr>
+<tr><td>Long Context</td><td>长上下文</td><td>Stage 6</td></tr>
+<tr><td>Fine-tuning</td><td>模型微调</td><td>Stage 6</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">操作界面</th><td>Agent Interfaces</td><td>Agent 操作界面</td><td>Stage 8</td></tr>
+<tr><td>Code Sandbox</td><td>隔离代码执行环境</td><td>Stage 8</td></tr>
+<tr><td>Cold Start</td><td>启动延迟</td><td>Stage 8</td></tr>
+<tr><td>Reward Hacking</td><td>钻评分漏洞</td><td>Stage 7／8</td></tr>
+</tbody>
+</table>
+</details>
+<span id="-按主题查词"></span><h2 data-heading-alias="-按主题查词" id="h893ae16505d4">📚 按主题查词</h2>
+<p>下面不是新的阅读顺序。直接跳到你刚看到的词即可。</p>
+<span id="1-基本概念"></span><h2 data-heading-alias="1-基本概念" id="hdc8f6196600c">1. 基本概念</h2>
+<span id="llmlarge-language-model大语言模型"></span><h3 data-heading-alias="llmlarge-language-model大语言模型" id="hafcb07d0ef94">LLM（Large Language Model，大语言模型）</h3>
+<p><strong>LLM</strong> 是会按照输入和已经学到的模式生成内容的模型。它可以提出工具请求，但真正读取文件、联网或发送信息的，是外面的程序。</p>
+<p>📍 详情：<a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1</a></p>
+<span id="model-provider--provider-api模型供应商模型-api"></span><h3 data-heading-alias="model-provider--provider-api模型供应商模型-api" id="h8ac16790ac94">Model Provider / Provider API（模型供应商／模型 API）</h3>
+<p><strong>Model Provider／Provider API</strong> 是模型公司的服务入口。你的程序发送消息，供应商返回结果并按照方案计费；它不是 coding agent。</p>
+<span id="llm-router--api-router模型路由器"></span><h3 data-heading-alias="llm-router--api-router模型路由器" id="h79a33db37b73">LLM Router / API Router（模型路由器）</h3>
+<p><strong>LLM Router／API Router</strong> 像总机：同一个 API 可以按照设置转到不同模型或后端。Router 帮你选路，不会自己变成模型或 Agent。</p>
+<span id="model-runtime模型执行环境"></span><h3 data-heading-alias="model-runtime模型执行环境" id="hc28601a5e64b">Model Runtime（模型执行环境）</h3>
+<p><strong>Model Runtime</strong> 是把模型加载起来并提供推理 API 的执行环境。Ollama、llama.cpp 和 <a href="../../reference/source-readings.html#s38dfe4b77abf">MLX LM</a> 属于这一类；要让它读取文件或运行命令，还要接上 Agent 或应用程序。MLX 本身是 array framework；这里指的是用 MLX 运行 LLM 的 MLX LM。</p>
+<span id="token"></span><h3 data-heading-alias="token" id="hd2089be67295">Token</h3>
+<p><strong>Token</strong> 是模型切分文字或其他输入时使用的小单位。每个 tokenizer 的切法不同，所以不要用固定的“一个字等于几个 token”公式；需要估算时使用所选模型的计数工具。</p>
+<p>📍 详情：<a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1</a></p>
+<span id="context-window上下文视窗"></span><h3 data-heading-alias="context-window上下文视窗" id="ha462e306dc98">Context Window（上下文视窗）</h3>
+<p><strong>Context Window</strong> 是模型这一次能一起参考的 token 空间。空间大不代表每段数据都会受到同样注意；先放任务真正需要的内容，再到 <a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1</a>查看当前型号的正式上限。</p>
+<span id="prompt提示词"></span><h3 data-heading-alias="prompt提示词" id="h78fab523fbf4">Prompt（提示词）</h3>
+<p><strong>Prompt</strong> 是交给模型的完整任务包，不只是一句问题。它可以包含指令、输入数据、背景、示例、成功条件和输出格式；<strong>Prompt Engineering</strong> 是设计并用 Eval 测试这份任务包。</p>
+<p>📍 详情：<a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 2</a></p>
+<span id="zero-shot--one-shot--few-shot"></span><h3 data-heading-alias="zero-shot--one-shot--few-shot" id="h39a7cce9db69">Zero-shot / One-shot / Few-shot</h3>
+<p>这三个词只是在数 Prompt 里有几个示范：</p>
+<ul>
+<li><strong>Zero-shot</strong>：不给示范，直接交代任务。</li>
+<li><strong>One-shot</strong>：先给一个输入和答案的示例。</li>
+<li><strong>Few-shot</strong>：先给少量示例，展示格式或边界。</li>
+</ul>
+<p>示例多不一定更好；用同一组 Eval 比较才知道。</p>
+<span id="chain-of-thoughtcot思维链"></span><h3 data-heading-alias="chain-of-thoughtcot思维链" id="h6755d9c3c45d">Chain-of-Thought（CoT，思维链）</h3>
+<p><strong>Chain-of-Thought（CoT）</strong> 是让模型经过中间推理步骤再回答的 prompting 研究方法。早期研究包含 <a href="../../reference/source-readings.html#s7d42a191f4b3">Few-shot CoT</a> 和 <a href="../../reference/source-readings.html#sb693b7aca613">Zero-shot CoT</a>。实际使用时通常要求简短、可核对的理由和证据，不要求公开模型的私有推理全文。</p>
+<span id="模型训练与调整"></span><h2 data-heading-alias="模型训练与调整" id="h889eca54e934">模型训练与调整</h2>
+<span id="pre-training预训练"></span><h3 data-heading-alias="pre-training预训练" id="h6fd82c22c11c">Pre-training（预训练）</h3>
+<p><strong>Pre-training</strong> 是用大量数据让模型先学会一般模式。它会改变模型权重，产生之后还能继续调整的 Base Model。</p>
+<span id="post-training后训练"></span><h3 data-heading-alias="post-training后训练" id="h0724952ecdc4">Post-training（后训练）</h3>
+<p><strong>Post-training</strong> 是 Base Model 完成后的训练阶段。它用示范、偏好或反馈，让模型更会遵循指令、安全地完成任务。</p>
+<span id="inference推理"></span><h3 data-heading-alias="inference推理" id="h9b4ce7b9ba5f">Inference（推理）</h3>
+<p><strong>Inference</strong> 是模型训练完成后，收到这一次输入并产生这一次结果。它是在使用模型，不是在重新训练模型。</p>
+<span id="fine-tuning模型微调"></span><h3 data-heading-alias="fine-tuning模型微调" id="h7ec974309f55">Fine-tuning（模型微调）</h3>
+<p><strong>Fine-tuning</strong> 用较小、较专门的数据继续调整模型权重。它适合反复出现的行为或格式；每天变化的事实通常改用 RAG 或工具读取。</p>
+<span id="sftsupervised-fine-tuning"></span><h3 data-heading-alias="sftsupervised-fine-tuning" id="hda7db153ec15">SFT（Supervised Fine-Tuning）</h3>
+<p><strong>SFT</strong> 把好的输入和答案交给模型模仿。它是常见的 Post-training 方法，会调整模型权重。</p>
+<span id="dpodirect-preference-optimization"></span><h3 data-heading-alias="dpodirect-preference-optimization" id="h6ca3ac680b9e">DPO（Direct Preference Optimization）</h3>
+<p><strong>DPO</strong> 让模型从“较好答案”和“较差答案”的配对中学习偏好。它需要可信的偏好数据，也会调整权重。</p>
+<span id="rlhf--rl"></span><h3 data-heading-alias="rlhf--rl" id="h3f37b1aa9abb">RLHF / RL</h3>
+<p><strong>RLHF</strong>（Reinforcement Learning from Human Feedback）/RL（Reinforcement Learning） 用人类或规则的反馈来训练模型。反馈设计错误时，模型也可能学会钻评分漏洞，所以仍要做独立 Eval。</p>
+<span id="grpo"></span><h3 data-heading-alias="grpo" id="h892f45a70737">GRPO</h3>
+<p><strong>GRPO</strong>（Group Relative Policy Optimization） 让同一问题的多个答案互相比较，再根据相对表现更新模型。它是 Post-training 方法之一，不是每个项目都必须使用。</p>
+<span id="peft--lora"></span><h3 data-heading-alias="peft--lora" id="h5718ed4ee29d">PEFT / LoRA</h3>
+<p><strong>PEFT</strong>（Parameter-Efficient Fine-Tuning） 是只训练较少参数的一组方法；<strong>LoRA</strong>（Low-Rank Adaptation） 会冻结原来的权重，再训练新增的低秩矩阵。它们能减少需要更新的参数，但仍需要数据与 Eval。</p>
+<span id="distillation蒸馏"></span><h3 data-heading-alias="distillation蒸馏" id="hae83f23a7c39">Distillation（蒸馏）</h3>
+<p><strong>Distillation</strong> 让较小的 Student Model 学习较大的 Teacher Model。目标常是缩小模型或降低推理成本，但效果要用自己的任务测试。</p>
+<p>📍 选修导览：<a href="resources--model-training-guide.zh-Hans.md.html">模型训练与调整指南</a></p>
+<span id="2-agent--工具使用"></span><h2 data-heading-alias="2-agent--工具使用" id="hfee8f3fdfe2b">2. Agent / 工具使用</h2>
+<span id="agent代理人"></span><h3 data-heading-alias="agent代理人" id="he9578cb68867">Agent（代理人）</h3>
+<p><strong>Agent</strong> 是能为了人的目标，自己判断下一步并采取行动的 AI 系统。人给它目标后，它会读取当前状态、决定下一步，需要时使用工具，再根据结果继续、修正、停止，或把控制权交还给人。它可以自动替人完成工作，但只能在明确规则和权限内行动。</p>
+<p>只回答一次的聊天机器人，或每一步都由程序预先写死的固定脚本，不一定是 Agent。关键在于 AI 是否会在执行过程中，根据状态决定如何达成目标。这个边界参考 <a href="../../reference/source-readings.html#s41fa4007ffce">OpenAI 的 Agent 指南</a> 和 <a href="../../reference/source-readings.html#sffc229d83891">Anthropic 的 Agents 说明</a>。</p>
+<span id="tool-use--function-calling"></span><h3 data-heading-alias="tool-use--function-calling" id="hab3c91d40e99">Tool Use / Function Calling</h3>
+<p><strong>Tool Use／Function Calling</strong> 是模型提出结构化工具请求的机制。模型只是在说“想调用什么”；你的程序仍要检查工具名称、参数和权限后才执行。</p>
+<p>📍 详情：<a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3</a></p>
+<span id="tool-schema工具纲要"></span><h3 data-heading-alias="tool-schema工具纲要" id="h805346143477">Tool Schema（工具纲要）</h3>
+<p><strong>Tool Schema</strong> 是工具说明卡，列出名称、用途、输入字段、类型和必填条件。Schema 可以限制格式，但不能保证模型给出的内容安全或真实。</p>
+<span id="tool-call工具请求"></span><h3 data-heading-alias="tool-call工具请求" id="h48c594d3ca3b">Tool Call（工具请求）</h3>
+<p><strong>Tool Call</strong> 是模型发送的工具名称和参数。它是不可信输入；程序要先验证，再决定执行、拒绝或请人批准。</p>
+<span id="tool-result工具结果"></span><h3 data-heading-alias="tool-result工具结果" id="hd9c0d21f22ff">Tool Result（工具结果）</h3>
+<p><strong>Tool Result</strong> 是程序执行工具后交回模型的结果。成功、失败和原来的 call ID 要对应，模型才知道下一步该做什么。</p>
+<span id="reactreasoning--acting"></span><h3 data-heading-alias="reactreasoning--acting" id="h6b0451759533">ReAct（Reasoning + Acting）</h3>
+<p><strong>ReAct</strong> 把可观察的 Action 和 Observation 交替放进任务流程，让模型根据新结果决定下一步。它来自 <a href="../../reference/source-readings.html#s7647307fe498">ReAct paper</a>；实际实现仍要有最大步数、工具权限和停止条件。</p>
+<span id="structured-output结构化输出"></span><h3 data-heading-alias="structured-output结构化输出" id="hc253b94c7124">Structured Output（结构化输出）</h3>
+<p><strong>Structured Output</strong> 要求输出符合 JSON Schema 或类型。它能让程序稳定解析格式，但格式正确不等于内容正确，仍要验证数值、来源和业务规则。</p>
+<span id="agent-loop"></span><h3 data-heading-alias="agent-loop" id="had9074f4d0f4">Agent Loop</h3>
+<p><strong>Agent Loop</strong> 是一次执行里真正重复的流程：模型决定动作，程序执行，模型读回结果，再决定下一步。循环必须能在完成、错误、超时、超预算或达到步数上限时停止。</p>
+<span id="workflow-graph工作流程图"></span><h3 data-heading-alias="workflow-graph工作流程图" id="h62160937be77">Workflow Graph（工作流程图）</h3>
+<p><strong>Workflow Graph</strong> 用 node、edge、branch 和 state 明确排出工作路线。一个 node 可以放 Agent Loop、普通程序、工具或人工批准；它不是每个 Agent 都必须使用的形状。</p>
+<p>📍 详情：<a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4</a></p>
+<span id="self-refine基础反思--无记忆"></span><h3 data-heading-alias="self-refine基础反思--无记忆" id="hd4b8ac4504a3">Self-Refine（基础反思 / 无记忆）</h3>
+<p><strong>Self-Refine</strong> 让模型先生成答案，再根据反馈修改一次或多次。原始方法见 <a href="../../reference/source-readings.html#s5ef9bdcc0ba6">Self-Refine paper</a>；如果没有外部检查和停止条件，重写很多次仍可能一直出错。</p>
+<span id="3-memory--retrieval--rag"></span><h2 data-heading-alias="3-memory--retrieval--rag" id="h07b8834ceb43">3. Memory / Retrieval / RAG</h2>
+<span id="memory记忆-两种正交分类轴"></span><h3 data-heading-alias="memory记忆-两种正交分类轴" id="hc9cf701430d3">Memory（记忆）— 两种正交分类轴</h3>
+<p><strong>Memory</strong> 是把以后还要用的信息写入某个存储层，再在需要时读回。可以按照保存时间分成短期／长期，也可以按照内容分成 episodic、semantic、procedural；这是两条不同分类轴。</p>
+<span id="ragretrieval-augmented-generation"></span><h3 data-heading-alias="ragretrieval-augmented-generation" id="ha53c3e356252">RAG（Retrieval-Augmented Generation）</h3>
+<p><strong>RAG</strong> 是“先检索证据，再让模型根据证据回答”。原始方法见 <a href="../../reference/source-readings.html#s02ad74cdb0c9">RAG paper</a>。它不会自动保证正确；还要测试数据质量、检索命中、引用和回答忠实度。</p>
+<p>📍 详情：<a href="stages--06-memory-rag.zh-Hans.md.html">Stage 6</a></p>
+<span id="reflexion完整反思--带-episodic-memory"></span><h3 data-heading-alias="reflexion完整反思--带-episodic-memory" id="h1807e8994dbe">Reflexion（完整反思 / 带 episodic memory）</h3>
+<p><strong>Reflexion</strong> 会把以前的尝试、反馈和反思保存为 episodic memory，让以后的尝试参考。它比单次 Self-Refine 多了跨尝试的记忆；原始方法见 <a href="../../reference/source-readings.html#s1df60a1d4afe">Reflexion paper</a>。</p>
+<span id="embedding嵌入"></span><h3 data-heading-alias="embedding嵌入" id="hc0d40d688fd5">Embedding（嵌入）</h3>
+<p><strong>Embedding</strong> 把文字、图片或其他数据转成向量，让系统能比较相似度。Dense 和 sparse 表示擅长的信号不同；要用自己的查询集测试，而不是只看维度大小。</p>
+<span id="vector-db向量数据库"></span><h3 data-heading-alias="vector-db向量数据库" id="h5c4e40917a6e">Vector DB（向量数据库）</h3>
+<p><strong>Vector DB</strong> 保存向量、metadata 和索引，并找出相近项目。它是检索层，不是 RAG 的全部；切块、查询、Reranking 和回答仍是其他步骤。</p>
+<span id="semantic-search语义搜索"></span><h3 data-heading-alias="semantic-search语义搜索" id="h60d1a453f673">Semantic Search（语义搜索）</h3>
+<p><strong>Semantic Search</strong> 按照意思相近程度查找数据，不只比较相同文字。它适合同义问法，但专有名词、编号和精确字符串常要搭配关键词搜索。</p>
+<span id="chunking切块"></span><h3 data-heading-alias="chunking切块" id="h466f9b02d87e">Chunking（切块）</h3>
+<p><strong>Chunking</strong> 把长文档切成可检索的小段。切法要和文档结构、实际问题一起测试；不存在适合所有数据的固定大小。</p>
+<span id="hybrid-search混合搜索"></span><h3 data-heading-alias="hybrid-search混合搜索" id="h93caea48cae9">Hybrid Search（混合搜索）</h3>
+<p><strong>Hybrid Search</strong> 同时使用语义向量和关键词信号，再把结果合并。它常用来兼顾“意思相近”和“名称必须完全命中”。</p>
+<span id="reranking重新排序"></span><h3 data-heading-alias="reranking重新排序" id="h1a830dc0dcb9">Reranking（重新排序）</h3>
+<p><strong>Reranking</strong> 让第二个模型或规则重新检查初步候选，把更符合问题的内容排到前面。它可能提高质量，也会增加等待时间和成本。</p>
+<span id="contextual-retrieval"></span><h3 data-heading-alias="contextual-retrieval" id="hd91b6bd6fa22">Contextual Retrieval</h3>
+<p><strong>Contextual Retrieval</strong> 先给每个 chunk 补上它在原文档中的简短背景，再建立搜索索引。Anthropic 的<a href="../../reference/source-readings.html#s33d811167435">方法说明</a>把 contextual embeddings 和 contextual BM25 一起评估；效果仍要用自己的数据测试。</p>
+<span id="4-multi-agent"></span><h2 data-heading-alias="4-multi-agent" id="h397d0f253f70">4. Multi-Agent</h2>
+<span id="multi-agent多-agent"></span><h3 data-heading-alias="multi-agent多-agent" id="hfa64f74dafd6">Multi-Agent（多 agent）</h3>
+<p><strong>Multi-Agent</strong> 是让两个以上 Agent 分工或互相交接。只有当角色、工具、权限或 context 真的需要分开时才值得使用；数量变多不代表答案一定更好。</p>
+<span id="handoff"></span><h3 data-heading-alias="handoff" id="hf89e2d72da00">Handoff</h3>
+<p><strong>Handoff</strong> 是把任务和必要 context 从一个 Agent 交给另一个 Agent。好的交接要说清楚目标、已完成事项、证据、剩余工作和停止条件。</p>
+<span id="a2aagent-to-agentprotocol"></span><h3 data-heading-alias="a2aagent-to-agentprotocol" id="h6b8191a7a900">A2A（Agent-to-Agent）Protocol</h3>
+<p><strong>A2A</strong> 是让彼此独立、内部可能不透明的 Agent 发现能力、交换消息和管理协作任务的开放协议。它处理 Agent 对 Agent 的互通；当前规范和版本看<a href="../../reference/source-readings.html#s73e2793d3acb">官方 latest specification</a>，不要把版本号写死在教程里。</p>
+<span id="5-claude-code-生态"></span><h2 data-heading-alias="5-claude-code-生态" id="hcc4f13707eab">5. Claude Code 生态</h2>
+<span id="mcpmodel-context-protocol"></span><h3 data-heading-alias="mcpmodel-context-protocol" id="hb6239812e522">MCP（Model Context Protocol）</h3>
+<p><strong>MCP</strong> 是 AI 应用连接外部数据和能力的开放协议。Server 可以提供 <strong>Prompts</strong>、<strong>Resources</strong> 和 <strong>Tools</strong>；Host／Client 决定怎样呈现、授权和传递。完整字段、transport 和安全规则以<a href="../../reference/source-readings.html#s4f6cea85fc05">现行规范</a>为准。</p>
+<p>📍 详情：<a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#52--mcpmodel-context-protocol-基础">Stage 5.2</a></p>
+<span id="project-instructions项目规则"></span><h3 data-heading-alias="project-instructions项目规则" id="hf1bac16b2dc7">Project Instructions（项目规则）</h3>
+<p><strong>Project Instructions</strong> 是工具在项目中读取的共同规则，适合放用途、禁止事项、验证命令和交付格式。不同工具的文件名和加载顺序不同，不能假设一份设置在所有 CLI 中完全相同。</p>
+<p>📍 入门：<a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html">Track A A2</a></p>
+<span id="skills--skillmd"></span><h3 data-heading-alias="skills--skillmd" id="h5bd950e59bff">Skills / SKILL.md</h3>
+<p><strong>Skill</strong> 是需要时才加载的操作卡。按照 <a href="../../reference/source-readings.html#sf36ae4007ec3">Agent Skills 规范</a>，一个 Skill 至少是一个包含 <code>SKILL.md</code> 的目录，也可以附带 scripts、references 和 assets；安装第三方 Skill 前仍要阅读内容和权限。</p>
+<span id="one-off-prompt单次提示"></span><h3 data-heading-alias="one-off-prompt单次提示" id="hba2b1f8b1802">One-off Prompt（单次提示）</h3>
+<p><strong>One-off Prompt</strong> 是只服务当前任务的一次性交代。每次都要遵守的规则放 Project Instructions；重复使用的流程才整理成 Skill。</p>
+<span id="plugin--marketplace"></span><h3 data-heading-alias="plugin--marketplace" id="h175bdc40841d">Plugin / Marketplace</h3>
+<p><strong>Plugin</strong> 是把 Skills、commands、hooks 或 MCP 设置等组件打包在一起的发布单位；<strong>Marketplace</strong> 是查找和安装这些软件包的目录。这是产品层功能，不是所有 Agent 的通用必备组件。</p>
+<span id="slash-command"></span><h3 data-heading-alias="slash-command" id="heb3dba2466b6">Slash Command</h3>
+<p><strong>Slash Command</strong> 是以 <code>/</code> 开头、由应用程序提供的指令。它可能打开功能、设置或可复用流程；实际名称和行为要看该工具的当前文档。</p>
+<span id="claudemd"></span><h3 data-heading-alias="claudemd" id="h6ebdb617a810">CLAUDE.md</h3>
+<p><strong>CLAUDE.md</strong> 是 Claude Code 可以读取的项目指示文件之一，用来告诉 Agent 这个项目怎样工作。它是给模型遵循的 context，不是能够强制阻挡危险操作的安全边界。</p>
+<span id="hooks"></span><h3 data-heading-alias="hooks" id="hd412a062620e">Hooks</h3>
+<p><strong>Hooks</strong> 会在指定事件发生时执行固定检查或动作。它适合 lint、记录、通知或拦截高风险操作；事件和设置格式会更新，所以直接看 <a href="../../reference/source-readings.html#s20106b0f3bee">Claude Code Hooks reference</a>，不要背固定数量。</p>
+<span id="deep-agent深度-agent"></span><h3 data-heading-alias="deep-agent深度-agent" id="h0422ee4acfeb">Deep Agent（深度 agent）</h3>
+<p><strong>Deep Agent</strong> 不是跨供应商的单一正式标准。LangChain 的 <a href="../../reference/source-readings.html#s191947403d65">deepagents</a>用这个名称描述一套包含规划、文件、子 Agent 和 context 管理的 agent harness；看到这个词时要先确认作者采用哪种定义。</p>
+<span id="subagent子-agent"></span><h3 data-heading-alias="subagent子-agent" id="h23e212e301f7">Subagent（子 agent）</h3>
+<p><strong>Subagent</strong> 是主 Agent 委派出去的隔离工作者，通常有自己的 context，完成后把结果交回。Claude Code 的当前设置、继承和权限边界见<a href="../../reference/source-readings.html#s7dc93e85c023">官方文档</a>；Subagent 不会自动正确，也要有明确任务和验证。</p>
+<p>📍 教程：<a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5</a> · <a href="resources--subagent-cookbook.zh-Hans.md.html">可复制 recipes</a> · <a href="resources--subagent-advanced.zh-Hans.md.html">进阶组合</a></p>
+<span id="6-production--eval--cost"></span><h2 data-heading-alias="6-production--eval--cost" id="hd89a49e6a194">6. Production / Eval / Cost</h2>
+<span id="cicontinuous-integration持续集成"></span><h3 data-heading-alias="cicontinuous-integration持续集成" id="h5028880c228d">CI（Continuous Integration，持续集成）</h3>
+<p><strong>CI</strong> 在 push 或 PR 时自动运行固定检查，例如测试、lint 和安全扫描。CI 通过只代表已经设置的检查通过，不代表可以跳过 review 或直接部署。</p>
+<span id="eval评估"></span><h3 data-heading-alias="eval评估" id="hc94aeeb6a695">Eval（评估）</h3>
+<p><strong>Eval</strong> 用固定输入、成功条件和记录方式比较 Prompt、模型或 Agent。先从少量代表题开始；在改动前后运行同一组，才能知道质量、成本和延迟怎样变化。</p>
+<p>📍 入门：<a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 2</a>；Agent 系统：<a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7</a></p>
+<span id="casetask案例任务"></span><h3 data-heading-alias="casetask案例任务" id="h99f78ddcc50e">Case/Task（案例/任务）</h3>
+<p><strong>Case/Task</strong> 是 Eval 考卷上的一道题：固定输入、测试环境和成功条件。没有清楚的 case，就不知道两次执行是不是在考同一件事。</p>
+<span id="suite测试组"></span><h3 data-heading-alias="suite测试组" id="he1afa42ac026">Suite（测试组）</h3>
+<p><strong>Suite</strong> 是一起执行和版本化的一组 cases。报告要记录 suite 的版本，否则“这次 90 分”不能和换过题目的上次直接比较。</p>
+<span id="golden-setreference-set黄金集参考集"></span><h3 data-heading-alias="golden-setreference-set黄金集参考集" id="h726c03c6fd99">Golden Set/Reference Set（黄金集/参考集）</h3>
+<p><strong>Golden Set/Reference Set</strong> 是人先审查过、能代表真实工作的案例与预期标准。Golden Set 是常见实践叫法，不是跨供应商的正式规范；它用来检查系统，不等于训练数据或 Few-shot 示例。</p>
+<span id="reference-solutioncriteria参考答案标准"></span><h3 data-heading-alias="reference-solutioncriteria参考答案标准" id="h2d5cbc9a83aa">Reference Solution/Criteria（参考答案/标准）</h3>
+<p><strong>Reference Solution/Criteria</strong> 说明怎样才算成功。Agent 任务常有不止一种好答案，所以可以写必要证据、允许范围、禁止行为和 rubric，不一定只放一段标准文字。</p>
+<span id="trial试跑"></span><h3 data-heading-alias="trial试跑" id="h3115111dde4a">Trial（试跑）</h3>
+<p><strong>Trial</strong> 是同一个 case 的一次完整执行。模型输出可能变化，所以高风险或不稳定案例要跑多次，不能用一次结果假装成固定能力。</p>
+<span id="grader评分器"></span><h3 data-heading-alias="grader评分器" id="h5b9e6d6addf5">Grader（评分器）</h3>
+<p><strong>Grader</strong> 按规则判断 trial。能用程序精确检查的先用 deterministic grader；模糊质量可以加模型或人工评分，但要留下 rubric、版本和原始证据。</p>
+<span id="baseline基线"></span><h3 data-heading-alias="baseline基线" id="h1a6150285b72">Baseline（基线）</h3>
+<p><strong>Baseline</strong> 是修改前的比较起点。它必须使用同一版 cases、环境、trial 次数和阈值，否则前后分数不能公平比较。</p>
+<span id="regression回归"></span><h3 data-heading-alias="regression回归" id="h02e0ca15abbd">Regression（回归）</h3>
+<p><strong>Regression</strong> 是新版本相对 baseline 出现超过阈值的退步，可能发生在质量、成本、安全或可靠性。先看多次 trials 和失败案例，再决定是否阻挡发布。</p>
+<span id="holdout-set保留测试集"></span><h3 data-heading-alias="holdout-set保留测试集" id="hdf63f6199b5e">Holdout Set（保留测试集）</h3>
+<p><strong>Holdout Set</strong> 是平常不拿来反复调整的冻结案例。开发时使用 development/reference cases；准备发布或做最后验证时才打开 holdout，避免把系统调成只会回答已经看过的考题。</p>
+<span id="observability"></span><h3 data-heading-alias="observability" id="ha37c93100e7c">Observability</h3>
+<p><strong>Observability</strong> 把 Agent 的步骤、工具、状态、时间、usage 和结果留下可查询记录。它像行车记录仪；记录时仍要遮住 secret、私人数据和不必要的 Prompt 内容。</p>
+<span id="prompt-caching"></span><h3 data-heading-alias="prompt-caching" id="h1823d9572582">Prompt Caching</h3>
+<p><strong>Prompt Caching</strong> 重用已经写入缓存、内容完全相同的 Prompt 前缀，减少重复处理；相似但不同的内容不会命中。最低长度、保存时间和价格因供应商而变化，实现前查看<a href="../../reference/source-readings.html#s9a3bbc4f637b">当前缓存说明</a>并记录实际 usage。</p>
+<span id="streaming流式输出"></span><h3 data-heading-alias="streaming流式输出" id="h5011f6dd9d76">Streaming（流式输出）</h3>
+<p><strong>Streaming</strong> 是模型生成一小段就先传一小段，不必等完整答案。界面会更快有反应，但客户端要能处理部分内容、取消、错误和尚未完成的 tool call。</p>
+<span id="batch-api批量-api"></span><h3 data-heading-alias="batch-api批量-api" id="hdfa3fc1fcf22">Batch API（批量 API）</h3>
+<p><strong>Batch API</strong> 把不需要马上回复的多条请求一起发送。它适合离线分类、摘要或 Eval；完成时间、限制和折扣以当前供应商文档为准。</p>
+<span id="token-cost--inference-cost"></span><h3 data-heading-alias="token-cost--inference-cost" id="h5e1928776bbf">Token Cost / Inference Cost</h3>
+<p><strong>Token Cost／Inference Cost</strong> 是模型推理费用。最小公式是输入用量乘输入单价，加输出用量乘输出单价；Agent 还要把每一轮、工具服务和计算成本一起算入。</p>
+<span id="guardrails"></span><h3 data-heading-alias="guardrails" id="h443f975eefe8">Guardrails</h3>
+<p><strong>Guardrails</strong> 是限制输入、输出和动作的规则层，例如 schema 验证、allowlist、权限和人工批准。它们能降低风险，但不能代替最小权限、隔离和测试。</p>
+<span id="prompt-injection提示注入"></span><h3 data-heading-alias="prompt-injection提示注入" id="hb2b766316591">Prompt Injection（提示注入）</h3>
+<p><strong>Prompt Injection</strong> 是把恶意指令藏在网页、文档或工具结果中，诱导 Agent 偏离原任务。把外部内容视为不可信数据，高风险动作使用最小权限和人工审核。</p>
+<span id="lethal-trifecta致命三角"></span><h3 data-heading-alias="lethal-trifecta致命三角" id="h107130c6557b">Lethal Trifecta（致命三角）</h3>
+<p><strong>Lethal Trifecta</strong> 指 Agent 同时能读取私密数据、接触不可信内容、又能对外通信时，Prompt Injection 可能把数据带出去。这个概念由 <a href="../../reference/source-readings.html#sc11eb7058f35">Simon Willison</a>整理；防护重点是切断至少一条危险路径。</p>
+<span id="7-术语--buzzword"></span><h2 data-heading-alias="7-术语--buzzword" id="h3a953b15faf2">7. 术语 / Buzzword</h2>
+<span id="cli-agent"></span><h3 data-heading-alias="cli-agent" id="ha4335bc71a1c">CLI Agent</h3>
+<p><strong>CLI Agent</strong> 是在终端中读取文件、修改文件和执行命令的 Agent／Harness。Claude Code、Codex、OpenCode、Pi、Aider 和 Gemini CLI 都属于这一类；它是工作台，不是里面的 LLM。</p>
+<span id="byo-api-keybring-your-own"></span><h3 data-heading-alias="byo-api-keybring-your-own" id="hb786e54a7b09">BYO API Key（Bring Your Own）</h3>
+<p><strong>BYO API Key</strong> 表示工具允许你提供自己的模型供应商密钥。它可能方便切换供应商，但密钥的计费、权限、保存和撤销仍由你管理。</p>
+<span id="local-llm--on-device"></span><h3 data-heading-alias="local-llm--on-device" id="h630de1b3647f">Local LLM / On-Device</h3>
+<p><strong>Local LLM／On-Device</strong> 表示模型在你的设备或自管机器上运行。只有模型、工具、数据和记录都没有另外发送到云端时，才能说这次流程完全留在本机。</p>
+<span id="quantization量化"></span><h3 data-heading-alias="quantization量化" id="h524d0a082bf7">Quantization（量化）</h3>
+<p><strong>Quantization</strong> 用较低精度表示模型权重，通常能减少内存和计算需求。速度、大小和质量的变化取决于模型、格式和硬件，需要实际测试。</p>
+<span id="hallucination幻觉"></span><h3 data-heading-alias="hallucination幻觉" id="haf9aed9d2b3a">Hallucination（幻觉）</h3>
+<p><strong>Hallucination</strong> 是模型生成看起来合理但没有可靠依据的内容。引用、RAG、工具和 Structured Output 都只能帮忙；重要事实仍要查看来源或用 Eval 验证。</p>
+<span id="frontier-model"></span><h3 data-heading-alias="frontier-model" id="hd2c23067a85a">Frontier Model</h3>
+<p><strong>Frontier Model</strong> 是某个时间点能力位于前沿的模型类别，不是一个永久名单。型号、价格、Context 和可用状态变化很快；当前数据统一查看 <a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1 的官方来源表</a>。</p>
+<span id="context-engineering"></span><h3 data-heading-alias="context-engineering" id="h4cb716c89111">Context Engineering</h3>
+<p><strong>Context Engineering</strong> 是决定每次模型调用前“要放入哪些信息、按照什么顺序放、什么时候删除或压缩”的系统工作。它和 Prompt Engineering 互相配合，不是新术语淘汰旧术语；可读 <a href="../../reference/source-readings.html#s126e07cf0d68">Anthropic 的实践说明</a>。</p>
+<span id="agent-production-engineering"></span><h3 data-heading-alias="agent-production-engineering" id="hb213ba28040e">Agent Production Engineering</h3>
+<p><strong>Agent Production Engineering</strong> 是本学习地图对“让 Agent 可以长期、安全、可观察地运行”的上位名称。它把 Harness、Loop、Workflow Graph、Eval、Guardrails、成本、恢复和人工批准放在同一章讨论。</p>
+<p>学习顺序是 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 的 Agent Loop</a> → <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 的 Workflow Graph／Agent Framework</a> → <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 的 Agent Production Engineering</a>。Prompt、Context、Harness、Loop、Graph 会一起工作；它们不是五层，也不是互相取代的产品世代。</p>
+<p>📍 完整章节：<a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7</a></p>
+<span id="agent-harness执行工作台"></span><h3 data-heading-alias="agent-harness执行工作台" id="h364f5ad05cd7">Agent Harness（执行工作台）</h3>
+<p><strong>Agent Harness</strong> 是包在模型外面的执行系统。它连接工具和 context，管理权限、状态、记录、错误和停止规则；同一个 Harness 可以包含 Agent Loop，也能成为 Workflow Graph 的一个 node。</p>
+<span id="harness-engineering"></span><h3 data-heading-alias="harness-engineering" id="h7378cc749790">Harness Engineering</h3>
+<p><strong>Harness Engineering</strong> 是设计和改进 Agent Harness 的工程工作。OpenAI 的<a href="../../reference/source-readings.html#s293d0f966169">案例</a>强调环境、知识、测试和反馈循环；它不是只把某个 framework 包在外面，也不会被 Loop Engineering 替代。</p>
+<span id="loop-engineering循环工程"></span><h3 data-heading-alias="loop-engineering循环工程" id="haa1d324f403c">Loop Engineering（循环工程）</h3>
+<p><strong>Loop Engineering</strong> 是设计 Agent 怎样开始、反复行动、检查、保存进度、停止或找人的工程工作。IBM 把它描述为新兴实践，包含 goal、action、observation 和 adjustment；看<a href="../../reference/source-readings.html#sa533e325e08e">当前说明</a>。</p>
+<p><strong>Agent Loop</strong> 是真正运行的循环；<strong>Loop Engineering</strong> 是把这个循环和外围规则设计好。它可能使用 Harness、Hooks、Skills、Subagents 和 Workflow Graph，而不是替代它们。</p>
+<span id="graph-engineering图工程"></span><h3 data-heading-alias="graph-engineering图工程" id="h3d36e81eb921">Graph Engineering（图工程）</h3>
+<p><strong>Graph Engineering</strong> 是有人用来描述 Workflow Graph 设计的新兴名称，但不是所有供应商共同采用的标准。稳定的学习对象仍是 node、edge、branch、state 和 checkpoint；研究用法可看<a href="../../reference/source-readings.html#sb2f7d124e426">当前的 survey preprint</a>。</p>
+<p>这里的 graph 是执行流程，不是 Stage 6 的 GraphRAG 知识图谱。先在 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4</a>学习基本 Workflow Graph，再到 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7</a>加入上线边界。</p>
+<span id="8-agent-interfaces"></span><h2 data-heading-alias="8-agent-interfaces" id="h690bf95c7f65">8. Agent Interfaces</h2>
+<span id="computer-use屏幕级-agent"></span><h3 data-heading-alias="computer-use屏幕级-agent" id="h4fc2ed86d108">Computer Use（屏幕级 agent）</h3>
+<p><strong>Computer Use</strong> 让模型读取画面并提出鼠标或键盘动作。Harness 必须先检查规则，executor 才执行；能用更小、可验证的 API 或 typed tool 时，通常先用那个。</p>
+<span id="browser-useweb-级-agent"></span><h3 data-heading-alias="browser-useweb-级-agent" id="hd96e524cc9b5">Browser Use（web 级 agent）</h3>
+<p><strong>Browser Use</strong> 让 Agent 在网页中读取数据、查找元素、填写表单或切换页面。它可以使用 DOM、Accessibility Tree 和 screenshot；<a href="../../reference/source-readings.html#sc1af6b58492f">browser-use</a>是开源实现之一。</p>
+<span id="sandbox代码隔离环境"></span><h3 data-heading-alias="sandbox代码隔离环境" id="had609c5cc63f">Sandbox（代码隔离环境）</h3>
+<p><strong>Sandbox</strong> 是限制程序能看到和能做什么的隔离环境。真正的边界要看文件、网络、进程、secret、CPU／内存和生命周期设置，不能只因为使用了容器就宣称安全。</p>
+<p>要比较 Search／Fetch、Browser Use、Computer Use 与 Sandbox，回到 <a href="stages--08-agent-interfaces.zh-Hans.md.html">Stage 8</a>。</p>
+<span id="microvmmicro-virtual-machine"></span><h3 data-heading-alias="microvmmicro-virtual-machine" id="h8d114eb4484f">microVM（micro Virtual Machine）</h3>
+<p><strong>microVM</strong> 是启动更精简、仍使用虚拟机隔离边界的执行环境。它常用于运行不可信代码，但安全仍取决于镜像、网络、权限和宿主设置。</p>
+<span id="firecracker"></span><h3 data-heading-alias="firecracker" id="h71980737a3af">Firecracker</h3>
+<p><strong>Firecracker</strong> 是使用 KVM 创建 microVM 的开源 Virtual Machine Monitor。它提供隔离技术，不会自动替你完成镜像更新、网络策略或租户安全；见<a href="../../reference/source-readings.html#sdc3539c030f4">官方 repository</a>。</p>
+<span id="gvisor"></span><h3 data-heading-alias="gvisor" id="h3e41408ab65a">gVisor</h3>
+<p><strong>gVisor</strong> 在应用程序和主机 kernel 之间加入 userspace application kernel，减少容器直接接触主机系统调用的范围。它不是完整虚拟机，支持和性能取舍看<a href="../../reference/source-readings.html#s3024891b2e67">官方文档</a>。</p>
+<span id="找不到的词"></span><h2 data-heading-alias="找不到的词" id="h0fd60cd9b62c">找不到的词？</h2>
+<ul>
+<li>先回到你正在阅读的 Stage；重要词第一次出现时也应该有一句白话定义。</li>
+<li>看 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#52--mcpmodel-context-protocol-基础">Stage 5.2 的 MCP</a>、<a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#53--skillsclaude-code-的行为层-claude-code-生态最关键的一层">Stage 5.3 的 Skills</a>或 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 的 production 边界</a>。</li>
+<li>仍然找不到时打开 issue；请附上“在哪一页看到”和“哪一句不懂”。</li>
+</ul>
+<details markdown="1">
+<summary>来源和核查</summary>
+<p>上面的易变产品和协议说明只采用官方文档；研究术语链接到原始 paper。完整型号、价格和 Context 清单集中在 Stage 1，不在词典中复制。</p>
+<p><small>官方链接、产品身份和模型生命周期核查：2026-08-31 UTC。</small></p>
+</details>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

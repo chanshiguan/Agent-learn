@@ -1,0 +1,33 @@
+{
+  "paper": "Attention Is All You Need",
+  "version": "arXiv:1706.03762v7",
+  "source_url": "https://arxiv.org/html/1706.03762v7",
+  "checked_at": "2026-11-04",
+  "scope": "本课三问的有限证据片段与中文讲解；不替代研究投稿时的全文审读，不把论文授权变成 MIT。",
+  "evidence": [
+    {
+      "id": "q1-problem",
+      "location": "1 Introduction，循环模型计算段落",
+      "original_excerpt": "precludes parallelization within training examples",
+      "explanation": "这里的主语是前文讨论的序列计算依赖；批内并行受到限制。不能脱离主语解读为计算机无法并行。"
+    },
+    {
+      "id": "q2-architecture",
+      "location": "3 Model Architecture；3.1 Encoder",
+      "original_excerpt": "encoder-decoder structure; multi-head self-attention mechanism",
+      "explanation": "分号连接两个非连续短摘录。架构由编码器和解码器组成，编码器子层包含多头自注意力；同节还说明前馈、残差和归一化。位置编码见3.5，解码器遮挡见3.1。"
+    },
+    {
+      "id": "q3-experiments",
+      "location": "Abstract；6.1–6.3 Results",
+      "original_excerpt": "WMT 2014 English-to-German; WMT 2014 English-to-French; English constituency parsing",
+      "explanation": "三项是非连续实验名称摘录；中文分别是英德翻译、英法翻译、英语成分句法分析。另有模型变体实验。跨任务普遍最优不是这些证据支持的结论。"
+    }
+  ],
+  "negative_example": {
+    "claim": "论文证明所有领域的任务都最优。",
+    "citation": "q3-experiments",
+    "judgment": "未支持",
+    "reason": "该证据只列特定任务，不能支持全称断言；这是本教材的证据范围判断，不假造作者的限制原话。"
+  }
+}

@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A2：把一次成功变成可重复流程</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">A2 · 让 CLI agent 按同一套方法做事</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="a2把一次成功变成可重复流程"></span><h1 data-heading-alias="a2把一次成功变成可重复流程" id="h377b7206bd53">A2：把一次成功变成可重复流程</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hb3cbdee6ea3a">先分清三种记录</a></li><li><a href="#h524d5196fe23">CLI-5：项目规则卡</a></li><li><a href="#h845618959841">CLI-6：只读 Review Skill</a></li><li><a href="#haedc04b26ef2">CLI-7：大任务拆成四步</a></li><li><a href="#hbc83d687edd1">CLI-8：Portable prompt 与差异卡</a></li><li><a href="#h55e35577ca29">本课运行</a></li><li><a href="#h097ba9dfe319">实际能学到什么</a></li></ul></aside>
+<p>沿用 A1 的虚构项目和有限改动方式。本课先完成 CLI-5–8：写项目规则、审查 Git diff、分步修改、对比两个工具；再用 README 结构检查练习如何迁移同一套方法。做完后进入第五课核心，学习工具连接和事件处理。</p>
+<span id="先分清三种记录"></span><h2 data-heading-alias="先分清三种记录" id="hb3cbdee6ea3a">先分清三种记录</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>项目规则卡说明长期约束；Skill 说明某类任务怎么做；Portable prompt 说明这一次任务的目标、范围、禁止和成功条件。三者的适用时间不同：项目规则长期生效，Skill 可以反复使用，任务卡只描述本次工作。因此，不必把每次输入都写进项目永久规则。</p>
+<span id="cli-5项目规则卡"></span><h2 data-heading-alias="cli-5项目规则卡" id="h524d5196fe23">CLI-5：项目规则卡</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>至少写用途、允许与禁止、检查方法、交付物。规则要能被观察：“每个结论引用文件”可以验证，“始终做到最好”无法客观验收。改规则后运行正反例，防止描述与实际行为脱节。</p>
+<p>同一个项目可能有根规则和子目录规则。实际优先级依工具实现；先让工具说明读取了哪些文件，不能自行假定所有规则合并方式相同。</p>
+<span id="cli-6只读-review-skill"></span><h2 data-heading-alias="cli-6只读-review-skill" id="h845618959841">CLI-6：只读 Review Skill</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>examples/SKILL.md 是 review-changes：它检查真实 Git diff 中的问题，并给出文件位置、影响和证据。原题的完整步骤见 <a href="04-original-cli.html">CLI-5–8 逐题实作</a>。另外，examples/review.py 和 readme-skill.md 用于补充练习，检查 README 的标题和小节内容。标题齐全不代表内容正确，模型的评价也不能代替程序检查结果。</p>
+<p>原题使用 baseline、broken、fixed 三种 diff 样本，检查错误命令和失效链接是否被准确指出。补充的 README 练习另测完整、缺验收、文件不存在三种输入。两种审查都要列出具体证据，只读文件，不执行资料里的命令，也不自行修复。</p>
+<span id="cli-7大任务拆成四步"></span><h2 data-heading-alias="cli-7大任务拆成四步" id="haedc04b26ef2">CLI-7：大任务拆成四步</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>盘点：列文件与约束。计划：选择最小改动与检查。修改：按约定范围实施。验证：运行检查、读 diff、核对目标。每步有产物，下次接手才知道停在哪里。</p>
+<p>任务拆分不是把一个模糊目标分成十个模糊标题。每项要有输入、输出、通过条件、依赖。某一步失败时不要把“已尝试”记为“完成”；保留失败证据和下一步。</p>
+<span id="cli-8portable-prompt-与差异卡"></span><h2 data-heading-alias="cli-8portable-prompt-与差异卡" id="hbc83d687edd1">CLI-8：Portable prompt 与差异卡</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>可迁移部分是任务、范围、禁止、成功条件；不迁移的部分是 CLI 命令、规则文件位置、模型选择、权限和会话恢复。保持 portable prompt 不变，另写差异卡，才能分清是任务设计问题还是宿主能力不同。</p>
+<p>提示词中的指令不能越过宿主权限。让工具先返回计划的工作流，也不能因为另一个工具默认更主动就直接接受越界修改。</p>
+<span id="本课运行"></span><h2 data-heading-alias="本课运行" id="h55e35577ca29">本课运行</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<pre><code class="language-bash"># 运行 courses/A2-cli-workflow/examples/review.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/A2-cli-workflow/examples/review.py
+# 运行 courses/A2-cli-workflow/examples/review.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/A2-cli-workflow/examples/review.py /tmp/does-not-exist-course-file.md
+</code></pre>
+<p>第一条针对完整样本应 PASS；第二条应 FAIL 且返回非零退出码。第二条专门测试缺文件的情况，失败是预期结果；保留这个检查，才能确认程序会正确处理缺失输入。</p>
+<span id="实际能学到什么"></span><h2 data-heading-alias="实际能学到什么" id="h097ba9dfe319">实际能学到什么</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>从“每次重新解释需求”转为“规则稳定、任务可迁移、反馈明确”。真正复用的是可验证流程，Skill 文件只是载体。原课程精选流程项目与完整示范仍在本地核对页，按需要选择，不必安装整套第三方提示库。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">A2 参考知识整合 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

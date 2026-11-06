@@ -1,0 +1,5 @@
+{
+  "name": "course-readme",
+  "version": "1.0.0",
+  "description": "教学用 README 完整性检查；只读，不安装或执行文档中的命令。"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "CLI 核心＋Skill 完整示范",
+    "lesson": "lessons/03-workshop.html#h83939a4b291b",
+    "example": "examples/reference-draft.json",
+    "assessment": "lessons/03-workshop.html#hed15824338dc"
+  },
+  {
+    "requirement": "产物与事实校验",
+    "lesson": "lessons/03-workshop.html#h4e7634b03e08",
+    "example": "examples/reference-draft.json",
+    "assessment": "lessons/03-workshop.html#hed15824338dc"
+  },
+  {
+    "requirement": "可复现 README",
+    "lesson": "lessons/03-workshop.html#h6c8861fef929",
+    "example": "examples/reference-draft.json",
+    "assessment": "lessons/03-workshop.html#hed15824338dc"
+  },
+  {
+    "requirement": "五维四级量规",
+    "lesson": "lessons/03-workshop.html#hcc06cba63ba6",
+    "example": "examples/reference-draft.json",
+    "assessment": "lessons/03-workshop.html#hed15824338dc"
+  },
+  {
+    "requirement": "结业交付与延迟复习",
+    "lesson": "lessons/03-workshop.html#hed15824338dc",
+    "example": "examples/reference-draft.json",
+    "assessment": "lessons/03-workshop.html#hed15824338dc"
+  }
+]

@@ -1,0 +1,170 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>在虚构网页中完成可验证动作</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">8 · Browser Use、Computer Use 与 Sandbox</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线必修 · A 线建议</strong><p>B 线完成练习 1–4；A 线建议至少完成练习 1。</p></aside><span id="top"></span><span id="在虚构网页中完成可验证动作"></span><h1 data-heading-alias="在虚构网页中完成可验证动作" id="hcb775d0bf025">在虚构网页中完成可验证动作</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h11e937823cb2">单元一：选择最低成本的接口</a></li><li><a href="#hfd14f5fd71e6">单元二：先完成真实执行器，再连接智能提议</a></li><li><a href="#h32da5fa58d9d">单元三：把供应商协议接到同一控制层</a></li><li><a href="#h524a4a4282aa">单元四：Sandbox 的完整责任</a></li><li><a href="#h393b44f84ddb">单元五：原四题的完整成果</a></li><li><a href="#he0cbc98443ff">参考资源与测验边界</a></li></ul></aside>
+<span id="单元一选择最低成本的接口"></span><h2 data-heading-alias="单元一选择最低成本的接口" id="h11e937823cb2">单元一：选择最低成本的接口</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>已有结构化 API 时先调用 API；只需资料时先搜索或读取；需要网页状态时用 Browser Use；操作整个桌面才用 Computer Use；执行未知程序时另考虑 Sandbox。浏览器执行器不是模型，模型也不直接点击鼠标：模型提出动作，应用决定是否允许，执行器改变外部状态，再把观察交回。</p>
+<p>DOM 或可访问性树提供元素与语义；截图提供像素，适合图像控件和视觉回退。页面变化后原来的坐标可能指向另一个按钮，所以观察必须有时间/版本。不要根据旧截图执行新动作。</p>
+<span id="单元二先完成真实执行器再连接智能提议"></span><h2 data-heading-alias="单元二先完成真实执行器再连接智能提议" id="hfd14f5fd71e6">单元二：先完成真实执行器，再连接智能提议</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>本课的 browser_loop 使用真实 Playwright、完全本地页面和可重放的固定提议。它完成观察、提议、策略、操作者接受/拒绝、执行、读取页面实际结果。这样先验证控制流程，避免把模型随机性和执行器错误混在一起。固定提议只能验证执行流程，不能说明模型会自行选对动作。</p>
+<p>只在缺依赖时安装：</p>
+<pre><code class="language-bash"># 在所用环境中安装本例列出的依赖及版本；这不会下载课程正文。
+courses/.venv-verification/bin/python -m pip install playwright
+# 用本行指定的 Python 运行模块或查看解释器信息。
+courses/.venv-verification/bin/python -m playwright install chromium
+</code></pre>
+<p>完整测试顺序：</p>
+<pre><code class="language-bash"># 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --decision accept
+# 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --decision reject
+# 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --scenario stale --decision accept
+# 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --scenario failure --decision accept
+# 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --scenario offsite
+# 运行 courses/08-agent-interfaces/examples/browser_loop.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/08-agent-interfaces/examples/browser_loop.py --scenario send
+</code></pre>
+<p>分别期待 VERIFIED、REJECTED、STALE_REQUIRES_NEW_REVIEW、FAILED、BLOCKED、BLOCKED。只有第一条实际填了“课程学习草稿”；截图和 receipt.json 默认在 <code>/tmp/ai-learn-action-loop</code>，要保留每次结果就用 <code>--output</code> 给不同目录。CLI 的 decision 来自操作者，不能从模型提议读取“我已获准”。</p>
+<pre><code class="language-python">&quot;&quot;&quot;本地虚构表单：观察→提议→策略→人工决定→执行→外部状态验证。无发送。&quot;&quot;&quot;
+
+# 先读 observe/propose/policy，再看 run；固定提议用于隔离执行器问题，不代表模型规划。
+import argparse
+import json
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+
+# 读取页面真实值和版本，既用于执行前检查，也用于执行后验收。
+def observe(page):
+    return {'title':page.title(),'draft':page.locator('#draft').input_value(),
+            'version':page.locator('#version').inner_text()}
+
+
+# 按场景返回固定请求；请求携带观察快照，便于发现批准后页面变化。
+def propose(observation, scenario):
+    if scenario == 'offsite':
+        return {'type':'navigate','url':'https://evil.test','expected':observation}
+    if scenario == 'send':
+        return {'type':'send','expected':observation}
+    return {'type':'fill','value':'课程学习草稿','expected':observation}
+
+
+# 填写需要操作者批准；发送和跳转都不属于本题允许的动作。
+def policy(action):
+    if action['type'] == 'fill':
+        return 'ASK'
+    return 'BLOCK'
+
+
+# 只有策略允许、操作者接受、页面未变三项都满足，才调用浏览器填写。
+def run(output, decision='reject', scenario='normal'):
+    output=Path(output); output.mkdir(parents=True,exist_ok=True)
+    with sync_playwright() as p:
+        browser=p.chromium.launch(headless=True)
+        page=browser.new_page()
+        # 演示页不需要网络，所有页面请求都阻断。
+        page.route('**/*',lambda route:route.abort())
+        page.set_content('&lt;title&gt;本地虚构表单&lt;/title&gt;&lt;label&gt;草稿&lt;input id=&quot;draft&quot;&gt;&lt;/label&gt;&lt;span id=&quot;version&quot;&gt;1&lt;/span&gt;')
+        before=observe(page)
+        action=propose(before,scenario)
+        verdict=policy(action)
+        record={'before':before,'proposal':action,'policy':verdict,'executed':False}
+        if verdict == 'BLOCK':
+            record['status']='BLOCKED'
+        else:
+            # 只允许操作者通过 CLI 明确选择；提议无法自行给出批准。
+            record['decision']=decision
+            if decision != 'accept':
+                record['status']='REJECTED'
+            else:
+                if scenario == 'stale':
+                    page.locator('#version').evaluate('(e) =&gt; e.textContent = &quot;2&quot;')
+                # 批准后再读一次当前页面；状态变化就停止，旧批准不能用于新状态。
+                if observe(page) != action['expected']:
+                    record['status']='STALE_REQUIRES_NEW_REVIEW'
+                else:
+                    try:
+                        if scenario == 'failure':
+                            raise RuntimeError('教学注入：执行器不可用')
+                        page.locator('#draft').fill(action['value'])
+                        record['executed']=True
+                        # 执行后独立读取输入框，核对真正写进去的内容，而不是相信执行器口头报告。
+                        after=observe(page)
+                        if after['draft'] != action['value']:
+                            raise RuntimeError('实际页面值与提议不一致')
+                        record['status']='VERIFIED'
+                    except Exception as error:
+                        record['status']='FAILED'
+                        record['error']=str(error)
+        record['after']=observe(page)
+        page.screenshot(path=str(output/'state.png'),full_page=True)
+        browser.close()
+    # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    (output/'receipt.json').write_text(json.dumps(record,ensure_ascii=False,indent=2))
+    return record
+
+
+if __name__ == '__main__':
+    p=argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--decision',choices=['accept','reject'],default='reject')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--scenario',choices=['normal','offsite','send','stale','failure'],default='normal')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--output',type=Path,default=Path('/tmp/ai-learn-action-loop'))
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    a=p.parse_args()
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(run(a.output,a.decision,a.scenario),ensure_ascii=False,indent=2))
+
+</code></pre>
+<span id="单元三把供应商协议接到同一控制层"></span><h2 data-heading-alias="单元三把供应商协议接到同一控制层" id="h32da5fa58d9d">单元三：把供应商协议接到同一控制层</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>无论供应商如何命名，基本消息链相同：请求携带工具定义与观察 → 响应包含调用 ID 和动作 → 应用检查并执行 → 结果携带同一调用 ID → 下一轮模型观察结果。不能把多个工具结果都配给同一个 ID，也不能漏掉未执行动作的明确失败结果。</p>
+<p>Anthropic 的客户端工具调用要返回对应 tool_use_id；toolset 还需匹配对应名称。OpenAI 的 computer 调用结果对应 call_id，可有一批 actions；顺序执行，前一步失败后后续依赖动作不能继续。截图应来自实际执行后的环境，不由模型生成。不同版本的旧 preview 与新工具名称不能混用，原课协议说明与本地版本说明列出快照差异。</p>
+<p>把固定 propose 替换为模型的第一步，不是开放所有点击，而是只接受当前定义的动作枚举和字段；未知动作拒绝，有限次数循环，外部状态每步重读。批量操作也要逐项检查是否符合执行策略；批准绑定具体内容、页面版本与操作者，变化就重审。读取网页中的“忽略规则”是读取数据，不是获得授权。</p>
+<span id="单元四sandbox-的完整责任"></span><h2 data-heading-alias="单元四sandbox-的完整责任" id="h524a4a4282aa">单元四：Sandbox 的完整责任</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>运行环境有四样东西：初始化文件、当前活跃会话、可恢复快照、聊天记录。它们生命周期不同。Manifest 描述新环境要有哪些文件，不意味着续接旧 session 时会自动清空所有修改。快照也可能保存敏感内容，需访问与保留策略。</p>
+<p>容器共享宿主内核，虚拟机提供不同隔离边界；不能仅凭 Docker 字样认为绝对安全。最低配置包括只读输入、单独输出、非 root、资源与时间上限、关闭不需要网络、不挂载宿主凭证。托管 E2B/Modal/Vercel 等还涉及实例生命周期、凭证、计费和下载产物；结束任务后应清理环境。</p>
+<p>本课 plot_csv.py 与 Dockerfile 已给出固定任务的完整代码。只得到 SVG 不证明容器隔离，必须记录实际容器命令与挂载/网络设置。没有 Docker 的机器可以理解并审查配置，但容器这一项保持未执行。</p>
+<span id="单元五原四题的完整成果"></span><h2 data-heading-alias="单元五原四题的完整成果" id="h393b44f84ddb">单元五：原四题的完整成果</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>原题</th>
+<th>完整实现</th>
+<th>通过证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 打开并截图</td>
+<td>browser_lab.py --live</td>
+<td>example.com 的标题、最终 URL 和截图</td>
+</tr>
+<tr>
+<td>2 策略</td>
+<td>policy.py 与正反例</td>
+<td>合法读允许，发送待审，离域/异常动作拒绝</td>
+</tr>
+<tr>
+<td>3 隔离绘图</td>
+<td>plot_csv.py、Dockerfile</td>
+<td>实际隔离配置、输入输出、产物</td>
+</tr>
+<tr>
+<td>4 动作闭环</td>
+<td>browser_loop.py</td>
+<td>六个场景的状态与实际页面内容一致</td>
+</tr>
+</tbody>
+</table>
+<p>第 4 题完整参考就是本章代码；接真实模型是后续效果实验，不影响本地流程验收。扩展到真实登录、邮件与付款不是本课作业。</p>
+<span id="参考资源与测验边界"></span><h2 data-heading-alias="参考资源与测验边界" id="he0cbc98443ff">参考资源与测验边界</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Playwright MCP 把执行能力接给支持 MCP 的宿主；browser-use 组织网页 Agent 工作；OmniParser 帮助把截图变成元素信息；它们职责不同。WebArena、BrowserGym、Mind2Web、OSWorld 等提供不同任务、数据或环境，比较成绩要固定环境、步数和评分器。离线动作数据不等于获得访问任意真实网站的许可。</p>
+<p>最终测验必须检查外部状态：声称填入但输入框仍空，失败；拒绝后却执行，失败；旧状态被接受，失败。迁移题是在同一虚构页加第二个只填写字段，复用同样六类测试，不能通过扩大域名许可来绕过问题。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 第八课必读与全部资源分类</a><a href="99-exercises.html">第八课课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

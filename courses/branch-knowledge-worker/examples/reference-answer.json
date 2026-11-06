@@ -1,0 +1,29 @@
+{
+  "draft": "Decision：先做原型、不发布。ActionItem：整理报名字段。Owner：小林。DueDate：周五，具体日期待确认。SourceSentence：m2。NeedsConfirmation：会议日期和预算。",
+  "claims": [
+    {
+      "text": "小林负责整理字段",
+      "source_ids": [
+        "m2"
+      ],
+      "status": "supported"
+    },
+    {
+      "text": "预算已获批准",
+      "source_ids": [],
+      "status": "unsupported"
+    },
+    {
+      "text": "周五的具体年月日",
+      "source_ids": [
+        "m3"
+      ],
+      "status": "uncertain"
+    }
+  ],
+  "needs_confirmation": [
+    "会议日期",
+    "周五对应的具体日期",
+    "预算确认人及结果"
+  ]
+}

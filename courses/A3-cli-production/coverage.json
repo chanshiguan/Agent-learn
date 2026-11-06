@@ -1,0 +1,26 @@
+[
+  {
+    "requirement": "CLI-9：原题 filesystem server 路径",
+    "lesson": "lessons/04-original-delivery.html#h5d390571143a",
+    "example": "lessons/04-original-delivery.html#h5d390571143a",
+    "assessment": "lessons/04-original-delivery.html#h5d390571143a"
+  },
+  {
+    "requirement": "CLI-10：PR 输入与可信 Skill 必须一起对应",
+    "lesson": "lessons/04-original-delivery.html#hb5c05492eda1",
+    "example": "examples/review-workflow.yml",
+    "assessment": "lessons/04-original-delivery.html#hb5c05492eda1"
+  },
+  {
+    "requirement": "CLI-11：未知和未运行字段",
+    "lesson": "lessons/04-original-delivery.html#h6d08d928f903",
+    "example": "examples/receipt.py",
+    "assessment": "lessons/04-original-delivery.html#h6d08d928f903"
+  },
+  {
+    "requirement": "CLI-12：可安装、可撤销的同名 Skill",
+    "lesson": "lessons/04-original-delivery.html#hff1a96f7aef2",
+    "example": "examples/team-plugin/README.md",
+    "assessment": "lessons/04-original-delivery.html#hff1a96f7aef2"
+  }
+]

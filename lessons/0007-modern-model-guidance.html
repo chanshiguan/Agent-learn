@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>07 · 现代模型与厂商差异</title><link rel="stylesheet" href="../assets/course.css"></head>
+<body><main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><a href="0006-parameters-iteration-and-evals.html">06 迭代与 Eval</a><span class="current">07 现代模型</span><a href="../reference/prompt-glossary.html">术语表</a></nav>
+  <p class="eyebrow">Lesson 07 · Model-Specific Guidance</p>
+  <h1>Prompt 原则相通，但模型说明书不能混用</h1>
+  <p class="lede">清楚、具体、可验证是通用原则；预填充、推理强度、消息角色、采样参数和工具调用却可能随模型与 API 改变。本课教你分清“长期原则”和“当前接口行为”。</p>
+
+  <h2>1. 先区分三层知识</h2>
+  <table>
+    <thead><tr><th>层级</th><th>例子</th><th>变化速度</th></tr></thead>
+    <tbody>
+      <tr><td>通用原则</td><td>目标明确、输入有边界、输出可检查、用 Eval 验证</td><td>慢</td></tr>
+      <tr><td>模型家族习惯</td><td>推理模型偏好高层目标；普通生成模型需要更明确步骤</td><td>中</td></tr>
+      <tr><td>API 行为</td><td>字段名、角色优先级、工具 schema、参数是否生效</td><td>快</td></tr>
+    </tbody>
+  </table>
+  <p>迁移模型时，保留第一层，重新验证第二层，并查阅第三层的当前官方文档。</p>
+
+  <h2>2. GPT 类模型与推理模型</h2>
+  <p>OpenAI 当前指南将模型选择概括为两类倾向：</p>
+  <ul>
+    <li><strong>GPT 类模型：</strong>执行明确、细致的指令通常更稳定。复杂任务可给工作流程、成功标准、工具使用方式和输出格式。</li>
+    <li><strong>推理模型：</strong>更擅长在高层目标下自行规划。过度规定每一步可能限制它；给目标、约束和验收标准通常更合适。</li>
+  </ul>
+  <div class="callout"><strong>不是二选一的教条。</strong>先从简洁 Prompt 开始，用任务 Eval 决定是否需要更多步骤、示例或更强模型。模型大小还涉及成本、延迟和能力的权衡。</div>
+
+  <h2>3. 不要索取或依赖隐藏思维过程</h2>
+  <p>早期教程常把“逐步思考”写成要求模型展示完整推理。现代推理模型可以在内部完成推理；应用真正需要的是可核验结果：</p>
+  <pre><code>请给出：
+1. 最终结论；
+2. 支持结论的关键证据；
+3. 必要的计算或可复核步骤；
+4. 不确定性与待确认信息。</code></pre>
+  <p>这比索取冗长的私人思维记录更实用。提高 reasoning effort 也不是免费的：通常会增加 token、延迟与成本，应通过 Eval 判断是否值得。</p>
+
+  <h2>4. Gemini 3 系列的当前提示原则</h2>
+  <ul class="checklist">
+    <li>语言精确、直接，避免互相冲突或含糊的要求。</li>
+    <li>用一致的 Markdown 标题或 XML 标签组织规则、上下文和输入。</li>
+    <li>解释含义不明确的参数、缩写和业务术语。</li>
+    <li>明确所需详细程度，不要只写“简洁”或“详细”。</li>
+    <li>多模态输入要与问题对应，说明图片、音频或视频在任务中的用途。</li>
+    <li>关键行为约束放在前面；长资料放前面，具体问题放在资料后面。</li>
+    <li>长上下文末尾可加锚点，如“根据以上合同，回答下面的问题”。</li>
+  </ul>
+  <p>Google 还给 Gemini 3 Flash 提到日期、知识截止时间和严格 grounding 约束。它们是行为提醒，不会赋予模型最新知识：涉及今天的新闻、价格、法规或软件版本，仍应使用搜索或可信数据源。</p>
+
+  <h2>5. 一份跨模型可迁移的 Prompt 骨架</h2>
+  <pre><code># 身份
+你是售后工单分类助手。
+
+# 任务
+把当前留言分为 billing、bug 或 other。
+
+# 判断规则
+- billing：退款、扣款、发票、套餐费用。
+- bug：功能报错、页面打不开、操作结果异常。
+- other：无法归入前两类或信息不足。
+
+# 示例
+输入：付款页一直转圈，无法提交。
+输出：bug
+
+# 当前输入
+&lt;message&gt;会员为什么没有学生优惠？&lt;/message&gt;
+
+# 输出约束
+只返回一个小写标签，不要解释。</code></pre>
+  <p>骨架不是固定仪式。自然语言短任务不必堆满标题；复杂任务才需要用结构降低歧义。动态输入应与规则分隔，避免把附件中的句子误当成指令。</p>
+
+  <h2>6. 长上下文怎样摆放</h2>
+  <p>三个来源共同支持的实用布局是：稳定规则靠前，长资料随后，当前问题靠近末尾。这样既利于阅读，也有利于某些 API 的 Prompt Cache 命中。</p>
+  <pre><code>[身份与长期规则]
+[工具说明与固定范例]
+[本次长资料]
+[锚点：只根据以上资料]
+[本次问题与输出格式]</code></pre>
+  <p>长上下文不等于可靠上下文。应先检索相关片段、保留出处，并要求答案引用提供的证据；超出资料时明确回答“不足以确定”。</p>
+
+  <h2>7. Agent 系统提示需要控制哪些行为</h2>
+  <table>
+    <thead><tr><th>行为维度</th><th>应说明的内容</th></tr></thead>
+    <tbody>
+      <tr><td>任务分解</td><td>先识别依赖关系，再决定步骤顺序</td></tr>
+      <tr><td>诊断</td><td>保留多个假设，用证据逐个排除</td></tr>
+      <tr><td>风险</td><td>不可逆、外部影响大的操作先确认</td></tr>
+      <tr><td>信息源</td><td>优先使用哪些文件、搜索、数据库或工具</td></tr>
+      <tr><td>Grounding</td><td>事实如何引用；缺少证据时怎样表达不确定</td></tr>
+      <tr><td>适应</td><td>工具失败、结果异常时如何调整计划</td></tr>
+      <tr><td>持久性</td><td>在安全范围内继续尝试，直到达到验收标准</td></tr>
+      <tr><td>完整性</td><td>不能只完成容易部分；逐项核对要求</td></tr>
+      <tr><td>沟通</td><td>何时报告进度、何时提问、输出多详细</td></tr>
+    </tbody>
+  </table>
+  <p>这也是 Google 所说的三个大类：推理与策略、执行与可靠性、交互与输出。系统提示负责行为边界，应用代码负责真正的权限控制；不能只靠文字阻止危险操作。</p>
+
+  <h2>8. 编码与前端任务的现代建议</h2>
+  <ul>
+    <li>提供仓库规则、现有技术栈、允许修改的范围和完成标准。</li>
+    <li>要求先读取相关代码，再做最小改动，并运行对应测试或静态检查。</li>
+    <li>给出工具调用范例，特别是命令格式、路径和测试方式。</li>
+    <li>前端任务需明确视觉目标、响应式范围、无障碍要求和允许使用的组件库。</li>
+    <li>不要把“使用最新库”写死在长期 Prompt 中；依赖推荐会变化，应查当前项目与官方资料。</li>
+  </ul>
+
+  <h2>9. 三份资料中容易过时的具体建议</h2>
+  <table>
+    <thead><tr><th>建议</th><th>现在应该怎样理解</th></tr></thead>
+    <tbody>
+      <tr><td>Anthropic 的 XML 工具调用</td><td>它很好地解释了工具循环原理；生产代码优先使用当前 API 的原生 tool schema</td></tr>
+      <tr><td>Assistant Prefill</td><td>能约束输出开头，但不是所有新模型或 API 都支持，先查兼容性</td></tr>
+      <tr><td>“思考必须写出来才算数”</td><td>属于旧模型时代的说法；现代推理模型可内部推理，要求可验证证据即可</td></tr>
+      <tr><td>OpenAI <code>instructions</code></td><td>优先级高，但只作用于当前响应；使用 <code>previous_response_id</code> 不会自动继承旧 instructions</td></tr>
+      <tr><td>Gemini 采样参数</td><td>新版本可能忽略或拒绝自定义 temperature、top_p、top_k，必须按具体版本验证</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10. 最终决策顺序</h2>
+  <ol>
+    <li>先用最小、清晰的 Prompt 建立基线。</li>
+    <li>检查输出是否被截断、解析是否错误。</li>
+    <li>判断缺的是指令、范例、知识、推理能力还是工具。</li>
+    <li>只修改一个变量，用固定 Eval 重跑。</li>
+    <li>记录模型快照、参数、Prompt 版本、成本与失败样本。</li>
+    <li>升级模型或 SDK 时，重新核对厂商特定行为。</li>
+  </ol>
+
+  <h2>11. 检索练习</h2>
+  <div class="quiz" data-quiz data-answer="b" data-correct="当前信息需要外部数据源；日期提醒不能让静态模型自动知道今天的价格。" data-incorrect="提示模型注意日期只能影响行为，不能补充它没有获得的事实。">
+    <fieldset><legend>1. 要回答“今天某股票收盘价”，最关键的是？</legend><label><input type="radio" name="g1" value="a"> 写上“当前日期”</label><label><input type="radio" name="g1" value="b"> 调用可信行情工具</label><label><input type="radio" name="g1" value="c"> 提高 temperature</label></fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="quiz" data-quiz data-answer="c" data-correct="模型或 API 升级后，应以固定 Eval 重新验证所有模型特定行为。" data-incorrect="通用原则可以保留，但 API 与模型习惯可能已经变化。">
+    <fieldset><legend>2. 从旧 Claude 教程迁移到新模型，最稳妥的做法是？</legend><label><input type="radio" name="g2" value="a"> 原 Prompt 完全不变</label><label><input type="radio" name="g2" value="b"> 删除所有结构</label><label><input type="radio" name="g2" value="c"> 保留通用原则并做回归 Eval</label></fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="next-prev"><a href="0006-parameters-iteration-and-evals.html">← 上一课：迭代与 Eval</a><a href="../reference/prompt-glossary.html">下一步：查阅术语表 →</a></div>
+  <footer><p>完成七课后，请用自己的真实任务做一个 10 条案例的 Eval；这是从“理解概念”进入“能稳定应用”的分界线。</p></footer>
+</main><script src="../assets/quiz.js"></script></body></html>

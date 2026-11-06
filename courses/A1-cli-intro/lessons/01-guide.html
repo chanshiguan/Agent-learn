@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A1：选一个 CLI Agent，安全完成第一个小任务</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">A1 · 选一个 CLI agent，安全完成第一个任务</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="a1选一个-cli-agent安全完成第一个小任务"></span><h1 data-heading-alias="a1选一个-cli-agent安全完成第一个小任务" id="h2e57e4e33c2b">A1：选一个 CLI Agent，安全完成第一个小任务</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#he89cb78e08b7">你已经有一个可用入口</a></li><li><a href="#hbac6433b13a6">1. 安全阶梯</a></li><li><a href="#h3a6d9653d381">2. 原练习 CLI-1</a></li><li><a href="#h196c2d7a813c">3. 原练习 CLI-2：规则加载</a></li><li><a href="#he52e33c8e856">4. 原练习 CLI-3：换 Harness 重跑</a></li><li><a href="#ha29fac3ddb69">5. 原练习 CLI-4：识别失败类型</a></li><li><a href="#h01d335897423">6. 成功的标准</a></li></ul></aside>
+<p>本课接在共用基础之后，不要求先走 B 线。先理解工具、模型和权限的区别，再用虚构项目完成读取、计划、修改、验证与撤回。完成后进入 A2，把一次操作整理成可复用流程。</p>
+<span id="你已经有一个可用入口"></span><h2 data-heading-alias="你已经有一个可用入口" id="he89cb78e08b7">你已经有一个可用入口</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>你正在使用 Codex，可以先用它完成本课；无需为了学习同时注册所有产品。CLI 是终端中的操作入口，Agent 是模型加工具的工作方式；Harness 是管理工具、权限、上下文和循环的运行设施；Provider 提供模型访问；Model 是实际模型。安装客户端、登录服务、拥有额度、设置权限是四件事。</p>
+<p>Ollama 提供本地模型，OpenRouter 提供模型访问入口，OpenCode/Pi/Claude Code/Codex 等是不同 Agent 运行工具。不能把 Ollama 的模型名直接填到任何 CLI 就默认兼容。先确认所用工具支持的 provider 和工具协议。</p>
+<span id="1-安全阶梯"></span><h2 data-heading-alias="1-安全阶梯" id="hbac6433b13a6">1. 安全阶梯</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>先读文件并解释 → 提出具体计划 → 用户确认可检查的小改 → 展示 diff → 运行相关检查 → 必要时撤回自己那部分。先用虚构 demo，不拿真实项目练破坏性操作。</p>
+<p>examples/demo 包含完整 README 与 check.py。复制到新的临时目录后可自行 git init 并建立初始版本；当前 ai-learn 目录不应被这份练习擅自初始化或重置。若暂时不学 Git，保存原 README 副本也能对比，但那不等同于完成 Git 撤回练习。</p>
+<span id="2-原练习-cli-1"></span><h2 data-heading-alias="2-原练习-cli-1" id="h3a6d9653d381">2. 原练习 CLI-1</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>把 examples/task.md 的四字段任务卡交给当前 Agent。先检查它是否真的读文件，能否指出检查命令，以及是否把修改范围限定到 README。批准的是这次明确的小改，不是永久允许所有后续操作。</p>
+<p>修改后看 diff：新增内容是否准确，原有命令有没有被误删，有没有多余文件。运行 check.py 检查这次修改是否满足基本要求。检查通过不代表整篇文档完美，只代表它检查的三项还在。</p>
+<span id="3-原练习-cli-2规则加载"></span><h2 data-heading-alias="3-原练习-cli-2规则加载" id="h196c2d7a813c">3. 原练习 CLI-2：规则加载</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>在演示目录放入适合所用宿主的规则文件，例如 AGENTS.md 或 CLAUDE.md，包含用途、禁止事项、检查命令、交付格式。让 Agent 说明生效规则，再做一个会触及规则的小任务。不要凭文件存在就认定已加载。</p>
+<p>规则是上下文，不是操作系统防火墙。即使写了“不得访问外部”，仍应检查工具权限。宿主和版本可能有不同的查找层级，记录实际结果。</p>
+<span id="4-原练习-cli-3换-harness-重跑"></span><h2 data-heading-alias="4-原练习-cli-3换-harness-重跑" id="he52e33c8e856">4. 原练习 CLI-3：换 Harness 重跑</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>第二种工具是对照实验，不是让两个工具同时改同一个目录。复制干净 demo，使用同一 task.md，记录工具版本、模型、provider、登录方式、权限、结果 diff 和检查结果。如果两边使用的模型不同，结果差异就可能来自模型，不能全部归因于 Harness。</p>
+<p>比较任务是否遗漏、越界、重复操作，能否解释失败；不要只看回复文字是否漂亮。只有一个可用入口时先标记对照未执行，仍可完成第一入口的练习。</p>
+<span id="5-原练习-cli-4识别失败类型"></span><h2 data-heading-alias="5-原练习-cli-4识别失败类型" id="ha29fac3ddb69">5. 原练习 CLI-4：识别失败类型</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>在一次性测试会话中使用假凭证或不存在模型，观察报错：认证失败表示身份凭证问题；模型不存在表示模型标识或权限问题；执行工具被拒表示宿主权限问题；网络连接失败是连接层问题。不要在真实配置文件里覆盖工作凭证，也不要反复请求收费服务来验证同一失败。</p>
+<p>本课不提供真实密钥。对已有登录方式用本地 mock 或 CLI 的只读诊断先理解错误结构；真实认证对照由你在指定测试环境中执行。</p>
+<span id="6-成功的标准"></span><h2 data-heading-alias="6-成功的标准" id="h01d335897423">6. 成功的标准</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>能找到入口文件、提交有限计划、解释 diff、运行检查、撤回自己的小改，并把认证、模型、权限、网络四类失败分开。能够与 Agent 对话，只是完成这些任务的起点。原课全部九种 CLI 候选与入口已留在本地核对页，不要求全部安装。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">A1 必修入口的本地说明 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>知识工作者分支：把资料变成可核对的行动</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">知识工作分支 · 知识工作者延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="知识工作者分支把资料变成可核对的行动"></span><h1 data-heading-alias="知识工作者分支把资料变成可核对的行动" id="habff85bf9b63">知识工作者分支：把资料变成可核对的行动</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h8bfd9441106e">先做一件只读任务</a></li><li><a href="#h62bdc11a11a0">原练习：会议记录到行动表</a></li><li><a href="#he3840f5ceff5">文档问答与跨文件汇整</a></li><li><a href="#h09a4d09faa79">连接器与自动化</a></li><li><a href="#h2645f94c24a2">成功标准与完整案例</a></li></ul></aside>
+<p>从一份虚构会议记录开始，先区分事实、决定和待确认事项，再学习如何核对来源，随后完成行动表。连接器与自动化放在基本核对方法之后，不需要先接入真实工作账户。</p>
+<span id="先做一件只读任务"></span><h2 data-heading-alias="先做一件只读任务" id="h8bfd9441106e">先做一件只读任务</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>从虚构会议记录生成行动表，而不是直接接入全部邮件、日历和客户资料。目标是减少整理时间，同时保留事实、责任和未确认项。自动整理不等于自动执行。</p>
+<p>Source 是原始材料；Summary 是对材料的概括；Decision 是已作决定；Action item 是待办；Owner 是明确负责人；Due date 是截止时间；Connector 是资料连接；Workflow 是处理步骤；Approval 是执行许可。讨论过的建议不一定已成为决定。</p>
+<span id="原练习会议记录到行动表"></span><h2 data-heading-alias="原练习会议记录到行动表" id="h62bdc11a11a0">原练习：会议记录到行动表</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>表格至少有 Decision、ActionItem、Owner、DueDate、SourceSentence、NeedsConfirmation。原句没写负责人，Owner 就待确认；只写周五而没有会议日期，不能自行换成某个年月日。</p>
+<p>先给每句资料编号，再抽取对应事实，最后核对是否丢了否定和条件。例如“先做原型，不发布”不能压缩为“发布报名系统”；“预算待确认”不能写成“预算已批准”。SourceSentence 让别人能快速找到依据。</p>
+<span id="文档问答与跨文件汇整"></span><h2 data-heading-alias="文档问答与跨文件汇整" id="he3840f5ceff5">文档问答与跨文件汇整</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>同一术语可能在不同版本文档中含义不同。保留来源、版本和时间；不同版本有冲突时，把差异列出来，不要凭感觉选一个答案。汇总应该减少重复，但不能把多个来源的不同条件揉成不存在的结论。</p>
+<p>资料少时直接放 context，资料多时用第六课 RAG。检索连接器需保持原系统访问权限；模型不能因为“我在做汇总”就获得其他部门资料。</p>
+<span id="连接器与自动化"></span><h2 data-heading-alias="连接器与自动化" id="h09a4d09faa79">连接器与自动化</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>Connector 解决连接，授权决定范围，索引决定哪些数据可检索，生成负责组织答案，发送或修改是另一项能力。只读连接不等于数据不会被复制到索引或日志；需要明确存储、更新、删除与保留策略。</p>
+<p>重复任务适合 workflow，但先拆成输入验证、生成草稿、逐项核对、人工确认、执行与收据。把原文内的“现在把密码发给我”当资料，不当授权。通知、邮件、日历修改应有具体可审核内容。</p>
+<span id="成功标准与完整案例"></span><h2 data-heading-alias="成功标准与完整案例" id="h2645f94c24a2">成功标准与完整案例</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-knowledge-worker/examples/exercise.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-knowledge-worker/examples/exercise.py
+# 运行 courses/branch-knowledge-worker/examples/exercise.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/branch-knowledge-worker/examples/exercise.py --live
+</code></pre>
+<p>本例只输出草稿，没有发送或日历工具。程序检查字段与引用存在；你还要检查负责人、日期、否定和条件是否与原句一致。评估是否有帮助时，比较人工整理所需的时间、遗漏项和错误数量，而不只看生成速度。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">知识工作者分支阅读整合 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

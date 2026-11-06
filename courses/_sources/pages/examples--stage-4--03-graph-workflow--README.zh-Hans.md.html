@@ -1,0 +1,141 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-3图式-workflowlanggraph-条件分支--hitl"></span><h1 data-heading-alias="练习-3图式-workflowlanggraph-条件分支--hitl" id="h9b3704633502">练习 3：图式 workflow（LangGraph 条件分支 + HITL）</h1>
+<p>对应 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a> 练习 3。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 graph workflow + HITL 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s7dd57631bd24">LangGraph interrupts (human-in-the-loop)</a> + <a href="../../reference/source-readings.html#scb0825026d12">LangGraph time-travel docs</a></li>
+<li>完整 references 见 <a href="stages--04-agent-frameworks.zh-Hans.md.html#-精选-projects">Stage 4 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="任务"></span><h2 data-heading-alias="任务" id="h5253040db864">任务</h2>
+<p><code>classify → [search?] → respond → [HITL] → final</code></p>
+<ul>
+<li><strong><code>classify_node</code></strong>：看 query 决定 <code>needs_search</code></li>
+<li><strong>条件分支</strong>：<code>needs_search=True</code> 走 <code>search</code> node、否则直接 <code>respond</code></li>
+<li><strong>HITL checkpoint</strong>：<code>review_node</code> 用 <code>interrupt()</code> 暂停，等待人类回答</li>
+<li><strong><code>final_node</code></strong>：<code>approved=True</code> → PUBLISHED、否则 REJECTED</li>
+</ul>
+<p>这题用 LangGraph 示范 <strong>graph state（图状态）</strong>、<strong>checkpoint（检查点）</strong>、<code>interrupt()</code> 与 <code>Command(resume=...)</code>。你可以看见流程停在哪里，以及它如何从同一个 <code>thread_id</code> 继续。</p>
+<span id="怎么跑--两条路径"></span><h2 data-heading-alias="怎么跑--两条路径" id="hcfbfbec15e1b">怎么跑 — 两条路径</h2>
+<blockquote>
+<p>⚠️ <strong>每个练习都要有自己的 Python 3.11 <code>.venv</code>。</strong> 不要把 Stage 4 五个 <code>requirements.txt</code> 混装。</p>
+</blockquote>
+<span id="path-aollama本机"></span><h3 data-heading-alias="path-aollama本机" id="he3a6dd47f2bf">Path A（Ollama、本机）</h3>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>预算：模型 API 是 <strong>$0</strong>；本机硬体、电力与下载仍有成本。这份 starter 会真的请 Ollama 写草稿，其他节点则使用可预测的 Python 逻辑。</p>
+<span id="path-banthropic比较云端结果"></span><h3 data-heading-alias="path-banthropic比较云端结果" id="h0e3c77158554">Path B（Anthropic、比较云端结果）</h3>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>预设固定型号：<code>claude-haiku-4-5-20251001</code>。若一次请求用 2,000 input + 1,000 output tokens：<code>2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007</code>。本练习通常只需要短草稿，但仍可能重试；先设供应商支出上限 <strong>$0.05</strong>。</p>
+<details markdown="1">
+<summary>macOS／Linux 指令与查核资讯</summary>
+<pre><code class="language-bash">python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+</code></pre>
+<p>官方来源：<a href="../../reference/source-readings.html#s7dd57631bd24">LangGraph interrupts</a>｜<a href="../../reference/source-readings.html#s99e58642fe77">LangGraph persistence</a>｜<a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic pricing</a></p>
+<p><small>套件、model ID、价格与官方连结查核：2026-08-28 UTC。</small></p>
+</details>
+<span id="不花钱验证程序逻辑"></span><h2 data-heading-alias="不花钱验证程序逻辑" id="h4571f575b19e">不花钱验证程序逻辑</h2>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py # 真正走分支、interrupt 与 resume
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 共用图行为
+</code></pre>
+<span id="langgraph-图结构精简"></span><h2 data-heading-alias="langgraph-图结构精简" id="hb753b10a1ddd">LangGraph 图结构（精简）</h2>
+<pre><code class="language-python">g = StateGraph(State)
+g.add_node(&quot;classify&quot;, classify_node)
+g.add_node(&quot;search&quot;, search_node)
+g.add_node(&quot;respond&quot;, respond_node)
+g.add_node(&quot;final&quot;, final_node)
+
+g.add_edge(START, &quot;classify&quot;)
+g.add_conditional_edges(&quot;classify&quot;, should_search, {&quot;search&quot;: &quot;search&quot;, &quot;respond&quot;: &quot;respond&quot;})
+g.add_edge(&quot;search&quot;, &quot;respond&quot;)
+g.add_edge(&quot;respond&quot;, &quot;review&quot;)
+g.add_edge(&quot;review&quot;, &quot;final&quot;)
+g.add_edge(&quot;final&quot;, END)
+
+graph = g.compile(checkpointer=InMemorySaver())
+</code></pre>
+<span id="hitl-怎么运作"></span><h2 data-heading-alias="hitl-怎么运作" id="h3c428c83cf1d">HITL 怎么运作</h2>
+<pre><code class="language-python"># 第一段：review_node 呼叫 interrupt()，图就把资料存进 checkpoint 并停下来
+config = {&quot;configurable&quot;: {&quot;thread_id&quot;: &quot;demo&quot;}}
+state_before = graph.invoke({&quot;query&quot;: ...}, config=config)
+# state_before[&quot;__interrupt__&quot;] 会带出草稿与问题
+
+# 第二段：人类回答后，用同一个 thread_id 恢复
+state_after = graph.invoke(Command(resume=True), config=config)
+</code></pre>
+<p><strong>关键</strong>：<code>interrupt()</code> 是“先停一下”；<code>Command(resume=True/False)</code> 是“带著人的回答继续”。Production 可以把这个等待点接到 webhook、Slack 或前端按钮。</p>
+<span id="为什么这个-pattern-重要"></span><h2 data-heading-alias="为什么这个-pattern-重要" id="hc350f9f4f9ca">为什么这个 pattern 重要</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>不用 HITL</th>
+<th>用 HITL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 发 email</td>
+<td>直接送出（风险）</td>
+<td>显示草稿、人类按 approve</td>
+</tr>
+<tr>
+<td>Agent 改 production 设定</td>
+<td>直接套用</td>
+<td>dry-run 后等核准</td>
+</tr>
+<tr>
+<td>Agent 做退款</td>
+<td>自动退</td>
+<td>超过 $X 等审核</td>
+</tr>
+</tbody>
+</table>
+<p>有 <strong>side effect（会改变外部世界的动作）</strong> 时，先判断风险；寄信、退款或改 production 设定通常需要 HITL、权限检查与 audit log。低风险唯读动作不一定要每次人工核准。</p>
+<span id="两个-path-观察重点"></span><h2 data-heading-alias="两个-path-观察重点" id="h83012a0e47ab">两个 path 观察重点</h2>
+<p>两个 path 共用同一张图；<code>classify</code>、离线查询与路由是可预测的 Python，<code>respond</code> 则真的调用不同模型写草稿。<strong>比较时只换模型，不要同时改 graph。</strong></p>
+<p>Node 里只负责暂停，拿到人的答案后再更新 state：</p>
+<pre><code class="language-python">from langgraph.types import interrupt
+
+def review_node(state):
+    approved = interrupt({&quot;draft&quot;: state[&quot;draft&quot;], &quot;question&quot;: &quot;Approve?&quot;})
+    return {&quot;approved&quot;: approved}
+</code></pre>
+<p>外面的 caller 收到真人答案后，才从同一个 <code>thread_id</code> 继续：</p>
+<pre><code class="language-python">from langgraph.types import Command
+
+human_answer = True
+result = graph.invoke(Command(resume=human_answer), config=config)
+</code></pre>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ul>
+<li><strong><code>checkpointer</code> 没设</strong>：没有 checkpointer 就无法可靠地保存 pause/resume 状态</li>
+<li><strong><code>thread_id</code> 不一致</strong>：第一段 <code>invoke</code> 与 <code>Command(resume=...)</code> 必须用同一个设定，否则找不到原来的 checkpoint</li>
+<li><strong>在 <code>interrupt()</code> 前做 side effect</strong>：恢复时节点可能重新执行。把寄信或扣款放在核准后，并加入 idempotency key</li>
+<li><strong>conditional_edges 函数要回 string</strong>：<code>should_search</code> return value 必须是 <code>add_conditional_edges</code> 第三个参数 dict 的 key、不能 return literal value 直接当 node name</li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<p>比较另一个模型，或把记忆体 checkpointer 换成适合部署环境的持久化储存。先确认官方 persistence 文件与失败恢复行为，再选资料库。</p>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>加 retry</strong>：在 <code>search_node</code> 失败时 retry、用 LangGraph 的 <code>error</code> edge</li>
+<li><strong>加多个 HITL</strong>：在不同 review node 调用 <code>interrupt()</code>，并替每个核准动作定义清楚资料</li>
+<li><strong>time-travel debug</strong>：<code>graph.get_state_history(config)</code> 拿到所有 checkpoint、可以回到任一步 fork 新 thread</li>
+<li><strong>加 streaming</strong>：<code>for state in graph.stream(...)</code> 边跑边看 state</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

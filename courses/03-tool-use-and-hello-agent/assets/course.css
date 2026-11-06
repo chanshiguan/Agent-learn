@@ -1,0 +1,18 @@
+/* 复用项目样式；本文件仅扩展第三课的代码阅读和打印。 */
+.toc ol { padding-left: 1.4em; }
+.toc li { margin: 8px 0; }
+.code-panel { position: relative; margin: 24px 0; }
+.code-panel pre { max-height: 44rem; tab-size: 4; font-size: .82rem; }
+.code-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font: 700 .86rem/1.5 system-ui, sans-serif; }
+.copy-button, [data-next] { padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); cursor: pointer; }
+.reading-source { color: var(--muted); font: .85rem/1.7 system-ui, sans-serif; }
+.step-view { min-height: 160px; padding: 20px; background: var(--panel); border-radius: 12px; }
+.step-view strong { color: var(--accent); }
+.lesson-list small { display: block; margin-left: 40px; color: var(--muted); }
+@media print {
+  details > * { display: block !important; }
+  details { break-inside: auto; }
+  .code-panel pre { max-height: none; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; }
+  .copy-button, [data-next], .course-nav { display: none; }
+  h2, h3 { break-after: avoid; }
+}

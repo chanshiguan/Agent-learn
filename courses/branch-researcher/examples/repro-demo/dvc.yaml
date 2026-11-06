@@ -1,0 +1,21 @@
+# 列出 DVC 可重跑的处理阶段。
+stages:
+  # 将指标计算阶段命名为 measure。
+  measure:
+    # 重跑此阶段使用当前环境中的 Python。
+    # 重跑时用当前 Python 环境执行指标脚本。
+    cmd: python measure.py
+    # 这些输入或脚本变化时，DVC 才需要重新计算对应指标。
+    # 列出阶段依赖；这些内容变化时需重新计算。
+    deps:
+      # 把输入样本表纳入依赖。
+      - data.csv
+      # 把指标计算代码纳入依赖。
+      - measure.py
+    # 将 JSON 标记为指标文件，便于比较不同数据版本的结果。
+    # 声明阶段产出的指标文件。
+    metrics:
+      # 将 metrics.json 作为比较实验结果的指标文件。
+      - metrics.json:
+          # 不把此指标文件放入 DVC 数据缓存，保留为便于版本比较的小文本文件。
+          cache: false

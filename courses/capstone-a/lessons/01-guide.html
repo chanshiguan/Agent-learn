@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>结业 A：做一条你会反复使用的 CLI 工作流</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">结业 A · CLI Power User 结业专题</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="结业-a做一条你会反复使用的-cli-工作流"></span><h1 data-heading-alias="结业-a做一条你会反复使用的-cli-工作流" id="h3234f8ec9512">结业 A：做一条你会反复使用的 CLI 工作流</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h8f35eccab8d4">原课门槛</a></li><li><a href="#h725c94de268a">完整示范：会议资料到行动草稿</a></li><li><a href="#h22b879db05a4">五维四级自评</a></li><li><a href="#hd325580cb201">最终交付</a></li></ul></aside>
+<p>把 A1、A2、第五课核心和 A3 的能力用在同一个任务中。先跑固定的会议整理示范，理解完整交付长什么样；再换自己的资料独立完成，并按五维标准自评。第八课建议学习，但不是本结业项目的强制前提。</p>
+<span id="原课门槛"></span><h2 data-heading-alias="原课门槛" id="h8f35eccab8d4">原课门槛</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>共用基础、A1、A2、第五课核心 5.1–5.4、A3 通过自我检查；第五课扩展和第八课不影响进入，第八课建议学习。选择一个真实重复问题，用 CLI Agent 为核心，至少连接一个 MCP 或自写 Skill/command。</p>
+<p>成品必须有明确输入、可用产出、别人可重跑的说明和至少一种失败处理。仅写一个离线 Python 脚本不满足 CLI Agent 核心要求；仅跟模型聊天没有交付物也不满足。</p>
+<span id="完整示范会议资料到行动草稿"></span><h2 data-heading-alias="完整示范会议资料到行动草稿" id="h725c94de268a">完整示范：会议资料到行动草稿</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>输入 meeting.txt，流程由 meeting-actions Skill 规定，CLI 生成 JSON 草稿，人核对后保存 draft.json，validate.py 做独立检查。输出不发送、不写真实日历。真实任务中换成你有权使用的资料，保持待确认和引用规则。</p>
+<p>examples 包含 Skill、任务卡、虚构资料、参考产物与完整验证器。把该目录复制到干净 demo；按所用宿主规则将 Skill 放入项目级技能目录，或在交互式 CLI 中显式提供它作为操作步骤。放好文件后，还要检查宿主是否真正识别并加载了 Skill。</p>
+<p>在当前 CLI 会话提交 task.md，确认它读取了正确 Skill 与资料。把实际结果另存 draft.json，然后运行：</p>
+<pre><code class="language-bash"># 运行 courses/capstone-a/examples/validate.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/capstone-a/examples/validate.py /tmp/draft.json
+</code></pre>
+<p>使用你的实际输出路径。默认不带路径时只校验 reference-draft.json，不能拿那次 PASS 当真实 CLI 成绩。保留 CLI 版本、模型、实际输出、检查日志和一次失败；缺文件时应停止，不生成替代会议内容。</p>
+<span id="五维四级自评"></span><h2 data-heading-alias="五维四级自评" id="h22b879db05a4">五维四级自评</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>从五个方面自评：问题是否真实、工具运用是否合适、别人能否重跑、失败后能否处理，以及文档与反思是否完整。每项分四级：未达，表示缺失或无法使用；基本，表示能运行但条件没有说清；良好，表示有真实用途、完整步骤和失败处理；优秀，还要有可测量的收益、可重复验证的结果和明确改进。原课完整 rubric 已放在本地核对资料中。</p>
+<span id="最终交付"></span><h2 data-heading-alias="最终交付" id="hd325580cb201">最终交付</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>一个目录，含成品、README、至少一次真实 CLI 运行证据、150 字以内反思。README 写安装、设置、输入、执行、预期输出、失败和卸载。省了多少时间应来自测量，不靠估计写成事实。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">结业 A 复用哪些知识 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

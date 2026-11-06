@@ -1,0 +1,17 @@
+{
+  "task": "将会议资料整理为 Decision/ActionItem/Owner/DueDate/SourceSentence/NeedsConfirmation 行动表草稿，缺失不猜。",
+  "evidence": [
+    {
+      "id": "m1",
+      "text": "会议决定先制作报名表原型，不发布正式版本。"
+    },
+    {
+      "id": "m2",
+      "text": "小林负责整理报名字段，周五前交给小周。"
+    },
+    {
+      "id": "m3",
+      "text": "预算待财务确认。会议记录未注明日期。"
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-5型别安全-agentpydantic-ai-structured-output"></span><h1 data-heading-alias="练习-5型别安全-agentpydantic-ai-structured-output" id="h9450b5bdc17a">练习 5：型别安全 agent（Pydantic AI structured output）</h1>
+<p>对应 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a> 练习 5。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 structured output / type-safe 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s473e7956a863">Pydantic AI 官方 docs</a> + <a href="../../reference/source-readings.html#s03ff95638105">Instructor library</a>（另一条 typed-output 路线）</li>
+<li>完整 references 见 <a href="stages--04-agent-frameworks.zh-Hans.md.html#-精选-projects">Stage 4 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="任务"></span><h2 data-heading-alias="任务" id="h5253040db864">任务</h2>
+<p>Agent 回问题、<strong>强制</strong> return <code>AnswerWithConfidence</code>：</p>
+<pre><code class="language-python">class AnswerWithConfidence(BaseModel):
+    answer: str
+    confidence: float = Field(ge=0.0, le=1.0) # runtime 验证 0-1
+    sources: list[str]
+</code></pre>
+<p>Pydantic AI 把 <strong>schema validation（格式规则检查）</strong> 放进程序：LLM 不照 schema 时，framework 可以拒绝或重试。它能检查形状，<strong>不能证明答案内容是真的</strong>。</p>
+<span id="怎么跑--两条路径"></span><h2 data-heading-alias="怎么跑--两条路径" id="hcfbfbec15e1b">怎么跑 — 两条路径</h2>
+<blockquote>
+<p>⚠️ <strong>每个练习都要有自己的 Python 3.11 <code>.venv</code>。</strong> 不要把这题的 Pydantic 需求与 CrewAI 练习混装。</p>
+</blockquote>
+<span id="path-a默认本机免费"></span><h3 data-heading-alias="path-a默认本机免费" id="hb0c1e438cbd6">Path A（默认、本机免费）</h3>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>预算：模型 API 是 <strong>$0</strong>；本机硬体、电力与重试时间仍有成本。</p>
+<span id="path-banthropic比较云端结果"></span><h3 data-heading-alias="path-banthropic比较云端结果" id="h0e3c77158554">Path B（Anthropic、比较云端结果）</h3>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>预设固定型号：<code>claude-haiku-4-5-20251001</code>。若一次请求用 2,000 input + 1,000 output tokens：<code>2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007</code>。验证失败可能重试；先设供应商支出上限 <strong>$0.05</strong>。</p>
+<details markdown="1">
+<summary>macOS／Linux 指令与查核资讯</summary>
+<pre><code class="language-bash">python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+</code></pre>
+<p>官方来源：<a href="../../reference/source-readings.html#sf2e164910593">Pydantic AI output</a>｜<a href="../../reference/source-readings.html#sebefc0c1cc0d">Pydantic AI testing</a>｜<a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic pricing</a></p>
+<p><small>套件、model ID、价格与官方连结查核：2026-08-28 UTC。</small></p>
+</details>
+<span id="不花钱验证程序逻辑"></span><h2 data-heading-alias="不花钱验证程序逻辑" id="h4571f575b19e">不花钱验证程序逻辑</h2>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py # 官方 TestModel + schema 边界
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 相同输出契约
+</code></pre>
+<p><code>test.py</code> 直接验 <code>AnswerWithConfidence</code> 对非法资料（confidence &gt; 1.0、type 不对、sources 不是 list）的 ValidationError——不需要打 LLM、纯 type 层测试。</p>
+<span id="为什么-type-safe-agent-重要"></span><h2 data-heading-alias="为什么-type-safe-agent-重要" id="h5b80567cf459">为什么 type-safe agent 重要</h2>
+<pre><code>Stage 3 练习 6：schema = JSON Schema in prompt
+    LLM 看到、但回什么是 LLM 决定（可能违反）
+
+Stage 4 练习 5：schema = Pydantic model in code
+    LLM 违反 → framework 自动 raise → retry / 修
+    成功回传的 output 已通过 runtime 格式检查
+    内容是否正确仍要另外验证
+</code></pre>
+<p>对 production：</p>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>纯 prompt schema</th>
+<th>Pydantic AI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM 偶尔少栏位</td>
+<td>你的下游 code 要 try/except</td>
+<td>自动 retry 直到符合</td>
+</tr>
+<tr>
+<td>型别错（confidence=&quot;high&quot;）</td>
+<td>下游 crash</td>
+<td>Pydantic ValidationError、retry</td>
+</tr>
+<tr>
+<td>边界错（confidence=1.5）</td>
+<td>下游用错误值</td>
+<td>拒绝、retry</td>
+</tr>
+<tr>
+<td>多余栏位</td>
+<td>依你的 parser 而定</td>
+<td>依 Pydantic model 设定处理</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：下游程序需要固定栏位时，typed output 很有用。Stage 3 练习 6 教 schema 设计；这题把 schema 变成 runtime contract，再提醒你补上事实查核。</p>
+<span id="pydantic-ai-核心观念"></span><h2 data-heading-alias="pydantic-ai-核心观念" id="h4815b30d798c">Pydantic AI 核心观念</h2>
+<span id="agent--output_type"></span><h3 data-heading-alias="agent--output_type" id="h63618912e21b">Agent + output_type</h3>
+<pre><code class="language-python">agent = Agent(
+    model=...,
+    output_type=AnswerWithConfidence, # ← 强制 LLM 回这个 shape
+    system_prompt=&quot;...&quot;
+)
+result = agent.run_sync(question)
+answer: AnswerWithConfidence = result.output # 已验证的物件
+</code></pre>
+<p><strong>重点</strong>：framework 把 Pydantic schema 转成 structured output 指示，执行 validation，失败时依设定重试。重试成功只表示格式合格。</p>
+<span id="field-constraints"></span><h3 data-heading-alias="field-constraints" id="h88f2c7edfd5a">Field constraints</h3>
+<pre><code class="language-python">confidence: float = Field(ge=0.0, le=1.0, description=&quot;...&quot;)
+</code></pre>
+<p><code>ge</code> / <code>le</code> 是 Pydantic 的 numeric bound。LLM 回 <code>1.5</code> 会被 ValidationError 挡下、retry。</p>
+<span id="自动-retry"></span><h3 data-heading-alias="自动-retry" id="hdfac29cef21a">自动 retry</h3>
+<pre><code class="language-python">Agent(..., retries=3) # default 1，可调
+</code></pre>
+<p>Pydantic AI 看到 ValidationError、会把错误讯息塞回 prompt、要求 LLM 重产。</p>
+<span id="两个-path-观察重点"></span><h2 data-heading-alias="两个-path-观察重点" id="h83012a0e47ab">两个 path 观察重点</h2>
+<table>
+<thead>
+<tr>
+<th>观察项</th>
+<th>Anthropic Claude haiku</th>
+<th>Ollama qwen2.5:3b</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次产对 schema</td>
+<td>用相同题组量测</td>
+<td>用相同题组量测</td>
+</tr>
+<tr>
+<td>retry 次数</td>
+<td>记录实际结果</td>
+<td>记录实际结果</td>
+</tr>
+<tr>
+<td>confidence 边界</td>
+<td>由 Pydantic 验证</td>
+<td>由 Pydantic 验证</td>
+</tr>
+<tr>
+<td>sources 是 list</td>
+<td>由 Pydantic 验证</td>
+<td>由 Pydantic 验证</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>依 tokens 与重试次数</td>
+<td>模型 API $0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教学重点</strong>：比较模型时要一起记录成功率、重试次数、延迟与费用；不要只看单次 token 价格，也不要先假设大模型一定比较省。</p>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ul>
+<li><strong><code>output_type</code> 太复杂</strong>：nested model 越深越难产生与维护。先用最少必要栏位，再用评测决定是否拆分</li>
+<li><strong>缺 <code>description</code></strong>：<code>Field(...)</code> 没写 <code>description=</code>、LLM 看不到栏位用途、易误填</li>
+<li><strong><code>retries=0</code></strong>：失败就 raise。重试次数要依费用、延迟与失败模式设定，并保留上限</li>
+<li><strong>小 model + 深 nested</strong>：qwen2.5:3b 可能 retry 多次仍不对。换大 model 或扁平 schema</li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<pre><code class="language-powershell">$env:MODEL=&quot;claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+</code></pre>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>加 tools</strong>：Pydantic AI agent 可以同时有 tools + structured output、<code>@agent.tool</code> 装饰函数</li>
+<li><strong>stream typed output</strong>：<code>agent.run_stream(...)</code> 边跑边验</li>
+<li><strong>跨 model 比较</strong>：同一个 schema 跑 Claude / GPT / Gemini / 本机 model，比较通过率、重试与成本</li>
+<li><strong>接 production</strong>：Pydantic AI 跟 FastAPI 整合很好、output 直接当 API response model</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

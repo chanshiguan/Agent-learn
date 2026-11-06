@@ -1,0 +1,88 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="核心练习先停下存好再安全地继续"></span><h1 data-heading-alias="核心练习先停下存好再安全地继续" id="h5872b454254a">核心练习：先停下、存好，再安全地继续</h1>
+<p>这题不用模型，也不会真的寄信或改资料。程序只把“假动作”写进本机 JSON ledger，让你先看懂安全骨架。</p>
+<p>对应 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 — Agent 上线工程：可测、可看、可停、可恢复</a> 核心练习 3。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<ul>
+<li><strong>Human Approval（人工批准）</strong>：敏感动作先暂停；人可以 approve 或 reject。</li>
+<li><strong>Checkpoint（检查点）</strong>：在等待批准时保存工作状态。</li>
+<li><strong>Resume（续跑）</strong>：程序重开后，从同一个 task ID 接着做。</li>
+<li><strong>Recovery（恢复）</strong>：状态损坏或不相符时 fail closed，不猜下一步。</li>
+<li><strong>Idempotency（幂等）</strong>：同一个 key 重跑很多次，假动作仍只执行一次。</li>
+</ul>
+<span id="先跑不花模型费用的测试"></span><h2 data-heading-alias="先跑不花模型费用的测试" id="h76191b069dc2">先跑不花模型费用的测试</h2>
+<p>在这个文件夹打开 PowerShell，直接复制：</p>
+<pre><code class="language-powershell">py -3.11 test.py
+</code></pre>
+<p>看到 <code>8/8 passed</code>，代表暂停、拒绝、批准、重开续跑、ledger 对账、损坏状态与“最多执行一次”都有离线测试。</p>
+<span id="亲手走一次-pause--approve--resume"></span><h2 data-heading-alias="亲手走一次-pause--approve--resume" id="hda7c5956e61b">亲手走一次 pause → approve → resume</h2>
+<p>第一步只建立 checkpoint，<strong>不执行假动作</strong>：</p>
+<pre><code class="language-powershell">py -3.11 starter.py start --action &quot;publish draft&quot; --key demo-001
+</code></pre>
+<p>你会看到 <code>status</code> 是 <code>waiting_for_approval</code>。现在关掉终端机也没关系；状态在 <code>.cache/safe-execution-state.json</code>。</p>
+<p>第二步由人决定。批准：</p>
+<pre><code class="language-powershell">py -3.11 starter.py resume --decision approve
+</code></pre>
+<p>再次执行同一行，ledger 仍只有一笔 <code>demo-001</code>。这就是最小的 idempotency 证据。</p>
+<p>要练拒绝，先删除这个练习自己建立的两个 <code>.cache/safe-execution-*.json</code>，再用新 key start，最后执行：</p>
+<pre><code class="language-powershell">py -3.11 starter.py resume --decision reject
+</code></pre>
+<span id="看懂两份文件"></span><h2 data-heading-alias="看懂两份文件" id="ha21549a392b8">看懂两份文件</h2>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>它保存什么</th>
+<th>不应该放什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>checkpoint state</td>
+<td>task ID、动作、状态、批准结果、schema version</td>
+<td>API key、密码、未遮罩的客户资料</td>
+</tr>
+<tr>
+<td>side-effect ledger</td>
+<td>已执行的 idempotency key 与假动作</td>
+<td>把“写入成功”当成业务 Outcome 已正确</td>
+</tr>
+</tbody>
+</table>
+<p>真实系统通常把 state 放进有权限、备份、保留期限与版本控制的数据库或 queue。这个 JSON 示例只教责任边界，不是 production 存储方案。</p>
+<span id="只改一件事"></span><h2 data-heading-alias="只改一件事" id="h3e24b238085c">只改一件事</h2>
+<p>把 <code>publish draft</code> 改成 <code>send reviewed summary</code>，并换一个新的 key。先 reject，再确认 ledger 没增加；重新 start 后 approve，再确认只增加一笔。</p>
+<span id="成功检查"></span><h2 data-heading-alias="成功检查" id="h10fc3e9baba8">成功检查</h2>
+<ul>
+<li>[ ] 没有人批准时，ledger 不会出现假动作。</li>
+<li>[ ] reject 后状态是 <code>cancelled</code>，而且没有副作用。</li>
+<li>[ ] approve 后状态是 <code>completed</code>。</li>
+<li>[ ] 同一个 key resume 两次，ledger 仍只有一笔。</li>
+<li>[ ] ledger 与 checkpoint 冲突时，程序会修复可证明的完成状态，或停止请人处理；不会把已执行的动作标成 <code>cancelled</code>。</li>
+<li>[ ] JSON 损坏或 key／action 不相符时，程序停止而不是猜测。</li>
+</ul>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s8e19a25035a2">OpenAI Agents SDK — Human-in-the-loop</a>：tool approval、<code>RunState</code> 保存与 resume。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s7dd57631bd24">LangGraph — Interrupts</a>：pause、approve／reject、checkpoint、resume 与 interrupt 前的幂等副作用。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s99e58642fe77">LangGraph — Persistence</a>：checkpointer、store、thread state 与 fault tolerance 的边界。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s6c790a16de0a">Anthropic — Demystifying evals for AI agents</a>：不要只看 Agent 说了什么，也要检查外部 Outcome 与完整 Trajectory。</li>
+</ul>
+<p><small>官方文件与链接查核：2026-08-31 UTC。</small></p>
+<details markdown="1">
+<summary>展开：为什么 ledger 要先写，checkpoint 才标成完成？</summary>
+<p>如果程序在两次写入中间中断，下次 resume 会先在 ledger 找同一个 idempotency key。找到就不重做假动作，只补上 <code>completed</code> checkpoint。这是教学用的最小 write-ahead 想法；真实跨服务交易仍要依数据库、queue 或供应商 API 的一致性保证设计。</p>
+</details>
+<details markdown="1">
+<summary>展开：常见错误与安全边界</summary>
+<ul>
+<li>把 approval 写在工具执行后：已经寄出或付款，再问人就太晚了。</li>
+<li>只有 retry，没有 idempotency key：网络 timeout 后重试可能重复副作用。</li>
+<li>checkpoint 没有 schema／程序版本：隔天部署新程序，旧 state 可能无法安全读取。</li>
+<li>把完整 Prompt、token 或客户资料塞进 state：state 也要做最小化、加密、权限与删除设计。</li>
+<li>只看 <code>status=completed</code>：仍要用 Outcome Eval 确认外部结果真的正确。</li>
+</ul>
+</details>
+<p>下一步：回到 <a href="stages--07-multi-agent-production.zh-Hans.md.html#-上线四步eval--observability--approvalrecovery--deploy">Stage 7 上线四步</a>，再做 Deploy 练习。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

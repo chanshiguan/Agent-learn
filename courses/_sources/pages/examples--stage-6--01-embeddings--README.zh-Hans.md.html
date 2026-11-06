@@ -1,0 +1,92 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-1embeddings-与相似内容搜索"></span><h1 data-heading-alias="练习-1embeddings-与相似内容搜索" id="h3d0669b779b5">练习 1：Embeddings 与相似内容搜索</h1>
+<p>← 回到 <a href="stages--06-memory-rag.zh-Hans.md.html#练习-1embeddings">Stage 6 — Memory &amp; RAG</a></p>
+<p>想象你把每句话放到一张大地图上。意思接近的句子会站得比较近。<strong>Embedding（嵌入向量）</strong>，就是每句话在这张地图上的数字坐标。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<ul>
+<li>说出 <strong>embedding</strong>、<strong>vector（向量）</strong>、<strong>cosine similarity（余弦相似度）</strong> 是什么。</li>
+<li>把 100 个句子转成向量。</li>
+<li>找出最接近问题的前 <code>top-k</code> 个句子。</li>
+<li>分清楚本机模型和云端 embedding 的差别。</li>
+</ul>
+<span id="-先懂三个核心词"></span><h2 data-heading-alias="-先懂三个核心词" id="h92f08ea3f3a5">🔑 先懂三个核心词</h2>
+<table>
+<thead>
+<tr>
+<th>核心词</th>
+<th>白话意思</th>
+<th>程序里看到什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Embedding</strong></td>
+<td>把文字变成一排数字，方便电脑比较意思</td>
+<td><code>model.encode(...)</code></td>
+</tr>
+<tr>
+<td><strong>Vector</strong></td>
+<td>那一排数字</td>
+<td><code>[0.12, -0.04, ...]</code></td>
+</tr>
+<tr>
+<td><strong>Cosine similarity</strong></td>
+<td>看两个向量的方向有多像；越接近 <code>1</code>，意思通常越近</td>
+<td><code>sent_vecs @ q_vec</code></td>
+</tr>
+</tbody>
+</table>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>★★★★★ <a href="../../reference/source-readings.html#sca656ad2dbe7">Sentence Transformers 官方文档</a>：本机 embedding 的第一手说明与示例。</li>
+<li>★★★★★ <a href="../../reference/source-readings.html#se43654adb91d">OpenAI <code>text-embedding-3-small</code> 官方模型页</a>：云端模型、用途与现行价格。</li>
+<li>★★★★☆ <a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a>：适合读完本练习后，再看较完整的 embedding 与 RAG 章节。</li>
+</ul>
+<p><sub>资料查核：2026-08-30 UTC。</sub></p>
+<span id="-先直接跑-path-a本机免费"></span><h2 data-heading-alias="-先直接跑-path-a本机免费" id="h9cf813735c51">▶️ 先直接跑 Path A（本机、免费）</h2>
+<pre><code class="language-powershell">pip install -r requirements.txt
+python starter.py
+</code></pre>
+<p>第一次执行会下载 <code>sentence-transformers/all-MiniLM-L6-v2</code>。模型在你的电脑执行，API 费用是 <strong>$0</strong>。</p>
+<details markdown="1">
+<summary>Path B（云端 embedding，OpenAI）</summary>
+<pre><code class="language-powershell">pip install -r requirements.txt
+$env:OPENAI_API_KEY = Read-Host &quot;OpenAI API key&quot;
+python starter_anthropic.py
+</code></pre>
+<p>Anthropic 目前没有自家的 embedding API；<a href="../../reference/source-readings.html#sb7330ee1efa0">Anthropic 官方 embedding 指南</a>以 Voyage AI 为主要示例。这份入门程序用 OpenAI，让你能跟本机结果做简单对照。</p>
+<p><code>text-embedding-3-small</code> 的费用按输入 token 计算：</p>
+<pre><code class="language-text">费用 = 输入 token 数 ÷ 1,000,000 × 每百万 token 价格
+</code></pre>
+<p>执行前先到官方模型页确认价格，并为 API 账户设定小额使用上限。</p>
+</details>
+<p><strong>Stage 06 总预算</strong>：五个 Path A 全部跑完，API 费用仍是 <strong>$0</strong>（不含下载、磁盘与电费）。选跑云端 Path 时，费用依 embedding／输入／输出 token 实际用量计算；先设小额账户上限，成功跑一次就停。</p>
+<span id="-不下载模型也能验证"></span><h2 data-heading-alias="-不下载模型也能验证" id="he5f26cdc85f6">✅ 不下载模型也能验证</h2>
+<pre><code class="language-powershell">python test.py
+python test_anthropic.py
+</code></pre>
+<p>测试使用假的向量与假的 API 回复，所以不会连外、不会扣款。</p>
+<span id="程序只做三件事"></span><h2 data-heading-alias="程序只做三件事" id="hedda6fc3b63d">程序只做三件事</h2>
+<pre><code class="language-python">sent_vecs = model.encode(sentences, normalize_embeddings=True)
+q_vec = model.encode([query], normalize_embeddings=True)[0]
+sims = sent_vecs @ q_vec
+top_idx = np.argsort(-sims)[:top_k]
+</code></pre>
+<ol>
+<li>把句子和问题都变成向量。</li>
+<li>比较向量方向。</li>
+<li>把分数最高的 <code>top-k</code> 笔放到前面。</li>
+</ol>
+<p><strong>Normalize（正规化）</strong> 会把向量调成相同长度。完成后，dot product 就能直接当 cosine similarity 使用。</p>
+<details markdown="1">
+<summary>常见问题与下一步</summary>
+<ul>
+<li><strong>不同模型的向量不能混用</strong>：它们像两张不同的地图，坐标不能直接比较。</li>
+<li><strong>查询太短</strong>：只有一两个字时，意思不够清楚，搜索结果容易飘。</li>
+<li><strong><code>top_k</code> 不是越大越好</strong>：拿太多内容会把噪声一起带回来。</li>
+<li>想比较模型时，可看 <a href="../../reference/source-readings.html#s9630f18b8920">MTEB</a>，但要用自己的语言与数据再测一次。</li>
+</ul>
+</details>
+<p>下一步：把向量放进 <a href="examples--stage-6--02-vector-db--README.zh-Hans.md.html">练习 2：Vector DB</a>，不必每次从头比较全部句子。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

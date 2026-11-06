@@ -1,0 +1,93 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-2多工具选择"></span><h1 data-heading-alias="练习-2多工具选择" id="h6d64a9b22511">练习 2：多工具选择</h1>
+<p>对应 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 — 工具使用与第一个 Agent Loop</a> 练习 2。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 70-150 行 illustrative 版、聚焦 <code>核心 pattern + 两条 SDK path</code>，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 tool-calling / multi-tool dispatch 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s54450ef6cd31">Anthropic Tool Use Cookbook</a>（单工具→多工具→parallel 完整 notebook）</li>
+<li>完整 references 见 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html#-精选-projects">Stage 3 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="为什么这题重要"></span><h2 data-heading-alias="为什么这题重要" id="h98de4bbbba52">为什么这题重要</h2>
+<p>这个练习让 LLM 在同一轮面对三个工具：<code>web_search</code>、<code>calculator</code>、<code>calendar_lookup</code>。重点不是工具本身强不强，而是观察 schema 的 <code>name</code> / <code>description</code> / <code>parameters</code> 如何决定模型挑哪一个。把 schema 写清楚，是 Stage 3 最值得花时间的子题。</p>
+<span id="怎么跑--两条路径"></span><h2 data-heading-alias="怎么跑--两条路径" id="hcfbfbec15e1b">怎么跑 — 两条路径</h2>
+<span id="path-a默认本机免费"></span><h3 data-heading-alias="path-a默认本机免费" id="hb0c1e438cbd6">Path A（默认、本机免费）</h3>
+<pre><code class="language-powershell">pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+python starter.py
+</code></pre>
+<p>预算：<strong>$0 API 费用</strong>；不包含硬件、内存与电力成本。</p>
+<span id="path-banthropic云端比较"></span><h3 data-heading-alias="path-banthropic云端比较" id="h18007cc6e9d9">Path B（Anthropic、云端比较）</h3>
+<pre><code class="language-powershell">pip install -r requirements.txt
+$env:ANTHROPIC_API_KEY = &quot;your-key&quot;
+python starter_anthropic.py
+</code></pre>
+<p>预算：每次先预留 <strong>$0.05</strong>。实际费用按 <code>输入 tokens × $1 / 1,000,000 + 输出 tokens × $5 / 1,000,000</code> 计算，Tool Use 还会加入 prompt tokens；价格查核日：<code>2026-08-27</code>。</p>
+<p>预期看到（Path A、本机）：</p>
+<pre><code>❓ 问题：What is (19 * 42) - 8? Use the best available tool.（using Ollama qwen2.5:3b）
+   tool: calculator
+   tool_input: {'expression': '(19 * 42) - 8'}
+   observation: 790
+✅ 练习 2 通过 — 你已用本机 qwen2.5:3b 跑通 multi-tool selection、$0/run
+</code></pre>
+<span id="不花钱验证程序逻辑mock-based"></span><h2 data-heading-alias="不花钱验证程序逻辑mock-based" id="h660f2bbd824f">不花钱验证程序逻辑（mock-based）</h2>
+<pre><code class="language-powershell">python test.py            # 验 Path A (Ollama) starter.py 逻辑
+python test_anthropic.py  # 验 Path B (Anthropic) starter_anthropic.py 逻辑
+</code></pre>
+<p>两条 test 都用 <code>unittest.mock</code>、不打真 API、$0/run。Path A 用 OpenAI-compat response shape、Path B 用 Anthropic content blocks。</p>
+<span id="两条-path-的-sdk-差异"></span><h2 data-heading-alias="两条-path-的-sdk-差异" id="h3ee91a202a3c">两条 path 的 SDK 差异</h2>
+<p>三个关键差异（其他完全一样）：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>Anthropic（Path B）</th>
+<th>OpenAI-compat / Ollama（Path A）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schema 包法</td>
+<td><code>tools=[{name, description, input_schema}, ...]</code></td>
+<td><code>tools=[{&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {name, description, parameters}}, ...]</code></td>
+</tr>
+<tr>
+<td>抓 tool call</td>
+<td><code>resp.content[i].type == &quot;tool_use&quot;</code></td>
+<td><code>resp.choices[0].message.tool_calls[i]</code></td>
+</tr>
+<tr>
+<td>input 格式</td>
+<td><code>call.input</code> 是 dict（自动 parse）</td>
+<td><code>call.function.arguments</code> 是 JSON string、要 <code>json.loads(...)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Tool selection <strong>逻辑本身</strong>跨 backend，但实际行为会随模型与题目变化。固定 prompt、schema 与测试题，用 eval 记录成功率与失败类型。</p>
+<span id="容易踩坑"></span><h2 data-heading-alias="容易踩坑" id="hd2f32b795f72">容易踩坑</h2>
+<p>多工具选择最常见的错误是 description 写得太像“一般说明文档”，而不是“给模型做决策的判断规则”：</p>
+<ul>
+<li><code>calendar_lookup</code> 描述只说“行事历”就会跟 <code>web_search</code> 边界模糊；明写“查特定日期事件”才好</li>
+<li><code>web_search</code> 适合“外部 / 近期 / 不确定信息”、<code>calculator</code> 只处理算式；边界写越清楚、模型越少误判</li>
+<li>不同模型对 description 质量的反应可能不同；不要预设哪一个一定更稳，用同一组固定 eval 实测</li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<p>预设用固定 ID <code>claude-haiku-4-5-20251001</code>。想比较 sonnet 时：</p>
+<pre><code class="language-powershell">$env:MODEL = &quot;claude-sonnet-5&quot;; python starter_anthropic.py
+</code></pre>
+<p>或在 Ollama path 换 <code>qwen2.5:7b</code>；行为和成本要用固定 eval 实测：</p>
+<pre><code class="language-powershell">$env:MODEL = &quot;qwen2.5:7b&quot;; python starter.py
+</code></pre>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>加更多 tool</strong>：在 <code>TOOLS_SPEC</code> + <code>TOOL_IMPL</code> 补一个 entry 即可</li>
+<li><strong>改成多轮 ReAct</strong>：把单轮 call 包进 while loop，看 <a href="examples--stage-3--03-react-from-scratch--README.zh-Hans.md.html"><code>../03-react-from-scratch/</code></a></li>
+<li><strong>schema 细节</strong>：看 <a href="examples--stage-3--06-schema-design--README.zh-Hans.md.html"><code>../06-schema-design/</code></a> 比较 bad / good schema 对选择正确率的影响</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

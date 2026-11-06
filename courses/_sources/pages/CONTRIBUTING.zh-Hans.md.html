@@ -1,0 +1,107 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CONTRIBUTING.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="贡献指南"></span><h1 data-heading-alias="贡献指南" id="hc23b3122c231">贡献指南</h1>
+<p>谢谢你考虑贡献。<strong>这是一份精选的学习路线图，不是百科目录。质量 &gt; 数量。</strong></p>
+<p>这个 repo <strong>本来就是设计给社群一起改良的</strong>——一个人 curate 永远跟不上 AI agent 生态的变化速度。Maintainer 一个季度跑 1 次 review 不够，需要更多眼睛看。</p>
+<p>这份 catalog 分<strong>两条轨道</strong>：<strong>Track A</strong>（CLI Power User，<code>tracks/cli/A1-A3</code>）跟 <strong>Track B</strong>（Agent Builder，<code>stages/03-08</code>，包含 Stage 7.5）。贡献时请注明你动的是哪条轨道——两条的 audience 不一样。</p>
+<span id="-第一次贡献好上手的-5-个切入点"></span><h2 data-heading-alias="-第一次贡献好上手的-5-个切入点" id="hc033d549a1f4">🚪 第一次贡献：好上手的 5 个切入点</h2>
+<p>不确定从哪开始？挑一个你 30 分钟内能做完的：</p>
+<ol>
+<li><strong>🐛 回报过时 entry</strong>：跑 <code>python scripts/check-repository-freshness.py full</code>，把归档、停用、搬家或 License 不一致的证据放进 issue</li>
+<li><strong>🔗 修一个失效连结</strong>：你看 stage X 时连结 404 了，直接 PR 改</li>
+<li><strong>✍️ 补一个 entry 的 <code>怎么跑</code> section</strong>：很多 entry 没写安装指令，你跑过就补上</li>
+<li><strong>🌏 修正三语镜像</strong>：对照繁中、简中和英文，把意思不同、链接不同或翻译不顺的地方改好</li>
+<li><strong>💬 对某个 entry 加个人笔记</strong>：你跑过 <code>练习 3</code> 卡某个地方，补一句“注意：xxx”</li>
+</ol>
+<p>这 5 种都不用先读完整份 style guide，范围小、容易检查，适合第一次贡献。</p>
+<blockquote>
+<p>🧪 <strong>想跑 walkthrough / build script / CI workflow 第一次？</strong> 看 <a href="../../reference/navigation-notes.html#nb3a86474bf61"><code>.github/TESTING-STATUS.md</code></a>——这份<strong>诚实揭露</strong>哪些 code maintainer 真的跑过、哪些只 syntax check、哪些完全没测。第一个踩到坑的人开 issue + PR 是 highest-value contribution。</p>
+</blockquote>
+<span id="我们接受什么"></span><h2 data-heading-alias="我们接受什么" id="hf13629dc30d5">我们接受什么</h2>
+<span id="高价值-pr"></span><h3 data-heading-alias="高价值-pr" id="h9a9d2aa80a69">高价值 PR</h3>
+<ul>
+<li><strong>新增 project</strong> 到某个 stage，并说明为什么这个 project 对应该阶段的学习</li>
+<li><strong>补齐或修正三语内容</strong>；繁中先定稿，再让英文和简中表达同一件事</li>
+<li><strong>标记停滞 / 失维护的 project</strong>（请先开 issue）</li>
+<li><strong>改善现有 project 的策展备注</strong>（让“教什么”说明更清楚）</li>
+<li><strong>重新整理</strong> 某个 stage 内部顺序，如果现在的顺序不符合学习进程</li>
+</ul>
+<span id="较低优先仍然欢迎"></span><h3 data-heading-alias="较低优先仍然欢迎" id="ha9a59a97a4f7">较低优先（仍然欢迎）</h3>
+<ul>
+<li>错字修正</li>
+<li>连结修正（请先用 <code>curl -I</code> 验证）</li>
+<li>Stage 介绍文字优化</li>
+</ul>
+<span id="不接受"></span><h3 data-heading-alias="不接受" id="h9ee32cac8346">不接受</h3>
+<ul>
+<li>没有策展理由的批量加 repo</li>
+<li>没有教学价值的自我推销</li>
+<li>没文件的 project</li>
+<li>没明确 license 的 project</li>
+</ul>
+<span id="怎么新增一个-project"></span><h2 data-heading-alias="怎么新增一个-project" id="hd9b27a22a7cc">怎么新增一个 project</h2>
+<p>每一个 project 在 stage 页面内应该照这个格式：</p>
+<pre><code class="language-markdown">### [Project Name](url)
+
+| 栏位 | 内容 |
+|---|---|
+| 语言 | Python / TS / etc. |
+| License | MIT / Apache 2 / ... |
+| 推荐度 | ⭐⭐⭐⭐ |
+
+**教什么**：核心学习一句话总结。
+
+**适合谁**：谁应该读这个、为什么。
+
+**备注**：1-3 句的个人评价。哪里好、哪里弱、哪里可以跳。
+
+**怎么跑**：
+\`\`\`bash
+# 最小安装 / 第一次跑的指令
+\`\`\`
+</code></pre>
+<span id="策展标准"></span><h2 data-heading-alias="策展标准" id="h5ed0ee04dcc5">策展标准</h2>
+<p>值得列入的 project 必须：</p>
+<ol>
+<li><strong>有维护</strong>：最近 6 个月内有 commit，或明确标示“stable, no longer maintained”</li>
+<li><strong>有 hello-world 文件</strong>：读者应该能在 30 分钟内把东西跑起来</li>
+<li><strong>明确 license</strong>：MIT、Apache 2、BSD 或类似。避免没 license 的 repo。</li>
+<li><strong>可信赖的维护者</strong>：知名组织、公司，或有口碑的个人</li>
+</ol>
+<p><strong>大厂官方 AI 工具例外</strong>：已知大型供应商的官方工具与文档，不受上述 30 分钟入门门槛限制。
+例如 OpenAI、Anthropic、Google、Meta 与 xAI 的官方来源。这不适用于第三方包装或社区 repo。</p>
+<p>仍须确认教学用途、现行官方来源、状态与访问限制。未实测时要明写“官方动态／未实测参考”，不得标成已验证实践推荐。
+其他策展、授权、安全、三语及测试要求照常。</p>
+<p>自动检查会合并同一个 repo 的重复链接，查看它是否搬家、归档、停用，以及 GitHub 显示的 SPDX license。半年没有 push 只是在提醒你再看一眼：稳定而且仍有教学价值的项目可以保留，但要把状态写清楚。如果 GitHub API 暂时无法回答，结果会标成“无法确认”，不会假装一切正常。</p>
+<span id="三语风格"></span><h2 data-heading-alias="三语风格" id="hf8bdb9cbb5f0">三语风格</h2>
+<ul>
+<li><strong>繁中（Traditional Chinese, zh-TW）为正本</strong>；英文（<code>*.en.md</code>）和简中（<code>*.zh-Hans.md</code>）是正式镜像。</li>
+<li>修改已有三语版本的公开教材时，PR 必须同时更新三语。如果你只会一种语言，请在 issue 提供证据和建议文字，让维护者安排完整同步。</li>
+<li>三语的概念、URL、数字、推荐度、安全限制和完成条件必须一致。</li>
+<li><strong>自然翻译</strong>，不要逐字对译。技术词如果直接用英文比较自然，就保留英文（“使用 LangGraph 建 multi-agent 系统”）。</li>
+<li><strong>完整风格规范请看 <a href="resources--style-guide.zh-Hans.md.html"><code>resources/style-guide.zh-Hans.md</code></a></strong>——禁用词、entry schema、license 标注惯例、写作风格、推荐星等定义都在里面。PR 之前请先读。</li>
+</ul>
+<span id="流程"></span><h2 data-heading-alias="流程" id="hbdd207e8c6e3">流程</h2>
+<ol>
+<li>新 project 或大幅重组请先开 issue</li>
+<li>一次一个 stage，PR 范围要聚焦</li>
+<li>等审查（通常 7 天）</li>
+<li>Reviewer 可能会问你“为什么这个 project 教这个 stage”</li>
+</ol>
+<span id="要避免的反模式"></span><h2 data-heading-alias="要避免的反模式" id="h780672b14ea6">要避免的反模式</h2>
+<ul>
+<li>❌ “leverage”、“delve”、“comprehensive”、“robust”（LLM tell）</li>
+<li>❌ 过度行销（“revolutionary”、“game-changing”）</li>
+<li>❌ 只因为热门就列上来</li>
+<li>❌ 大段引用 project 自己的行销文案</li>
+</ul>
+<span id="担任-stage--branch-维护者"></span><h2 data-heading-alias="担任-stage--branch-维护者" id="he7d53f7e857b">担任 Stage / Branch 维护者</h2>
+<p>除了交一次性 PR，也欢迎担任<strong>特定 stage 或 branch 的长期维护者</strong>——负责定期 review、处理该领域的 issue、把关该领域的 PR。</p>
+<p>自荐流程：</p>
+<ol>
+<li>开一个 issue，标题 <code>[maintainer] Stage N — your-handle</code> 或 <code>[maintainer] for-X branch — your-handle</code></li>
+<li>讲清楚你愿意 commit 多久（建议至少一季 = 3 个月）</li>
+<li>简述你在这个领域的背景</li>
+</ol>
+<p>详见 <a href="CONTRIBUTORS.md.html"><code>CONTRIBUTORS.md</code></a>。每个 stage / branch 的 maintainer 名单都在那边。</p>
+<span id="license"></span><h2 data-heading-alias="license" id="hc011d6097bfb">License</h2>
+<p>贡献即代表你同意你的内容以 MIT 授权。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

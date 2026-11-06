@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03 · 输出控制、预填充与 Few-Shot</title><link rel="stylesheet" href="../assets/course.css">
+</head>
+<body><main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><a href="0002-foundations-roles-and-boundaries.html">02 基础与边界</a><span class="current">03 输出与范例</span><a href="0004-reasoning-grounding-and-reliability.html">04 推理与可靠性</a></nav>
+  <p class="eyebrow">Lesson 03 · Output & Examples</p>
+  <h1>不只要答对，还要让程序接得住</h1>
+  <p class="lede">这一课将 Anthropic 的输出格式与 Few-Shot、OpenAI 的 Markdown/XML 结构、Google 的补全策略和范例一致性合成一套可操作方法。</p>
+
+  <h2>1. 输出格式是任务契约</h2>
+  <p>模型默认倾向“帮助人”，所以常会加前言、解释、Markdown 或客套话。人类可以看懂，但程序可能只接受一个标签。</p>
+  <div class="two-col">
+    <div><h3>人类可读</h3><p>“根据留言内容，我认为这属于 billing。”</p></div>
+    <div><h3>程序可解析</h3><p><code>billing</code></p></div>
+  </div>
+  <p>格式要求应该具体到可检查：</p>
+  <ul>
+    <li>允许哪些值：<code>billing</code>、<code>bug</code>、<code>other</code>。</li>
+    <li>是否允许解释：不允许。</li>
+    <li>是否允许 Markdown：不允许代码块。</li>
+    <li>大小写和空白如何处理：小写，无多余空白。</li>
+  </ul>
+
+  <h2>2. XML 和 Markdown 的真正作用</h2>
+  <p>Markdown 标题适合表达层次，XML 标签适合标记数据边界和元数据。它们的作用是减少歧义，不是“提升智商”。</p>
+  <pre><code># Identity
+你是留言分类器。
+
+# Instructions
+- 只使用留言中的信息。
+- 不确定时输出 other。
+
+# Input
+&lt;message id="case-17"&gt;我被扣款两次&lt;/message&gt;
+
+# Output format
+只返回 billing、bug 或 other。</code></pre>
+  <p>对简单文本提取，可以要求模型用 <code>&lt;answer&gt;...&lt;/answer&gt;</code> 包裹关键结果，再由程序提取。对严格结构数据，应使用 Structured Outputs/schema，而不要把 XML 或“返回 JSON”当成硬保证。</p>
+
+  <h2>3. 预填充：给模型一个已经开始的模式</h2>
+  <p>Anthropic 旧教程将这种做法称为“替 Claude 先说一点”；Google 称为 completion strategy。思路是相同的：给出输出开头，让模型沿着模式继续。</p>
+  <pre><code>任务：输出订单中存在的商品数量。
+订单：两个汉堡和一杯饮料。
+输出：
+{</code></pre>
+  <p>它可以减少前言并引导格式，但仍然不是有效 JSON 的硬保证。不同 API 对 assistant prefill 的支持也可能不同，必须查当前模型文档。</p>
+
+  <h2>4. Stop Sequence：何时停止生成</h2>
+  <p>如果预期结果以 <code>&lt;/answer&gt;</code> 结束，API 可以配置该序列为停止条件，从而减少标签之后的多余内容。停止序列不能选择容易在正文中出现的字符串，否则会提前截断。</p>
+
+  <h2>5. Zero-Shot、One-Shot 和 Few-Shot</h2>
+  <table>
+    <thead><tr><th>方式</th><th>范例数</th><th>优势</th><th>风险</th></tr></thead>
+    <tbody>
+      <tr><td>Zero-Shot</td><td>0</td><td>短、快、成本低</td><td>边界和格式可能不稳定</td></tr>
+      <tr><td>One-Shot</td><td>1</td><td>能演示一种理想格式</td><td>一个范例可能让模型过度概括</td></tr>
+      <tr><td>Few-Shot</td><td>少量</td><td>展示多个边界与输出模式</td><td>占用 token，坏范例会教坏模型</td></tr>
+    </tbody>
+  </table>
+  <p>Few-Shot 不是微调。它没有修改模型参数，范例只在当前上下文中生效。</p>
+
+  <h2>6. 好范例的四条标准</h2>
+  <ol>
+    <li><strong>正确：</strong>输出必须是你真正想要的答案。</li>
+    <li><strong>多样：</strong>覆盖不同类型和容易混淆的边界，不只是三个同类简单案例。</li>
+    <li><strong>一致：</strong>标签、空格、换行、XML 和分隔符保持一样。</li>
+    <li><strong>代表性：</strong>范例的分布要接近真实输入，并包含失败过的边界。</li>
+  </ol>
+  <div class="callout warning"><strong>不要把“Google 建议经常使用 Few-Shot”理解成永远加范例。</strong>范例数没有固定答案。太多范例会增加上下文和成本，也可能让输出过度贴合范例。用 Eval 决定。</div>
+
+  <h2>7. 指令和范例如何分工</h2>
+  <p>指令适合表达通用规则；范例适合展示难以用话说清的边界、语气和格式。</p>
+  <pre><code># Instructions
+- 扣款、支付、发票属于 billing。
+- 界面或功能异常属于 bug。
+- 其他请求属于 other。
+
+# Examples
+&lt;example&gt;
+  &lt;input&gt;付款页面打不开&lt;/input&gt;
+  &lt;output&gt;bug&lt;/output&gt;
+&lt;/example&gt;</code></pre>
+  <p>这个边界范例很重要：它同时提到“付款”和“页面打不开”，因此能演示“技术故障优先按 bug 分类”的边界规则。</p>
+
+  <h2>8. 稳定前缀与 Prompt Caching</h2>
+  <p>对大量重复请求，将身份、规则和范例这些稳定内容放在前面，将每次变化的输入放在后面，有利于供应商的 Prompt Cache 命中。它不改变正确性，主要用来减少延迟和成本。</p>
+
+  <h2>9. 检索练习</h2>
+  <div class="quiz" data-quiz data-answer="a" data-correct="边界案例能展示单纯文字规则中难以表达的优先级。" data-incorrect="选择范例时要看信息量，不是只看字数。">
+    <fieldset><legend>1. 下列哪个最像有价值的边界范例？</legend>
+      <label><input type="radio" name="o1" value="a"> 付款页无法打开</label><label><input type="radio" name="o1" value="b"> 账单金额有误</label><label><input type="radio" name="o1" value="c"> 我被重复扣款</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="quiz" data-quiz data-answer="c" data-correct="对严格机器解析，schema 比自然语言承诺更可靠。" data-incorrect="前缀和 XML 能提高稳定性，但不提供严格 schema 保证。">
+    <fieldset><legend>2. 程序必须获得符合固定 JSON Schema 的数据，优先做法是？</legend>
+      <label><input type="radio" name="o2" value="a"> 加入 JSON 前缀</label><label><input type="radio" name="o2" value="b"> 多写几次必须</label><label><input type="radio" name="o2" value="c"> 使用结构化输出</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+
+  <div class="next-prev"><a href="0002-foundations-roles-and-boundaries.html">← 上一课：基础与边界</a><a href="0004-reasoning-grounding-and-reliability.html">下一课：推理与可靠性 →</a></div>
+  <footer><p>有不清楚的地方，可以把你的 Few-Shot 范例发给我，我会逐条说明它在教模型什么。</p></footer>
+</main><script src="../assets/quiz.js"></script></body></html>

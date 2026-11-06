@@ -1,0 +1,174 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>第四课课后练习</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">4 · Workflow Graph 与 Agent 框架</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="第四课课后练习"></span><h1 data-heading-alias="第四课课后练习" id="h508e2768e45e">第四课课后练习</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#ha1af12dd9457">目标与提交物</a></li><li><a href="#ha65251ae5032">先不看正文回答</a></li><li><a href="#hba60d2d6f22b">五项原练习与贯穿项目</a></li><li><a href="#hf683ac821958">排错与迁移</a></li><li><a href="#hb50f4e279762">本课分层完成标准</a></li><li><a href="#he06aec239d3e">独立回忆：先作答再展开</a></li><li><a href="#h53e0abd2eae6">新增必读 API 练习：动态工作者与两种交接</a></li></ul></aside>
+<span id="目标与提交物"></span><h2 data-heading-alias="目标与提交物" id="ha1af12dd9457">目标与提交物</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>目的：把“会调用框架”提升为“能解释流程、比较框架并控制失败”。做完应能画出状态图、定位工具调用、演示暂停恢复、区分结构正确和事实正确。</p>
+<p>提交一个 exercise-report.md，包含五项原练习的运行命令、Python/依赖/模型版本、输入输出、通过或失败原因。不要只交终端里的“通过”字样。</p>
+<span id="先不看正文回答"></span><h2 data-heading-alias="先不看正文回答" id="ha65251ae5032">先不看正文回答</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<ol>
+<li>一个 Graph 是否必须有两个 Agent？为什么？</li>
+<li>为什么修改 messages 要追加，修改 draft 却通常覆盖？</li>
+<li>Checkpoint 已写入，是否意味着发邮件一定不会重复？</li>
+<li>confidence 合法且很高，是否可以省略来源检查？</li>
+</ol>
+<details><summary>回忆题答案</summary>
+<p>不必须；Graph 描述控制关系。消息历史需要保留请求与结果，草稿字段通常表示当前版本。Checkpoint 不自动协调外部副作用，恢复要靠收据和幂等。confidence 只是输出字段，不能替代事实核查。</p>
+</details>
+<span id="五项原练习与贯穿项目"></span><h2 data-heading-alias="五项原练习与贯穿项目" id="hba60d2d6f22b">五项原练习与贯穿项目</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>依次运行本课 guide 指出的五个 examples/upstream 子目录。每题增加一个失败输入：字典没有的主题、作者看不到研究证据、拒绝审核、非法计算表达式、空来源。然后把图式案例改成“生成课程摘要 → 检查是否带固定资料来源 → 人工接受或拒绝”。</p>
+<p>验收：相同输入用于框架比较；拒绝时没有通过结果；循环在上限内停；空来源不能通过类型校验；把模拟数据明确标成模拟。模型失败也要记录，不准用手工填写的成功回答替换。</p>
+<details><summary>提示：从哪里修改</summary>
+<p>先改固定 search 字典与问题，再改 respond_node 的输出要求；别同时换模型、工具、框架和评分。审核节点仍使用 interrupt。先保留原测试作为基线，再增加拒绝与缺来源两种情况。</p>
+</details>
+<details><summary>完整参考实现：条件图、暂停与恢复</summary>
+<p>下面是与改造题对应的完整答案：固定来源检查、SQLite 跨进程恢复与拒绝分支。详细操作与预期输出见实作章；原五题代码仍保留作基线。</p>
+<pre><code class="language-python">&quot;&quot;&quot;真实 LangGraph：固定证据摘要→来源检查→人工批准；SQLite 跨进程恢复。&quot;&quot;&quot;
+
+# 先读 execute 的新建/恢复分支，再看 build 的连接关系和三个节点。
+import argparse
+import json
+from pathlib import Path
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+# interrupt 会把图暂停在审核点并保存待处理信息；收到恢复值之前，后续节点不会继续执行。
+# Command 携带恢复值或跳转信息；恢复暂停节点时要将人的决定放入 resume。
+from langgraph.types import interrupt, Command
+# SQLite 检查点把状态写入磁盘，因此可在另一个进程恢复；外部动作是否重复仍需幂等控制。
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+SOURCES = {'course-3': '工具调用由模型提出，应用执行，并把结果交回模型。'}
+
+
+# 这些字段描述共享状态的形状；TypedDict 本身不执行运行时校验。
+# 节点只返回自己更新的字段，状态会逐步补齐，因此 total=False 允许字段暂时缺失；TypedDict 不负责运行时拦截坏数据。
+class State(TypedDict, total=False):
+    topic: str
+    # draft：保存尚未批准的候选内容，把“生成成功”和“允许发布”分成两个不同阶段。
+    draft: str
+    source_ids: list[str]
+    checked: bool
+    status: str
+    published: bool
+
+
+def summarize(state):
+    # 固定摘录让本题只考流程；真实生成可以替换此节点，仍须走后续检查。
+    return {'draft': SOURCES.get(state['topic'], ''),
+            'source_ids': [state['topic']] if state['topic'] in SOURCES else [], 'published': False}
+
+
+# 本题要求草稿等于固定资料摘录，来源存在且内容匹配才进入人工审核。
+def check_sources(state):
+    refs = state['source_ids']
+    valid = bool(refs) and all(x in SOURCES for x in refs)
+    valid = valid and state['draft'] == '\n'.join(SOURCES[x] for x in refs)
+    return {'checked': valid, 'status': 'awaiting_review' if valid else 'blocked'}
+
+
+# interrupt 暂停后等待外部传入布尔决定；恢复时本节点可能从头再跑。
+def review(state):
+    # 把待审草稿带到暂停事件中，等待人给出明确决定；恢复时该节点可能重新执行，暂停前不要放不可重复的外部动作。
+    decision = interrupt({'draft': state['draft'], 'source_ids': state['source_ids'],
+                          'action': '仅标记本地接受，不向外发布'})
+    if type(decision) is not bool:
+        raise ValueError('批准必须为布尔值')
+    return {'status': 'accepted' if decision else 'rejected', 'published': decision}
+
+
+# 来源检查失败直接结束，通过才进入 review；检查点由调用者传入。
+def build(saver):
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    g = StateGraph(State)
+    # 把 summarize 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('summarize', summarize)
+    # 把 check 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('check', check_sources)
+    # 把 review 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('review', review)
+    # START 完成后进入 summarize，将这两步的执行先后固定在程序中。
+    g.add_edge(START, 'summarize')
+    # summarize 完成后进入 check，将这两步的执行先后固定在程序中。
+    g.add_edge('summarize', 'check')
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    g.add_conditional_edges('check', lambda s: 'review' if s['checked'] else END)
+    # review 完成后进入 END，将这两步的执行先后固定在程序中。
+    g.add_edge('review', END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    # checkpointer：把图的中间状态交给检查点保存器；暂停后恢复需要这份状态，单靠再次调用图无法找回进度。
+    return g.compile(checkpointer=saver)
+
+
+# 同一数据库和 thread_id 才指向同一个任务；已结束任务不能再次批准。
+def execute(database, thread, topic='course-3', decision=None):
+    # 运行配置必须在暂停和恢复时保持同一个会话标识，否则恢复会找不到刚才待审核的状态。
+    # configurable：传递可在每次运行时指定的图配置；会话标识放在这里，供检查点系统定位历史状态。
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    config = {'configurable': {'thread_id': thread}}
+    # 检查点写入磁盘，下一进程使用同一数据库和 thread_id 才能继续。
+    # 打开检查点数据库连接；路径决定保存在哪里，后续进程必须打开同一个库才能恢复。
+    with SqliteSaver.from_conn_string(str(database)) as saver:
+        graph = build(saver)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        if decision is None:
+            if snapshot.values:
+                raise ValueError('任务编号已存在；请恢复任务或换新编号')
+            graph.invoke({'topic': topic}, config)
+        else:
+            if not snapshot.next or snapshot.values.get('status') != 'awaiting_review':
+                raise ValueError('该任务不在等待批准状态，不能重复或越过批准')
+            # 把外部决定交回原暂停点，不重新创建一个跳过检查的新任务。
+            graph.invoke(Command(resume=decision), config)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        return {'state': snapshot.values, 'next': list(snapshot.next)}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument('--db', type=Path, required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument('--thread', required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--topic', default='course-3')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--decision', choices=['accept', 'reject'])
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    a = p.parse_args()
+    decision = None if a.decision is None else a.decision == 'accept'
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(execute(a.db, a.thread, a.topic, decision), ensure_ascii=False, indent=2))
+
+</code></pre>
+</details>
+<span id="排错与迁移"></span><h2 data-heading-alias="排错与迁移" id="hf683ac821958">排错与迁移</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>故意把 should_search 返回值改成未登记的名字，记录异常；恢复映射后再次运行。再把 InMemorySaver 当长期存储运行两个进程，说明为什么第二个进程无法读回第一个状态；给出改用持久化 saver 的设计，而不是假装已持久化。</p>
+<p>完成当天用一句话解释框架选择；两天后不看源码画图；一周后把天气查询换成课程资料检索。只有能独立重建并解释失败，才算巩固。</p>
+<span id="本课分层完成标准"></span><h2 data-heading-alias="本课分层完成标准" id="hb50f4e279762">本课分层完成标准</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<ol>
+<li>先回想：不看答案，用自己的话解释本课几个容易混淆的概念，再展开答案核对。</li>
+<li>跟着做：按<a href="03-workshop.html">分步实作与完整参考</a>运行最小案例，保存输入和输出。</li>
+<li>自己做：换一份资料，或修改一个要求，完成自己的结果。只运行参考文件还不够。</li>
+<li>试着排错：故意触发一次失败，说明怎么找到原因、怎么修复，再运行正常例子确认恢复。</li>
+</ol>
+<p>做完后，对照实作章末尾的评分标准逐项检查。分别记录代码是否运行成功、自动检查是否通过、内容是否经过人工核对，以及实际集成是否完成。待复核和未执行的项目暂不计为通过。卡住时，把课程编号、输入和实际输出发给我，一起定位问题。完成练习所需的步骤都在项目里。</p>
+<span id="独立回忆先作答再展开"></span><h2 data-heading-alias="独立回忆先作答再展开" id="he06aec239d3e">独立回忆：先作答再展开</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>每题先用自己的话回答，再看参考答案。表述可以不同，但要说清谁负责、什么情况下成立。</p>
+<span id="回忆题-1"></span><h3 data-heading-alias="回忆题-1" id="h26d39fd160b3">回忆题 1</h3>
+<p>图里只有一个模型节点，还算 Workflow 吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>算。图组织状态与控制关系，节点也可以是普通函数；节点或角色名称数量不是 Agent 数量。</p>
+</details>
+<span id="回忆题-2"></span><h3 data-heading-alias="回忆题-2" id="h77732339f22a">回忆题 2</h3>
+<p>SQLite 已保存状态，为什么仍可能重复发邮件？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>本地状态与邮件服务不是同一事务，恢复可能重跑，需要幂等键、外部收据和状态协调。</p>
+</details>
+<span id="新增必读-api-练习动态工作者与两种交接"></span><h2 data-heading-alias="新增必读-api-练习动态工作者与两种交接" id="h53e0abd2eae6">新增必读 API 练习：动态工作者与两种交接</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>完成<a href="06-framework-apis.html">动态分工与交接</a>中的三文档输入和两种交接对照，提交事件、最终 agent 与 reducer 解释。完整答案及预期结果在该章；默认脚本模型不计为真实模型能力成绩。</p>
+<p><a href="06-framework-apis.html">打开完整步骤、案例和答案</a></p>
+<nav class="next-prev" aria-label="章节导航"><a href="03-workshop.html">← 从一个状态对象，到可恢复的摘要流程</a><a href="../../index.html">完成本课验收后，查看下一课路线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,491 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>03-tool-use-and-hello-agent.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="stage-3--工具使用与第一个-agent-loop-"></span><h1 data-heading-alias="stage-3--工具使用与第一个-agent-loop-" id="h8a0a94632641">Stage 3 — 工具使用与第一个 Agent Loop ⭐</h1>
+<p>🌐 <a href="">English</a> | <strong>简体中文</strong> | <a href="">繁體中文</a></p>
+<p>这一关要做一件事：让模型填写一张“工具工作单”，再由你的程序检查、执行，并把结果送回去。这个来回就是你的第一个 <strong>Agent Loop</strong>。</p>
+<blockquote>
+<p><strong>云端范例兼容性</strong>：现有 Anthropic 范例刻意保留 <strong>Haiku 4.5 兼容性基准</strong>，不代表最新或最低价模型。改用固定 ID <code>claude-haiku-5-5</code> 前，先按 <a href="../../reference/source-readings.html#se471bc2bb72f">Haiku 5.5 迁移指南</a> 调整程序，不能只换 model ID：处理默认 adaptive thinking（自适应思考）、按 <code>type == &quot;text&quot;</code> 提取文字、移除 <code>temperature</code>／<code>top_p</code>／<code>top_k</code>，并重新计算 tokens、输出上限与预算。工具循环须原样保留 thinking 区块并只追加历史；离线测试通过不代表已验证真实模型质量。</p>
+</blockquote>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<p>完成后，你可以：</p>
+<ul>
+<li>说出 <code>schema → call → execute → result → answer</code> 五个步骤。</li>
+<li>定义一个工具，检查参数，再安全地执行对应函数。</li>
+<li>不靠 framework，写出有次数上限和停止条件的 <strong>Agent Loop</strong>。</li>
+<li>分清 <strong>Function Calling</strong> 与 <strong>Structured Output</strong>，不再把两者当成同一件事。</li>
+<li>用固定题目比较 schema 或模型，而不是靠一次结果下结论。</li>
+</ul>
+<span id="-进入条件"></span><h2 data-heading-alias="-进入条件" id="h4203fdf0a3c2">🚪 进入条件</h2>
+<p>你能运行一个 Python 文件、看懂 function 与 dict，并完成 <a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 02</a>，就可以开始。环境还没准备好时，先回 <a href="stages--00-foundations.zh-Hans.md.html">Stage 00</a>。</p>
+<span id="-先认识八个核心词"></span><h2 data-heading-alias="-先认识八个核心词" id="h70155c361cc5">🧩 先认识八个核心词</h2>
+<span id="tool-use工具使用"></span><h3 data-heading-alias="tool-use工具使用" id="h9dcad5bcb026"><strong>Tool Use（工具使用）</strong></h3>
+<p>模型需要外部资料或动作时，会先提出工具请求。就像孩子请大人帮忙打开高处的盒子：模型提出要做什么，程序才真正动手。本章用它查天气和做计算。<strong>模型本身不会执行你的 client tool。</strong></p>
+<span id="function-calling函数调用"></span><h3 data-heading-alias="function-calling函数调用" id="hb472d1beffb7"><strong>Function Calling（函数调用）</strong></h3>
+<p>模型按照约定格式，返回要调用的函数名称与参数。就像填写一张有固定栏位的工作单。本章用它把自然语言问题变成程序能读取的请求。不同供应商的消息格式不完全相同。</p>
+<span id="tool-schema工具纲要"></span><h3 data-heading-alias="tool-schema工具纲要" id="ha0ae88d7aba0"><strong>Tool Schema（工具纲要）</strong></h3>
+<p><strong>JSON</strong>（JavaScript Object Notation） 是程序交换数据的文本格式。</p>
+<p>Schema 是工具的说明卡：名称、用途、可填栏位和数据类型。就像菜单告诉客人能点什么。本章会用 JSON Schema 描述工具。Schema 能约束外形，但程序仍要验证数值、权限和业务规则。</p>
+<span id="tool-call工具请求"></span><h3 data-heading-alias="tool-call工具请求" id="h621474aac4ae"><strong>Tool Call（工具请求）</strong></h3>
+<p>Tool Call 是模型填好的工作单，包含工具名称、call ID 和参数。比如“请查台北，单位用摄氏”。本章的程序会先读取它，再从 allowlist 找到合法函数。它是请求，不是执行结果。</p>
+<span id="tool-result工具结果"></span><h3 data-heading-alias="tool-result工具结果" id="h92b1f3ac927c"><strong>Tool Result（工具结果）</strong></h3>
+<p>Tool Result 是程序做完事情后交回的数据，并用 call ID 对回原请求。就像厨房把做好的餐点放回正确桌号。本章会把成功或错误结果送回模型。外部结果可能不可信，不能把它当成最高优先级指令。</p>
+<span id="agent-loopagent-执行循环"></span><h3 data-heading-alias="agent-loopagent-执行循环" id="hb39a4369f251"><strong>Agent Loop（Agent 执行循环）</strong></h3>
+<p>程序重复“询问模型 → 执行工具 → 返回结果”，直到得到答案或碰到上限。就像照食谱一步一步做，完成就停。完整来回是 <code>model → tool call → execute → tool result → model</code>。本章的 working definition 是 <code>模型 + 工具 + 有界循环</code>；这是学习用定义，不是所有 Agent 的唯一学术定义。</p>
+<span id="reactreasoning--acting"></span><h3 data-heading-alias="reactreasoning--acting" id="hf811be9390f6"><strong>ReAct（Reasoning + Acting）</strong></h3>
+<p>ReAct 会交替决定下一步、采取 action、查看 observation，再继续。就像找钥匙时先看桌上，没看到再查抽屉。本章写的是 <strong>ReAct-inspired 的可观察工具循环</strong>；不要求模型公开私有 Chain-of-Thought。</p>
+<span id="structured-output结构化输出"></span><h3 data-heading-alias="structured-output结构化输出" id="h8d1b642c6cee"><strong>Structured Output（结构化输出）</strong></h3>
+<p>模型直接返回固定形状的数据，例如符合 schema 的 JSON。就像把答案填进表格。本章用它和 Function Calling 对照：前者要数据，后者要程序采取动作。即使外形合法，内容仍可能错误、被拒答或被截断。</p>
+<p><img src="../upstream/resources/diagrams/tool-use-loop.zh-Hans.png" alt="Tool Use 六步图：模型提出 Tool Call，程序验证并执行，再把 Tool Result 送回模型。" /></p>
+<span id="先选对方法"></span><h2 data-heading-alias="先选对方法" id="h79091d082ac8">先选对方法</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你要什么</th>
+<th style="text-align:left">先用什么</th>
+<th style="text-align:left">例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">只要文字答案</td>
+<td style="text-align:left">一般模型回答</td>
+<td style="text-align:left">改写一封信</td>
+</tr>
+<tr>
+<td style="text-align:left">要固定形状的数据</td>
+<td style="text-align:left">Structured Output</td>
+<td style="text-align:left">抽取姓名与日期</td>
+</tr>
+<tr>
+<td style="text-align:left">要查实时数据或采取动作</td>
+<td style="text-align:left">Function Calling / Tool Use</td>
+<td style="text-align:left">查天气、建立工单</td>
+</tr>
+</tbody>
+</table>
+<span id="-写第一个-agent-前的五条底线"></span><h2 data-heading-alias="-写第一个-agent-前的五条底线" id="h2cb0aa346cfa">⚠️ 写第一个 Agent 前的五条底线</h2>
+<ol>
+<li>只执行 allowlist 里的工具，不用模型输出的名称做任意函数调用。</li>
+<li>把工具参数当成不可信输入；先检查类型、范围和权限。</li>
+<li>工具只拿完成任务需要的最小权限。</li>
+<li>删除、付款、发邮件等高风险动作，执行前要让人确认。</li>
+<li>设置最大轮数、timeout 和费用上限；不能让 Agent 无限绕圈。</li>
+</ol>
+<span id="-必修阅读"></span><h2 data-heading-alias="-必修阅读" id="h333a7c3c42fb">📚 必修阅读</h2>
+<p>按顺序阅读：</p>
+<ol>
+<li><a href="../../reference/source-readings.html#s282a74b822c3">Ollama Tool Calling</a> ⭐⭐⭐⭐⭐ — 先看 single tool 与 multi-turn loop。</li>
+<li><a href="../../reference/source-readings.html#sa2c7cb24dc72">Anthropic — How Tool Use Works</a> ⭐⭐⭐⭐⭐ — 看清模型、应用程序和 tool result 各自负责什么。</li>
+<li><a href="../../reference/source-readings.html#s7647307fe498">ReAct paper</a> ⭐⭐⭐⭐ — 先读 abstract；了解 Reasoning + Acting 的来源，不必一次读完所有公式。</li>
+</ol>
+<details markdown="1">
+<summary>展开前置知识、环境、时间与预算</summary>
+<p><strong>前置知识</strong>：能运行 Python、看懂 list／dict／function，并完成 <a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 02</a>。</p>
+<p><strong>本地主路径</strong>：Ollama + <code>qwen2.5:3b</code>。这是根据用户安装情况验证后保留的入门模型，不代表它在每个 schema 上都最好。</p>
+<pre><code class="language-powershell">ollama pull qwen2.5:3b
+ollama serve
+python -m pip install &quot;openai&gt;=3.3,&lt;4&quot;
+</code></pre>
+<p><strong>云端比较路径</strong>：Anthropic + pinned Haiku model ID。</p>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;贴上你的密钥&quot;
+python -m pip install &quot;anthropic&gt;=1.0,&lt;2&quot;
+</code></pre>
+<p>macOS／Linux 的设置方式是 <code>export ANTHROPIC_API_KEY=&quot;贴上你的密钥&quot;</code>。不要把密钥写进程序或 commit。</p>
+<p><strong>时间</strong>：先跑练习 1–3 约 2–3 小时；练习 4–6 约 3–5 小时；完整 active path 约 5–8 小时。</p>
+<p><strong>费用计算方式</strong>：</p>
+<pre><code class="language-text">费用 = 输入 tokens ÷ 1,000,000 × input price
+     + 输出 tokens ÷ 1,000,000 × output price
+</code></pre>
+<p>2026-08-27 查核时，Claude Haiku 4.5 是 <code>$1 / $5</code>（input / output，每百万 tokens）。如果一次请求使用 2,000 input + 1,000 output，示例费用约 <code>$0.007</code>。工具循环会发送多次请求；每题先预留 <code>$0.05</code>，全章五轮实验先设置 <code>$1</code> provider spend limit。这是保守上限，不是账单保证。</p>
+<p>Path A 的 <strong>API 费用是 <code>$0</code></strong>；仍会使用你的硬件、内存与电力。</p>
+</details>
+<span id="agent-的经典范式thinking-patterns"></span><h3 data-heading-alias="agent-的经典范式thinking-patterns" id="h0a2ff456dce7">Agent 的经典范式（thinking patterns）</h3>
+<details markdown="1">
+<summary>展开 CoT、ReAct、Reflection 与 Planning 的差别</summary>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">白话用途</th>
+<th style="text-align:left">在哪里学</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Chain-of-Thought（CoT）</strong></td>
+<td style="text-align:left">早期 prompt 技巧常要求写出中间推理。现在不把完整私有思维链当成通用输出要求；需要检查时，看最终答案与简短、可验证的理由</td>
+<td style="text-align:left"><a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 02</a></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ReAct</strong></td>
+<td style="text-align:left">在循环中交替采取 action、读 observation，再决定下一步</td>
+<td style="text-align:left">本章练习 3</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Reflection</strong></td>
+<td style="text-align:left">用一轮反馈改进下一次尝试的广义做法</td>
+<td style="text-align:left">本章下方路由</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Reflexion／Self-Refine</strong></td>
+<td style="text-align:left">有明确 Actor／Critic 或自我反馈流程的研究 pattern</td>
+<td style="text-align:left">本章概念；持久记忆版见 <a href="stages--06-memory-rag.zh-Hans.md.html">Stage 06</a></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Planning</strong></td>
+<td style="text-align:left">先拆成多步，再根据结果调整计划</td>
+<td style="text-align:left"><a href="stages--07.5-advanced-agentic-concepts.zh-Hans.md.html">Stage 07.5</a></td>
+</tr>
+</tbody>
+</table>
+<p>这些词描述不同的解题方式，不是判断 Agent 的唯一标准。Computer-use、CodeAct 和 workflow agent 也可能使用不同的 loop。</p>
+</details>
+<span id="-动手练习"></span><h2 data-heading-alias="-动手练习" id="heaf7ce6df8e7">🛠 动手练习</h2>
+<p>先完成练习 1–3。练习 4–6 用来让循环更稳，不需要一天全部做完。</p>
+<span id="练习-1function-calling一个工具一次调用"></span><h3 data-heading-alias="练习-1function-calling一个工具一次调用" id="h83bb7856053f">练习 1：Function Calling（一个工具、一次调用）</h3>
+<p>完成后，你会看到模型先生成 <code>get_weather</code> Tool Call，程序执行它，再由模型用 Tool Result 回答。</p>
+<p>如果你偏好使用文件实现，可以打开<a href="examples--stage-3--01-function-calling--README.zh-Hans.md.html">练习 1 完整文件夹</a>。</p>
+<p><strong>第一步</strong>：复制并运行 <code>ollama pull qwen2.5:3b</code>。接着展开 Path A，把完整程序直接复制成 <code>hello_tool.py</code>。</p>
+<details markdown="1">
+<summary>Path A：Ollama 完整可复制示例（API 费用 <code>$0</code>）</summary>
+<pre><code class="language-python">import json
+
+from openai import OpenAI
+
+client = OpenAI(base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;)
+
+TOOLS = [{
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;function&quot;: {
+        &quot;name&quot;: &quot;get_weather&quot;,
+        &quot;description&quot;: &quot;获取指定城市的示例天气数据&quot;,
+        &quot;parameters&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {
+                &quot;city&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;城市名称，例如台北&quot;},
+                &quot;unit&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;celsius&quot;]},
+            },
+            &quot;required&quot;: [&quot;city&quot;, &quot;unit&quot;],
+            &quot;additionalProperties&quot;: False,
+        },
+    },
+}]
+
+
+def get_weather(city: str, unit: str) -&gt; dict:
+    if unit != &quot;celsius&quot;:
+        raise ValueError(&quot;只接受 celsius&quot;)
+    return {&quot;city&quot;: city, &quot;temperature&quot;: 26, &quot;unit&quot;: unit}
+
+
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;台北现在几度？&quot;}]
+first = client.chat.completions.create(
+    model=&quot;qwen2.5:3b&quot;, messages=messages, tools=TOOLS
+)
+assistant = first.choices[0].message
+messages.append(assistant.model_dump(exclude_none=True))
+
+for call in assistant.tool_calls or []:
+    if call.function.name != &quot;get_weather&quot;:
+        raise ValueError(f&quot;不允许的工具：{call.function.name}&quot;)
+    args = json.loads(call.function.arguments)
+    if (
+        not isinstance(args, dict)
+        or set(args) != {&quot;city&quot;, &quot;unit&quot;}
+        or not isinstance(args[&quot;city&quot;], str)
+        or not args[&quot;city&quot;].strip()
+        or args[&quot;unit&quot;] != &quot;celsius&quot;
+    ):
+        raise ValueError(&quot;city 必须是非空字符串，unit 必须是 celsius&quot;)
+    result = get_weather(args[&quot;city&quot;], args[&quot;unit&quot;])
+    messages.append({
+        &quot;role&quot;: &quot;tool&quot;,
+        &quot;tool_call_id&quot;: call.id,
+        &quot;content&quot;: json.dumps(result, ensure_ascii=False),
+    })
+
+if not assistant.tool_calls:
+    raise RuntimeError(&quot;模型没有调用工具；请检查模型与 schema&quot;)
+
+final = client.chat.completions.create(
+    model=&quot;qwen2.5:3b&quot;, messages=messages, tools=TOOLS
+)
+print(final.choices[0].message.content)
+
+assert assistant.tool_calls[0].function.name == &quot;get_weather&quot;
+assert any(message[&quot;role&quot;] == &quot;tool&quot; for message in messages)
+</code></pre>
+<pre><code class="language-powershell">python hello_tool.py
+</code></pre>
+<p>这里使用的是 <strong>连接到 Ollama compatible Chat Completions endpoint 的 OpenAI Python SDK</strong>，数据不会发送到 OpenAI 云端。<code>additionalProperties: false</code> 对 schema 很有帮助，但 Ollama 与 OpenAI strict mode 的保证不能画等号；程序仍要验证。</p>
+<p>如果模型没有调用工具，先保持问题、模型和 schema 不变，重跑三次并记录成功次数；不要只凭一次失败就宣布模型“不支持”。</p>
+</details>
+<details markdown="1">
+<summary>Path B：Anthropic 完整来回（每次先预留 <code>$0.05</code>）</summary>
+<pre><code class="language-python">import json
+import os
+
+import anthropic
+
+client = anthropic.Anthropic(api_key=os.environ[&quot;ANTHROPIC_API_KEY&quot;])
+tools = [{
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;获取指定城市的示例天气数据&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;required&quot;: [&quot;city&quot;],
+        &quot;additionalProperties&quot;: False,
+    },
+}]
+
+
+def get_weather(city: str) -&gt; dict:
+    return {&quot;city&quot;: city, &quot;temperature&quot;: 26, &quot;unit&quot;: &quot;celsius&quot;}
+
+
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;台北现在几度？&quot;}]
+
+first = client.messages.create(
+    model=&quot;claude-haiku-4-5-20251001&quot;,
+    max_tokens=512,
+    tools=tools,
+    messages=messages,
+)
+messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: first.content})
+tool_results = []
+for block in first.content:
+    if block.type == &quot;tool_use&quot;:
+        if block.name != &quot;get_weather&quot;:
+            raise ValueError(f&quot;不允许的工具：{block.name}&quot;)
+        if (
+            set(block.input) != {&quot;city&quot;}
+            or not isinstance(block.input[&quot;city&quot;], str)
+            or not block.input[&quot;city&quot;].strip()
+        ):
+            raise ValueError(&quot;get_weather 需要一个字符串 city&quot;)
+        result = get_weather(block.input[&quot;city&quot;])
+        tool_results.append({
+            &quot;type&quot;: &quot;tool_result&quot;,
+            &quot;tool_use_id&quot;: block.id,
+            &quot;content&quot;: json.dumps(result, ensure_ascii=False),
+        })
+
+if not tool_results:
+    raise RuntimeError(f&quot;没有工具请求；stop_reason={first.stop_reason}&quot;)
+
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+final = client.messages.create(
+    model=&quot;claude-haiku-4-5-20251001&quot;,
+    max_tokens=512,
+    tools=tools,
+    messages=messages,
+)
+print(&quot;\n&quot;.join(block.text for block in final.content if block.type == &quot;text&quot;))
+</code></pre>
+<p>Anthropic client tool 的失败结果要使用对应的 <code>tool_use_id</code>，并加上 <code>&quot;is_error&quot;: true</code>。不要把工具结果插入 system prompt。</p>
+</details>
+<span id="练习-2多工具选择"></span><h3 data-heading-alias="练习-2多工具选择" id="h6d64a9b22511">练习 2：多工具选择</h3>
+<p>完成后，模型会在 <code>calculator</code> 和 <code>get_weather</code> 中选择一个，程序只派发 allowlist 内的名称。</p>
+<p><strong>第一步</strong>：直接复制这一行运行 mock test，不需要密钥：</p>
+<pre><code class="language-powershell">python examples/stage-3/02-multi-tool-selection/test.py
+</code></pre>
+<details markdown="1">
+<summary>展开 Path A／Path B、观察重点与预算</summary>
+<ul>
+<li><a href="examples--stage-3--02-multi-tool-selection--README.zh-Hans.md.html">Path A README（Ollama）</a>：运行 <code>python starter.py</code>。</li>
+<li>同一文件夹的 <code>starter_anthropic.py</code> 是 Path B；运行 <code>python test_anthropic.py</code>，先用 mock 验证消息形状。</li>
+<li>观察 <code>tool_calls[0].function.name</code>，再确认程序会拒绝未知名称。</li>
+<li>不要使用 <code>globals()[model_name]()</code> 或 <code>eval()</code> 派发工具。</li>
+</ul>
+<p>Path A 的 API 费用是 <code>$0</code>；Path B 一轮先预留 <code>$0.05</code>。</p>
+</details>
+<span id="结构化输出structured-outputs--json-mode-function-calling-的孪生兄弟"></span><h3 data-heading-alias="结构化输出structured-outputs--json-mode-function-calling-的孪生兄弟" id="h383c9e144b0d">结构化输出（Structured Outputs / JSON mode）⭐ function calling 的孪生兄弟</h3>
+<p>Function Calling 是“请程序做事”；Structured Output 是“请模型把数据放进固定形状”。两者都使用 schema，但目的不同。</p>
+<details markdown="1">
+<summary>展开 strict mode、JSON mode 与常见限制</summary>
+<ul>
+<li><strong>JSON mode</strong> 通常只保证可以解析成 JSON，不一定符合你的栏位规则。</li>
+<li><strong>Structured Output</strong> 会在供应商支持的限制内约束 schema 外形；仍可能遇到 refusal、截断或语义错误。</li>
+<li><strong>OpenAI strict mode</strong> 要求每个 object 设置 <code>additionalProperties: false</code>，并把 properties 全部列为 required；Chat Completions 默认仍不是 strict。</li>
+<li><strong>Anthropic strict tool use</strong> 的 schema 格式、消息格式与 OpenAI 不同，不要直接复制旗标名称。</li>
+<li><strong>Ollama／其他 compatible endpoint</strong> 的支持范围取决于模型与版本。用固定 eval 验证，不要从“compatible”推断完全相同。</li>
+</ul>
+<p>想用 Python model 管理 schema，可以看 <a href="../../reference/source-readings.html#s03ff95638105">567-labs/instructor</a>；想研究 constrained decoding，可以看 <a href="../../reference/source-readings.html#sdd44483fe80f">dottxt-ai/outlines</a>。无论使用哪一个，程序都要处理解析和语义错误。</p>
+</details>
+<span id="练习-3从零实现-react不用-framework"></span><h3 data-heading-alias="练习-3从零实现-react不用-framework" id="h6427d7a522c8">练习 3：从零实现 ReAct（不用 framework）</h3>
+<p>完成后，你会有一个最小 Agent Loop：模型可以多次调用工具，但超过上限一定停止。</p>
+<p><strong>第一步</strong>：先运行不需要密钥的测试：</p>
+<pre><code class="language-powershell">python examples/stage-3/03-react-from-scratch/test.py
+</code></pre>
+<details markdown="1">
+<summary>展开 13 行 loop、双路径与完成条件</summary>
+<pre><code class="language-python">for step in range(MAX_STEPS):
+    response = ask_model(messages, tools)
+    calls = read_tool_calls(response)
+    if not calls:
+        return read_final_text(response)
+    for call in calls:
+        name, args, call_id = validate_call(call)
+        result = TOOL_IMPL[name](**args)
+        messages.append(make_tool_result(call_id, result))
+raise RuntimeError(f&quot;Agent 超过 {MAX_STEPS} 步，已停止&quot;)
+</code></pre>
+<p>真正的程序还要把 assistant 的 Tool Call 放回 history，并处理 refusal、max tokens、timeout、未知工具、JSON 解析与工具异常。完整双路径在 <a href="examples--stage-3--03-react-from-scratch--README.zh-Hans.md.html"><code>03-react-from-scratch</code></a>。</p>
+<p>把 trace 记成 <code>action / observation / final</code> 或简短可验证摘要即可；不要把私有 Chain-of-Thought 当成 log 契约。</p>
+<p>Path A 的 API 费用是 <code>$0</code>；Path B 一次 loop 先预留 <code>$0.05</code>。<strong>完成条件</strong>：测试能证明“没有 tool call 就停止”与“超过 <code>MAX_STEPS</code> 会报错”。</p>
+</details>
+<span id="练习-4多步骤推理任务"></span><h3 data-heading-alias="练习-4多步骤推理任务" id="h37e7a72f35ba">练习 4：多步骤推理任务</h3>
+<p>完成后，同一个 loop 会先查资料、再计算，并且每一步都有对应的 call ID 和结果。</p>
+<p><strong>第一步</strong>：复制测试命令：</p>
+<pre><code class="language-powershell">python examples/stage-3/04-multi-step-reasoning/test.py
+</code></pre>
+<details markdown="1">
+<summary>展开任务、比较方法与预算</summary>
+<p>任务示例：“查台北温度，再换算成华氏。”工具分成 <code>get_weather</code> 与 <code>celsius_to_fahrenheit</code>。不要把两个步骤偷偷合成一个假工具；本题要观察模型是否会接着使用前一个结果。</p>
+<p>完整双路径在 <a href="examples--stage-3--04-multi-step-reasoning--README.zh-Hans.md.html"><code>04-multi-step-reasoning</code></a>。比较模型时，固定 prompt、tools、schema、<code>MAX_STEPS</code> 和测试题，至少重跑五次，再记录成功率与失败类型。</p>
+<p>Path A 的 API 费用是 <code>$0</code>；Path B 多轮请求先预留 <code>$0.10</code>。更大的模型可能更稳定，也可能只是更贵；用 eval 决定。</p>
+</details>
+<span id="练习-5错误处理"></span><h3 data-heading-alias="练习-5错误处理" id="h50a2ad49e747">练习 5：错误处理</h3>
+<p>完成后，程序会把“可以让模型修正的工具错误”送回去，同时对 transport、解析或超出上限的错误明确停止。</p>
+<p><strong>第一步</strong>：先运行两条 mock test：</p>
+<pre><code class="language-powershell">python examples/stage-3/05-error-handling/test.py
+python examples/stage-3/05-error-handling/test_anthropic.py
+</code></pre>
+<details markdown="1">
+<summary>展开错误分类、bounded retry 与预算</summary>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">错误</th>
+<th style="text-align:left">程序先做什么</th>
+<th style="text-align:left">是否送回模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">网络 timeout／rate limit</td>
+<td style="text-align:left">有上限地 retry；记录错误</td>
+<td style="text-align:left">通常先不要</td>
+</tr>
+<tr>
+<td style="text-align:left">Tool Call JSON 解析失败</td>
+<td style="text-align:left">不执行工具；回报格式错误</td>
+<td style="text-align:left">可以，用 error result</td>
+</tr>
+<tr>
+<td style="text-align:left">未知工具／未授权参数</td>
+<td style="text-align:left">拒绝执行；留下 audit log</td>
+<td style="text-align:left">可以，但不能放宽权限</td>
+</tr>
+<tr>
+<td style="text-align:left">工具查无数据</td>
+<td style="text-align:left">返回明确、最小的语义错误</td>
+<td style="text-align:left">可以，让模型改查询或放弃</td>
+</tr>
+<tr>
+<td style="text-align:left">达到 <code>MAX_STEPS</code>／费用上限</td>
+<td style="text-align:left">立即停止</td>
+<td style="text-align:left">不再 retry</td>
+</tr>
+</tbody>
+</table>
+<p>Anthropic 的失败 <code>tool_result</code> 使用 <code>&quot;is_error&quot;: true</code>。OpenAI-compatible 路径可以在 <code>role: tool</code> 的 content 中放结构化错误，但应用程序仍要自己限制 retry。</p>
+<p>完整双路径在 <a href="examples--stage-3--05-error-handling--README.zh-Hans.md.html"><code>05-error-handling</code></a>。Path A 的 API 费用是 <code>$0</code>；Path B 一轮错误恢复先预留 <code>$0.10</code>。</p>
+</details>
+<span id="练习-6function-schema-设计坏-schema-修到好"></span><h3 data-heading-alias="练习-6function-schema-设计坏-schema-修到好" id="h50bcf774c0ff">练习 6：Function schema 设计（坏 schema 修到好）</h3>
+<p>完成后，你会用同一组题目比较两个 schema，并指出描述、栏位、enum 或限制哪里得到改善。</p>
+<p><strong>第一步</strong>：直接运行坏版和好版的 mock test：</p>
+<pre><code class="language-powershell">python examples/stage-3/06-schema-design/test.py
+python examples/stage-3/06-schema-design/test_anthropic.py
+</code></pre>
+<details markdown="1">
+<summary>展开五条规则、eval 卡与预算</summary>
+<ol>
+<li>工具名称用清楚的动词加名词，例如 <code>get_weather</code>。</li>
+<li>Description 说明何时使用，也说明何时不要使用。</li>
+<li>每个栏位都有清楚的名称、类型与示例。</li>
+<li>能用 <code>enum</code>、范围和 <code>additionalProperties: false</code> 就明确限制。</li>
+<li>Schema 只负责接口；权限、业务规则和数据安全仍由程序验证。</li>
+</ol>
+<p>完整双路径在 <a href="examples--stage-3--06-schema-design--README.zh-Hans.md.html"><code>06-schema-design</code></a>，速查表在 <a href="resources--schema-design-cheatsheet.zh-Hans.md.html"><code>resources/schema-design-cheatsheet.zh-Hans.md</code></a>。</p>
+<p>直接复制这张结果卡，不必先画空表：</p>
+<pre><code class="language-text">固定题目：________________
+坏 schema｜成功 __ / 5｜主要错误：________________
+好 schema｜成功 __ / 5｜主要改善：________________
+结论｜哪个栏位帮助最大：________________
+</code></pre>
+<p>不要写“某模型几乎必错”。Path A 的 API 费用是 <code>$0</code>；Path B 五轮比较先预留 <code>$0.25</code>。</p>
+</details>
+<span id="-推荐小项目安全的天气小助手"></span><h2 data-heading-alias="-推荐小项目安全的天气小助手" id="h8ef5e9b8d050">🎒 推荐小项目：安全的天气小助手</h2>
+<p>把练习 1–6 接起来，只保留两个只读工具：<code>get_weather</code> 和 <code>convert_temperature</code>。加入 allowlist、参数验证、<code>MAX_STEPS</code>、timeout、错误结果和五题 eval。</p>
+<p>最小成果是 <code>agent.py</code>、<code>test_agent.py</code>、<code>eval_cases.json</code> 和一张结果卡。先让 mock tests 通过，再运行本地模型；不要先接付款、删档或发邮件工具。</p>
+<span id="-反思reflexion--self-refine-概念--路由"></span><h3 data-heading-alias="-反思reflexion--self-refine-概念--路由" id="h4a2680005f99">🪞 反思（Reflexion / Self-Refine）— 概念 + 路由</h3>
+<details markdown="1">
+<summary>展开 Reflection、Reflexion、Self-Refine 与记忆的关系</summary>
+<ul>
+<li><strong>Reflection</strong> 是广义名称：查看上一轮结果，再改进下一轮。</li>
+<li><strong>Reflexion</strong> 常把失败、反馈与下一次策略写进可重复使用的文字记录。</li>
+<li><strong>Self-Refine</strong> 常用“生成 → 批评 → 重写”循环改善同一份输出。</li>
+<li>这些都是 ReAct 的 sibling patterns，不等于 Tool Use，也不一定需要持久记忆。</li>
+</ul>
+<p>本章只理解 single-session loop。需要跨 session 保存失败经验时，进入 <a href="stages--06-memory-rag.zh-Hans.md.html">Stage 06 的 Reflection Memory</a>；需要更完整的 planning、verification 与长时间执行时，进入 <a href="stages--07.5-advanced-agentic-concepts.zh-Hans.md.html">Stage 07.5</a>。</p>
+</details>
+<span id="-精选-projects"></span><h2 data-heading-alias="-精选-projects" id="h44aee77132c0">🎯 精选 Projects</h2>
+<p>先完成一条五星路线：官方文档 → 练习 1–3 → 一个从零实现。完整表格是工具箱，不是 21 条待办清单。</p>
+<p><small>资源核查：2026-08-27 UTC</small></p>
+<blockquote>
+<p>推荐度是本 Stage 的学习优先顺序，不是人气排名：<code>⭐⭐⭐⭐⭐</code>＝跳过会卡住本章路线；<code>⭐⭐⭐⭐</code>＝建议优先；<code>⭐⭐⭐</code>＝有需要再看；<code>⭐⭐</code>＝历史或少数情境。</p>
+</blockquote>
+<table align="center">
+  <thead>
+    <tr>
+      <th scope="col">分类</th>
+      <th scope="col">资源</th>
+      <th scope="col">先做什么</th>
+      <th scope="col">状态／授权</th>
+      <th scope="col">推荐度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="6" align="center" valign="middle">官方核心文档</th><td><a href="../../reference/source-readings.html#sa2c7cb24dc72">Anthropic — How Tool Use Works</a></td><td>先看 client tool 的五步来回。</td><td>官方文档</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s42e907e29544">Anthropic — Handle Tool Calls</a></td><td>查看 call ID、result 与 <code>is_error</code>。</td><td>官方文档</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s282a74b822c3">Ollama — Tool Calling</a></td><td>照 single tool 和 agent loop 示例跑一次。</td><td>官方文档</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s90f2bf11e4fb">OpenAI — Function Calling</a></td><td>比较 function schema 与 strict mode。</td><td>官方文档</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s11b2fd5af705">Google Gemini — Function Calling</a></td><td>需要 Gemini 时比较 sequential／parallel call。</td><td>官方文档</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s7647307fe498">ReAct paper</a></td><td>先读 abstract 与方法图。</td><td>原始论文；arXiv</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">官方课程与示例</th><td><a href="../../reference/source-readings.html#s94485c0a6d4b">Anthropic Courses — Tool Use</a></td><td>阅读旧版 Tool Use notebook；动手时对照下一行 Cookbook。</td><td>已归档的官方课程；上游未提供 SPDX</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s54450ef6cd31">Anthropic Tool Use Cookbook</a></td><td>从单工具读到并行工具。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sb3731f96b1a0">Anthropic Quickstarts</a></td><td>练习后看完整应用如何连接工具。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s8ea7b5016269">Microsoft AI Agents for Beginners</a></td><td>需要另一条完整课程时选读一章。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">从零实现</th><td><a href="../../reference/source-readings.html#sa02a5d101f7f">ai-agents-from-scratch</a></td><td>用 Ollama 对照练习 3 的 loop。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sa9b6b2e4e093">react-from-scratch</a></td><td>需要 Gemini／Reflection 变体时再看。</td><td>更新放缓（最后 push 2025-05）；Apache-2.0</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sded900bafe81">agent-implementation</a></td><td>只用来逐行看最小教学玩具。</td><td>历史参考（最后 push 2024-01）；上游未提供 SPDX</td><td align="center" valign="middle">⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s6da89fcedc48">GenericAgent</a></td><td>想看小型 framework 时再比较。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="3" align="center" valign="middle">Framework／CodeAct 对照</th><td><a href="../../reference/source-readings.html#scce197194374">Hugging Face Smolagents</a></td><td>完成 JSON-tool loop 后比较 CodeAct。</td><td>维护中；Apache-2.0</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s674810ed906a">QuantaLogic</a></td><td>需要第二个 CodeAct 实现时再看。</td><td>更新较慢（最后 push 2025-12）；Apache-2.0</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sc933ef81323d">LangChain ReAct Agent</a></td><td>看 framework 如何包住自己写过的 loop。</td><td>维护中；MIT</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">中文章节式教材</th><td><a href="../../reference/source-readings.html#see7e0e584b26">hello-agents</a></td><td>需要完整中文章节时走这条主线。</td><td>维护中；上游 metadata 未提供 SPDX</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#se0965940276c">HelloAgents</a></td><td>配合上面教材运行程序；先确认对应分支。</td><td>维护中；上游 metadata 未提供 SPDX</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">Structured Output 工具</th><td><a href="../../reference/source-readings.html#s03ff95638105">instructor</a></td><td>想使用 typed model、验证与 retry 时看。</td><td>原 <code>jxnl/instructor</code> 已转址；MIT</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sdd44483fe80f">outlines</a></td><td>研究本地 constrained decoding 时看。</td><td>维护中；Apache-2.0</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+</table>
+<span id="-进-stage-4-前的自我检查"></span><h2 data-heading-alias="-进-stage-4-前的自我检查" id="h55a6ecf3569c">✅ 进 Stage 4 前的自我检查</h2>
+<ul>
+<li>[ ] 我能用自己的话说出 <code>schema → call → execute → result → answer</code>。</li>
+<li>[ ] 我能分清 Tool Call、Tool Result 与 Structured Output。</li>
+<li>[ ] 我的程序只派发 allowlist 工具，会验证参数，也有 <code>MAX_STEPS</code>。</li>
+<li>[ ] 我跑过练习 1–3，并看过至少一次成功和一次错误路径。</li>
+<li>[ ] 我比较模型或 schema 时使用同一组题目与明确分数。</li>
+</ul>
+<p>都做到后，进入 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a>。如果还说不出完整来回，先重跑练习 1；不需要把整章重新读一遍。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

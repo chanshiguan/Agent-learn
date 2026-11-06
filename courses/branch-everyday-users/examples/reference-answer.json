@@ -1,0 +1,22 @@
+{
+  "draft": "Draft：周五前准备海报初稿，核对活动名称、时间、地点。FactsCopied：任务和字段来自 e1/e2。NeedsConfirmation：具体日期、活动资料、提交渠道。此内容仅为草稿。",
+  "claims": [
+    {
+      "text": "需交海报初稿",
+      "source_ids": [
+        "e1"
+      ],
+      "status": "supported"
+    },
+    {
+      "text": "已发送提醒",
+      "source_ids": [],
+      "status": "unsupported"
+    }
+  ],
+  "needs_confirmation": [
+    "周五的具体日期",
+    "活动名称与时间地点",
+    "提交渠道"
+  ]
+}

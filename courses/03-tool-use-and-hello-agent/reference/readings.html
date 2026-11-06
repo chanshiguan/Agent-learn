@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本地必修阅读 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+
+<p class="eyebrow">Required Reading · 全部在本地</p><h1>三份必修阅读<br>中文知识讲义</h1>
+<p class="lede">这里把本阶段需要从三份资料掌握的内容合并讲清。直接读本页，再做本地案例。官方来源名称用于说明依据，不是额外阅读任务。</p>
+<nav class="toc"><ol><li><a href="#s1">Ollama：工具如何进入对话</a></li><li><a href="#s2">Anthropic：模型与执行端的契约</a></li><li><a href="#s3">ReAct：行动与观察怎样配合</a></li><li><a href="#supplement">其他参考知识与资料目录</a></li></ol></nav>
+<h2 id="s1">必修一 · Ollama Tool Calling</h2>
+<p>要点是把工具能力写入请求，让模型返回工具调用，再将执行结果放回历史。它支持单次往返，也支持多工具和多轮交互。</p>
+<p>一次返回多个工具请求时，应处理整组请求并返回每个结果。对话进入下一轮，模型才能据观察决定继续调用或回答。流式模式需要先收齐工具参数，不能拿未完成的片段执行。</p>
+<p>原生 Ollama 的工具参数通常是对象，结果消息可用 tool_name。兼容 Chat Completions 则按 function.arguments 和 tool_call_id 处理。本课的主线固定使用后者，不混用两套字段。</p>
+<p>本地对应：<a href="../lessons/0003-first-tool.html">单工具往返</a>、<a href="../lessons/0004-agent-loop.html">多工具与循环</a>。先跑成功路径，再用上限测试检查持续调用的情况。</p>
+<h2 id="s2">必修二 · Anthropic How Tool Use Works</h2>
+<p>工具接口是一份契约：程序提供可用操作与输入说明，模型决定提出哪个请求，执行端运行操作，再将结果送回模型。模型不会自行运行你本机的函数实现。</p>
+<p>client tool 在你的程序中执行。即使工具 Schema 来自厂商，例如某些桌面或编辑器工具，其执行位置也可能仍在客户端。server tool 则由供应商基础设施执行，不能机械套用本地函数的回传流程。</p>
+<p>对 client tool，Claude 返回 tool_use 内容块和相应停止原因。程序读取 id、name、input，执行后发回 tool_result。模型可以继续提出工具请求，直到形成最终回答。</p>
+<p>消息格式与异常处理见本页 S6 和<a href="../lessons/0007-reading-and-protocols.html">单元 7 的完整实现</a>。使用哪家模型不改变程序仍需负责输入验证、权限与执行边界这一点。</p>
+<h2 id="s3">必修三 · ReAct 原始论文</h2>
+<p>论文由 Shunyu Yao 等人提出，将语言推理与环境行动交错：行动带来新的观察，观察帮助模型调整之后的决策。它在知识问答与交互任务中研究这种组合，而不是仅靠一次性生成答案或固定行动序列。</p>
+<p>论文任务包括 HotpotQA、FEVER、ALFWorld 和 WebShop。它展示的是特定模型与实验设置下的效果，不意味着所有工具任务只要加 ReAct 就提高。错误的早期假设、检索失败和反复无效行动仍可能造成失败。</p>
+<p>本课借鉴论文中的反馈循环，使用现代原生工具调用来演示，没有复现论文完整的提示轨迹或实验环境。学习时重点观察 action、observation 与后续参数之间是否有因果联系，不要求展示私有思维链。</p>
+<p>本地练习：把查到的温度交给换算工具；检查第二次调用发生在结果之后。如果后一步只是提前猜值，最终答案正确也没证明完成了交互式推理。</p>
+<h2 id="supplement">补充参考知识 · 都已纳入正文</h2>
+<h3 id="s4">S4 · Ollama 的 OpenAI 兼容接口</h3>
+<p>SDK 是客户端，模型由请求地址决定。本地 base_url 指向 localhost:11434/v1，api_key 占位值不代表云端授权。兼容接口覆盖部分 OpenAI API，不承诺每个字段或保证都一致。原生与兼容协议要分别核对。</p>
+<h3 id="s5">S5 · 工具定义</h3>
+<p>工具名称要能对应一个具体动作；描述说清用途、适用条件和边界；每个参数说明类型、含义与合法选择。不要把用户没授权的业务动作混入一个模糊的万能工具。完整接口见单元 2。</p>
+<h3 id="s6">S6 · Anthropic 请求与结果处理</h3>
+<p>tool_use 使用 id、name、input。结果放在 user 消息的 tool_result 块，用 tool_use_id 原样关联；失败加 is_error=true。结果消息紧接对应 assistant；多请求返回对应的整组结果。保留 assistant 完整内容块，展示答案时只提取 text。外部结果按不可信数据处理。</p>
+<h3 id="s7">S7 · OpenAI Function Calling</h3>
+<p>本课使用 Chat Completions：tools 包含 type/function，名称和 parameters 在 function 内；返回 tool_calls，每条有独立 id，结果用 role=tool 和 tool_call_id。Responses API 的工具、输出项与结果结构不同，不能直接照搬这套消息格式。strict 是服务支持范围内的结构约束，不是业务授权。</p>
+<h3 id="s8">S8 · 结构化输出</h3>
+<p>本地 Ollama 可对响应指定 JSON 或 Schema 格式。JSON 语法正确、字段结构合规、内容语义正确是三道不同检查。模型拒答、输出截断或抽取值错误时，不能因为拿到了一个对象就算成功。</p>
+<h3 id="s9">S9 · JSON Schema</h3>
+<p>properties 声明属性，required 指定必填，additionalProperties 控制未声明属性。它们相互独立。enum 限制可选值，minimum/maximum 限制数值范围。应用权限、真实数据存在性与业务合法性仍由程序检查。</p>
+<h3 id="s10">S10 · SDK 超时与重试</h3>
+<p>SDK 可能自带重试。为了控制尝试总数，要明确关闭或设置它，再决定是否自己重试。请求超时不证明服务端没有执行；写操作重试需要幂等设计。本课为只读工具，传输最多额外重试一次。</p>
+<h3 id="s11">S11 · 顺序与并行工具</h3>
+<p>多个互不依赖的查询可以形成一批调用；后一步依赖前一步结果时，必须等待观察再继续。主线默认顺序执行，单元10提供真正并发执行的完整替代入口和重叠测试。</p>
+<h3 id="s12">S12 · 严格工具约束</h3>
+<p>严格参数约束有助于让请求符合接口形状。它既不证明模型选对工具，也不证明当前登录用户有权执行该操作。不同服务的参数名与支持范围不同；本课用 Python 再验证，不从“兼容”推断严格保证。</p>
+<h3 id="s13">S13 · Reflexion</h3>
+<p>Reflexion 根据任务反馈总结文字经验，再保存这些经验，供后续尝试参考；这个过程不会通过本次交互更新模型权重。单元 12 提供完整的最小实现和可选文件记忆，更完整的记忆架构留待后续阶段。</p>
+<h3 id="s14">S14 · Self-Refine</h3>
+<p>Self-Refine 通过生成、反馈和修订反复改进当前输出。反馈者也可能出错，修订要用明确标准验收，并允许原答案已经正确。单元12提供完整代码、独立规则检查和拒绝退步的测试。</p>
+<h2>扩展资料在原路线中各负责什么</h2>
+<table><tr><th>方向</th><th>资料名称</th><th>本阶段学习到哪里</th></tr>
+<tr><td>官方课程与案例</td><td>Anthropic Courses、Tool Use Cookbook、Quickstarts；Microsoft AI Agents for Beginners</td><td>掌握接口、执行和状态；本课已提供对应独立案例</td></tr>
+<tr><td>从零实现</td><td>ai-agents-from-scratch、react-from-scratch、agent-implementation、GenericAgent</td><td>先能自己解释当前循环，再比较其他封装</td></tr>
+<tr><td>框架与 CodeAct</td><td>Smolagents、QuantaLogic、LangChain ReAct Agent</td><td>知道固定函数请求与生成可执行代码的能力边界不同</td></tr>
+<tr><td>中文教材</td><td>hello-agents、HelloAgents</td><td>保留扩展路线，不作为本课前置</td></tr>
+<tr><td>结构化输出库</td><td>Instructor、Outlines</td><td>分别关注类型验证与约束解码，不替代业务检查</td></tr></table>
+<p>这些仓库的全部源码不在本课覆盖范围。完成本课无需访问它们；需要核查出处时，外部链接集中保存在目录内 RESOURCES.md。</p>
+
+<h2 id="supplement-full">扩展主题的本地学习入口</h2>
+<p>流式、工具选择、并发、论文方法、反思、类型化生成和代码行动分别有独立单元。下面列出知识来源，点击本地链接即可进入相应讲解。</p>
+<h3 id="s15">S15 · Instructor：类型验证与有限重试</h3>
+<p>Instructor 在模型客户端上增加 response_model 与验证失败后的重新尝试。Pydantic 定义可检查的数据契约；程序仍需决定哪些业务规则必须满足、允许几次尝试。完整教学在<a href="../lessons/0013-instructor-and-outlines.html">单元13</a>。</p>
+<h3 id="s16">S16 · Outlines：输出类型与生成约束</h3>
+<p>Outlines 用输出类型组织结构化生成。连接 Ollama 时，本例将 JSON Schema 交给后端，而非在 Python 客户端逐token控制远端模型。不同后端支持的 Schema、正则或文法范围不同。完整代码在单元13。</p>
+<h3 id="s17">S17 · CodeAct：把代码作为行动</h3>
+<p>CodeAct 将可执行代码作为行动表示，便于表达变量、计算和多个工具的组合，并通过执行反馈继续处理。完整 Python 执行器需要独立隔离策略。本课用原创受限解释器展示关键流程，见<a href="../lessons/0014-codeact.html">单元14</a>。</p>
+<h3 id="s18">S18 · Python AST</h3>
+<p>ast.parse 将源码变成语法树，不会因为解析就运行代码。本课只解释明确列出的节点；解析成功本身不代表代码安全。未实现的语法统一拒绝。</p>
+<h3 id="s19">S19 · Python线程池</h3>
+<p>submit 提交函数并返回 Future，result 取得对应结果。线程池可以重叠等待型工作；超时等待不等于停止已开始的线程。完整并发案例在<a href="../lessons/0010-choice-and-concurrency.html">单元10</a>。</p>
+<h3 id="s20">S20 · 代码执行隔离</h3>
+<p>本课解释器没有文件、网络、导入或任意宿主函数入口，只适合教学中的有限任务。要运行完整Python，应另外配置进程/容器或远程隔离、资源限制和凭证边界，不能靠删除builtins或一段提示词获得完整隔离。</p>
+
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

@@ -1,0 +1,21 @@
+{
+  "draft": "计划：只补 README 中的检查说明，保留 python check.py；得到具体修改授权后实施，随后展示 diff 与真实检查输出。",
+  "claims": [
+    {
+      "text": "修改范围只有 README.md",
+      "source_ids": [
+        "d1"
+      ],
+      "status": "supported"
+    },
+    {
+      "text": "检查已经通过",
+      "source_ids": [],
+      "status": "unsupported"
+    }
+  ],
+  "needs_confirmation": [
+    "实际 diff",
+    "实际检查结果"
+  ]
+}

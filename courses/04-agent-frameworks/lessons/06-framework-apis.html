@@ -1,0 +1,245 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>必读 API 实作：动态分工与交接</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">4 · Workflow Graph 与 Agent 框架</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="必读-api-实作动态分工与交接"></span><h1 data-heading-alias="必读-api-实作动态分工与交接" id="h83ed4c12b913">必读 API 实作：动态分工与交接</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h3d2a922bafbf">环境与本章目标</a></li><li><a href="#h05aaf2ca8d60">动态工作者：Send 与 reducer</a></li><li><a href="#h97d3880a2832">两种交接：最终由谁回答</a></li><li><a href="#h09e0c8b8eeac">本章练习与完整答案</a></li></ul></aside>
+<span id="环境与本章目标"></span><h2 data-heading-alias="环境与本章目标" id="h3d2a922bafbf">环境与本章目标</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>前面的 patterns.py 教控制关系，本章实际调用 LangGraph 的 Send/reducer 和 OpenAI Agents SDK 的 as_tool/handoffs。默认模型响应是可重放脚本，因此不需要密钥；编排代码由真正的框架运行。它能证明接线正确，不能证明模型会自行选对专家。</p>
+<p>在项目根运行。已有 courses/.venv-verification 时使用该解释器；如果是新复制的项目，先用 Python 3.11 创建该环境，再装本章依赖，避免改变根 .venv：</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-verification
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-verification/bin/python -m pip install -r courses/04-agent-frameworks/examples/requirements-orchestration.txt
+</code></pre>
+<p>第一行仅在环境不存在时需要；requirements 写精确验证版本。SDK 与 OpenAI Python 包是不同层，安装 SDK 不等于得到模型访问能力。</p>
+<span id="动态工作者send-与-reducer"></span><h2 data-heading-alias="动态工作者send-与-reducer" id="h05aaf2ca8d60">动态工作者：Send 与 reducer</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>输入是文档列表。调度节点根据列表长度创建 Send，每个工作者只收到自己那份 document。两个工作者都更新 checks，所以必须规定合并方式：<code>Annotated[list[dict], operator.add]</code> 将各结果拼接，而非互相覆盖。</p>
+<p>执行顺序为 START → validate → 动态 check_document → merge → END。并行分支的完成顺序不作为业务排序；merge 按文档 ID 排序。检查只验证“目的”“运行”两个词是否出现，题目明确限定这两项，不据此声称 README 内容正确。</p>
+<pre><code class="language-python">&quot;&quot;&quot;真实 LangGraph Send 与 reducer；工作函数固定，离线检验编排。&quot;&quot;&quot;
+
+# 一个文档对应一个工作者输入；本例验证真实图的动态分发，不调用生成模型。
+import argparse
+import json
+import operator
+# Annotated 在类型上附带额外处理规则；这里的 reducer 决定状态更新时是追加消息还是覆盖旧消息。
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing import Annotated, TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Send
+
+
+# checks 使用加法 reducer 合并并行结果，避免后返回的结果覆盖前一个。
+class State(TypedDict):
+    documents: list[dict]
+    checks: Annotated[list[dict], operator.add]
+    report: dict
+
+
+# 每个工作者只接收自己负责的文档，避免依赖未分配的共享输入。
+class WorkerState(TypedDict):
+    document: dict
+
+
+# 先拒绝空输入和重复 ID，否则汇总时无法判断有没有漏查或覆盖。
+def validate(state):
+    documents = state['documents']
+    ids = [doc['id'] for doc in documents]
+    if not documents or len(ids) != len(set(ids)):
+        raise ValueError('文档不能为空，ID 不能重复')
+    return {'report': {}}
+
+
+# 文档数量决定 Send 的数量；每条 Send 指定节点名和该节点收到的状态。
+def dispatch(state):
+    return [Send('check_document', {'document': doc}) for doc in state['documents']]
+
+
+# 只检查约定的两个词，返回状态更新；不要把它当内容正确性审查。
+def check_document(state: WorkerState):
+    doc = state['document']
+    missing = [word for word in ('目的', '运行') if word not in doc['text']]
+    return {'checks': [{'id': doc['id'], 'missing': missing, 'ok': not missing}]}
+
+
+# 先核对结果数量，再按 ID 排序；只有全部工作者通过，整份报告才通过。
+def merge(state):
+    checks = sorted(state['checks'], key=lambda row: row['id'])
+    if len(checks) != len(state['documents']):
+        raise ValueError('工作者结果不完整')
+    return {'report': {'status': 'PASS' if all(x['ok'] for x in checks) else 'FAIL',
+                       'checks': checks}}
+
+
+def run(documents):
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    graph = StateGraph(State)
+    # 把 validate 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node('validate', validate)
+    # 把 check_document 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node('check_document', check_document)
+    # 把 merge 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node('merge', merge)
+    # START 完成后进入 validate，将这两步的执行先后固定在程序中。
+    graph.add_edge(START, 'validate')
+    # dispatch 返回的 Send 决定这次有多少工作者，不是提前固定两条分支。
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    graph.add_conditional_edges('validate', dispatch, ['check_document'])
+    # check_document 完成后进入 merge，将这两步的执行先后固定在程序中。
+    graph.add_edge('check_document', 'merge')
+    # merge 完成后进入 END，将这两步的执行先后固定在程序中。
+    graph.add_edge('merge', END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    return graph.compile().invoke({'documents': documents, 'checks': [], 'report': {}})['report']
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument('--fixed', action='store_true')
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    docs = [{'id': 'a', 'text': '目的：演示。运行：python app.py'},
+            {'id': 'b', 'text': '目的：核查。' + ('运行：python check.py' if args.fixed else '')}]
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(run(docs), ensure_ascii=False, indent=2))
+
+</code></pre>
+<pre><code class="language-bash"># 运行 courses/04-agent-frameworks/examples/dynamic_workers.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/dynamic_workers.py
+# 运行 courses/04-agent-frameworks/examples/dynamic_workers.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/dynamic_workers.py --fixed
+</code></pre>
+<p>第一条应 FAIL，a 无缺项，b 缺“运行”；第二条 PASS，两个结果都留下。不是只打印两个角色名，而是实际分发两次工作节点、合并两份 state 更新。输入空列表或重复 ID 会抛 ValueError，防止漏查与覆盖。</p>
+<p>为什么不用普通赋值字段？多个分支同一轮写 checks 时，需要明确允许多值并定义合并；移除 reducer 是常见错误。为什么不在 worker 中修改共享原列表？框架依靠节点返回的 state 更新安排合并，直接修改共享对象会使行为难以追踪。</p>
+<span id="两种交接最终由谁回答"></span><h2 data-heading-alias="两种交接最终由谁回答" id="h97d3880a2832">两种交接：最终由谁回答</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>manager-as-tools：主管请求专家工具 → 专家返回 → 主管继续。适合统一口径汇总。handoff：分诊者移交 → 专家继续后续对话；最终 agent 变了。交接不是隔离权限的同义词，专家能看到什么历史、有哪些工具，仍由配置决定。</p>
+<pre><code class="language-python">&quot;&quot;&quot;真实 Agents SDK 编排；默认脚本模型，--live 才接本地 Ollama。&quot;&quot;&quot;
+
+# 同一问题做两次实验：专家作为工具时主管回答，handoff 后由专家回答。
+import argparse
+import asyncio
+import json
+from agents import Agent, Runner, Model, ModelResponse, Usage, set_tracing_disabled, set_trace_provider
+from agents.tracing.provider import DefaultTraceProvider
+from openai.types.responses import ResponseOutputMessage, ResponseOutputText, ResponseFunctionToolCall
+
+
+# 构造 SDK 可消费的文本消息对象，作为离线模型的预设输出。
+def text_item(text):
+    return ResponseOutputMessage(id='msg_demo', type='message', role='assistant', status='completed',
+        content=[ResponseOutputText(type='output_text',text=text,annotations=[])])
+
+
+class ScriptedModel(Model):
+    &quot;&quot;&quot;模型替身只控制响应；工具调用、交接与运行循环由真实 SDK 执行。&quot;&quot;&quot;
+    def __init__(self, outputs):
+        self.outputs = list(outputs)
+
+    async def get_response(self, *args, **kwargs):
+        if not self.outputs:
+            raise RuntimeError('脚本响应耗尽，可能发生非预期循环')
+        return ModelResponse(output=self.outputs.pop(0), usage=Usage(), response_id=None)
+
+    async def stream_response(self, *args, **kwargs):
+        raise NotImplementedError('本教学例仅验证非流式路径')
+        if False:
+            # 保留异步生成器接口的语法形状；上方已明确抛错，这个分支不会实际产出值。
+            yield None
+
+
+# 只有 live 模式使用本机 Ollama；客户端不会读取系统代理设置。
+def local_model(name):
+    from agents import OpenAIChatCompletionsModel
+    from openai import AsyncOpenAI, DefaultAsyncHttpxClient
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+    # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+    client = AsyncOpenAI(base_url='http://localhost:11434/v1',api_key='ollama',timeout=60,max_retries=0,
+                         # http_client：显式注入底层 HTTP 客户端，让代理、超时等行为与这个案例的运行条件一致。
+                         # trust_env：设为 False 可避免继承系统代理等环境配置，使本地请求路径更可控；不会关闭 TLS 证书校验。
+                         http_client=DefaultAsyncHttpxClient(trust_env=False))
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    return OpenAIChatCompletionsModel(model=name, openai_client=client)
+
+
+async def run(live=False, model_name='gemma4:e4b'):
+    # 不注册网络 exporter，避免离线案例也初始化代理客户端。
+    set_trace_provider(DefaultTraceProvider())
+    set_tracing_disabled(True)
+    specialist = Agent(name='specialist', instructions='依据固定虚构资料回答：报名截止时间为周五18:00。',
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([[text_item('周五18:00 [signup]')]]))
+    # 专家包装成工具后，返回值仍交回主管，由主管组织最后回答。
+    expert_tool = specialist.as_tool(tool_name='ask_specialist',tool_description='查询虚构报名截止时间')
+    manager = Agent(name='manager', instructions='必须先用 ask_specialist 查询报名时间，再由你总结并保留来源。',
+        # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        tools=[expert_tool], model=local_model(model_name) if live else ScriptedModel([
+            [ResponseFunctionToolCall(type='function_call',call_id='call_demo',name='ask_specialist',
+                                      # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+                                      arguments=json.dumps({'input':'报名截止时间？'}))],
+            [text_item('主管汇总：周五18:00 [signup]')]]))
+    # max_turns：限制 Agent 与模型交互的总轮数，避免角色交接或工具调用迟迟不能结束。
+    managed = await Runner.run(manager,'报名截止时间？',max_turns=4)
+    # 两次实验使用独立 Agent 和模型实例，避免脚本队列/会话相互影响。
+    receiving = Agent(name='specialist', instructions='直接回答用户：报名截止时间为周五18:00，来源signup。',
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([[text_item('周五18:00 [signup]')]]))
+    # handoff 则改变接下来回答的 Agent；最后检查 last_agent 来验证区别。
+    triage = Agent(name='triage', instructions='将报名问题交给 specialist，不自行作答。',handoffs=[receiving],
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([
+            [ResponseFunctionToolCall(type='function_call',call_id='handoff_demo',
+                                      name='transfer_to_specialist',arguments='{}')]]))
+    # max_turns：限制 Agent 与模型交互的总轮数，避免角色交接或工具调用迟迟不能结束。
+    handed = await Runner.run(triage,'报名截止时间？',max_turns=4)
+    rows = []
+    for name,result in [('manager_as_tools',managed),('handoff',handed)]:
+        rows.append({'pattern':name,'final_agent':result.last_agent.name,
+                     'answer':result.final_output,
+                     'events':[{'type':item.type,'agent':item.agent.name} for item in result.new_items]})
+    return {'mode':'本地模型' if live else '真实 SDK + 脚本模型，非模型能力评测','rows':rows}
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument('--live',action='store_true')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument('--model',default='gemma4:e4b')
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(asyncio.run(run(args.live,args.model)),ensure_ascii=False,indent=2))
+
+</code></pre>
+<pre><code class="language-bash"># 运行 courses/04-agent-frameworks/examples/sdk_orchestration.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/sdk_orchestration.py
+</code></pre>
+<p>应有两行模式结果：manager_as_tools 的 final_agent=manager；handoff 的 final_agent=specialist。事件中前者出现 tool_call_item 与 tool_call_output_item，后者出现 handoff 相关事件。不能只检查最终文本里有没有“专家”两个字。</p>
+<p>代码使用 ScriptedModel 给出预设响应，真实 Runner 负责消费工具、传回结果与改变当前 Agent。每个实验单独创建模型，避免第一次消耗掉脚本队列。<code>max_turns=4</code> 防止非预期循环；不用流式时不必实现流式路径。关闭 tracing 是为了这个本地教学例不上传轨迹。</p>
+<p>可选真实本地模型：确保 Ollama 正在运行，<code>ollama list</code> 中已有 gemma4:e4b，然后执行：</p>
+<pre><code class="language-bash"># 运行 courses/04-agent-frameworks/examples/sdk_orchestration.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/sdk_orchestration.py --live
+</code></pre>
+<p>如果模型直接回答而不调用工具，内容可能看起来正确，但本题编排要求不通过；检查 events 与 final_agent，不能把提示词说“必须调用”当成执行保证。若模型无法产出合法工具参数，先保留失败轨迹，再调整工具说明或选择已支持工具调用的本地模型。</p>
+<span id="本章练习与完整答案"></span><h2 data-heading-alias="本章练习与完整答案" id="h09e0c8b8eeac">本章练习与完整答案</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>练习一：给动态工作者增加第三份文档 c，仅含“运行”，预期 a 完整、b 缺运行、c 缺目的；输出三行且最终 FAIL。下面是完整输入，可在 Python 交互环境导入 dynamic_workers.run 后传入：</p>
+<pre><code class="language-python"># 从 dynamic_workers 导入 run；供下方相应函数或类型使用。
+from dynamic_workers import run
+# 打印结果，供运行后核对：run([{'id': 'a', 'text': '目的：演示。运行：python ap…。
+print(run([
+    # 填写 标识（id） 字段：文本 'a'；填写 文本（text） 字段：文本 '目的：演示。运行：python app.py'。
+    {'id':'a','text':'目的：演示。运行：python app.py'},
+    # 填写 标识（id） 字段：文本 'b'；填写 文本（text） 字段：文本 '目的：教学'。
+    {'id':'b','text':'目的：教学'},
+    # 填写 标识（id） 字段：文本 'c'；填写 文本（text） 字段：文本 '运行：python demo.py'。
+    {'id':'c','text':'运行：python demo.py'},
+# 结束当前列表；前面的字段或参数至此组装完毕。
+]))
+</code></pre>
+<p>在 examples 目录用专用解释器执行这段代码，或写成同目录新文件；不要从项目根直接猜 import 搜索路径。完整实现不需要改 worker，输入数量就是工作者数量。</p>
+<p>练习二：不运行先预测两种交接的 final_agent，再核对事件。答案是 manager/specialist，理由是专家工具会返回主管，handoff 改变负责后续的 Agent。迁移时让专家返回“资料不足”，主管也应保留这个限制，不自行发明日期。</p>
+<p>验收：保存两种模式事件、最终 agent 与回答；动态分工交三份结果；解释 reducer 的合并职责及权限边界。延迟两天重新画输入→工作者→结果的路径，不能只背 API 名称。本课最终作业仍集中在课末。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="05-original-labs.html">← 原练习逐题运行与验收</a><a href="03-workshop.html">从一个状态对象，到可恢复的摘要流程 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

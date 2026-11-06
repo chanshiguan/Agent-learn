@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从失败记录做一次增加或删除实验</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">7.5 · 进阶 Agentic 选择</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。</p></aside><span id="top"></span><span id="从失败记录做一次增加或删除实验"></span><h1 data-heading-alias="从失败记录做一次增加或删除实验" id="h1537c1625fcf">从失败记录做一次增加或删除实验</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hf1fba43652d6">单元一：Harness Engineering 的完整工作链</a></li><li><a href="#he64e66b2cfd0">单元二：四个概念落在同一份实验记录</a></li><li><a href="#h29a06a884aa1">单元三：可直接运行的删除实验</a></li><li><a href="#h848d4baf083e">单元四：完整决策记录参考</a></li><li><a href="#h77faaa6968c2">单元五：复杂方法的边界</a></li><li><a href="#h8489468240b6">课后练习与验收</a></li></ul></aside>
+<span id="单元一harness-engineering-的完整工作链"></span><h2 data-heading-alias="单元一harness-engineering-的完整工作链" id="hf1fba43652d6">单元一：Harness Engineering 的完整工作链</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Harness 是模型工作的环境：任务输入、代码库、工具、权限、状态、反馈和结束条件。人先把“希望更好”变成可检查目标，再让系统执行。稳定收益往往来自让模型能看见实际结果，例如运行检查、查看界面、读取失败日志，而不是再叠一段抽象要求。</p>
+<p>仓库文档要容易找到，内容也要能与实际运行结果核对。短规则文件负责指路；领域说明、设计决策、操作指南各有位置。运行中的事实比过期文字可靠：文档写入口 A，代码却从 B 启动时，应通过检查发现差异并修正文档。重要的架构约束还要用检查程序验证，不能只写在文档里。</p>
+<p>任务完成后做小步 review 和维护，把重复问题转成规则、测试或工具改进；过多重复规则本身也会成为负担。人的责任是选择目标和取舍、评估系统结果，而不是盲目接受所有生成代码。官方案例的组织规模与投入是背景，不是你必须复制的工程规模。</p>
+<span id="单元二四个概念落在同一份实验记录"></span><h2 data-heading-alias="单元二四个概念落在同一份实验记录" id="he64e66b2cfd0">单元二：四个概念落在同一份实验记录</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Evaluator-Optimizer 需要明确缺陷与修订依据；Failure Injection 主动制造一个可恢复错误；Autonomy Gradients 根据任务影响决定允许建议、草稿或受限执行；Model–Harness Fit 在换模型后检查哪些补丁仍必要。</p>
+<p>把它们串起来：先发现缺引用 → 写一个会漏引用的故障样例 → 增加来源检查 → 比较前后 → 保留有证据的控制；再尝试删除某段无收益提示，确认质量和限制都不退步。功能与权限检查的责任不能仅因模型更强而消失。</p>
+<span id="单元三可直接运行的删除实验"></span><h2 data-heading-alias="单元三可直接运行的删除实验" id="h29a06a884aa1">单元三：可直接运行的删除实验</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<pre><code class="language-bash"># 运行 courses/07.5-advanced-agentic-concepts/examples/ablation.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/07.5-advanced-agentic-concepts/examples/ablation.py
+</code></pre>
+<p>基线四题通过；删除来源检查后，bad_ref 与 empty 两题失败。正常题仍通过，说明只测正常路径会掩盖退步。超时题停止，说明故障处理不等于崩溃。这里使用固定数据和函数，验证的是这些检查能否拦住错误，没有测量模型表现的改善比例。</p>
+<pre><code class="language-python">&quot;&quot;&quot;可复现的故障注入与删除实验：固定程序输出，不冒充模型评测。&quot;&quot;&quot;
+
+# 每次只改变是否保留来源检查，用同一套正反例观察退步；不测模型能力。
+import json
+
+CASES=[{'id':'normal','refs':['d1'],'expected':'ok'},
+       {'id':'bad_ref','refs':['invented'],'expected':'stop'},
+       {'id':'empty','refs':[],'expected':'stop'},
+       {'id':'timeout','refs':['d1'],'error':'timeout','expected':'stop'}]
+
+
+# 本题既检查返回值，也检查异常是否符合预期；正确停止也可能是通过。
+def trial(case, check_sources):
+    if case.get('error'):
+        return 'stop'
+    if check_sources and (not case['refs'] or any(r!='d1' for r in case['refs'])):
+        return 'stop'
+    return 'ok'
+
+
+# 逐题保存基线与删除后的差异，避免只看正常题掩盖故障。
+def experiment():
+    rows=[]
+    for variant,check in [('baseline',True),('remove_source_check',False)]:
+        for case in CASES:
+            actual=trial(case,check)
+            rows.append({'variant':variant,'case':case['id'],'actual':actual,'passed':actual==case['expected']})
+    return {'mode':'确定性故障实验','rows':rows,'decision':'保留来源检查：删除后 bad_ref 与 empty 回退。该控制不是可随模型升级删除的措辞补丁。'}
+
+
+if __name__=='__main__':
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(experiment(),ensure_ascii=False,indent=2))
+
+</code></pre>
+<span id="单元四完整决策记录参考"></span><h2 data-heading-alias="单元四完整决策记录参考" id="h848d4baf083e">单元四：完整决策记录参考</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>问题：无来源或伪造来源也被系统接受。证据：实验里的 bad_ref、empty 两题。基线：有检查时四题通过。候选：只删除来源检查，其他完全不变。事前门槛：关键失败不能增加；任何越权一票否决。结果：两题回退。决定：保留来源检查。撤销：恢复检查并重跑全部四题。下一步：用真实生成模型产生更多改写，人工校准语义评分。</p>
+<p>这是完整示范结论；你自己的实验不能照填这些结果。真实模型试验至少记录每题每次输出与环境，环境失败单列。模型生成答案的变化可能来自随机性，不应从一次成功认定收益稳定。</p>
+<span id="单元五复杂方法的边界"></span><h2 data-heading-alias="单元五复杂方法的边界" id="h77faaa6968c2">单元五：复杂方法的边界</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>长期 Agent 每次接手任务时，先确认环境和已完成事项的证据，再执行一个能够检查结果的步骤；上下文摘要不能替代进度文件。并行研究适合不同资料的独立搜索，紧耦合编码任务的隐含决策容易冲突。Plan-act-reflect 的反思应引用外部结果，重复“我需要更仔细”没有可操作信息。</p>
+<p>Constitutional AI 的研究包含按原则生成批评/改写及训练阶段，不等于运行时加一个 judge。CAMEL 的角色对话需要防角色倒置和无穷客套。DSPy 通过数据与指标优化程序，奖励指标有漏洞时也会优化错。Benchmark 要核对任务版本、环境、允许工具、超时和 grader；空答案或投机答案能否获分，是评分器自身的必测题。</p>
+<p>The Bitter Lesson 讨论通用计算与学习方法的长期历史趋势。它不能直接推出“今天应删除全部工程控制”。理解这篇文章时，要区分两类措施：一类弥补模型能力不足，另一类负责权限、数据和故障恢复。再用实验判断具体哪些措施可以调整。这里不要求学习者复现论文训练或把其他教材整本读完。</p>
+<span id="课后练习与验收"></span><h2 data-heading-alias="课后练习与验收" id="h8489468240b6">课后练习与验收</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>交 decision.md 与逐题结果：明确失败、可复现基线、唯一改动、事前门槛、结果和撤销六项。正例参考见上一节；反例是“token 少一半，因此删除审批”，判不通过，因为必要控制责任未被替代。</p>
+<p>回忆题：没有发现真实失败能否先增加复杂架构？应标为假设，先设计能证伪的实验。迁移题：换一个模型后只删除一段格式修复提示，保留检查；运行相同开发集，若不退步再测未参与优化的题。两天后不看模板重写决定理由，一周后验证一次新失败。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 第 7.5 课的阅读整合</a><a href="99-exercises.html">第 7.5 课课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

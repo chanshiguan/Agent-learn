@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>原练习逐题运行与验收</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">6 · RAG 与 Memory</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="原练习逐题运行与验收"></span><h1 data-heading-alias="原练习逐题运行与验收" id="h252970059b62">原练习逐题运行与验收</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hc0e18182eaa8">01-embeddings：Embedding</a></li><li><a href="#h09131f22422c">02-vector-db：向量数据库</a></li><li><a href="#h17d7afe0bb2c">03-chunking-comparison：切分比较</a></li><li><a href="#hd91d0cdc3901">04-full-rag-pipeline：原始 RAG 基线</a></li><li><a href="#h2ec92884e70d">05-long-term-memory：原始记忆基线</a></li></ul></aside>
+<blockquote>
+<p>本课教学副本使用简体中文问题与资料。本地向量案例统一使用 <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>，这是支持多语言的编码模型；首次运行会下载权重。旧的英文模型缓存不能替代这份权重。默认长期记忆目录改为 <code>.stage06-memory-zh</code>，避免混用旧模型的向量；如果自行指定旧目录，也应新建集合并重新入库。模型资料见 <a href="../../reference/source-readings.html#s3604b09019d3">Sentence Transformers 官方说明</a>，学习所需用法已在本课说明。</p>
+<p>离线测试用固定向量或字词重叠替身检查入库、召回、提示拼接和持久化，不能证明新模型的中文检索质量。实际运行时仍要按各实验标准核对排名与证据；关键词基线只做子串匹配，不提供完整中文分词。</p>
+</blockquote>
+<p>以下命令从 ai-learn 根目录运行。每题有独立 Python 3.11 环境；创建和安装只在首次需要，日常直接用对应环境解释器。requirements.txt 列依赖，不是课程正文。不要将这些依赖安装进主环境或第二、三课环境。</p>
+<p>原始代码完整保留在源码页，标为 upstream；补充参考解在本课实作章。原材料中的云价格与产品状态是来源快照，实际开销以账户和用量为准。</p>
+<p>这些练习共用同一套排错方法：如果出现 ModuleNotFoundError，核对运行解释器与安装解释器是否相同；模型不存在先用 ollama list 核对名字；模型返回格式不符则保留实际输出，不伪造成功。原包版本与本地模型支持情况会影响结果，mock 测试和真实调用分开记录。</p>
+<span id="01-embeddingsembedding"></span><h2 data-heading-alias="01-embeddingsembedding" id="hc0e18182eaa8">01-embeddings：Embedding</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>首次运行会下载 sentence-transformers 权重。记录实际模型、向量维度与相似度。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-06-01
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-06-01/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/01-embeddings/requirements.txt
+# 运行 courses/06-memory-rag/examples/upstream/01-embeddings/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-06-01/bin/python courses/06-memory-rag/examples/upstream/01-embeddings/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-06-01/bin/python courses/06-memory-rag/examples/upstream/01-embeddings/starter.py
+</code></pre>
+<p>验收：同义与无关句对照；相反句也可能相似，不能据相似度判事实。</p>
+<span id="02-vector-db向量数据库"></span><h2 data-heading-alias="02-vector-db向量数据库" id="h09131f22422c">02-vector-db：向量数据库</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>看 collection 的 ID、文段、metadata 与 query 返回值；判断临时或持久存储。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-06-02
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-06-02/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/02-vector-db/requirements.txt
+# 运行 courses/06-memory-rag/examples/upstream/02-vector-db/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-06-02/bin/python courses/06-memory-rag/examples/upstream/02-vector-db/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-06-02/bin/python courses/06-memory-rag/examples/upstream/02-vector-db/starter.py
+</code></pre>
+<p>验收：正确题能取回依据，未知题不要把任意近邻当答案。</p>
+<span id="03-chunking-comparison切分比较"></span><h2 data-heading-alias="03-chunking-comparison切分比较" id="h17d7afe0bb2c">03-chunking-comparison：切分比较</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>比较固定长度、段落、标题；检查关键条件与例外有没有断开。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-06-03
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-06-03/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/03-chunking-comparison/requirements.txt
+# 运行 courses/06-memory-rag/examples/upstream/03-chunking-comparison/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-06-03/bin/python courses/06-memory-rag/examples/upstream/03-chunking-comparison/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-06-03/bin/python courses/06-memory-rag/examples/upstream/03-chunking-comparison/starter.py
+</code></pre>
+<p>验收：不能只比较片段数量，要检查支持同一问题的证据是否完整。</p>
+<span id="04-full-rag-pipeline原始-rag-基线"></span><h2 data-heading-alias="04-full-rag-pipeline原始-rag-基线" id="hd91d0cdc3901">04-full-rag-pipeline：原始 RAG 基线</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原例只把文本传给模型；它用于理解检索生成，不满足逐事实引用的新综合要求。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-06-04
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-06-04/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/requirements.txt
+# 运行 courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-06-04/bin/python courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-06-04/bin/python courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py
+</code></pre>
+<p>验收：先看检索，再看回答；本课 grounded_rag 才是完整引用参考。</p>
+<span id="05-long-term-memory原始记忆基线"></span><h2 data-heading-alias="05-long-term-memory原始记忆基线" id="h2ec92884e70d">05-long-term-memory：原始记忆基线</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原实现使用 Chroma PersistentClient，数据写到指定目录；测试包含两个新进程一写一读，使用固定假向量避免下载权重。它能证明持久化，但尚未完整实现用户同意、更新、删除、期限和用户隔离。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-06-05
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-06-05/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/05-long-term-memory/requirements.txt
+# 运行 courses/06-memory-rag/examples/upstream/05-long-term-memory/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-06-05/bin/python courses/06-memory-rag/examples/upstream/05-long-term-memory/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-06-05/bin/python courses/06-memory-rag/examples/upstream/05-long-term-memory/starter.py
+</code></pre>
+<p>验收：原题用 test.py 的真实 Chroma 持久化测试证明重启读回；更新/删除/隔离/期限与“改表格”使用 memory_lifecycle.py 的补充完整参考。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="08-example-readings.html">← 原练习 README 的必读补充：从向量到可维护资料库</a><a href="03-workshop.html">带证据、会拒答、能遗忘的助手 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

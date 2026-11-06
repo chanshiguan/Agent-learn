@@ -1,0 +1,38 @@
+[
+  {
+    "requirement": "完整 RAG 工具循环",
+    "lesson": "lessons/03-workshop.html#h7d236b6b51bd",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  },
+  {
+    "requirement": "评分器校准与反例",
+    "lesson": "lessons/03-workshop.html#h5c2ffb8e6a96",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  },
+  {
+    "requirement": "逐题人工答案",
+    "lesson": "lessons/03-workshop.html#h54c5b2cd4cf9",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  },
+  {
+    "requirement": "学生提交与多次 trial",
+    "lesson": "lessons/03-workshop.html#h11e2b0c1e6b2",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  },
+  {
+    "requirement": "失败分析与冲突迁移",
+    "lesson": "lessons/03-workshop.html#hdfb3b60f43c3",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  },
+  {
+    "requirement": "七维自评与结业标准",
+    "lesson": "lessons/03-workshop.html#h6b452254cdea",
+    "example": "examples/evaluate.py",
+    "assessment": "lessons/03-workshop.html#h6b452254cdea"
+  }
+]

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工具选择控制与并发执行 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 10</p><h1>工具选择控制与并发执行</h1><p class="lede">控制模型何时调用工具，正确关联并发结果。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-extra">扩展选读</span><strong>B 线基础必修</strong><p>扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。</p></aside>
+<h2>1. tool_choice控制模型请求行为</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<table><tr><th>意图</th><th>Chat Completions形状</th><th>用途</th></tr>
+<tr><td>模型自行决定</td><td><code>"auto"</code></td><td>常规助手，可回答或调用</td></tr>
+<tr><td>本轮不调用</td><td><code>"none"</code></td><td>只回答或只格式化已有结果</td></tr>
+<tr><td>必须选一个或多个</td><td><code>"required"</code></td><td>检验是否经过工具路径</td></tr>
+<tr><td>指定函数</td><td><code>{"type":"function","function":{"name":"get_weather"}}</code></td><td>验证特定接口，不再测试工具路由能力</td></tr></table>
+<p>这些是当前接口对请求生成的控制，不会授予执行权限。程序依然根据本次白名单决定是否运行。none案例同时使用空执行白名单；若接口违反约束返回调用，程序直接停止。</p>
+<p>Anthropic对应格式是type=auto/none/any/tool，指定函数用name；不是直接复制上表JSON。部分模型或思考设置不接受强制工具，需要按服务能力处理。兼容端点同样必须实测，不能只因为请求返回200就认为约束有效。</p>
+<section class="code-panel" id="10_tool_choice-py"><div class="code-title"><a href="../examples/10_tool_choice.py">10_tool_choice.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;首轮演示四种工具选择；后续恢复 auto，避免强制调用导致无限循环。&quot;&quot;&quot;
+
+# tool_choice 影响模型能否请求工具；执行层仍要核对实际请求，不能只相信设置。
+
+import argparse
+import os
+
+from agent import print_run, run_agent
+from tools import TOOLS
+
+
+# 把命令行选项转成接口要求的字符串或指定函数对象。
+def choice_value(mode):
+    if mode == &quot;specific&quot;:
+        return {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;get_weather&quot;}}
+    if mode not in (&quot;auto&quot;, &quot;none&quot;, &quot;required&quot;):
+        raise ValueError(&quot;未知工具选择模式&quot;)
+    return mode
+
+
+# 首轮使用指定策略，收到结果后的后续轮恢复 auto；总轮数仍受循环限制。
+def make_choice_ask(mode):
+    from openai import OpenAI
+
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+    # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+    client = OpenAI(base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;, timeout=60, max_retries=0)
+    first = True
+
+    def ask(messages, tools):
+        nonlocal first
+        choice = choice_value(mode) if first else &quot;auto&quot;
+        # 即使服务端错误地返回了请求，none 模式的执行白名单仍为空。
+        response = client.chat.completions.create(
+            # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+            # messages：传入本轮模型要读取的角色与内容；工具循环还须保留历史请求和结果，模型才知道前一步实际发生了什么。
+            model=os.environ.get(&quot;OLLAMA_MODEL&quot;, &quot;gemma4:e4b&quot;), messages=messages,
+            # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+            tools=TOOLS if mode == &quot;none&quot; else tools, tool_choice=choice,
+            # reasoning_effort：配置模型支持的推理行为；这里的值必须与所用服务兼容，不能当作所有模型通用的开关。
+            # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+            # max_tokens：限制本次响应最多生成多少 token，约束延迟和输出规模；达到上限后必须检查是否截断。
+            reasoning_effort=&quot;none&quot;, temperature=0, max_tokens=768,
+        )
+        first = False
+        selected = response.choices[0]
+        if mode in (&quot;required&quot;, &quot;specific&quot;) and len(messages) == 2:
+            if not selected.message.tool_calls:
+                raise RuntimeError(&quot;当前模型/接口未实现该工具选择约束；本实验不通过&quot;)
+            if mode == &quot;specific&quot; and any(call.function.name != &quot;get_weather&quot; for call in selected.message.tool_calls):
+                raise RuntimeError(&quot;返回了未指定的工具&quot;)
+        if mode == &quot;none&quot; and selected.message.tool_calls:
+            raise RuntimeError(&quot;接口违反 none 约束，禁止执行&quot;)
+        # 把 SDK 或模型对象转成普通数据，方便保存与返回；不要把对象的调试字符串当作协议 JSON。
+        # exclude_none：省略值为 None 的可选字段，避免把“未返回”误写成一项有内容的协议字段。
+        return {&quot;message&quot;: selected.message.model_dump(exclude_none=True), &quot;finish_reason&quot;: selected.finish_reason,
+                &quot;tokens&quot;: response.usage.total_tokens if response.usage else 0}
+
+    return ask
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;mode&quot;, choices=[&quot;auto&quot;, &quot;none&quot;, &quot;required&quot;, &quot;specific&quot;])
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    question = &quot;你好，用一句话回应。&quot; if args.mode == &quot;none&quot; else &quot;查询台北的示例气温。&quot;
+    # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+    print_run(run_agent(question, make_choice_ask(args.mode), tools=[] if args.mode == &quot;none&quot; else TOOLS))</code></pre></section><pre><code># 检验本行选择的工具调用模式。
+python 10_tool_choice.py auto
+# 检验本行选择的工具调用模式。
+python 10_tool_choice.py none
+# 检验本行选择的工具调用模式。
+python 10_tool_choice.py required
+# 检验本行选择的工具调用模式。
+python 10_tool_choice.py specific</code></pre>
+<p>强制模式只用于首轮；收到结果后，下一轮恢复 auto，让模型可以直接回答。如果每轮都设为 required，模型就可能一直请求工具，无法自然结束。指定函数实验不应计入“模型自己选对工具”的评测分数。</p>
+<h2>2. 多请求不等于真正并发</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>模型同轮提出查台北和查北京，只说明两张请求单同时产生。原来的for循环仍然顺序执行。本节用ThreadPoolExecutor把独立只读调用交给不同工作线程，让它们的等待时间重叠。</p>
+<p>如果两个查询各等80毫秒，顺序执行约160毫秒；并发可能接近80毫秒再加调度开销。这是理想示意，实际机器负载、限流和服务端串行都会改变效果，不能把理论值写成成绩。</p>
+<section class="code-panel" id="11_parallel_tools-py"><div class="code-title"><a href="../examples/11_parallel_tools.py">11_parallel_tools.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;真正并发执行互不依赖的只读函数，按原请求顺序关联结果。&quot;&quot;&quot;
+
+# 这里只并行处理一批互不依赖的只读调用；后一步需要前一步结果时不能放进同一批。
+
+import argparse
+import json
+import time
+# 线程池让独立的等待型调用重叠执行；它不能让有前后数据依赖的工具提前运行。
+from concurrent.futures import ThreadPoolExecutor
+
+from agent import print_run, run_agent
+from model_client import make_ask
+from tools import TOOLS, execute
+
+
+# 并行执行后按原调用次序收集结果，保证结果能与对应 ID 配对。
+def execute_parallel(calls, allowed, runner=execute):
+    if not calls:
+        return []
+    if len(calls) &gt; 8:
+        raise ValueError(&quot;单批请求不能超过 8 个&quot;)
+    with ThreadPoolExecutor(max_workers=min(4, len(calls))) as pool:
+        # 先提交任务并取得 Future；把所有独立任务提交后再取结果，等待时间才有机会重叠。
+        futures = [pool.submit(runner, call[&quot;function&quot;][&quot;name&quot;], call[&quot;function&quot;][&quot;arguments&quot;], allowed) for call in calls]
+        # 等待当前 Future 的结果，保持它与原请求关联；等待超时并不等于杀掉已经开始的线程。
+        return [future.result() for future in futures]
+
+
+# 人为等待用于比较耗时，不代表真实工具的速度。
+def delayed_read(name, arguments, allowed):
+    time.sleep(0.08)  # 模拟有明确时长的只读 I/O，不请求外网。
+    return execute(name, arguments, allowed)
+
+
+def demo():
+    calls = [{&quot;id&quot;: f&quot;parallel-{index}&quot;, &quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
+        # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        &quot;name&quot;: &quot;get_weather&quot;, &quot;arguments&quot;: json.dumps({&quot;city&quot;: city}, ensure_ascii=False)}}
+        for index, city in enumerate((&quot;台北&quot;, &quot;北京&quot;))]
+    # 记录循环开始的时刻，后面在请求前后检查总耗时，避免每轮各自未超时却总任务无限拖长。
+    started = time.perf_counter()
+    sequential = [delayed_read(call[&quot;function&quot;][&quot;name&quot;], call[&quot;function&quot;][&quot;arguments&quot;], {&quot;get_weather&quot;}) for call in calls]
+    sequential_seconds = time.perf_counter() - started
+    # 记录循环开始的时刻，后面在请求前后检查总耗时，避免每轮各自未超时却总任务无限拖长。
+    started = time.perf_counter()
+    parallel = execute_parallel(calls, {&quot;get_weather&quot;}, delayed_read)
+    parallel_seconds = time.perf_counter() - started
+    assert sequential == parallel
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    print(json.dumps({&quot;sequential_seconds&quot;: round(sequential_seconds, 3),
+                      # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+                      # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+                      &quot;parallel_seconds&quot;: round(parallel_seconds, 3), &quot;results&quot;: parallel}, ensure_ascii=False, indent=2))
+    print(&quot;这是固定 I/O 演示；加速幅度不是模型或真实天气服务的基准成绩。&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;--live&quot;, action=&quot;store_true&quot;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    if args.live:
+        print_run(run_agent(&quot;请在同一轮分别查询台北和北京的示例气温。最终只分别列出城市与气温，不做相加等额外计算。&quot;, make_ask(),
+                            # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+                            tools=[TOOLS[0]], batch_executor=execute_parallel))
+    else:
+        demo()</code></pre></section><pre><code># 验证并发执行及请求结果关联。
+python 11_parallel_tools.py
+# 验证并发执行及请求结果关联；--live 会进入真实服务路径，需先满足本章环境要求。
+python 11_parallel_tools.py --live</code></pre>
+<h2>3. 返回顺序和完成顺序可以不同</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>本例先提交全部任务，得到代表待完成结果的 Future 对象，再按原请求顺序调用 result 取回结果。因此，即使北京先完成，也不会把它配给台北的请求 ID。每个成功或错误结果仍然对应原请求；一条查询失败不能被悄悄丢掉。</p>
+<p>agent.py在任何任务开始前检查整批ID、请求结构与次数上限；并发函数内的每个调用仍经过execute验证。主线默认仍顺序执行，只有显式传入batch_executor才切换。</p>
+<h2>4. 哪些调用可以并发</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<table><tr><th>任务</th><th>能否并发</th><th>原因</th></tr>
+<tr><td>查台北与查北京</td><td>可以</td><td>参数互不依赖，均只读</td></tr>
+<tr><td>查气温后换算</td><td>不能提前并发</td><td>后一步需要前一步的结果</td></tr>
+<tr><td>先扣款再发收据</td><td>不能照搬本例</td><td>有业务顺序、副作用、幂等与确认要求</td></tr></table>
+<p>线程适合让多项 I/O 等待重叠，例如等待网络返回；不保证加速纯 Python 的密集计算。future.result 等待超时，也不会终止已经开始的线程。真实网络工具还需设置自身的超时和并发上限。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s5">S5</a>、<a href="../reference/readings.html#s7">S7</a>、<a href="../reference/readings.html#s19">S19</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="0" data-correct="关联始终取决于原请求ID，而不是完成先后。" data-incorrect="关联始终取决于原请求ID，而不是完成先后。"><fieldset><legend>并发查询中北京先完成，结果应关联什么？</legend><label><input type="radio" name="qs10" value="0"> 北京的原请求ID</label><label><input type="radio" name="qs10" value="1"> 台北的原请求ID</label><label><input type="radio" name="qs10" value="2"> 最后那条用户消息</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0009-streaming-tools.html">← 流式工具调用</a><a href="0011-react-paper.html">ReAct论文详解与检索实验 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

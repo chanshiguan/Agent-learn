@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学习地图与运行环境 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 01</p><h1>学习地图与运行环境</h1><p class="lede">分清谁提出请求、谁执行代码；准备可验证的环境。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必读；结合本单元案例理解，并在单元 8 完成基础验收。</p></aside>
+<h2>1. 这一阶段真正要交付什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>第二课训练你把任务描述清楚。第三课开始，模型除了回答，还可以提出“请调用某个工具”的请求。你负责写程序，把请求检查清楚、执行函数，再把结果交回模型。</p>
+<p>目标是做出一个天气与计算助手：能选择工具，能使用前一个工具结果，能在失败时说明原因，并且一定会在上限内停止。主线不引入 Agent 框架，先看清循环本身。</p>
+<div class="formula">定义接口 → 模型请求 → 程序检查与执行 → 回传结果 → 模型回答或继续</div>
+<h2>2. 八个词，只按职责记</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><thead><tr><th>术语</th><th>白话解释</th><th>本课对应物</th></tr></thead><tbody>
+<tr><td>Tool Use</td><td>用外部能力补资料或完成动作</td><td>查询固定天气数据、算术、换算</td></tr>
+<tr><td>Function Calling</td><td>模型按协议提出函数名称与参数</td><td>名称为 get_weather，参数是 city</td></tr>
+<tr><td>Tool Schema</td><td>给模型看的接口说明</td><td>名称、用途、字段、类型、必填项</td></tr>
+<tr><td>Tool Call</td><td>模型提出的一次请求</td><td>带独立 ID 的工具工作单</td></tr>
+<tr><td>Tool Result</td><td>程序交回的成功数据或错误</td><td>26°C，或“没有该城市数据”</td></tr>
+<tr><td>Agent Loop</td><td>模型和工具来回交互的有界循环</td><td>本课 run_agent 函数</td></tr>
+<tr><td>ReAct</td><td>交替决定下一步、行动、读观察</td><td>先查气温，再用实际气温换算</td></tr>
+<tr><td>Structured Output</td><td>把最终数据放进指定结构</td><td>从现成句子抽取城市与温度 JSON</td></tr>
+</tbody></table>
+<p>这一课先用“模型 + 工具 + 有界循环”来理解 Agent。不同研究和产品对 Agent 的定义可能更宽泛，学习时先看清程序做了什么，不必纠结名称。</p>
+<h2>3. 什么问题需要哪一种方法</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>用户任务</th><th>做法</th><th>为什么</th></tr>
+<tr><td>把一句话写得礼貌</td><td>普通模型回答</td><td>不依赖外部数据或动作</td></tr>
+<tr><td>从“台北 26°C”抽取字段</td><td>结构化输出</td><td>信息已在输入里，重点是格式</td></tr>
+<tr><td>查询某城市的数据库记录</td><td>工具调用</td><td>需要程序访问已有数据</td></tr>
+<tr><td>先查记录，再计算，再回答</td><td>有界工具循环</td><td>后续参数依赖前面的结果</td></tr></table>
+<h2>4. 文件夹和编号</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>本目录是<strong>总课程第三课</strong>。下面的 01–15 是第三课内部学习单元，与第二课的编号互不影响。完整案例在 examples，速查资料在 reference；第四课及后续课程各有独立目录，可以从总课程首页进入。</p>
+<h2>5. 一次性准备环境</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>沿用项目现有虚拟环境和已经安装的 gemma4:e4b。本课固定 SDK 版本，减少版本差异对案例的影响。已经在 ai-learn 目录时跳过第一条 cd；终端已激活 .venv 时跳过 source；依赖版本已符合 requirements.txt 时，不用重复安装。最后的测试用来检查程序是否正常，不会调用真实模型。</p>
+<pre><code># 已经在项目根目录时，不用重复执行下一行。
+cd /Users/owen/Documents/ai-learn
+# 让本终端的 python 指向项目虚拟环境；已激活时可跳过。
+source .venv/bin/activate
+# 按 txt 中列出的包名和版本安装依赖，不是下载课程正文；环境已满足时可跳过。
+python -m pip install -r courses/03-tool-use-and-hello-agent/examples/requirements.txt
+# 查看本机已安装的模型，不会下载新模型。
+ollama list
+# 下面的测试和短命令从案例目录执行。
+cd courses/03-tool-use-and-hello-agent/examples
+# 发现并运行所有 test_*.py，-v 会显示各项结果；这里不请求模型。
+python -m unittest discover -p &#x27;test_*.py&#x27; -v</code></pre>
+<p>如果 Ollama 应用已经运行，不要重复启动服务。如果终端提示无法连接，先打开 Ollama 应用；也可以在另一个终端运行 <code>ollama serve</code>。只有模型列表里没有目标模型时，才执行 <code>ollama pull gemma4:e4b</code>；下载会占磁盘和带宽。</p>
+<p>这里的 api_key="ollama" 是本地接口占位值。请求地址写死为 localhost，不会自动转到 OpenAI 云端。导入 OpenAI Python SDK，并不意味着在使用 OpenAI 模型。换模型可设置 OLLAMA_MODEL，但还要核对 reasoning_effort 参数兼容性。</p>
+<h2>6. 两类验证各证明什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p><strong>离线测试</strong>：用固定响应代替模型，检查程序是否正确保存消息、返回错误、停止循环。<strong>真实模型运行</strong>：检查模型会不会正确选择工具、填参数、使用结果。离线测试通过后，还需要真实模型评测。</p>
+<p>本地主线没有按 token 收取的云 API 费用，但会用本机内存、电力和运行时间。完整五轮 Schema 对比共 50 个任务，先跑单题和一轮小评测，再决定是否跑完。</p>
+<h2>7. 学习顺序</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先学单元 1–4，跑通模型与工具之间的往返；再学 5–7，处理错误并理解必修阅读，随后用单元 8 检查基础能力。单元 9–14 继续讲流式、并发、研究方法和扩展案例，单元 15 是最后的综合检查，可以分多次完成。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s1">S1</a>、<a href="../reference/readings.html#s2">S2</a>、<a href="../reference/readings.html#s4">S4</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="1" data-correct="本课 client tool 由你的 Python 程序执行。" data-incorrect="本课 client tool 由你的 Python 程序执行。"><fieldset><legend>模型返回 get_weather 请求后，谁真正运行 Python 函数？</legend><label><input type="radio" name="qa1" value="0"> 模型自行执行</label><label><input type="radio" name="qa1" value="1"> 宿主程序执行</label><label><input type="radio" name="qa1" value="2"> 接口说明执行</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="../index.html">← 第三课首页</a><a href="0002-schema-and-contract.html">工具接口与参数验证 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

@@ -1,0 +1,200 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-4codeact-vs-json-toolsmolagents"></span><h1 data-heading-alias="练习-4codeact-vs-json-toolsmolagents" id="h0a45f87e6a6c">练习 4：CodeAct vs JSON tool（Smolagents）</h1>
+<p>对应 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a> 练习 4。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 CodeAct vs JSON tool 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s11c34c1d5476">Smolagents 官方 cookbook</a> + <a href="../../reference/source-readings.html#s69fcc631de05">QuantaLogic/quantalogic</a>（另一个 CodeAct framework）</li>
+<li>完整 references 见 <a href="stages--04-agent-frameworks.zh-Hans.md.html#-精选-projects">Stage 4 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="两种-agent-action-路线对照"></span><h2 data-heading-alias="两种-agent-action-路线对照" id="h0b4e41197ac9">两种 agent action 路线对照</h2>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>怎么 act</th>
+<th>范例 framework</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>JSON tool</strong></td>
+<td>LLM 回 <code>{&quot;name&quot;: &quot;tool_x&quot;, &quot;arguments&quot;: {...}}</code></td>
+<td>OpenAI function calling、LangGraph、CrewAI</td>
+</tr>
+<tr>
+<td><strong>CodeAct</strong></td>
+<td>LLM 写 Python code、直接执行</td>
+<td>HuggingFace Smolagents</td>
+</tr>
+</tbody>
+</table>
+<p><strong>这题用 CodeAct 解同题（人口比例）、跟练习 1 / 3 的 JSON tool 路线对照</strong>。</p>
+<span id="怎么跑--两条路径"></span><h2 data-heading-alias="怎么跑--两条路径" id="hcfbfbec15e1b">怎么跑 — 两条路径</h2>
+<blockquote>
+<p>⚠️ <strong>每个练习都要有自己的 Python 3.11 <code>.venv</code>。</strong> 这题还需要 Docker；不要把模型产生的程序码直接放到主机执行。这个教学容器仍可能连网，所以里面不要放密码或私密数据。</p>
+</blockquote>
+<span id="path-a默认本机免费"></span><h3 data-heading-alias="path-a默认本机免费" id="hb0c1e438cbd6">Path A（默认、本机免费）</h3>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+docker version
+.\.venv\Scripts\python.exe test_docker_smoke.py
+.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>预算：模型 API 是 <strong>$0</strong>；本机硬体、电力与 Docker 资源仍有成本。小模型可能需要更多修正步骤，所以程序把 <code>max_steps</code> 限制为 4。</p>
+<span id="path-banthropic比较云端结果"></span><h3 data-heading-alias="path-banthropic比较云端结果" id="h0e3c77158554">Path B（Anthropic、比较云端结果）</h3>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>预设固定型号：<code>anthropic/claude-haiku-4-5-20251001</code>。单次 2,000 input + 1,000 output tokens 的例子为 <code>$0.007</code>；CodeAct 可能多轮调用，因此先设供应商支出上限 <strong>$0.10</strong>。实际费用看 tokens 与步数。</p>
+<details markdown="1">
+<summary>macOS／Linux 指令与查核资讯</summary>
+<pre><code class="language-bash">python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+docker version
+./.venv/bin/python test.py
+./.venv/bin/python test_docker_smoke.py
+</code></pre>
+<p>价格公式：<code>input_tokens / 1,000,000 × $1 + output_tokens / 1,000,000 × $5</code>。</p>
+<p>官方来源：<a href="../../reference/source-readings.html#sccb3c996ccd9">Secure code execution</a>｜<a href="../../reference/source-readings.html#s2c20392510b8">Python executors</a>｜<a href="../../reference/source-readings.html#s1e53417c513d">Docker port publishing</a>｜<a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic pricing</a></p>
+<p><small>套件、model ID、价格与官方连结查核：2026-08-28 UTC。</small></p>
+</details>
+<span id="不花钱验证程序逻辑"></span><h2 data-heading-alias="不花钱验证程序逻辑" id="h4571f575b19e">不花钱验证程序逻辑</h2>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py # AST、JSON allowlist、loopback 控制端口与资源限制
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 相同安全边界
+</code></pre>
+<p>这两个离线测试<strong>不会</strong>执行模型产生的程序码，也不需要 Docker daemon。<code>test_docker_smoke.py</code> 是另一个手动 smoke test：它真的启动 Jupyter executor，确认主机控制通道可用，而且控制端口只绑定到 <code>127.0.0.1</code>；先让 <code>docker version</code> 成功再运行。它不会假装容器不能连网。</p>
+<span id="codeact-是怎么运作的"></span><h2 data-heading-alias="codeact-是怎么运作的" id="h5ef2a4e573e3">CodeAct 是怎么运作的</h2>
+<p>LLM 不回 JSON、而是<strong>回 Python code block</strong>：</p>
+<pre><code>（user）Find Taipei population, divide by NYC, give ratio.
+
+（LLM 回应）
+```python
+pop_taipei = lookup_fact(query=&quot;Taipei population&quot;) # 2602000
+pop_nyc = lookup_fact(query=&quot;New York population&quot;) # 8336000
+ratio = calculator(expression=f&quot;{pop_taipei}/{pop_nyc}&quot;) # 0.3122
+print(ratio)
+```
+
+（Smolagents 执行这段 code、把 print 结果接回去给 LLM 继续）
+</code></pre>
+<p>这份示例明确使用 Docker executor。Jupyter 控制端口只绑定到主机的 <code>127.0.0.1</code>，并移除 Linux capabilities、禁止提权与 pickle，再限制内存、process 数与 agent 步数。一般 Docker bridge <strong>仍可能让容器连接外部网络或主机服务</strong>，所以这只是受控教学示例，不是 production sandbox。需要执行不可信程序码时，还要加真正的 egress／host 防火墙，或改用有正式隔离边界的远程 sandbox。</p>
+<span id="codeact-vs-json-tool-对照"></span><h2 data-heading-alias="codeact-vs-json-tool-对照" id="h43fe6ac0dbc5">CodeAct vs JSON tool 对照</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>JSON tool</th>
+<th>CodeAct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM 输出形式</td>
+<td>结构化 JSON</td>
+<td>Python 程序码</td>
+</tr>
+<tr>
+<td>变数绑定</td>
+<td>LLM 要自己记得 / 重复调用</td>
+<td>自然有 variable（<code>pop_taipei = ...</code>）</td>
+</tr>
+<tr>
+<td>多步运算</td>
+<td>每步一次 LLM call</td>
+<td>一次写好几行 code</td>
+</tr>
+<tr>
+<td>一轮 token 数</td>
+<td>较少</td>
+<td>较多（code 较长）</td>
+</tr>
+<tr>
+<td>对小 model</td>
+<td>较友善（稳定的 JSON）</td>
+<td>较吃力（要产正确 Python）</td>
+</tr>
+<tr>
+<td>Debug 友善</td>
+<td>tool call 看得清楚</td>
+<td>看 code execution log</td>
+</tr>
+<tr>
+<td>安全考量</td>
+<td>allowlist + 参数验证</td>
+<td>不可信程序码，必须隔离、限权、限资源</td>
+</tr>
+<tr>
+<td>哪些题目擅长</td>
+<td>单步、边界明确</td>
+<td>多步运算、需要中间 variable</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HuggingFace 的观点</strong>：CodeAct 更贴近“人类怎么解问题”——你也是用变数记中间结果、不是每步都重新查。</p>
+<span id="两个-path-观察重点"></span><h2 data-heading-alias="两个-path-观察重点" id="h83012a0e47ab">两个 path 观察重点</h2>
+<table>
+<thead>
+<tr>
+<th>观察项</th>
+<th>Anthropic Claude haiku</th>
+<th>Ollama qwen2.5:3b</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产出可执行 Python</td>
+<td>用相同测试题量测</td>
+<td>用相同测试题量测</td>
+</tr>
+<tr>
+<td>变数命名 / 重用</td>
+<td>看 execution log</td>
+<td>看 execution log</td>
+</tr>
+<tr>
+<td>比例是否算对</td>
+<td>验证最终值</td>
+<td>验证最终值</td>
+</tr>
+<tr>
+<td>步数</td>
+<td>由 <code>max_steps=4</code> 限制</td>
+<td>由 <code>max_steps=4</code> 限制</td>
+</tr>
+<tr>
+<td>模型 API 成本</td>
+<td>依 tokens 与步数</td>
+<td>$0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>punchline</strong>：CodeAct 比 JSON tool 多了一个“执行程序码”的风险面。不要先假设哪个模型或路线较好；用相同任务比较成功率、步数、成本与安全边界。</p>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ul>
+<li><strong><code>@tool</code> 函数 docstring 是 prompt 的一部分</strong>：Smolagents 把 docstring 当 tool description 给 LLM 看。<strong>docstring 没写好、LLM 不知道何时用这 tool</strong></li>
+<li><strong>把 Docker 当完整 sandbox</strong>：错。这份示例只缩小权限并把控制端口绑定到 loopback；上线前还要做镜像、权限、egress、host access、资源与记录审查</li>
+<li><strong><code>max_steps</code> 不够</strong>：先看错在哪一步，不要只把数字调大；较大上限会增加费用与 loop 风险</li>
+<li><strong>模型程序码有 syntax error</strong>：Smolagents 可以把错误接回模型修正，但会增加步数；是否换模型要看评测结果</li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<pre><code class="language-powershell">$env:MODEL=&quot;anthropic/claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+</code></pre>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>加更多 tools</strong>：<code>@tool</code> 装饰函数即自动 wrap、Smolagents 自动拿 docstring 当 description</li>
+<li><strong>改 ToolCallingAgent</strong>：Smolagents 也有非 CodeAct 的 <code>ToolCallingAgent</code>、用 JSON tool 路线。对照看</li>
+<li><strong>接 Hugging Face Hub</strong>：使用现行 <code>InferenceClientModel</code> 调用 HF inference（不需要本机 Ollama）</li>
+<li><strong>看 <a href="../../reference/source-readings.html#sffc229d83891">Anthropic Building Effective Agents</a></strong>：Anthropic 的观点是两条路线都合理、看任务</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,176 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>结业 B：评测系统，也评测评分器</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">结业 B · Agent Builder 结业专题</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="结业-b评测系统也评测评分器"></span><h1 data-heading-alias="结业-b评测系统也评测评分器" id="h02d7437d04dc">结业 B：评测系统，也评测评分器</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h7d236b6b51bd">完整案例的数据流</a></li><li><a href="#h5c2ffb8e6a96">为什么新版评分不只看关键词</a></li><li><a href="#h54c5b2cd4cf9">每道示范题的人工答案标准</a></li><li><a href="#h11e2b0c1e6b2">提交自己的答案</a></li><li><a href="#hdfb3b60f43c3">完整失败分析参考</a></li><li><a href="#h6b452254cdea">七维自评与完成门槛</a></li></ul></aside>
+<span id="完整案例的数据流"></span><h2 data-heading-alias="完整案例的数据流" id="h7d236b6b51bd">完整案例的数据流</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>CLI 接收问题 → 模型提出 retrieve 调用 → 程序验证名字、参数、ID与预算 → 检索虚构制度 → 工具结果按 ID 返回 → 模型生成答案和来源 → 校验结构/引用 → 逐题评分。固定摘录基线跳过模型，适合先验证数据和评分；只有 --live 才是完整模型工具调用路径。</p>
+<p>完整的 rag_agent.py、documents.json、eval_cases.json 与 evaluate.py 均在本课源码页，课末折叠答案也完整展示。根环境已有 openai 时不用再次安装；先确认 Ollama 正在运行且有 gemma4:e4b。</p>
+<span id="为什么新版评分不只看关键词"></span><h2 data-heading-alias="为什么新版评分不只看关键词" id="h5c2ffb8e6a96">为什么新版评分不只看关键词</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>“不是09:00开放”包含正确时间，却表达错误事实。引用一个真实 ID 也不代表它支持当前句子。本课评分器先查来源集合与实际检索轨迹；完全一致的可信摘录可自动判定；改写答案进入 NEEDS_REVIEW，人工核对后才算最终通过。没有检索轨迹、伪造工具结果、来源越界直接 FAIL。</p>
+<pre><code class="language-python">&quot;&quot;&quot;评分分为确定性证据检查与人工语义复核，未知不算通过。&quot;&quot;&quot;
+
+# 先读 grade 的证据检查，再看 evaluate 如何逐题多次运行；待复核不会计入通过率。
+import argparse
+import json
+import time
+from pathlib import Path
+from rag_agent import run, make_ask, retrieve
+
+
+# 重新执行轨迹中的查询，拒绝伪造证据；完全摘录可自动判定，改写留给人工复核。
+def grade(case, result):
+    errors = []
+    answer, refs = result.get('answer'), result.get('source_ids')
+    trace = result.get('trace', [])
+    if not isinstance(answer, str) or not answer.strip():
+        errors.append('答案为空或不是字符串')
+    if not isinstance(refs, list) or not all(isinstance(x, str) for x in refs):
+        errors.append('来源格式错误')
+        refs = []
+    if len(refs) != len(set(refs)) or set(refs) != set(case['sources']):
+        errors.append('来源集合不符合本题证据要求')
+    observed = {}
+    for step in trace:
+        if step.get('tool') != 'retrieve' or not isinstance(step.get('query'), str):
+            errors.append('轨迹不是允许的检索步骤')
+            continue
+        # 用记录中的查询重新检索，防止提交者手填一份看似成功的工具结果。
+        expected = retrieve(step['query'])
+        if step.get('result') != expected:
+            errors.append('轨迹中的证据与实际检索不一致')
+        observed.update({x['id']: x['text'] for x in expected})
+    if not trace or not set(refs).issubset(observed):
+        errors.append('缺少支持本次来源的检索轨迹')
+    if errors:
+        return {'status': 'FAIL', 'reasons': errors}
+    if not refs:
+        return {'status': 'PASS' if answer == '资料不足，无法回答。' else 'FAIL',
+                'reasons': ['无证据题只接受明确拒答']}
+    # 只对完全一致的已知摘录自动通过。改写不武断判错，也不默认为对。
+    exact = '\n'.join(observed[x] for x in refs)
+    if answer == exact:
+        return {'status': 'PASS', 'reasons': ['答案为本次可信资料的完整摘录；来源与轨迹符合本题']}
+    return {'status': 'NEEDS_REVIEW', 'reasons': [
+        '这是改写答案，需按本题人工量规逐条核对；关键词命中不计分',
+        '核对主体、数字、否定与例外；每条事实有支持；没有额外编造；确实回答问题']}
+
+
+# 题集、次数和输入版本固定后逐题记录；异常归为失败，不丢掉失败行。
+def evaluate(split='development', trials=1, live=False, submission=None):
+    if not 1 &lt;= trials &lt;= 5:
+        raise ValueError('试跑次数必须为 1–5')
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    data = json.loads(Path(__file__).with_name('eval_cases.json').read_text())
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    supplied = json.loads(Path(submission).read_text()) if submission else None
+    if supplied is not None and set(supplied) != {c['id'] for c in data[split]}:
+        raise ValueError('提交 JSON 顶层必须包含所选题集的全部且仅有题号')
+    rows = []
+    ask = make_ask() if live else None
+    for case in data[split]:
+        for trial in range(trials):
+            start = time.perf_counter()
+            try:
+                result = supplied[case['id']] if supplied is not None else run(case['question'], ask)
+                row = {'id': case['id'], 'trial': trial+1, 'result': result, **grade(case, result)}
+            except Exception as exc:
+                row = {'id': case['id'], 'status': 'FAIL', 'reasons': [str(exc)]}
+            row['seconds'] = round(time.perf_counter()-start, 3)
+            rows.append(row)
+    # 把待人工复核单独计数，不混入自动通过率。
+    counts = {s: sum(x['status'] == s for x in rows) for s in ['PASS', 'FAIL', 'NEEDS_REVIEW']}
+    return {'dataset_version': data['version'], 'split': split, 'counts': counts,
+            'automatic_pass_rate': counts['PASS']/len(rows),
+            'meaning': '待人工复核不计入通过；公开题不能作为盲测；不会据此记录学习者掌握', 'rows': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--split', choices=['development', 'holdout'], default='development')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--trials', type=int, default=1)
+    # 让真实模型、固定答案或提交文件等模式互斥，避免一次运行混用两种来源而无法解释结果。
+    group = p.add_mutually_exclusive_group()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    group.add_argument('--live', action='store_true')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    group.add_argument('--submission', type=Path)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    a = p.parse_args()
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(evaluate(a.split, a.trials, a.live, a.submission), ensure_ascii=False, indent=2))
+
+</code></pre>
+<p>输出分别统计 PASS、FAIL、NEEDS_REVIEW。automatic_pass_rate 不包含待审项，不能把它叫完整业务正确率。规则无法判断的答案不必全判错，但必须保留未知。</p>
+<span id="每道示范题的人工答案标准"></span><h2 data-heading-alias="每道示范题的人工答案标准" id="h54c5b2cd4cf9">每道示范题的人工答案标准</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>必须正确表达</th>
+<th>不能接受</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d1 周一时间</td>
+<td>09:00–18:00，引用 hours</td>
+<td>否定这些时间、换日或编造例外</td>
+</tr>
+<tr>
+<td>d2 提前预约</td>
+<td>至少提前1天，引用 booking</td>
+<td>把至少改成最多</td>
+</tr>
+<tr>
+<td>d3 退款</td>
+<td>开课前至少24小时的条件，引用 cancel</td>
+<td>漏掉条件后说任何时候全额退</td>
+</tr>
+<tr>
+<td>d4 通话</td>
+<td>门厅，引用 quiet</td>
+<td>把安静区当可通话区</td>
+</tr>
+<tr>
+<td>d5 教材</td>
+<td>只能下载所报课程教材，引用 files</td>
+<td>扩成全部课程资料</td>
+</tr>
+<tr>
+<td>h1 周日</td>
+<td>闭馆，引用 hours</td>
+<td>改为开放</td>
+</tr>
+<tr>
+<td>h2 最多提前</td>
+<td>7天，引用 booking</td>
+<td>把至少与最多混淆</td>
+</tr>
+<tr>
+<td>h3 月球地址</td>
+<td>资料不足，来源为空</td>
+<td>猜地址或借不相关来源</td>
+</tr>
+</tbody>
+</table>
+<p>除了答案，每题还查禁止动作和实际工具轨迹。所谓 holdout 在本教材是公开示范，读完这张表后不能再把它当你的盲测成绩。</p>
+<span id="提交自己的答案"></span><h2 data-heading-alias="提交自己的答案" id="h11e2b0c1e6b2">提交自己的答案</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p><code>--submission</code> 接收 JSON，顶层是所选题集的题号，每项含 answer、source_ids、trace，trace 必须来自真实运行结果，不手填成功。可以把每题 run 的结果直接保存为这份对象。</p>
+<pre><code class="language-bash"># 运行 courses/capstone-b/examples/evaluate.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/capstone-b/examples/evaluate.py
+# 运行 courses/capstone-b/examples/evaluate.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/capstone-b/examples/evaluate.py --submission /tmp/my-development.json
+# 运行 courses/capstone-b/examples/evaluate.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/capstone-b/examples/evaluate.py --live --trials 3
+</code></pre>
+<p>最后一条是15次真实任务，时间取决于本地模型。人工记录用“题号／trial／事实／引用／禁止动作／最终结论／理由”七列。有错写实际反例，不改答案后再冒充原输出。</p>
+<span id="完整失败分析参考"></span><h2 data-heading-alias="完整失败分析参考" id="hdfb3b60f43c3">完整失败分析参考</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>现象：一题答案引用了不存在 ID。层次：生成或引用契约，检索正常。复现：保留相同问题与工具输出，让假模型返回 fake ID。修复：在执行层检查引用属于本轮候选，拒绝后停止。回归：同题被拒、正常题继续通过、无证据题拒答。限制：合法 ID 仍可能不支持文本，所以继续人工语义评分。</p>
+<p>迁移冲突题的答案应列两个互不兼容的来源，说明无法确定哪个有效，要求补版本或权威信息；不能按候选顺序选第一个。本示范关键词检索不自动解决任意同义词和冲突，它是你扩展评测的起点。</p>
+<span id="七维自评与完成门槛"></span><h2 data-heading-alias="七维自评与完成门槛" id="h6b452254cdea">七维自评与完成门槛</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>问题定义看输入输出是否可验收；架构看组件职责与停止条件；正确性看逐条事实和工具行为；评测看五开发题、三个新保留题、多次试跑和评分校准；韧性看超时、无资料、非法工具与恢复；接口文档看干净环境复现；反思看一次有证据的改进。</p>
+<p>每维分未达、基本、良好、优秀：缺产物为未达，单一正常路径为基本，有正反例且可重现为良好，有实际复用和受控比较为优秀。结业至少关键维度良好，无越权或伪造结果。最终交程序、架构说明、逐题报告、README、失败分析和200字反思，不能只交总分截图。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 结业 B 知识整合</a><a href="99-exercises.html">结业 B 最终实践 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

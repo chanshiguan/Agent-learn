@@ -1,0 +1,140 @@
+[
+  {
+    "requirement": "Retrieval 与知识/记忆分工",
+    "lesson": "lessons/03-workshop.html#hb54084f5af5c",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "Embedding、相似度与八题实验",
+    "lesson": "lessons/03-workshop.html#he586f0a6e71c",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "引用、权限与真实生成",
+    "lesson": "lessons/03-workshop.html#h49e4e1515c68",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "Memory 生命周期与持久化",
+    "lesson": "lessons/03-workshop.html#hf57fedfd4ed5",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "原五题与综合案例的分工",
+    "lesson": "lessons/03-workshop.html#h27299825d071",
+    "example": "text/05-original-labs.md",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "综合 RAG 的逐题验收",
+    "lesson": "lessons/03-workshop.html#h9c3ce5424857",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "RAG/Memory 进阶支线：从症状定位到实验",
+    "lesson": "lessons/04-advanced.html#he2aa308192ac",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "RAG/Memory 进阶支线：混合检索与 Reranker",
+    "lesson": "lessons/04-advanced.html#h36ea6f45d59c",
+    "example": "examples/rerank_experiment.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "查询变换与情境检索：原理和选择判断，非论文系统实现",
+    "lesson": "lessons/04-advanced.html#h75e84eae0fd3",
+    "example": "text/07-direct-readings.md",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "图与摘要树：方案比较与限制，非框架实现",
+    "lesson": "lessons/04-advanced.html#h5cdd52f930c6",
+    "example": "text/04-advanced.md",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "RAG策略：概念比较与有界循环，不冒称训练方法复现",
+    "lesson": "lessons/04-advanced.html#hc44790c17b6b",
+    "example": "text/04-advanced.md",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "RAG/Memory 进阶支线：长期记忆的设计选择",
+    "lesson": "lessons/04-advanced.html#h06b42f22cd9d",
+    "example": "examples/memory_store.py",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "RAG/Memory 进阶支线：最终选型记录参考",
+    "lesson": "lessons/04-advanced.html#h4ad96b216dfc",
+    "example": "text/04-advanced.md",
+    "assessment": "lessons/03-workshop.html#h9c3ce5424857"
+  },
+  {
+    "requirement": "原练习 Embedding",
+    "lesson": "lessons/05-original-labs.html#hc0e18182eaa8",
+    "example": "examples/upstream/01-embeddings/starter.py",
+    "assessment": "lessons/05-original-labs.html#hc0e18182eaa8"
+  },
+  {
+    "requirement": "原练习 向量数据库",
+    "lesson": "lessons/05-original-labs.html#h09131f22422c",
+    "example": "examples/upstream/02-vector-db/starter.py",
+    "assessment": "lessons/05-original-labs.html#h09131f22422c"
+  },
+  {
+    "requirement": "原练习 切分比较",
+    "lesson": "lessons/05-original-labs.html#h17d7afe0bb2c",
+    "example": "examples/upstream/03-chunking-comparison/starter.py",
+    "assessment": "lessons/05-original-labs.html#h17d7afe0bb2c"
+  },
+  {
+    "requirement": "原练习 原始 RAG 基线",
+    "lesson": "lessons/05-original-labs.html#hd91d0cdc3901",
+    "example": "examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "lessons/05-original-labs.html#hd91d0cdc3901"
+  },
+  {
+    "requirement": "原练习 原始记忆基线",
+    "lesson": "lessons/05-original-labs.html#h2ec92884e70d",
+    "example": "examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "lessons/05-original-labs.html#h2ec92884e70d"
+  },
+  {
+    "requirement": "直接必读：LangChain Retrieval（本课必读相关能力）",
+    "lesson": "lessons/03-workshop.html#h49e4e1515c68",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/06-abc-experiment.html#hfad0de2bd041"
+  },
+  {
+    "requirement": "直接必读：LlamaIndex concepts（本课必读相关能力）",
+    "lesson": "lessons/02-readings.html#h2a01e0b8eda3",
+    "example": "examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "lessons/06-abc-experiment.html#hfad0de2bd041"
+  },
+  {
+    "requirement": "直接必读：Chroma getting started（本课必读相关能力）",
+    "lesson": "lessons/05-original-labs.html#h09131f22422c",
+    "example": "examples/upstream/02-vector-db/starter.py",
+    "assessment": "lessons/06-abc-experiment.html#hfad0de2bd041"
+  },
+  {
+    "requirement": "直接必读：LangGraph Agentic RAG（本课必读相关能力）",
+    "lesson": "lessons/04-advanced.html#hc44790c17b6b",
+    "example": "examples/grounded_rag.py",
+    "assessment": "lessons/06-abc-experiment.html#hfad0de2bd041"
+  },
+  {
+    "requirement": "进阶原题：20题 A/B/C、BM25、重排、Recall@5",
+    "lesson": "lessons/06-abc-experiment.html#h7fd01c103260",
+    "example": "examples/rerank_experiment.py",
+    "assessment": "lessons/06-abc-experiment.html#hfad0de2bd041"
+  }
+]

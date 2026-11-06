@@ -1,0 +1,680 @@
+{
+  "04-agent-frameworks": {
+    "route": "B 线",
+    "level": "core",
+    "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+    "lessons": {
+      "04-patterns": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "06-framework-apis": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "工具目录该怎样读": {
+            "level": "lookup",
+            "note": "工具选型时查阅；不要求逐个安装。"
+          }
+        }
+      },
+      "05-original-labs": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      }
+    }
+  },
+  "05-claude-code-ecosystem": {
+    "route": "A/B 共用",
+    "level": "core",
+    "note": "B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。",
+    "lessons": {
+      "00-first-session": {
+        "level": "core",
+        "note": "首次使用 Claude Code 时必做；已经完成安装、登录与只读会话验证，可直接进入下一章。",
+        "sections": {}
+      },
+      "04-extensions": {
+        "level": "extra",
+        "note": "扩展选读、选做。基础 Plugin 概念仍在主讲义 5.4 学习；本章深入打包、动态工作流与 SDK 托管，不阻挡主线。",
+        "sections": {}
+      },
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。",
+        "sections": {
+          "单元六：Plugin、SDK 与长期运行": {
+            "level": "mixed",
+            "note": "基础 Plugin 和长期循环边界必读；SDK 及复杂部署选做。"
+          }
+        }
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。",
+        "sections": {
+          "Agent SDK、运行循环与托管": {
+            "level": "mixed",
+            "note": "运行循环的停止与权限边界必读；SDK 接入和托管实作选做。"
+          }
+        }
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。",
+        "sections": {
+          "5.5 Subagent：隔离上下文，不自动隔离文件": {
+            "level": "core",
+            "note": "B 线必读；A 线选读。"
+          },
+          "5.6 并行与 Worktree": {
+            "level": "core",
+            "note": "B 线必读基本边界；复杂并行选做，A 线选读。"
+          },
+          "5.7 Loop 与 5.8 SDK": {
+            "level": "mixed",
+            "note": "5.7 Loop 是 B 线必读；5.8 SDK 是扩展选读。A 线均按需选择。"
+          }
+        }
+      }
+    }
+  },
+  "06-memory-rag": {
+    "route": "B 线",
+    "level": "core",
+    "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+    "lessons": {
+      "07-direct-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "04-advanced": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "GraphRAG、LightRAG 与摘要树": {
+            "level": "mixed",
+            "note": "必读方法与适用条件；图检索和摘要树的具体产品实现选做。"
+          },
+          "Corrective、Self 与 Adaptive RAG": {
+            "level": "mixed",
+            "note": "必读何时修正、反思或切换流程；额外系统实现选做。"
+          }
+        }
+      },
+      "06-abc-experiment": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "08-example-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "练习四：LlamaIndex、LangChain 与受管 Retrieval": {
+            "level": "mixed",
+            "note": "理解索引、检索与生成的职责；受管服务接入选做，不必安装全部产品。"
+          },
+          "扩展教材与本地自测": {
+            "level": "mixed",
+            "note": "自测用于核对本章掌握情况；额外教材按需查阅。"
+          }
+        }
+      },
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "05-original-labs": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      }
+    }
+  },
+  "07-multi-agent-production": {
+    "route": "B 线",
+    "level": "core",
+    "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+    "lessons": {
+      "06-complete-project": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "07-example-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "Streaming、Prompt caching 与 Batch：三件不同的事": {
+            "level": "extra",
+            "note": "按输出体验、成本或批处理需求选读。"
+          },
+          "辩论、批准恢复与扩展教材": {
+            "level": "mixed",
+            "note": "批准、暂停与恢复必读；辩论实验和额外教材选读。"
+          }
+        }
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "05-original-labs": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "01-multi-agent-debate：多角色辩论（选修）": {
+            "level": "extra",
+            "note": "有多角色比较需求时再做；不阻挡主线。"
+          },
+          "04-sdk-advanced：SDK 进阶（选修）": {
+            "level": "extra",
+            "note": "需要流式或缓存时再做；不阻挡主线。"
+          }
+        }
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {
+          "8. 两个选修与成本优化": {
+            "level": "extra",
+            "note": "多 Agent 辩论、Streaming 与缓存的深入实现选做。"
+          }
+        }
+      }
+    }
+  },
+  "07.5-advanced-agentic-concepts": {
+    "route": "B 线",
+    "level": "core",
+    "note": "四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。",
+    "lessons": {
+      "99-exercises": {
+        "level": "core",
+        "note": "四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。",
+        "sections": {
+          "Dynamic Workflows": {
+            "level": "extra",
+            "note": "需要脚本化动态编排时再深入，不影响四个核心概念的验收。"
+          }
+        }
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。",
+        "sections": {
+          "5. 其他模式的证据门槛": {
+            "level": "mixed",
+            "note": "选择方法的证据门槛必读；所列复杂模式不要求逐个实现。"
+          }
+        }
+      }
+    }
+  },
+  "08-agent-interfaces": {
+    "route": "B 线必修 · A 线建议",
+    "level": "core",
+    "note": "B 线完成练习 1–4；A 线建议至少完成练习 1。",
+    "lessons": {
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线完成练习 1–4；A 线建议至少完成练习 1。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线完成练习 1–4；A 线建议至少完成练习 1。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线完成练习 1–4；A 线建议至少完成练习 1。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线完成练习 1–4；A 线建议至少完成练习 1。",
+        "sections": {}
+      }
+    }
+  },
+  "A1-cli-intro": {
+    "route": "A 线",
+    "level": "a",
+    "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+    "lessons": {
+      "99-exercises": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      }
+    }
+  },
+  "A2-cli-workflow": {
+    "route": "A 线",
+    "level": "a",
+    "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+    "lessons": {
+      "04-original-cli": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "99-exercises": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      }
+    }
+  },
+  "A3-cli-production": {
+    "route": "A 线",
+    "level": "a",
+    "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+    "lessons": {
+      "04-original-delivery": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "99-exercises": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      }
+    }
+  },
+  "branch-developer": {
+    "route": "身份分支",
+    "level": "branch",
+    "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+    "lessons": {
+      "99-exercises": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      }
+    }
+  },
+  "branch-everyday-users": {
+    "route": "身份分支",
+    "level": "branch",
+    "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+    "lessons": {
+      "99-exercises": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      }
+    }
+  },
+  "branch-knowledge-worker": {
+    "route": "身份分支",
+    "level": "branch",
+    "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+    "lessons": {
+      "99-exercises": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      }
+    }
+  },
+  "branch-researcher": {
+    "route": "身份分支",
+    "level": "branch",
+    "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+    "lessons": {
+      "04-reproducibility": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {
+          "可选 DVC 路径：完整管线": {
+            "level": "extra",
+            "note": "仅在需要数据版本和管线复现时选做。"
+          }
+        }
+      },
+      "99-exercises": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      }
+    }
+  },
+  "branch-teacher": {
+    "route": "身份分支",
+    "level": "branch",
+    "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+    "lessons": {
+      "99-exercises": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "branch",
+        "note": "按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。",
+        "sections": {}
+      }
+    }
+  },
+  "capstone-a": {
+    "route": "A 线",
+    "level": "a",
+    "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+    "lessons": {
+      "99-exercises": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "a",
+        "note": "走 A 线时必读、必做；只走 B 线时可跳过。",
+        "sections": {}
+      }
+    }
+  },
+  "capstone-b": {
+    "route": "B 线",
+    "level": "core",
+    "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+    "lessons": {
+      "99-exercises": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "03-workshop": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "02-readings": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      },
+      "01-guide": {
+        "level": "core",
+        "note": "B 线主线内容；读懂讲解并达到本课验收标准后继续。",
+        "sections": {}
+      }
+    }
+  },
+  "03-tool-use-and-hello-agent": {
+    "route": "B 线基础必修",
+    "level": "core",
+    "note": "单元 1–8 是主线必读与必做；单元 9–15 为扩展选读、选做。ReAct 的基础必读内容已在单元 7 整理。",
+    "lessons": {
+      "0001-map-and-setup": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0002-schema-and-contract": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0003-first-tool": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0004-agent-loop": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0005-errors-and-boundaries": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0006-schema-and-eval": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0007-reading-and-protocols": {
+        "level": "core",
+        "note": "主线必读；结合本单元案例理解，并在单元 8 完成基础验收。",
+        "sections": {}
+      },
+      "0008-exercises": {
+        "level": "core",
+        "note": "主线必做：完成六组原练习与综合项目；扩展实验不作为进入第四课的前提。",
+        "sections": {}
+      },
+      "0009-streaming-tools": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。",
+        "sections": {}
+      },
+      "0010-choice-and-concurrency": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。",
+        "sections": {}
+      },
+      "0011-react-paper": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。 ReAct 的入门概念在单元 7 必读；这里展开论文对照和检索实验。",
+        "sections": {}
+      },
+      "0012-feedback-and-memory": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。",
+        "sections": {}
+      },
+      "0013-instructor-and-outlines": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。",
+        "sections": {}
+      },
+      "0014-codeact": {
+        "level": "extra",
+        "note": "扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。",
+        "sections": {}
+      },
+      "0015-extended-exercises": {
+        "level": "extra",
+        "note": "扩展验收：只在学习对应扩展主题后完成；不替代单元 8 的主线验收。",
+        "sections": {}
+      }
+    }
+  }
+}

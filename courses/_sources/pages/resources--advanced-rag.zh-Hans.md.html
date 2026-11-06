@@ -1,0 +1,236 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>advanced-rag.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="进阶-rag先找出哪一步坏了再加新技巧"></span><h1 data-heading-alias="进阶-rag先找出哪一步坏了再加新技巧" id="h8a2892061519">进阶 RAG：先找出哪一步坏了，再加新技巧</h1>
+<p><strong>RAG</strong>（Retrieval-Augmented Generation）：先找相关资料，再依资料回答。</p>
+<p><a href="">繁體中文</a> | <a href="">English</a> | <a href="">简体中文</a></p>
+<p>← <a href="stages--06-memory-rag.zh-Hans.md.html">回到 Stage 6：RAG 与 Memory</a></p>
+<p>基础 RAG 像“先翻书，再回答”。进阶 RAG 不是把更多零件全装上去，而是先看哪一步找错了资料，再只修那一步。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<p>完成这页后，你可以：</p>
+<ol>
+<li>分清楚“找不到”“排序错”“证据不够”“回答乱讲”四种问题。</li>
+<li>知道何时该改搜索、重排结果、换问法，或连起跨文档的关系。</li>
+<li>用一小组固定问题比较修改前后，不靠一次漂亮回答下结论。</li>
+<li>知道什么时候先停在基本 RAG，不增加成本与复杂度。</li>
+</ol>
+<span id="-先认识八个核心术语"></span><h2 data-heading-alias="-先认识八个核心术语" id="h9b3fe72722f7">🧩 先认识八个核心术语</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">核心词</th>
+<th style="text-align:left">白话说法</th>
+<th style="text-align:left">这里怎么用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Chunk（资料片段）</strong></td>
+<td style="text-align:left">把长文档切成小段</td>
+<td style="text-align:left">搜索时先找片段，并保留它的来源。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Embedding（向量表示）</strong></td>
+<td style="text-align:left">用一串数字表示文字意思</td>
+<td style="text-align:left">把问题与资料片段转成可比较的数字。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Vector Search（向量搜索）</strong></td>
+<td style="text-align:left">找意思相近的内容</td>
+<td style="text-align:left">比较向量的相近程度，不只看字是否一样。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>BM25（关键词排名方法）</strong></td>
+<td style="text-align:left">按字词匹配程度排顺序</td>
+<td style="text-align:left">例如找产品编号 AB-123；也考虑字词多常见及文档长度。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Retriever（检索器）</strong></td>
+<td style="text-align:left">帮你找资料的零件</td>
+<td style="text-align:left">依问题找出可能有用的片段；这些就是“候选资料”。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Hybrid Search（混合搜索）</strong></td>
+<td style="text-align:left">两种找法一起用</td>
+<td style="text-align:left">合并 BM25 与向量搜索的结果，去掉重复资料。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Reranking（重新排序）</strong></td>
+<td style="text-align:left">把找到的资料再排一次</td>
+<td style="text-align:left">再看问题与候选资料的关系，把更有用的往前放。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Baseline（基线）</strong></td>
+<td style="text-align:left">修改前的成绩</td>
+<td style="text-align:left">保存原本系统与测试结果，留待改完后比较。</td>
+</tr>
+</tbody>
+</table>
+<p>先看这条路：问题 → 找候选资料 → 重新排序（可选）→ 依资料回答。<strong>Retrieval（检索）</strong>是找资料；<strong>Generation（生成）</strong>是写答案。先分清楚哪一步出错，再改那一步。</p>
+<span id="-先看症状再选方法"></span><h2 data-heading-alias="-先看症状再选方法" id="h7790f5a0bba3">🩺 先看症状，再选方法</h2>
+<p>先固定一组问题，并标出每题该找回的资料。<code>k</code> 是只看前几条，例如 <code>k = 5</code> 就看前五条。</p>
+<ul>
+<li><strong>Recall@k（前 k 条召回率）</strong>：该找回的资料，前 k 条找回了多少比例。</li>
+<li><strong>命中率</strong>：这组问题中，有多少比例的题目在前 k 条至少找到一笔相关资料。</li>
+</ul>
+<p>例如：一题该找回四份资料，前五条找到两份，Recall@5 就是 50%；这题也算命中。</p>
+<p>例如搜索 AB-123 的保固，却只找到其他产品？先看正确资料有没有被找回，再试 BM25。若已找回却排很后面，再试 Reranking。两者都正常，才检查答案是否照着证据写。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你看到的问题</th>
+<th style="text-align:left">先量什么</th>
+<th style="text-align:left">第一个可试的方法</th>
+<th style="text-align:left">先不要做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">文档里有答案，却没找回</td>
+<td style="text-align:left">Recall@k、命中率</td>
+<td style="text-align:left"><a href="#rag-search">调整切法或混合搜索</a></td>
+<td style="text-align:left">先换更大的生成模型</td>
+</tr>
+<tr>
+<td style="text-align:left">正确资料有找回，但排很后面</td>
+<td style="text-align:left">人工看前 k 条的顺序</td>
+<td style="text-align:left"><a href="#rag-search">重新排序</a></td>
+<td style="text-align:left">一口气增加很多零件</td>
+</tr>
+<tr>
+<td style="text-align:left">问题太模糊，或一次问太多事</td>
+<td style="text-align:left">各问法的命中率与等待时间</td>
+<td style="text-align:left"><a href="#rag-query">改写或拆开问题</a></td>
+<td style="text-align:left">无限制地产生查询</td>
+</tr>
+<tr>
+<td style="text-align:left">要连起多份文档的人物、事件</td>
+<td style="text-align:left">准备几题跨文档问题，核对关系</td>
+<td style="text-align:left"><a href="#rag-graph">先试关系搜索</a></td>
+<td style="text-align:left">每个系统都先建图</td>
+</tr>
+<tr>
+<td style="text-align:left">问题不需资料也一直搜索</td>
+<td style="text-align:left">多查了几次、花多少钱和时间</td>
+<td style="text-align:left"><a href="#rag-decisions">加入是否搜索的判断</a></td>
+<td style="text-align:left">无上限地重试</td>
+</tr>
+<tr>
+<td style="text-align:left">证据正确，答案却不照证据写</td>
+<td style="text-align:left">逐句核对答案与引用</td>
+<td style="text-align:left">改提示词、引用与拒答规则</td>
+<td style="text-align:left">继续改搜索掩盖回答问题</td>
+</tr>
+</tbody>
+</table>
+<p>要把排序变成分数时，再用 <strong>MRR（Mean Reciprocal Rank）</strong>看第一笔相关结果是否够前面；用 <strong>nDCG（Normalized Discounted Cumulative Gain）</strong>比较整体排序与理想顺序。核对答案是否受证据支持，叫 <strong>Faithfulness（忠实度）</strong>；它不等于答案符合所有外部事实。</p>
+<span id="-必读材料"></span><h2 data-heading-alias="-必读材料" id="ha33bf8c69b5a">📚 必读材料</h2>
+<p>请照顺序读；它们是学习主线，不藏在选单里。</p>
+<ol>
+<li><a href="../../reference/source-readings.html#sb8a9eac11828">LangChain：Retrieval 概念</a> — 分清楚保存资料、找资料与决定下一步的零件。</li>
+<li><a href="../../reference/source-readings.html#s33d811167435">Anthropic：Contextual Retrieval（情境化检索）</a> — 先替片段补来源背景，再建立搜索用的目录（索引）。</li>
+<li><a href="../../reference/source-readings.html#sc5ea993b30a2">Qdrant：Hybrid Queries</a> — 看两路搜索结果如何合并与重新排序。</li>
+<li><a href="../../reference/source-readings.html#sa8ee7a13dfef">Weaviate：Hybrid Search</a> — 看另一种关键字与向量搜索的合并方式。</li>
+<li><a href="../../reference/source-readings.html#s0e5c44602f14">LangGraph：Agentic RAG（由 Agent 决定何时搜索）</a> — 先完成固定的“找资料 → 回答”，再看如何加入判断。</li>
+<li><a href="../../reference/source-readings.html#s1ea1685ac7b2">Ragas</a> — 把“看起来不错”改成可重跑的数据集与评测回圈。</li>
+</ol>
+<span id="-从基础到进阶的顺序"></span><h2 data-heading-alias="-从基础到进阶的顺序" id="h7e8c05e930b5">🪜 从基础到进阶的顺序</h2>
+<span id="1-先固定一个最小-baseline"></span><h3 data-heading-alias="1-先固定一个最小-baseline" id="ha89e3915410c">1. 先固定一个最小 Baseline</h3>
+<p>准备 20–50 个经人工检查的问题，每题保存预期来源与可接受答案。先跑目前的版本，记录找回的资料、答案、等待时间（延迟）与成本。接着一次只改一件事，才知道是哪个改动有帮助。</p>
+<p><a id="rag-search"></a></p>
+<span id="2-先修-retrieval再修-generation"></span><h3 data-heading-alias="2-先修-retrieval再修-generation" id="h08d6327e5f3e">2. 先修 Retrieval，再修 Generation</h3>
+<ul>
+<li><strong>Chunking（切分资料）</strong>：先按标题与段落切。再比较固定长度（fixed-size）、先找小段再带回大段（parent-child），或按意思分段（semantic chunking）。</li>
+<li><strong>Metadata Filter（附加资料筛选）</strong>：用片段的产品名称、日期或权限等标签缩小范围。先确认筛选没有挡掉正确资料。</li>
+<li><strong>Hybrid Search</strong>：BM25 补字词匹配，向量搜索补意思相近的内容；先测合并后是否真的找得更多。</li>
+<li><strong>Reranking</strong> 不会创造新文档；它只把已找回的候选重新排列。</li>
+</ul>
+<p>文档也会提到 <strong>dense（密集向量）</strong>与 <strong>sparse（稀疏向量）</strong>：前者通常大多数位置有数值，后者多数位置是零。<strong>Fusion（融合）</strong>是合并不同搜索的分数或排名。向量的疏密本身不保证搜索质量。</p>
+<p><a id="rag-query"></a></p>
+<span id="3-问题不好找时再做-query-transformation"></span><h3 data-heading-alias="3-问题不好找时再做-query-transformation" id="heff2ef64235c">3. 问题不好找时，再做 Query Transformation</h3>
+<p><strong>Query Transformation（查询转换）</strong>是把问题换个问法，或拆成小题后再找。先选一种试，不必全加。</p>
+<ul>
+<li><strong>Multi-Query</strong>：把同一问题改成几种说法，各自搜索后合并。</li>
+<li><strong>HyDE（Hypothetical Document Embeddings）</strong>：先写假想答案，转成向量，再找真实资料。假想内容不是证据，也可能把搜索带偏。</li>
+<li><strong>RAG Fusion</strong>：合并多种问法得到的排名，降低单一措辞的影响。</li>
+<li><strong>Decomposition</strong>：把“比较 A、B 并解释原因”拆成数个可以分别找证据的小问题。</li>
+</ul>
+<p><a id="rag-graph"></a></p>
+<span id="4-需要跨文档关系时才考虑-graphrag"></span><h3 data-heading-alias="4-需要跨文档关系时才考虑-graphrag" id="h4582f41de379">4. 需要跨文档关系时，才考虑 GraphRAG</h3>
+<p><strong>GraphRAG</strong>把文档中的人物、组织等“实体”及彼此的关系连成图，再用来找证据。例如把“谁参与哪个计划”跨文档连起来。单份问答或精确条款，通常先用一般检索器就够了。</p>
+<p><strong>Microsoft GraphRAG</strong> 是研究参考实现，官方目前标示为 largely in maintenance mode，仍修 bug 与依赖问题，但不再以新增功能为主。它的 indexing 可能昂贵，应先用小数据集。<strong>LightRAG</strong> 是另一套活跃的 graph-based RAG 实现，资料模型与 Microsoft GraphRAG 不相同，不能把两者当成同一产品。</p>
+<p>先拿“哪些人物共同影响这件事？”或“整批文档有哪些主题？”测试，确认建图的成本有换到更好的答案。</p>
+<p><a id="rag-decisions"></a></p>
+<span id="5-流程需要判断时才加-corrective-或-agentic-rag"></span><h3 data-heading-alias="5-流程需要判断时才加-corrective-或-agentic-rag" id="hb105d0001ca4">5. 流程需要判断时，才加 Corrective 或 Agentic RAG</h3>
+<p>前面的做法大多照固定步骤搜索、回答。只有需要“现在要不要查、查不好怎么办”时，才增加下面的判断。</p>
+<ul>
+<li><strong>Self-RAG</strong>：模型学习何时检索，并对证据与回答做反思。</li>
+<li><strong>CRAG</strong>（Corrective Retrieval Augmented Generation，也叫 Corrective RAG）：先判断候选是否够好，不够时改查询或改来源。</li>
+<li><strong>Adaptive RAG</strong>：依问题难度选择不同流程。</li>
+<li><strong>Agentic RAG</strong>：让 agent 决定何时调用 retriever；必须设定步数、时间、成本与可用来源上限。</li>
+</ul>
+<p>原始入口：<a href="../../reference/source-readings.html#see3c6fa10985">Self-RAG</a>、<a href="../../reference/source-readings.html#s198f59bd51e9">CRAG</a>、<a href="../../reference/source-readings.html#sc29b3d11ab78">Adaptive-RAG</a>。</p>
+<span id="6-最后才碰摘要树与程序优化"></span><h3 data-heading-alias="6-最后才碰摘要树与程序优化" id="h55f450460f2d">6. 最后才碰摘要树与程序优化</h3>
+<p><strong>RAPTOR</strong>（Recursive Abstractive Processing for Tree-Organized Retrieval）把相近片段分组、写摘要，再逐层合成较大的摘要。细节问题找原片段，主题问题找上层摘要。</p>
+<p><strong>DSPy</strong>用示例与评分规则，调整 LLM（Large Language Model，能读写语言的模型）的提示词或示范，改善整个流程。先有清楚任务、可靠资料与评测，才适合用它。</p>
+<p>阅读：<a href="../../reference/source-readings.html#s01cc6bde2374">RAPTOR paper</a> · <a href="../../reference/source-readings.html#sa79ac563bcbf">DSPy</a></p>
+<span id="-一个可重复运行的小实验"></span><h2 data-heading-alias="-一个可重复运行的小实验" id="h21d8a6d969f7">🛠 一个可重复运行的小实验</h2>
+<ol>
+<li>选 20 题，为每题标出正确来源。</li>
+<li><strong>A：基线</strong>。只用向量搜索，保存前五条结果与答案。</li>
+<li><strong>B：混合搜索</strong>。保留 A，只加入 BM25 并合并结果，重跑同一批题目。</li>
+<li><strong>C：再加排序</strong>。保留 B，只加入重新排序，重跑同一批题目。</li>
+<li>三组都记录 Recall@5、命中率、延迟与成本。其余设定相同，写下哪几题变好或变差。</li>
+</ol>
+<p><strong>完成条件：</strong> 你能拿出同一份测试集的三组结果，而不是只展示一题成功案例。</p>
+<details markdown="1">
+<summary>成本、资料与上线前检查</summary>
+<ul>
+<li>Indexing 是否会调用付费模型？先用小样本估算一次完整重建成本。</li>
+<li>每个 chunk 是否保留来源、页码／位置、版本、时间与访问权限？</li>
+<li>Retriever 是否在查询前套用权限，而不是找到后才遮住答案？</li>
+<li>Agentic loop 是否有最大步数、timeout、budget 与安全来源清单？</li>
+<li>Cache 是否会让旧文档继续被取回？更新与删除流程是否测试过？</li>
+</ul>
+</details>
+<details markdown="1">
+<summary>常见失败与排查顺序</summary>
+<ol>
+<li>先看正确证据有没有进 top-k。</li>
+<li>有进 top-k，再看 reranker 是否把它往后排。</li>
+<li>排名正确，再看 prompt 是否要求引用与拒答。</li>
+<li>最后才检查生成模型；不要用更大模型掩盖 retrieval 错误。</li>
+</ol>
+</details>
+<span id="-精选-projects-与学习资源"></span><h2 data-heading-alias="-精选-projects-与学习资源" id="h9b515e845d58">🎯 精选 Projects 与学习资源</h2>
+<p>评分代表“对这张学习地图的教学价值”，不是项目质量排行榜。先选一个框架、一个数据层与一个评测工具。</p>
+<p><small>资料核查：2026-08-30 UTC</small></p>
+<div class="reader-resource-catalog" role="region" tabindex="0" aria-label="精选项目与学习资源">
+<table align="center">
+  <thead><tr><th scope="col">分类</th><th scope="col">项目／文档</th><th scope="col">评分</th><th scope="col">用途</th><th scope="col">限制</th></tr></thead>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">流程与示例</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#se7f1aab302e1">LlamaIndex</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 文档型应用开发者<div data-field="learn"><strong>能学什么：</strong> 找资料、组织回答与评测</td><td><div data-field="status"><strong>状态／限制：</strong> MIT；套件多，先跟官方 starter</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s24347d54513b">Haystack</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 想把处理步骤拆成小组件<div data-field="learn"><strong>能学什么：</strong> 拆分组件、选路与搜索</td><td><div data-field="status"><strong>状态／限制：</strong> Apache-2.0；先做小型流程</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sac8d6f662f37">RAG_Techniques</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 想比较技术的读者<div data-field="learn"><strong>能学什么：</strong> 可运行 notebooks 与技术对照</td><td><div data-field="status"><strong>状态／限制：</strong> 自定义非商业授权；商用须书面许可；事实回官方文档核对</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s5ff4bf30ae94">RAGFlow</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 想读完整产品架构的团队<div data-field="learn"><strong>能学什么：</strong> 读取文档、混合搜索与操作界面</td><td><div data-field="status"><strong>状态／限制：</strong> Apache-2.0；不适合当第一个 starter</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">搜索与图</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s97340b559d76">Qdrant</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 要合并密集与稀疏向量搜索<div data-field="learn"><strong>能学什么：</strong> 合并搜索结果与筛选资料</td><td><div data-field="status"><strong>状态／限制：</strong> Apache-2.0；需规划服务与备份</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sc5f2c6c39c63">pgvector</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 已使用 PostgreSQL 的团队<div data-field="learn"><strong>能学什么：</strong> 在同一数据库做文字与向量搜索</td><td><div data-field="status"><strong>状态／限制：</strong> 仍需索引与查询调校</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s118480639e4f">Microsoft GraphRAG</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 研究跨文档关系的读者<div data-field="learn"><strong>能学什么：</strong> 实体关系、局部与整体主题搜索</td><td><div data-field="status"><strong>状态／限制：</strong> MIT；维护模式、建索引成本高</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s134916e26204">LightRAG</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 比较以关系图找证据的读者<div data-field="learn"><strong>能学什么：</strong> 关系图与向量搜索</td><td><div data-field="status"><strong>状态／限制：</strong> MIT；架构不同于 Microsoft GraphRAG</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">评测与优化</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s1ea1685ac7b2">Ragas</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 要重跑评测的团队<div data-field="learn"><strong>能学什么：</strong> 测试数据、评分与实验比较</td><td><div data-field="status"><strong>状态／限制：</strong> Apache-2.0；模型评分仍需人工校准</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#scb3e555cea2b">TruLens</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 想追查执行过程并评测<div data-field="learn"><strong>能学什么：</strong> 自定义评分、记录与比较</td><td><div data-field="status"><strong>状态／限制：</strong> 先确认集成与资料保存方式</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sa79ac563bcbf">DSPy</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 已有测试数据与评分规则的开发者<div data-field="learn"><strong>能学什么：</strong> 改善模型的工作流程</td><td><div data-field="status"><strong>状态／限制：</strong> MIT；不是初学 RAG 的第一步</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sb29660378388">Anthropic Contextual Retrieval cookbook</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="audience"><strong>适合谁：</strong> 已完成 baseline 的读者<div data-field="learn"><strong>能学什么：</strong> 片段补背景与评测</td><td><div data-field="status"><strong>状态／限制：</strong> 供应商示例；数字只适用其设置</td></tr>
+  </tbody>
+</table>
+<span id="-自我检查"></span><h2 data-heading-alias="-自我检查" id="h97895b8996e9">✅ 自我检查</h2>
+<ul>
+<li>[ ] 我会先保存 baseline，再一次改一个组件。</li>
+<li>[ ] 我能分清 Hybrid Search 与 Agentic RAG。</li>
+<li>[ ] 我知道 Reranking 不能找回根本没进候选集的文档。</li>
+<li>[ ] 我能说出 GraphRAG 适合的问题，也能说出不该用它的情况。</li>
+<li>[ ] 我的评测同时记录质量、延迟、成本与失败案例。</li>
+</ul>
+<p>← <a href="stages--06-memory-rag.zh-Hans.md.html">回到 Stage 6：RAG 与 Memory</a></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

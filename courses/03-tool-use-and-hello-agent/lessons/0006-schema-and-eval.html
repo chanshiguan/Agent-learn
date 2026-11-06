@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schema 对比与固定评测 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 06</p><h1>Schema 对比与固定评测</h1><p class="lede">用实际轨迹和明确标准比较两种工具说明。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必读；结合本单元案例理解，并在单元 8 完成基础验收。</p></aside>
+<h2>1. 练习 6：好 Schema 到底帮助了什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>同样的三个函数，弱版本删除用途描述、枚举、范围、必填和额外字段限制；明确版本保留这些信息。底层验证、问题、模型、Prompt 与循环都不变，观察模型填写接口时的差异。</p>
+<p>这比较的是一组 Schema 改善，不能直接断言“某一个字段造成全部提升”。要定位某项作用，下一轮只改 description，或只改 enum，重新跑相同题目。</p>
+<h2>2. 固定五题</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<section class="code-panel" id="eval_cases-json"><div class="code-title"><a href="../examples/eval_cases.json">eval_cases.json · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>[
+  {&quot;id&quot;:&quot;weather&quot;,&quot;question&quot;:&quot;查询台北的示例气温。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;],&quot;number&quot;:26,&quot;unit_words&quot;:[&quot;摄氏&quot;,&quot;℃&quot;,&quot;°C&quot;,&quot;celsius&quot;],&quot;city&quot;:&quot;台北&quot;},
+  {&quot;id&quot;:&quot;math&quot;,&quot;question&quot;:&quot;请调用计算工具，计算 12 乘以 8。&quot;,&quot;actions&quot;:[&quot;calculator&quot;],&quot;number&quot;:96,&quot;operation&quot;:&quot;multiply&quot;,&quot;left&quot;:12,&quot;right&quot;:8},
+  {&quot;id&quot;:&quot;chain&quot;,&quot;question&quot;:&quot;查询台北的示例气温，再用温度工具换算成华氏。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;,&quot;convert_temperature&quot;],&quot;number&quot;:78.8,&quot;unit_words&quot;:[&quot;华氏&quot;,&quot;℉&quot;,&quot;°F&quot;,&quot;fahrenheit&quot;],&quot;city&quot;:&quot;台北&quot;},
+  {&quot;id&quot;:&quot;greeting&quot;,&quot;question&quot;:&quot;你好，用一句话回应即可。&quot;,&quot;actions&quot;:[]},
+  {&quot;id&quot;:&quot;missing&quot;,&quot;question&quot;:&quot;这是错误处理实验：请实际调用 get_weather 查询火星，让工具返回是否有数据；不要只根据工具说明推断。收到错误就说明无法查询，不要猜温度。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;],&quot;error&quot;:true,&quot;city&quot;:&quot;火星&quot;}
+]</code></pre><details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>[</code></td><td>开始一个数组，内部按顺序保存各项。</td></tr><tr><td>2</td><td><code>  {&quot;id&quot;:&quot;weather&quot;,&quot;question&quot;:&quot;查询台北的示例气温。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;],&quot;number&quot;:26,&quot;unit_words&quot;:[&quot;摄氏&quot;,&quot;℃&quot;,&quot;°C&quot;,&quot;celsius&quot;],&quot;city&quot;:&quot;台北&quot;},</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>3</td><td><code>  {&quot;id&quot;:&quot;math&quot;,&quot;question&quot;:&quot;请调用计算工具，计算 12 乘以 8。&quot;,&quot;actions&quot;:[&quot;calculator&quot;],&quot;number&quot;:96,&quot;operation&quot;:&quot;multiply&quot;,&quot;left&quot;:12,&quot;right&quot;:8},</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>4</td><td><code>  {&quot;id&quot;:&quot;chain&quot;,&quot;question&quot;:&quot;查询台北的示例气温，再用温度工具换算成华氏。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;,&quot;convert_temperature&quot;],&quot;number&quot;:78.8,&quot;unit_words&quot;:[&quot;华氏&quot;,&quot;℉&quot;,&quot;°F&quot;,&quot;fahrenheit&quot;],&quot;city&quot;:&quot;台北&quot;},</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>5</td><td><code>  {&quot;id&quot;:&quot;greeting&quot;,&quot;question&quot;:&quot;你好，用一句话回应即可。&quot;,&quot;actions&quot;:[]},</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>6</td><td><code>  {&quot;id&quot;:&quot;missing&quot;,&quot;question&quot;:&quot;这是错误处理实验：请实际调用 get_weather 查询火星，让工具返回是否有数据；不要只根据工具说明推断。收到错误就说明无法查询，不要猜温度。&quot;,&quot;actions&quot;:[&quot;get_weather&quot;],&quot;error&quot;:true,&quot;city&quot;:&quot;火星&quot;}</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>7</td><td><code>]</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details></section>
+<p>五题分别检查选天气工具、选计算工具、跨轮依赖、问候不滥用工具、没有数据时正确失败。对话历史每题重新建立，避免上一题残留数据帮助下一题。</p>
+<p>最后一题明确要求实际调用工具，目的是观察错误回传。普通产品中，模型根据已有说明直接告知“不支持该城市”也可能合理；本实验按“必须触发错误路径”的目标评分。</p>
+<h2>3. 评分不只看最后一句</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>维度</th><th>判断方式</th></tr>
+<tr><td>工具选择</td><td>action 的名称与预期顺序一致</td></tr>
+<tr><td>参数正确</td><td>城市、运算、操作数、输入输出单位符合任务</td></tr>
+<tr><td>依赖正确</td><td>换算发生在之后一轮，使用真实天气结果</td></tr>
+<tr><td>结果正确</td><td>工具执行成功，最终数值和单位符合预期</td></tr>
+<tr><td>失败正确</td><td>有失败结果，并在回答里说明不能查询</td></tr>
+<tr><td>正常结束</td><td>在上限内产生非空最终文字</td></tr></table>
+<p>本课评分器使用明确的规则，还不能全面理解答案的含义。例如，答案里出现了正确数值，整句话仍可能自相矛盾；出现了表示错误的词，也不代表其他内容都可靠。因此，每条记录都会保存答案和调用过程，最后还需要人工核对。</p>
+<h2>4. 先一轮，再五轮</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<pre><code># 比较工具说明在固定题集上的表现。
+python 06_schema_eval.py --variant good --repeat 1
+# 比较工具说明在固定题集上的表现。
+python 06_schema_eval.py --repeat 5</code></pre>
+<p>第一条只测试明确版 Schema，共五道题。第二条是五题 × 五轮 × 两个版本，共 50 个任务；每个任务可能请求模型多次。脚本逐轮交换两个版本的先后顺序，减少固定热身次序的影响，但小样本仍不能证明普遍优劣。</p>
+<p>结果写到同目录 eval_results.json；再次运行会覆盖这份评测输出，想保留前一版先另存。温度设为 0 也不能当作完全确定性的保证，重复运行仍有价值。</p>
+<section class="code-panel" id="06_schema_eval-py"><div class="code-title"><a href="../examples/06_schema_eval.py">06_schema_eval.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;练习 6：同题、同模型、同循环，比较弱描述与明确 schema。&quot;&quot;&quot;
+
+# 对同一题集比较清楚与含糊的工具说明；先读 score，再看 main 如何保存每题结果。
+
+import argparse
+import copy
+import json
+import re
+from pathlib import Path
+
+from agent import run_agent
+from model_client import make_ask
+from tools import TOOLS
+
+
+# 根据该题的预期工具与参数评分，不能仅凭最终回答看起来合理就判通过。
+def score(case, result):
+    actions = [event for event in result[&quot;trace&quot;] if event[&quot;event&quot;] == &quot;action&quot;]
+    observations = [event for event in result[&quot;trace&quot;] if event[&quot;event&quot;] == &quot;observation&quot;]
+    names = [event[&quot;name&quot;] for event in actions]
+    if names != case[&quot;actions&quot;]:
+        return False, f&quot;工具顺序不符：{names}&quot;
+    if not result[&quot;answer&quot;].strip():
+        return False, &quot;答案为空&quot;
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    arguments = [json.loads(event[&quot;arguments&quot;]) if isinstance(event[&quot;arguments&quot;], str)
+                 else event[&quot;arguments&quot;] for event in actions]
+    if case.get(&quot;city&quot;) and arguments[0].get(&quot;city&quot;) != case[&quot;city&quot;]:
+        return False, &quot;查询城市错误&quot;
+    if case.get(&quot;error&quot;):
+        failed = bool(observations) and not observations[-1][&quot;result&quot;][&quot;ok&quot;]
+        explained = any(word in result[&quot;answer&quot;] for word in (&quot;没有&quot;, &quot;无法&quot;, &quot;不支持&quot;, &quot;无数据&quot;))
+        return failed and explained, &quot;错误结果及无法查询说明&quot;
+    if any(not event[&quot;result&quot;][&quot;ok&quot;] for event in observations):
+        return False, &quot;工具执行失败&quot;
+    if case[&quot;id&quot;] == &quot;math&quot; and any(arguments[0].get(key) != case[key] for key in (&quot;operation&quot;, &quot;left&quot;, &quot;right&quot;)):
+        return False, &quot;运算参数错误&quot;
+    if case[&quot;id&quot;] == &quot;chain&quot;:
+        converted = arguments[1]
+        dependent = (actions[1][&quot;step&quot;] &gt; actions[0][&quot;step&quot;]
+                     and converted.get(&quot;value&quot;) == observations[0][&quot;result&quot;][&quot;data&quot;][&quot;temperature&quot;]
+                     and converted.get(&quot;from_unit&quot;) == &quot;celsius&quot; and converted.get(&quot;to_unit&quot;) == &quot;fahrenheit&quot;)
+        if not dependent:
+            return False, &quot;未等到天气结果，或换算没有使用实际温度及正确单位&quot;
+    if &quot;number&quot; in case:
+        # 中文常与数值相连，“气温为26.0摄氏度”也应识别。
+        numbers = [float(value) for value in re.findall(r&quot;(?&lt;![\d.])-?\d+(?:\.\d+)?(?![\d.])&quot;, result[&quot;answer&quot;])]
+        if not any(abs(value - case[&quot;number&quot;]) &lt; 0.01 for value in numbers):
+            return False, &quot;最终数值不符&quot;
+    if case.get(&quot;unit_words&quot;) and not any(word in result[&quot;answer&quot;] for word in case[&quot;unit_words&quot;]):
+        return False, &quot;最终答案缺少正确单位&quot;
+    return True, &quot;通过规则检查；仍需人工复核最终答案&quot;
+
+
+# 保留工具名和字段类型，同时削弱描述与参数约束；这是整组 Schema 的比较，不能单独归因于某个字段。
+def weak_schema():
+    tools = copy.deepcopy(TOOLS)
+    for tool in tools:
+        function = tool[&quot;function&quot;]
+        function[&quot;description&quot;] = &quot;处理数据&quot;
+        params = function[&quot;parameters&quot;]
+        params.pop(&quot;additionalProperties&quot;, None)
+        params.pop(&quot;required&quot;, None)
+        for rule in params[&quot;properties&quot;].values():
+            for key in (&quot;description&quot;, &quot;enum&quot;, &quot;minimum&quot;, &quot;maximum&quot;):
+                rule.pop(key, None)
+    return tools
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;--repeat&quot;, type=int, default=5)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;--variant&quot;, choices=[&quot;both&quot;, &quot;good&quot;, &quot;weak&quot;], default=&quot;both&quot;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    if not 1 &lt;= args.repeat &lt;= 20:
+        parser.error(&quot;repeat 必须在 1–20 之间&quot;)
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    cases = json.loads(Path(__file__).with_name(&quot;eval_cases.json&quot;).read_text())
+    ask = make_ask()
+    rows = []
+    variants = {&quot;good&quot;: TOOLS, &quot;weak&quot;: weak_schema()}
+    if args.variant != &quot;both&quot;:
+        variants = {args.variant: variants[args.variant]}
+    # 每轮交替版本顺序，减少固定顺序造成的热身差异；不是严谨统计实验。
+    for repeat in range(args.repeat):
+        ordered = list(variants.items())
+        if repeat % 2:
+            ordered.reverse()
+        for variant, tools in ordered:
+            for case in cases:
+                try:
+                    # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+                    result = run_agent(case[&quot;question&quot;], ask, tools=tools)
+                    passed, reason = score(case, result)
+                    row = {&quot;variant&quot;: variant, &quot;repeat&quot;: repeat + 1, &quot;case&quot;: case[&quot;id&quot;],
+                           &quot;passed&quot;: passed, &quot;reason&quot;: reason, &quot;answer&quot;: result[&quot;answer&quot;],
+                           &quot;trace&quot;: result[&quot;trace&quot;], &quot;tokens&quot;: result[&quot;tokens&quot;]}
+                except Exception as error:
+                    row = {&quot;variant&quot;: variant, &quot;repeat&quot;: repeat + 1, &quot;case&quot;: case[&quot;id&quot;],
+                           &quot;passed&quot;: False, &quot;reason&quot;: f&quot;{type(error).__name__}: {error}&quot;}
+                rows.append(row)
+                print(f&quot;{variant} | 第{repeat + 1}次 | {case[&#x27;id&#x27;]} | {row[&#x27;passed&#x27;]} | {row[&#x27;reason&#x27;]}&quot;)
+    output = Path(__file__).with_name(&quot;eval_results.json&quot;)
+    # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    output.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + &quot;\n&quot;)
+    for variant in variants:
+        selected = [row for row in rows if row[&quot;variant&quot;] == variant]
+        print(f&quot;{variant} 成功 {sum(row[&#x27;passed&#x27;] for row in selected)}/{len(selected)}&quot;)
+    print(&quot;完整记录：&quot;, output)
+
+
+if __name__ == &quot;__main__&quot;:
+    # 进入本文件的演示入口。
+    main()</code></pre></section>
+<h2>5. 如何写结论</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>结论记录实际模型标签与版本、两版 Schema、固定五题、运行次数、成功数和失败类型。没有实际运行的项目，先标为未执行，不填成绩。弱版本若同样通过，说明这组题还不足以区分它们，或这个模型对此任务足够稳定。</p>
+<pre><code>模型与环境：填写 ollama list 和 python 包版本
+固定题目：examples/eval_cases.json
+模型、Prompt、循环上限：两版保持一致
+weak：实际成功数 / 实际任务数
+good：实际成功数 / 实际任务数
+失败类型：路由 / 参数 / 依赖 / 答案 / 网络 / 上限
+下一轮只改哪一项：写明具体字段与假设</code></pre>
+<h2>6. 常见失败怎样定位</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>没选工具：检查描述、任务表达和模型支持；选对工具填错参数：检查字段含义、enum 和示例；工具结果正确但回答错：检查输出要求和上下文；持续重复调用：检查结果是否正确入历史；全部报连接错误：先查服务，不改 Prompt。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s5">S5</a>、<a href="../reference/readings.html#s7">S7</a>、<a href="../reference/readings.html#s9">S9</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="0" data-correct="多项变量同时变化，无法单独解释某一项的效果。" data-incorrect="多项变量同时变化，无法单独解释某一项的效果。"><fieldset><legend>同时改变模型和 Schema 后分数提高，能直接得出什么结论？</legend><label><input type="radio" name="qa6" value="0"> 尚不能单独归因</label><label><input type="radio" name="qa6" value="1"> 全部归功于模型</label><label><input type="radio" name="qa6" value="2"> 全部归功于说明</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0005-errors-and-boundaries.html">← 错误恢复与执行边界</a><a href="0007-reading-and-protocols.html">三份必修阅读与协议对照 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

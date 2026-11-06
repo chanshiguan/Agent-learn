@@ -1,0 +1,141 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从论文问题到可核对证据表</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">研究分支 · 研究人员延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="从论文问题到可核对证据表"></span><h1 data-heading-alias="从论文问题到可核对证据表" id="hf69ea20ca7c1">从论文问题到可核对证据表</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h60b9ffd9005c">单元一：原练习的三个问题</a></li><li><a href="#he8b31fdd0800">原三问的本地原文证据</a></li><li><a href="#h24bb8409be9e">单元二：引用的三步核对</a></li><li><a href="#hb54bf69dc492">单元三：完整参考产物</a></li><li><a href="#h4e1502014496">单元四：文献工具的操作知识</a></li><li><a href="#h0d516681cbc8">课末作业、提交与评分</a></li></ul></aside>
+<span id="单元一原练习的三个问题"></span><h2 data-heading-alias="单元一原练习的三个问题" id="h60b9ffd9005c">单元一：原练习的三个问题</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>原题问：论文解决什么问题、方法包含哪些部分、哪些实验支持结果以及限制。架构、实验任务和“是否证明所有任务最优”的判断用于补充核对，不能替代这三个问题。下面 reference-work 的 original_three_questions 已逐题回答，并标出位置、中文证据转述与支持范围。</p>
+<p>本地资料对应 Attention Is All You Need v7 的 Introduction、Model Architecture 与 Results。主要问题是循环依赖限制并行；方法以注意力组织编码解码，并保留位置与前馈等结构；实验包括翻译、变体和句法分析。论文结论不意味着所有任务最优。原文极短摘录与中文解释分开，中文转述不伪装原文直引。完整论文没有被重新授权为本仓库 MIT。</p>
+<span id="原三问的本地原文证据"></span><h2 data-heading-alias="原三问的本地原文证据" id="he8b31fdd0800">原三问的本地原文证据</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>下面保留带章节位置的短摘录，配合上面的中文讲解回答原题；分号分隔的内容来自同篇论文的不同位置，不拼成一段连续引语。原句可以支持什么、不能支持什么，也应写进答案。学习本课不需要再打开外站；来源链接用于追溯版本。<a href="../../reference/source-readings.html#s8a455ddf634c">论文 v7</a></p>
+<pre><code class="language-json">{
+  &quot;paper&quot;: &quot;Attention Is All You Need&quot;,
+  &quot;version&quot;: &quot;arXiv:1706.03762v7&quot;,
+  &quot;source_url&quot;: &quot;https://arxiv.org/html/1706.03762v7&quot;,
+  &quot;checked_at&quot;: &quot;2026-11-04&quot;,
+  &quot;scope&quot;: &quot;本课三问的有限证据片段与中文讲解；不替代研究投稿时的全文审读，不把论文授权变成 MIT。&quot;,
+  &quot;evidence&quot;: [
+    {
+      &quot;id&quot;: &quot;q1-problem&quot;,
+      &quot;location&quot;: &quot;1 Introduction，循环模型计算段落&quot;,
+      &quot;original_excerpt&quot;: &quot;precludes parallelization within training examples&quot;,
+      &quot;explanation&quot;: &quot;这里的主语是前文讨论的序列计算依赖；批内并行受到限制。不能脱离主语解读为计算机无法并行。&quot;
+    },
+    {
+      &quot;id&quot;: &quot;q2-architecture&quot;,
+      &quot;location&quot;: &quot;3 Model Architecture；3.1 Encoder&quot;,
+      &quot;original_excerpt&quot;: &quot;encoder-decoder structure; multi-head self-attention mechanism&quot;,
+      &quot;explanation&quot;: &quot;分号连接两个非连续短摘录。架构由编码器和解码器组成，编码器子层包含多头自注意力；同节还说明前馈、残差和归一化。位置编码见3.5，解码器遮挡见3.1。&quot;
+    },
+    {
+      &quot;id&quot;: &quot;q3-experiments&quot;,
+      &quot;location&quot;: &quot;Abstract；6.1–6.3 Results&quot;,
+      &quot;original_excerpt&quot;: &quot;WMT 2014 English-to-German; WMT 2014 English-to-French; English constituency parsing&quot;,
+      &quot;explanation&quot;: &quot;三项是非连续实验名称摘录；中文分别是英德翻译、英法翻译、英语成分句法分析。另有模型变体实验。跨任务普遍最优不是这些证据支持的结论。&quot;
+    }
+  ],
+  &quot;negative_example&quot;: {
+    &quot;claim&quot;: &quot;论文证明所有领域的任务都最优。&quot;,
+    &quot;citation&quot;: &quot;q3-experiments&quot;,
+    &quot;judgment&quot;: &quot;未支持&quot;,
+    &quot;reason&quot;: &quot;该证据只列特定任务，不能支持全称断言；这是本教材的证据范围判断，不假造作者的限制原话。&quot;
+  }
+}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>2</td><td><code>  &quot;paper&quot;: &quot;Attention Is All You Need&quot;,</code></td><td>保存当前对象的 paper 字段，按本例题目或配置读取。</td></tr><tr><td>3</td><td><code>  &quot;version&quot;: &quot;arXiv:1706.03762v7&quot;,</code></td><td>标识资料或题集版本，保证比较条件一致。</td></tr><tr><td>4</td><td><code>  &quot;source_url&quot;: &quot;https://arxiv.org/html/1706.03762v7&quot;,</code></td><td>保存当前对象的 source_url 字段，按本例题目或配置读取。</td></tr><tr><td>5</td><td><code>  &quot;checked_at&quot;: &quot;2026-11-04&quot;,</code></td><td>保存当前对象的 checked_at 字段，按本例题目或配置读取。</td></tr><tr><td>6</td><td><code>  &quot;scope&quot;: &quot;本课三问的有限证据片段与中文讲解；不替代研究投稿时的全文审读，不把论文授权变成 MIT。&quot;,</code></td><td>保存当前对象的 scope 字段，按本例题目或配置读取。</td></tr><tr><td>7</td><td><code>  &quot;evidence&quot;: [</code></td><td>提供可用于核对断言的证据。</td></tr><tr><td>8</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>9</td><td><code>      &quot;id&quot;: &quot;q1-problem&quot;,</code></td><td>标识当前条目，供引用或关联结果使用。</td></tr><tr><td>10</td><td><code>      &quot;location&quot;: &quot;1 Introduction，循环模型计算段落&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>11</td><td><code>      &quot;original_excerpt&quot;: &quot;precludes parallelization within training examples&quot;,</code></td><td>保存当前对象的 original_excerpt 字段，按本例题目或配置读取。</td></tr><tr><td>12</td><td><code>      &quot;explanation&quot;: &quot;这里的主语是前文讨论的序列计算依赖；批内并行受到限制。不能脱离主语解读为计算机无法并行。&quot;</code></td><td>保存当前对象的 explanation 字段，按本例题目或配置读取。</td></tr><tr><td>13</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>14</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>15</td><td><code>      &quot;id&quot;: &quot;q2-architecture&quot;,</code></td><td>标识当前条目，供引用或关联结果使用。</td></tr><tr><td>16</td><td><code>      &quot;location&quot;: &quot;3 Model Architecture；3.1 Encoder&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>17</td><td><code>      &quot;original_excerpt&quot;: &quot;encoder-decoder structure; multi-head self-attention mechanism&quot;,</code></td><td>保存当前对象的 original_excerpt 字段，按本例题目或配置读取。</td></tr><tr><td>18</td><td><code>      &quot;explanation&quot;: &quot;分号连接两个非连续短摘录。架构由编码器和解码器组成，编码器子层包含多头自注意力；同节还说明前馈、残差和归一化。位置编码见3.5，解码器遮挡见3.1。&quot;</code></td><td>保存当前对象的 explanation 字段，按本例题目或配置读取。</td></tr><tr><td>19</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>20</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>21</td><td><code>      &quot;id&quot;: &quot;q3-experiments&quot;,</code></td><td>标识当前条目，供引用或关联结果使用。</td></tr><tr><td>22</td><td><code>      &quot;location&quot;: &quot;Abstract；6.1–6.3 Results&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>23</td><td><code>      &quot;original_excerpt&quot;: &quot;WMT 2014 English-to-German; WMT 2014 English-to-French; English constituency parsing&quot;,</code></td><td>保存当前对象的 original_excerpt 字段，按本例题目或配置读取。</td></tr><tr><td>24</td><td><code>      &quot;explanation&quot;: &quot;三项是非连续实验名称摘录；中文分别是英德翻译、英法翻译、英语成分句法分析。另有模型变体实验。跨任务普遍最优不是这些证据支持的结论。&quot;</code></td><td>保存当前对象的 explanation 字段，按本例题目或配置读取。</td></tr><tr><td>25</td><td><code>    }</code></td><td>结束当前对象或数组。</td></tr><tr><td>26</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>27</td><td><code>  &quot;negative_example&quot;: {</code></td><td>保存当前对象的 negative_example 字段，按本例题目或配置读取。</td></tr><tr><td>28</td><td><code>    &quot;claim&quot;: &quot;论文证明所有领域的任务都最优。&quot;,</code></td><td>保存当前对象的 claim 字段，按本例题目或配置读取。</td></tr><tr><td>29</td><td><code>    &quot;citation&quot;: &quot;q3-experiments&quot;,</code></td><td>保存当前对象的 citation 字段，按本例题目或配置读取。</td></tr><tr><td>30</td><td><code>    &quot;judgment&quot;: &quot;未支持&quot;,</code></td><td>保存当前对象的 judgment 字段，按本例题目或配置读取。</td></tr><tr><td>31</td><td><code>    &quot;reason&quot;: &quot;该证据只列特定任务，不能支持全称断言；这是本教材的证据范围判断，不假造作者的限制原话。&quot;</code></td><td>说明当前判断或限制的依据。</td></tr><tr><td>32</td><td><code>  }</code></td><td>结束当前对象或数组。</td></tr><tr><td>33</td><td><code>}</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details><p>三问分别对应 q1-problem、q2-architecture、q3-experiments。完整参考的 local_evidence_id 与此表一致。对“所有领域都最优”的反例，应判未支持；不能因为带了真实引用就通过。三问较详细的方法说明属于中文教学转述，短摘录没有覆盖的细节不能假称是摘录逐字表达的内容。正式研究或发表需按自己的引用范围审读全文，与本课的限定证据练习分开。</p>
+<span id="单元二引用的三步核对"></span><h2 data-heading-alias="单元二引用的三步核对" id="h24bb8409be9e">单元二：引用的三步核对</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>第一步列断言，一句话包含两个事实就拆开。第二步找到能支持它的段落位置；标题相关但内容不支持，不能算引用。第三步核对范围：作者报告的结果、作者的解释、你自己的推断分别标注。</p>
+<p>例如“翻译任务有效”不能扩成“所有任务有效”。两个论文用不同任务、数据切分或指标时，不直接比较数字。没有找到作者的明确限制段落，应写你的证据范围判断，不能编造“作者承认……”的引语。</p>
+<span id="单元三完整参考产物"></span><h2 data-heading-alias="单元三完整参考产物" id="hb54bf69dc492">单元三：完整参考产物</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-json">{
+  &quot;questions&quot;: [
+    {
+      &quot;question&quot;: &quot;主要架构是否去掉循环和卷积？&quot;,
+      &quot;answer&quot;: &quot;在论文提出的 Transformer 主要序列建模架构中，是。不能推断所有注意力系统都不用卷积。&quot;,
+      &quot;source_ids&quot;: [
+        &quot;p1&quot;
+      ],
+      &quot;status&quot;: &quot;supported&quot;,
+      &quot;location&quot;: &quot;本地 input.json p1；论文架构章节的教学概述&quot;
+    },
+    {
+      &quot;question&quot;: &quot;评测哪些翻译任务？&quot;,
+      &quot;answer&quot;: &quot;WMT 2014 英德与英法翻译。不能据此推断所有语言对的效果。&quot;,
+      &quot;source_ids&quot;: [
+        &quot;p2&quot;
+      ],
+      &quot;status&quot;: &quot;supported&quot;,
+      &quot;location&quot;: &quot;本地 input.json p2；实验章节的教学概述&quot;
+    },
+    {
+      &quot;question&quot;: &quot;是否证明所有任务最优？&quot;,
+      &quot;answer&quot;: &quot;没有。给定证据没有穷尽任务、对照模型和训练条件。&quot;,
+      &quot;source_ids&quot;: [
+        &quot;p3&quot;
+      ],
+      &quot;status&quot;: &quot;unsupported&quot;,
+      &quot;location&quot;: &quot;本地 input.json p3&quot;
+    }
+  ],
+  &quot;comparison&quot;: {
+    &quot;paper_a&quot;: &quot;本地 Transformer 概述&quot;,
+    &quot;paper_b&quot;: &quot;教学反例：另一研究只做情感分类，非真实论文&quot;,
+    &quot;comparable&quot;: &quot;都可记录数据、指标和计算预算&quot;,
+    &quot;not_comparable&quot;: &quot;BLEU 与分类准确率不能直接相减，任务与数据不同&quot;
+  },
+  &quot;reproduction&quot;: {
+    &quot;status&quot;: &quot;未执行&quot;,
+    &quot;required&quot;: [
+      &quot;代码版本&quot;,
+      &quot;数据划分与许可&quot;,
+      &quot;随机种子&quot;,
+      &quot;训练配置&quot;,
+      &quot;算力&quot;,
+      &quot;原始指标&quot;,
+      &quot;失败日志&quot;
+    ]
+  },
+  &quot;review_record&quot;: {
+    &quot;date&quot;: &quot;2026-11-03&quot;,
+    &quot;tools&quot;: &quot;只读本地 input.json；无网络搜索&quot;,
+    &quot;limit&quot;: &quot;本练习只考给定证据核对，不是全文复现&quot;
+  },
+  &quot;original_three_questions&quot;: [
+    {
+      &quot;question&quot;: &quot;论文解决什么问题？&quot;,
+      &quot;answer&quot;: &quot;循环序列模型难在一个样本内并行计算，长距离依赖的连接路径也较长；论文探索用注意力为核心的序列转换架构。&quot;,
+      &quot;location&quot;: &quot;Introduction；Background&quot;,
+      &quot;evidence&quot;: &quot;教学转述：循环计算依赖前一位置状态，限制样本内并行。&quot;,
+      &quot;judgment&quot;: &quot;支持；不是“此前所有模型都没有注意力”&quot;,
+      &quot;local_evidence_id&quot;: &quot;q1-problem&quot;
+    },
+    {
+      &quot;question&quot;: &quot;方法有哪些主要部分？&quot;,
+      &quot;answer&quot;: &quot;编码器与解码器、多头注意力、位置前馈层、词嵌入与位置编码；解码器使用遮挡防止看到未来输出，并注意编码器结果；配合残差和归一化。&quot;,
+      &quot;location&quot;: &quot;Model Architecture 3.1–3.5&quot;,
+      &quot;evidence&quot;: &quot;短摘录：multi-head self-attention mechanism；其余为中文教学转述。&quot;,
+      &quot;judgment&quot;: &quot;支持；注意力替代主要循环结构，不代表去掉位置信息&quot;,
+      &quot;local_evidence_id&quot;: &quot;q2-architecture&quot;
+    },
+    {
+      &quot;question&quot;: &quot;实验支持与限制是什么？&quot;,
+      &quot;answer&quot;: &quot;用WMT2014英德、英法翻译作比较，另有模型变体与英语成分句法分析实验。证据只支持所测任务和设置；不能推断所有任务优于所有方法。&quot;,
+      &quot;location&quot;: &quot;Results 6.1–6.3；Why Self-Attention&quot;,
+      &quot;evidence&quot;: &quot;短摘录：English-to-German and English-to-French；其余为中文教学转述。&quot;,
+      &quot;judgment&quot;: &quot;支持实验范围；“所有任务最优”未支持。对泛化范围的限制是本教材推断，不伪装成作者专门限制段落原话。&quot;,
+      &quot;local_evidence_id&quot;: &quot;q3-experiments&quot;
+    }
+  ]
+}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>2</td><td><code>  &quot;questions&quot;: [</code></td><td>保存当前对象的 questions 字段，按本例题目或配置读取。</td></tr><tr><td>3</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>4</td><td><code>      &quot;question&quot;: &quot;主要架构是否去掉循环和卷积？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>5</td><td><code>      &quot;answer&quot;: &quot;在论文提出的 Transformer 主要序列建模架构中，是。不能推断所有注意力系统都不用卷积。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>6</td><td><code>      &quot;source_ids&quot;: [</code></td><td>记录支持断言的来源 ID。</td></tr><tr><td>7</td><td><code>        &quot;p1&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>8</td><td><code>      ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>9</td><td><code>      &quot;status&quot;: &quot;supported&quot;,</code></td><td>区分通过、失败、待复核或支持性状态。</td></tr><tr><td>10</td><td><code>      &quot;location&quot;: &quot;本地 input.json p1；论文架构章节的教学概述&quot;</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>11</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>12</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>13</td><td><code>      &quot;question&quot;: &quot;评测哪些翻译任务？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>14</td><td><code>      &quot;answer&quot;: &quot;WMT 2014 英德与英法翻译。不能据此推断所有语言对的效果。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>15</td><td><code>      &quot;source_ids&quot;: [</code></td><td>记录支持断言的来源 ID。</td></tr><tr><td>16</td><td><code>        &quot;p2&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>17</td><td><code>      ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>18</td><td><code>      &quot;status&quot;: &quot;supported&quot;,</code></td><td>区分通过、失败、待复核或支持性状态。</td></tr><tr><td>19</td><td><code>      &quot;location&quot;: &quot;本地 input.json p2；实验章节的教学概述&quot;</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>20</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>21</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>22</td><td><code>      &quot;question&quot;: &quot;是否证明所有任务最优？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>23</td><td><code>      &quot;answer&quot;: &quot;没有。给定证据没有穷尽任务、对照模型和训练条件。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>24</td><td><code>      &quot;source_ids&quot;: [</code></td><td>记录支持断言的来源 ID。</td></tr><tr><td>25</td><td><code>        &quot;p3&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>26</td><td><code>      ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>27</td><td><code>      &quot;status&quot;: &quot;unsupported&quot;,</code></td><td>区分通过、失败、待复核或支持性状态。</td></tr><tr><td>28</td><td><code>      &quot;location&quot;: &quot;本地 input.json p3&quot;</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>29</td><td><code>    }</code></td><td>结束当前对象或数组。</td></tr><tr><td>30</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>31</td><td><code>  &quot;comparison&quot;: {</code></td><td>保存当前对象的 comparison 字段，按本例题目或配置读取。</td></tr><tr><td>32</td><td><code>    &quot;paper_a&quot;: &quot;本地 Transformer 概述&quot;,</code></td><td>保存当前对象的 paper_a 字段，按本例题目或配置读取。</td></tr><tr><td>33</td><td><code>    &quot;paper_b&quot;: &quot;教学反例：另一研究只做情感分类，非真实论文&quot;,</code></td><td>保存当前对象的 paper_b 字段，按本例题目或配置读取。</td></tr><tr><td>34</td><td><code>    &quot;comparable&quot;: &quot;都可记录数据、指标和计算预算&quot;,</code></td><td>保存当前对象的 comparable 字段，按本例题目或配置读取。</td></tr><tr><td>35</td><td><code>    &quot;not_comparable&quot;: &quot;BLEU 与分类准确率不能直接相减，任务与数据不同&quot;</code></td><td>保存当前对象的 not_comparable 字段，按本例题目或配置读取。</td></tr><tr><td>36</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>37</td><td><code>  &quot;reproduction&quot;: {</code></td><td>保存当前对象的 reproduction 字段，按本例题目或配置读取。</td></tr><tr><td>38</td><td><code>    &quot;status&quot;: &quot;未执行&quot;,</code></td><td>区分通过、失败、待复核或支持性状态。</td></tr><tr><td>39</td><td><code>    &quot;required&quot;: [</code></td><td>列出必须提供的字段。</td></tr><tr><td>40</td><td><code>      &quot;代码版本&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>41</td><td><code>      &quot;数据划分与许可&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>42</td><td><code>      &quot;随机种子&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>43</td><td><code>      &quot;训练配置&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>44</td><td><code>      &quot;算力&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>45</td><td><code>      &quot;原始指标&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>46</td><td><code>      &quot;失败日志&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>47</td><td><code>    ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>48</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>49</td><td><code>  &quot;review_record&quot;: {</code></td><td>保存当前对象的 review_record 字段，按本例题目或配置读取。</td></tr><tr><td>50</td><td><code>    &quot;date&quot;: &quot;2026-11-03&quot;,</code></td><td>保存当前对象的 date 字段，按本例题目或配置读取。</td></tr><tr><td>51</td><td><code>    &quot;tools&quot;: &quot;只读本地 input.json；无网络搜索&quot;,</code></td><td>保存当前对象的 tools 字段，按本例题目或配置读取。</td></tr><tr><td>52</td><td><code>    &quot;limit&quot;: &quot;本练习只考给定证据核对，不是全文复现&quot;</code></td><td>保存当前对象的 limit 字段，按本例题目或配置读取。</td></tr><tr><td>53</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>54</td><td><code>  &quot;original_three_questions&quot;: [</code></td><td>保存当前对象的 original_three_questions 字段，按本例题目或配置读取。</td></tr><tr><td>55</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>56</td><td><code>      &quot;question&quot;: &quot;论文解决什么问题？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>57</td><td><code>      &quot;answer&quot;: &quot;循环序列模型难在一个样本内并行计算，长距离依赖的连接路径也较长；论文探索用注意力为核心的序列转换架构。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>58</td><td><code>      &quot;location&quot;: &quot;Introduction；Background&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>59</td><td><code>      &quot;evidence&quot;: &quot;教学转述：循环计算依赖前一位置状态，限制样本内并行。&quot;,</code></td><td>提供可用于核对断言的证据。</td></tr><tr><td>60</td><td><code>      &quot;judgment&quot;: &quot;支持；不是“此前所有模型都没有注意力”&quot;,</code></td><td>保存当前对象的 judgment 字段，按本例题目或配置读取。</td></tr><tr><td>61</td><td><code>      &quot;local_evidence_id&quot;: &quot;q1-problem&quot;</code></td><td>保存当前对象的 local_evidence_id 字段，按本例题目或配置读取。</td></tr><tr><td>62</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>63</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>64</td><td><code>      &quot;question&quot;: &quot;方法有哪些主要部分？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>65</td><td><code>      &quot;answer&quot;: &quot;编码器与解码器、多头注意力、位置前馈层、词嵌入与位置编码；解码器使用遮挡防止看到未来输出，并注意编码器结果；配合残差和归一化。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>66</td><td><code>      &quot;location&quot;: &quot;Model Architecture 3.1–3.5&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>67</td><td><code>      &quot;evidence&quot;: &quot;短摘录：multi-head self-attention mechanism；其余为中文教学转述。&quot;,</code></td><td>提供可用于核对断言的证据。</td></tr><tr><td>68</td><td><code>      &quot;judgment&quot;: &quot;支持；注意力替代主要循环结构，不代表去掉位置信息&quot;,</code></td><td>保存当前对象的 judgment 字段，按本例题目或配置读取。</td></tr><tr><td>69</td><td><code>      &quot;local_evidence_id&quot;: &quot;q2-architecture&quot;</code></td><td>保存当前对象的 local_evidence_id 字段，按本例题目或配置读取。</td></tr><tr><td>70</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>71</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>72</td><td><code>      &quot;question&quot;: &quot;实验支持与限制是什么？&quot;,</code></td><td>提供待回答的问题。</td></tr><tr><td>73</td><td><code>      &quot;answer&quot;: &quot;用WMT2014英德、英法翻译作比较，另有模型变体与英语成分句法分析实验。证据只支持所测任务和设置；不能推断所有任务优于所有方法。&quot;,</code></td><td>保存答案内容，仍需按本题规则判断。</td></tr><tr><td>74</td><td><code>      &quot;location&quot;: &quot;Results 6.1–6.3；Why Self-Attention&quot;,</code></td><td>保存当前对象的 location 字段，按本例题目或配置读取。</td></tr><tr><td>75</td><td><code>      &quot;evidence&quot;: &quot;短摘录：English-to-German and English-to-French；其余为中文教学转述。&quot;,</code></td><td>提供可用于核对断言的证据。</td></tr><tr><td>76</td><td><code>      &quot;judgment&quot;: &quot;支持实验范围；“所有任务最优”未支持。对泛化范围的限制是本教材推断，不伪装成作者专门限制段落原话。&quot;,</code></td><td>保存当前对象的 judgment 字段，按本例题目或配置读取。</td></tr><tr><td>77</td><td><code>      &quot;local_evidence_id&quot;: &quot;q3-experiments&quot;</code></td><td>保存当前对象的 local_evidence_id 字段，按本例题目或配置读取。</td></tr><tr><td>78</td><td><code>    }</code></td><td>结束当前对象或数组。</td></tr><tr><td>79</td><td><code>  ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>80</td><td><code>}</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details><p>input.json 与 exercise.py 是供本地模型练习证据草稿的简化材料。论文原三问与复现计划，以以上完整作业为准。生成草稿可以用 <code>exercise.py --live</code>，但给模型的材料有限，不能把其结果当全文论文审读。</p>
+<span id="单元四文献工具的操作知识"></span><h2 data-heading-alias="单元四文献工具的操作知识" id="h4e1502014496">单元四：文献工具的操作知识</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>带引用的 Notebook 流程是导入获授权来源 → 按问题检索 → 打开引用 → 同时读上下文 → 把支持或不支持写回笔记。引用只是入口，点击后没有支持仍要退回。上传前确认资料许可和工具数据处理范围；公开可读不自动授权转交任何服务。</p>
+<p>Zotero 中条目存作者、年份、题名、出版信息，附件存 PDF，笔记存你的阅读判断。先核对元数据，再用 collection 按项目组织、tag 标阅读状态，重复条目先合并，最后生成引用与书目。同步条目与同步附件不是同一件事；引用格式正确不等于内容正确。</p>
+<p>可重复研究要版本化代码、数据、参数与结果。DVC 用小元数据文件在 Git 中记录大文件版本，大文件另进 cache/remote；<code>dvc add</code> 不等于把数据上传远端。恢复版本要匹配代码与数据，管线明确依赖、命令和输出。MLflow 等记录参数、指标与产物，不能替你判断科学结论。Zenodo 发布要补标题、作者、版本、许可和数据说明；上传之后才有可追溯发布记录，课堂不要求实际公开。</p>
+<p>PaperQA 等将检索和证据摘要接到答案；ASReview 帮助筛选候选文献，纳排理由仍需记录；repo2docker 从环境声明重建运行环境，不保证数据可访问或结果复现。自动研究 Agent 尤其应保留失败实验，不能只汇报最好的随机种子。</p>
+<span id="课末作业提交与评分"></span><h2 data-heading-alias="课末作业提交与评分" id="h0d516681cbc8">课末作业、提交与评分</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>复制 reference-work 的字段结构，先清空答案，自己完成原三问与一条“不受支持”的反例，再核对参考。提交文件例如 <code>/tmp/research-work.json</code>：</p>
+<pre><code class="language-bash"># 运行 courses/branch-researcher/examples/check_work.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-researcher/examples/check_work.py /tmp/research-work.json
+</code></pre>
+<p>结构缺失 FAIL；结构齐全 NEEDS_REVIEW。人工逐项要求：三问均回答、每条断言有定位、没有夸大实验、推断与作者话分开、未运行实验不写成功。这五项全部满足才通过。两天后不看表复述方法与限制；一周后换一篇获授权资料重做，不要求使用某个付费产品。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 研究分支阅读整合</a><a href="04-reproducibility.html">从资料整理到复现实验的完整操作 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

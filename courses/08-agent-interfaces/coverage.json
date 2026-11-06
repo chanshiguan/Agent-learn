@@ -1,0 +1,38 @@
+[
+  {
+    "requirement": "Search/Browser/Computer/Sandbox 选择",
+    "lesson": "lessons/03-workshop.html#h11e937823cb2",
+    "example": "examples/browser_loop.py",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  },
+  {
+    "requirement": "完整 observe–verify 循环",
+    "lesson": "lessons/03-workshop.html#hfd14f5fd71e6",
+    "example": "examples/browser_loop.py",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  },
+  {
+    "requirement": "供应商协议：消息与安全责任；非云端执行器实现",
+    "lesson": "lessons/03-workshop.html#h32da5fa58d9d",
+    "example": "text/01-guide.md",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  },
+  {
+    "requirement": "Sandbox guide 与隔离",
+    "lesson": "lessons/03-workshop.html#h524a4a4282aa",
+    "example": "examples/Dockerfile",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  },
+  {
+    "requirement": "原四题对应",
+    "lesson": "lessons/03-workshop.html#h393b44f84ddb",
+    "example": "text/03-workshop.md",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  },
+  {
+    "requirement": "资源工具职责与验收",
+    "lesson": "lessons/03-workshop.html#he0cbc98443ff",
+    "example": "examples/browser_loop.py",
+    "assessment": "lessons/03-workshop.html#he0cbc98443ff"
+  }
+]

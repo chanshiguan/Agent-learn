@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A1 课后练习</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">A1 · 选一个 CLI agent，安全完成第一个任务</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="a1-课后练习"></span><h1 data-heading-alias="a1-课后练习" id="h5cc7a61e64c6">A1 课后练习</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h8d455c11f255">本课任务</a></li><li><a href="#hb50f4e279762">本课分层完成标准</a></li><li><a href="#he06aec239d3e">独立回忆：先作答再展开</a></li></ul></aside>
+<p>目的：在最小范围内完成一次可检查、可撤销的 Agent 工作。做完能独立说明“读了什么、改了什么、怎么验收、怎么撤回”。</p>
+<span id="本课任务"></span><h2 data-heading-alias="本课任务" id="h8d455c11f255">本课任务</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>依次完成 CLI-1 至 CLI-4。提交前后 README、diff、检查输出、规则卡、两种 Harness 对照表、四类错误记录。没有第二种账户时把真实对照列为未执行，不伪造。</p>
+<p>验收：初始分析不改文件；批准后的修改只触及 README；check.py 通过；撤回后与基线一致；错误分类有原始输出或明确标注的 mock。</p>
+<details><summary>完整任务卡参考</summary>
+<pre><code>任务：先读取 README.md 和 check.py，解释项目用途与检查方式，然后提出一个仅修改 README.md 的计划。
+范围：当前演示目录。
+禁止：未经确认修改文件；联网；安装依赖；读取目录外文件；提交或推送。
+成功条件：说明引用实际文件；计划只增加学习记录说明，保留原检查命令；得到用户确认后才修改；运行 python check.py 并展示 diff。
+
+</code></pre>
+</details>
+<details><summary>完整检查代码</summary>
+<pre><code class="language-python">
+# 只检查教学 README 里约定的内容；修改 README 后重跑，不要通过删检查来获得通过。
+from pathlib import Path
+
+path = Path(__file__).with_name(&quot;README.md&quot;)
+# 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+# encoding：明确按 UTF-8 读写中文，避免不同终端或系统默认编码导致乱码。
+text = path.read_text(encoding=&quot;utf-8&quot;)
+assert text.startswith(&quot;# 学习演示项目&quot;), &quot;缺项目标题&quot;
+assert &quot;python check.py&quot; in text, &quot;丢失检查命令&quot;
+assert &quot;虚构资料&quot; in text, &quot;丢失资料说明&quot;
+print(&quot;PASS：标题、检查命令和资料说明仍存在&quot;)
+
+</code></pre>
+</details>
+<details><summary>回忆题答案</summary>
+<p>Provider 是服务入口，Model 是实际模型，Harness 管运行。规则写“禁止”不保证执行层已阻断。两种工具比较时应保持任务、起始文件和评分一致。撤回只针对本次改动，不能清空别人的工作。</p>
+</details>
+<p>两天后不用模板写一次四字段任务卡；一周后换一份虚构文档重做整个闭环。</p>
+<span id="本课分层完成标准"></span><h2 data-heading-alias="本课分层完成标准" id="hb50f4e279762">本课分层完成标准</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<ol>
+<li>先回想：不看答案，用自己的话解释本课几个容易混淆的概念，再展开答案核对。</li>
+<li>跟着做：按<a href="03-workshop.html">分步实作与完整参考</a>运行最小案例，保存输入和输出。</li>
+<li>自己做：换一份资料，或修改一个要求，完成自己的结果。只运行参考文件还不够。</li>
+<li>试着排错：故意触发一次失败，说明怎么找到原因、怎么修复，再运行正常例子确认恢复。</li>
+</ol>
+<p>做完后，对照实作章末尾的评分标准逐项检查。分别记录代码是否运行成功、自动检查是否通过、内容是否经过人工核对，以及实际集成是否完成。待复核和未执行的项目暂不计为通过。卡住时，把课程编号、输入和实际输出发给我，一起定位问题。完成练习所需的步骤都在项目里。</p>
+<span id="独立回忆先作答再展开"></span><h2 data-heading-alias="独立回忆先作答再展开" id="he06aec239d3e">独立回忆：先作答再展开</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>每题先用自己的话回答，再看参考答案。表述可以不同，但要说清谁负责、什么情况下成立。</p>
+<span id="回忆题-1"></span><h3 data-heading-alias="回忆题-1" id="h26d39fd160b3">回忆题 1</h3>
+<p>Model、Provider、Harness 分别是什么？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>模型本身、模型服务入口、管理上下文工具权限与循环的运行设施。</p>
+</details>
+<span id="回忆题-2"></span><h3 data-heading-alias="回忆题-2" id="h77732339f22a">回忆题 2</h3>
+<p>已有未提交改动时可以直接 restore 整个目录吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>不能。先辨认自己的改动，定点撤回，保留他人工作。</p>
+</details>
+<nav class="next-prev" aria-label="章节导航"><a href="03-workshop.html">← 一次可检查、可撤回的小改动</a><a href="../../index.html">完成本课验收后，查看下一课路线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

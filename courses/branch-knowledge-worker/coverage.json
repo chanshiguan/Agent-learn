@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "原会议题与六字段",
+    "lesson": "lessons/03-workshop.html#h8a4803a76954",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "逐行参考及冲突",
+    "lesson": "lessons/03-workshop.html#hf007f03222b7",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "四类连接器与 MCP Registry",
+    "lesson": "lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "Zapier/流程自动化",
+    "lesson": "lessons/03-workshop.html#h3fae46e278cc",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "学生提交与验收",
+    "lesson": "lessons/03-workshop.html#hc6e63aff78cc",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  }
+]

@@ -1,0 +1,256 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A3-cli-production.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="a3--把-cli-agent-接入安全的团队流程"></span><h1 data-heading-alias="a3--把-cli-agent-接入安全的团队流程" id="h69073aae85eb">A3 — 把 CLI agent 接入安全的团队流程</h1>
+<blockquote>
+<p><a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#-进入条件与阅读路径">← Stage 5 — Track A 核心</a> · <strong>Track A: CLI Power User</strong> 第 3 站（核心最后一站）</p>
+</blockquote>
+<p>这一站只做一件事：<strong>让 CLI agent 在测试用 PR 做一次只读检查。它可以提出意见，但不能自己合并、部署或取得额外权限。</strong></p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<p>完成后，你可以：</p>
+<ul>
+<li>只把一个安全范围交给 <strong>MCP</strong> server。</li>
+<li>让 <strong>CI</strong> 在 PR 自动生成一份可检查的建议。</li>
+<li>用 <strong>Observability</strong> 看懂一次运行留下的 usage、时间和结果。</li>
+<li>把 A2 的 Skill 交给队友，并让对方安全地重新运行。</li>
+</ul>
+<span id="-先认识三个核心词"></span><h2 data-heading-alias="-先认识三个核心词" id="h934117fc0185">🧩 先认识三个核心词</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">核心词</th>
+<th style="text-align:left">它是什么、像什么</th>
+<th style="text-align:left">A3 怎么用</th>
+<th style="text-align:left">不是什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>MCP（Model Context Protocol）</strong></td>
+<td style="text-align:left">让 agent 连接外部工具或数据的标准转接头</td>
+<td style="text-align:left">只把一个 demo 文件夹或只读工具交给 server</td>
+<td style="text-align:left">不是自动安全；能碰什么仍取决于权限</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CI（Continuous Integration）</strong></td>
+<td style="text-align:left">push 或 PR 出现时会自动工作的检查站</td>
+<td style="text-align:left">让测试 PR 自动跑一次只读 review</td>
+<td style="text-align:left">不是可以跳过人工 review 的 auto-merge 按钮</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Observability（观测与记录）</strong></td>
+<td style="text-align:left">像收据加行车记录，留下发生过的事</td>
+<td style="text-align:left">记下 provider、model、usage、时间、结果与失败原因</td>
+<td style="text-align:left">不是只看一个总 token 或猜测拿不到的成本</td>
+</tr>
+</tbody>
+</table>
+<p>三个词会一起出现，但不是一回事：MCP 负责“接工具”，CI 负责“何时自动运行”，observability 负责“运行后留下什么证据”。</p>
+<span id="先走安全阶梯"></span><h2 data-heading-alias="先走安全阶梯" id="h376266dce789">先走安全阶梯</h2>
+<ol>
+<li><strong>只读</strong>：先让 agent 看数据，不让它改数据。</li>
+<li><strong>最小权限</strong>：只开启这次需要的文件夹、repo、tool 或 token scope。</li>
+<li><strong>demo repo</strong>：先在可丢弃的练习环境测试。</li>
+<li><strong>人工 review</strong>：由人决定要不要采用 agent 的建议。</li>
+<li><strong>最后才考虑写入</strong>：auto-merge、push、deploy 不属于这一站。</li>
+</ol>
+<details markdown="1">
+<summary>展开时间、前置条件、环境和费用</summary>
+<ul>
+<li><strong>时间</strong>：先完成四个最小成果，通常可以拆成几次短练习；不要为了赶时间一次接入很多服务。</li>
+<li><strong>前置条件</strong>：完成 <a href="tracks--cli--A1-cli-intro.zh-Hans.md.html">A1</a>、<a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html">A2</a> 和 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#-进入条件与阅读路径">Stage 5 的 Track A 核心 5.1–5.4</a>，并能看懂 <code>git status</code>、PR 和 GitHub Actions 的基本界面。</li>
+<li><strong>环境</strong>：一个没有真实 secrets 的 demo repo；第一轮使用 GitHub-hosted Linux runner，更容易套用 sandbox。</li>
+<li><strong>费用</strong>：GitHub Actions、CLI 订阅和模型 API 可能分别计费。运行前先查看自己使用的方案，不要把别人的价格当成自己的价格。</li>
+</ul>
+<p>如果 A2 的 <code>review-changes</code> Skill 还不能稳定输出 <code>PASS</code> 或具体问题，先回去修好再进入 A3。</p>
+</details>
+<span id="-必读"></span><h2 data-heading-alias="-必读" id="h2e6a2159493e">📚 必读</h2>
+<p><small>必读资料与学习资源核查：2026-08-27 UTC</small></p>
+<ol>
+<li>先看 <a href="../../reference/source-readings.html#s64e61c3b3e8a">MCP Connect to local servers</a>，了解 server 只能拿到你交给它的路径。</li>
+<li>再看 <a href="../../reference/source-readings.html#s81bc5d8217bb">GitHub Actions Security Hardening</a>，先理解 least privilege 和不可信 PR。</li>
+<li>选择一条 CI 路径：
+<ul>
+<li>Claude Code：<a href="../../reference/source-readings.html#s0d633fbd8ab5">官方 GitHub Actions 文档</a></li>
+<li>Codex：<a href="../../reference/source-readings.html#s508b7e602fde">官方 GitHub Action 文档</a></li>
+</ul>
+</li>
+<li>需要 trace、eval 或完整 production 理论时，再进入 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7</a> 和 <a href="stages--07.5-advanced-agentic-concepts.zh-Hans.md.html">Stage 7.5</a>。</li>
+</ol>
+<span id="-动手练习"></span><h2 data-heading-alias="-动手练习" id="heaf7ce6df8e7">🛠 动手练习</h2>
+<p><a id="cli-9"></a></p>
+<span id="动手练习-cli-9只连接一个-mcp-server"></span><h3 data-heading-alias="动手练习-cli-9只连接一个-mcp-server" id="h1972323808b8">动手练习 CLI-9：只连接一个 MCP server</h3>
+<p><strong>成果：</strong> agent 能读到一个新建的 demo 文件夹，但没有取得整个 home、磁盘、真实项目或 secrets。</p>
+<p>先复制适合你电脑的指令，创建 <code>a3-mcp-demo/hello.txt</code>。</p>
+<p>PowerShell：</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force -Path a3-mcp-demo | Out-Null
+Set-Content -LiteralPath a3-mcp-demo/hello.txt -Value 'hello from A3'
+</code></pre>
+<p>macOS／Linux：</p>
+<pre><code class="language-bash">mkdir -p a3-mcp-demo
+printf 'hello from A3\n' &gt; a3-mcp-demo/hello.txt
+</code></pre>
+<p>把官方 filesystem reference server 接到你的 CLI 时，<strong>只传入这个文件夹的绝对路径</strong>。</p>
+<p>成功时，agent 能读出 <code>hello.txt</code>；要求它读取范围外的文件时，应该失败或要求你重新授权。</p>
+<details markdown="1">
+<summary>展开 CLI-9 的安装、权限测试与 GitHub MCP 延伸</summary>
+<ol>
+<li>根据你主要使用的 CLI 官方 MCP 文档打开设置；不同 CLI 的配置文件和命令不一定相同。</li>
+<li>使用官方 package <code>@modelcontextprotocol/server-filesystem</code>，arguments 只放 <code>a3-mcp-demo</code> 的绝对路径。不要填 <code>~</code>、home、磁盘根目录或整个工作区。</li>
+<li>重启 CLI，让它列出 demo 文件夹，再读取 <code>hello.txt</code>。</li>
+<li>让它读取 demo 范围外的一个普通文件名。正确结果是拒绝或先要求新增授权；不能偷偷读取。</li>
+<li>练习后移除 server 配置，确认 CLI 已不能再使用它。</li>
+</ol>
+<p>要读取 PR 或 issue 时，改看 GitHub 官方的 <a href="../../reference/source-readings.html#sfaa318861b48"><code>github/github-mcp-server</code></a>。先使用 <code>--read-only</code>，再用 toolsets 或 tools allow-list 只开启需要的能力。如果使用 PAT，把它放在安全的 secret／环境变量中，授予最少 scope，练习后撤销；能用 OAuth 时，按 host 官方流程设置。</p>
+<p><a href="../../reference/source-readings.html#scb8f252ccaaf"><code>modelcontextprotocol/servers</code></a> 适合阅读 reference implementation，但官方说明它们不是 production-ready。旧的 <code>github</code> reference server 已移到历史集合，不要再把它作为当前 GitHub 入口。</p>
+<p><strong>费用提醒：</strong> 本地 filesystem server 通常不另外收费，但 CLI／模型仍可能计费。远程 MCP 也可能有自己的方案。</p>
+</details>
+<p><a id="cli-10"></a></p>
+<span id="动手练习-cli-10让-pr-多一个只读检查员"></span><h3 data-heading-alias="动手练习-cli-10让-pr-多一个只读检查员" id="h54142cb8121e">动手练习 CLI-10：让 PR 多一个只读检查员</h3>
+<p><strong>成果：</strong> 测试用 PR 会留下 review 结果；人仍决定是否修改、合并或部署。</p>
+<p>选择 Anthropic 的 <a href="../../reference/source-readings.html#s0b22ca37fd38"><code>claude-code-action</code></a> 或 OpenAI 的 <a href="../../reference/source-readings.html#s71f8ba1491fd"><code>codex-action</code></a>。第一轮只在自己控制的 demo repo 和 branch 执行，沿用 A2 的 <a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html#cli-6"><code>review-changes</code> Skill</a>。</p>
+<p>成功标准不是“几分钟内完成”，而是 workflow 成功结束，并通过 PR comment、job summary 或 artifact 留下可阅读的结果。</p>
+<details markdown="1">
+<summary>展开 CLI-10 的安全设置与验证步骤</summary>
+<ol>
+<li>根据供应商的官方示例建立 workflow，不要复制来源不明的 YAML。</li>
+<li>把 API key 放入 GitHub Actions secret。不要写进 workflow、prompt、repo 或 log。</li>
+<li><code>GITHUB_TOKEN</code> 从 <code>contents: read</code> 起步。只有需要发布 PR comment 时，才给该 job 增加必要的 pull-request 权限。</li>
+<li>Codex 的只读工作使用当前官方 action 支持的 <code>permission-profile: &quot;:read-only&quot;</code>；不要同时设置互斥的 legacy sandbox 字段。Claude Code 依据官方 action 的 permissions／allowed tools 限制可用能力。</li>
+<li>prompt 只要求读取 diff、列出问题、输出 <code>PASS</code> 或具体建议。明确写出：不得 edit、commit、push、merge、deploy 或发送额外消息。</li>
+<li>先使用自己创建的 same-repo test branch。不要使用 <code>pull_request_target</code> checkout 不可信的 PR code；这可能让不可信内容接触 secrets 或写入权限。</li>
+<li>检查 Actions log、review 结果和 repo diff。任何 secret 泄露迹象都要立即删除 log、撤销并轮换 secret。</li>
+</ol>
+<p>GitHub 建议 production workflow 把第三方 Action pin 到完整 commit SHA，因为 tag 可能移动。官方文档中的 <code>@v1</code>／<code>@v5</code> 适合辨认产品版本；正式使用时再查证并固定当时可信的完整 SHA。</p>
+<p><strong>费用提醒：</strong> 设置 job timeout 和 concurrency，避免卡住或重复触发。模型 API、供应商方案和 GitHub Actions minutes 要分开看。</p>
+</details>
+<p><a id="cli-11"></a></p>
+<span id="动手练习-cli-11看一次运行的收据"></span><h3 data-heading-alias="动手练习-cli-11看一次运行的收据" id="h747020252719">动手练习 CLI-11：看一次运行的收据</h3>
+<p><strong>成果：</strong> 你留下 provider／model、input usage、output usage、时间和结果；拿不到的字段会清楚写“未确认”，不会猜。</p>
+<p>先分清订阅费与 API 用量费。下面只估算普通输入／输出 token 的费用，两种单价都按“每百万 token”计；其他收费另查供应商规则。</p>
+<p><code>(input tokens ÷ 1,000,000 × input price) + (output tokens ÷ 1,000,000 × output price)</code></p>
+<details markdown="1">
+<summary>展开 CLI-11 的记录卡、停止规则与 observability</summary>
+<p>先用一个小 task 填这张卡：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">要记录什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Task</td>
+<td style="text-align:left">这次请 agent 做什么</td>
+</tr>
+<tr>
+<td style="text-align:left">Provider／model</td>
+<td style="text-align:left">实际使用的供应商和型号；拿不到就写未确认</td>
+</tr>
+<tr>
+<td style="text-align:left">Usage</td>
+<td style="text-align:left">input／output usage；不要只写模糊的“总 token”</td>
+</tr>
+<tr>
+<td style="text-align:left">时间</td>
+<td style="text-align:left">workflow 或 CLI 显示的实际耗时</td>
+</tr>
+<tr>
+<td style="text-align:left">结果</td>
+<td style="text-align:left"><code>PASS</code>、问题清单或失败原因</td>
+</tr>
+<tr>
+<td style="text-align:left">成本</td>
+<td style="text-align:left">只有能对上官方单价时才计算；否则写计费方式或未确认</td>
+</tr>
+</tbody>
+</table>
+<p>再设置一个工具真正支持的停止规则，例如 job timeout、最大重试、provider spend limit，或每次进入付费步骤前人工确认。不要创建工具不会读取的设置来制造安全感。</p>
+<p>要比较多次运行时，可以选择 <a href="../../reference/source-readings.html#sa5d406dab379">Langfuse</a>、<a href="../../reference/source-readings.html#s1db29eb9ab4f">Phoenix</a>、<a href="../../reference/source-readings.html#s1eedc9a60741">Helicone</a> 或 <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a>。先确认数据会发送到哪里、是否包含原始 prompt／code／PII，再决定能不能接入。</p>
+<p>Prompt caching 的 TTL、资格和价格因 provider／model 而异。Anthropic 当前文档同时提供默认 5 分钟和可选 1 小时 TTL；把它当作要查询的产品设置，不要当成所有 CLI 的固定规则。</p>
+</details>
+<p><a id="cli-12"></a></p>
+<span id="动手练习-cli-12安全地把-skill-交给队友"></span><h3 data-heading-alias="动手练习-cli-12安全地把-skill-交给队友" id="h190299415eb0">动手练习 CLI-12：安全地把 Skill 交给队友</h3>
+<p><strong>成果：</strong> 第二个干净的 demo repo 能找到 <code>review-changes</code> Skill；运行后没有非预期修改。</p>
+<p>把 A2 的 <code>review-changes</code> Skill 放进可版本控制的 team repo，附上四件事：安装位置、需要的权限、测试方法、移除方法。Claude Code 可以再按照官方 plugin 格式打包；其他 CLI 按各自的 Skill 文档安装。</p>
+<details markdown="1">
+<summary>展开 CLI-12 的分享、安装与撤销步骤</summary>
+<ol>
+<li>分享前读完 <code>SKILL.md</code> 和附带的 scripts，确认没有下载陌生程序、读取 secrets 或改变外部系统。</li>
+<li>保留 plugin 根目录的 <code>skills/review-changes/SKILL.md</code>；不要把项目自己的 <code>CLAUDE.md</code>、<code>AGENTS.md</code> 或 secrets 一起打包。</li>
+<li>在第二个干净的 demo repo 中按照工具文档安装。Claude Code 可以参考 <a href="../../reference/source-readings.html#sfc9dd52a1466">Plugins 文档</a>和 <a href="../../reference/source-readings.html#s02eab667df44"><code>anthropics/claude-plugins-official</code></a>。</li>
+<li>做一个小的文档 diff，运行 Skill，再用 <code>git status --short</code> 确认它只 review、没有修改文件。</li>
+<li>记录版本或 commit SHA。更新前先看 diff；不再使用时，按照文档移除 plugin／Skill，并确认 agent 找不到它。</li>
+</ol>
+<p>Skill 的核心意思可以共用，但文件夹、权限、frontmatter 和安装方式不一定相同。不要把某一家工具的 plugin 格式说成所有 CLI 都通用。</p>
+<p><strong>费用提醒：</strong> 分享文件本身通常不收模型费用，但每位队友运行 Skill 时可能使用自己的订阅或 API 额度。</p>
+</details>
+<span id="只记住这个-production-安全循环"></span><h2 data-heading-alias="只记住这个-production-安全循环" id="h51c588997ba9">只记住这个 production 安全循环</h2>
+<p><code>圈定范围 → 只读运行 → 留下记录 → 人工判断 → 能够恢复</code></p>
+<p>如果没有范围、证据或恢复方法，就先不要提高权限。这比记住很多工具名称更重要。</p>
+<blockquote>
+<p><strong>升级后重新验证安全边界：</strong> 在一次性 demo repo 重跑负向案例：文件夹中已关闭的 MCP 在 headless session 切换目录或重新加载 plugin 后仍不启动；
+管理员设置（managed settings）中的 <code>PreToolUse</code>（执行工具前）hook 拒绝工具调用时，应拦住该调用；若也返回 <code>&quot;continue&quot;: false</code>，这一回合（turn）必须停止。
+只拒绝调用时，Claude 仍可选择其他做法。只读模式不能写文件；需要人工批准的命令不能自动放行（包含 <code>BASH_ARGV0</code> 权限案例）。
+Anthropic 的 <a href="../../reference/source-readings.html#se75aaf1e1290">Claude Code v2.1.296 release notes（10 月 9 日）</a> 提供 MCP、hook 与 <code>BASH_ARGV0</code> 的上游回归线索；
+这不是本 repo 或你安装版本已通过这些检查的证据。</p>
+</blockquote>
+<span id="-playbook-4派遣-subagent-跑独立任务"></span><h3 data-heading-alias="-playbook-4派遣-subagent-跑独立任务" id="h836f9680f6c1">📋 Playbook 4：派遣 subagent 跑独立任务</h3>
+<p><strong>成果：</strong> 先列出当前工具真正提供哪些 agent，再把独立、可验证的工作交出去；不要假设每台电脑都有同名 agent。</p>
+<details markdown="1">
+<summary>展开 Playbook 4 与其余六个进阶 playbook</summary>
+<p><strong>Playbook 4 — subagent：</strong> subagent 是主 session 派出的独立小帮手。Claude Code 目前有 <code>Explore</code>、<code>Plan</code>、<code>general-purpose</code> 等 built-in subagent；可用清单仍会受版本、session 和设置影响。<code>code-reviewer</code> 是官方文档提供的<strong>自定义示例</strong>，不是每个安装都固定存在的内置 agent。先运行工具的 agent list，再选择 read-only agent 或创建受限 reviewer。</p>
+<p>其余情况只记一个动作，理论放在 <a href="stages--07.5-advanced-agentic-concepts.zh-Hans.md.html">Stage 7.5</a>：</p>
+<ul>
+<li><strong>范围不清：</strong> 明确写出可动和不可动的路径，先要求计划，不先改文件。</li>
+<li><strong>多人／多 agent 并行：</strong> 分开 ownership 和 commit，最后再整合；不要同时修改同一批文件。</li>
+<li><strong>Review agent 输出：</strong> reviewer 只提供证据，不取代测试、branch protection 或人类判断。</li>
+<li><strong>在 CI 运行 agent：</strong> 从只读和可信 trigger 开始；模型 fallback 必须明确设置并重新验证，不能偷偷切换。</li>
+<li><strong>控制成本：</strong> 使用实际 usage、timeout、重试和 provider limit；拿不到数据就说拿不到。</li>
+<li><strong>防止规则 drift：</strong> 故意做一个安全的小失败，确认 gate 确实会拦住；规则文字本身不是证据。</li>
+</ul>
+<p>延伸阅读：<a href="resources--subagent-cookbook.zh-Hans.md.html"><code>resources/subagent-cookbook.zh-Hans.md</code></a>和 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5</a>。这些页面之后会在自己的 layer 重新查核；使用 agent 名称前，仍以你当下的官方文档和实际清单为准。</p>
+</details>
+<span id="-精选-projects"></span><h2 data-heading-alias="-精选-projects" id="h44aee77132c0">🎯 精选 Projects</h2>
+<p>推荐度是本学习地图的编辑建议，不是 GitHub stars。<code>⭐⭐⭐⭐⭐</code> 表示这条学习路径的必读／必做入口；它不代表工具永远安全，也不代表 production 可以跳过自己的 threat model。</p>
+<div class="reader-resource-catalog" role="region" tabindex="0" aria-label="CLI 工具与学习资源">
+<table align="center">
+<thead><tr><th scope="col">分类</th><th scope="col">项目／文档</th><th scope="col">评分</th><th scope="col">用途</th><th scope="col">来源</th></tr></thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">安全连接 MCP</th><td><div data-field="entry"><strong>MCP Connect to local servers</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> allowed directories 和明确授权<div data-field="when"><strong>何时使用：</strong> 第一次连接本地 server</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s64e61c3b3e8a">官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong>MCP Security Best Practices</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> least privilege、scope 和 token handling<div data-field="when"><strong>何时使用：</strong> 要连接账户或远程服务前</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s4903497743e8">官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>github-mcp-server</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> <code>--read-only</code>、toolsets 和 tools allow-list<div data-field="when"><strong>何时使用：</strong> 要读取 GitHub PR／issue</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#sfaa318861b48">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>servers</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> reference implementation 和非 production-ready 警告<div data-field="when"><strong>何时使用：</strong> 学习协议或阅读示例代码</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#scb8f252ccaaf">GitHub repo</a></td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="5" align="center" valign="middle" width="80">CI 与 PR review</th><td><div data-field="entry"><strong>GitHub Actions Secure Use</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 最小权限、不可信输入、pin SHA<div data-field="when"><strong>何时使用：</strong> 编写任何带 secrets 的 workflow 前</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s215dc07e3642">官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong>Claude Code GitHub Actions</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 官方 setup、permissions 和 troubleshooting<div data-field="when"><strong>何时使用：</strong> 使用 Claude Code 运行 CI</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s0d633fbd8ab5">官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>claude-code-action</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 官方示例和 action inputs<div data-field="when"><strong>何时使用：</strong> 从可执行模板开始</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s0b22ca37fd38">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong>Codex GitHub Action</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> permission profile、trigger 和输出<div data-field="when"><strong>何时使用：</strong> 使用 Codex 运行 CI</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s508b7e602fde">OpenAI 官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>codex-action</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> <code>:read-only</code> 和 safety strategy<div data-field="when"><strong>何时使用：</strong> 核对最新 inputs 和示例</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s71f8ba1491fd">GitHub repo</a></td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">观察与评估</th><td><div data-field="entry"><strong><code>langfuse</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> traces、usage 和 eval<div data-field="when"><strong>何时使用：</strong> 想把多次运行放在一起看</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#sa5d406dab379">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>phoenix</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> tracing 和 evaluation<div data-field="when"><strong>何时使用：</strong> 想在本机观察 AI 系统</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s1db29eb9ab4f">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>helicone</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> proxy／gateway 的数据流与隐私边界<div data-field="when"><strong>何时使用：</strong> 想从 gateway 收集 request 记录</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s1eedc9a60741">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>promptfoo</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> eval cases 和 CI regression<div data-field="when"><strong>何时使用：</strong> 要比较改动前后是否退步</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">GitHub repo</a></td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="3" align="center" valign="middle" width="80">分享 Skill／plugin</th><td><div data-field="entry"><strong>Claude Code Plugins</strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> plugin 结构、安装和 marketplace<div data-field="when"><strong>何时使用：</strong> 要为 Claude Code 打包</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#sfc9dd52a1466">官方文档</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>claude-plugins-official</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 官方管理的 plugin 目录<div data-field="when"><strong>何时使用：</strong> 寻找可读的正式示例</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s02eab667df44">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>superpowers-marketplace</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 最小 marketplace 外壳<div data-field="when"><strong>何时使用：</strong> 理解 curator-only 结构</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s107d442e081b">GitHub repo</a></td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="2" align="center" valign="middle" width="80">目录与完整示例</th><td><div data-field="entry"><strong><code>awesome-mcp-servers</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> 先分类，再逐一检查来源和权限<div data-field="when"><strong>何时使用：</strong> 官方资源没有需要的 server 时</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s131c6958203d">GitHub repo</a></td></tr>
+<tr><td><div data-field="entry"><strong><code>superpowers</code></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="read"><strong>先看什么：</strong> Skill、规则和 workflow 如何组合<div data-field="when"><strong>何时使用：</strong> 完成最小流程后看完整示例</td><td><div data-field="sources"><strong>来源：</strong> <a href="../../reference/source-readings.html#s8c6014a36ca9">GitHub repo</a></td></tr>
+</tbody>
+</table>
+<p>目录只帮你“找到候选项”，不替候选项保证安全。安装任何 MCP、Action、Skill 或 plugin 前，都要再查看 source、权限、最近维护状态和移除方法。</p>
+<span id="-track-a-完成检查"></span><h2 data-heading-alias="-track-a-完成检查" id="h4320b3e773c8">✅ Track A 完成检查</h2>
+<ul>
+<li>[ ] MCP 只拿到 demo 文件夹或最小的 read-only toolset。</li>
+<li>[ ] PR workflow 只提出意见，没有 auto-merge、push 或 deploy。</li>
+<li>[ ] secrets 不在 repo、prompt 或 log 中；workflow 使用最小权限。</li>
+<li>[ ] 我能指出一次运行的结果和 usage；拿不到的数据没有乱猜。</li>
+<li>[ ] 队友能在干净的 demo repo 运行 Skill，之后 <code>git status</code> 没有非预期修改。</li>
+</ul>
+<p>五项都做到，就完成 Track A 核心。建议下一站读 <a href="stages--08-agent-interfaces.zh-Hans.md.html">Stage 8 — Agent 操作界面</a>，学习怎样给 Browser、Computer 和 Sandbox 设置安全边界；Stage 8 不影响 Track A Capstone 入场。想自己写 agent，再回到 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3</a>。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

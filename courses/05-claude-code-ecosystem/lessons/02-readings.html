@@ -1,0 +1,104 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>第五课参考知识整合</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">5 · Claude Code 生态系统</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>A/B 共用</strong><p>B 线学 5.1–5.7；A 线学 5.1–5.4。5.8 SDK 及复杂扩展按需选读。</p></aside><span id="top"></span><span id="第五课参考知识整合"></span><h1 data-heading-alias="第五课参考知识整合" id="h73bead669e8e">第五课参考知识整合</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h0fb8cf332ab6">官方 Quickstart、Memory、Skills</a></li><li><a href="#h6b0d9705512e">官方 MCP、Hooks、Plugins</a></li><li><a href="#h42ce7ba5faa3">Subagent Cookbook：15 个场景都用同一张委派卡</a></li><li><a href="#h5b118e9eac24">Subagent 进阶排错</a></li><li><a href="#hfe21d6afa72b">Agent SDK、运行循环与托管</a></li></ul></aside>
+<span id="官方-quickstartmemoryskills"></span><h2 data-heading-alias="官方-quickstartmemoryskills" id="h0fb8cf332ab6">官方 Quickstart、Memory、Skills</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>安装、认证、选择项目目录和理解权限是四个不同步骤。使用订阅登录与使用 API key 可能对应不同计费路径，不能从已装 SDK 推断已拥有额度。开始工作前先确认所在目录和可访问文件；规则文件解释项目，但账户权限由执行层控制。</p>
+<p>Memory 文档讨论指令来源、作用范围、导入和自动记忆；学习重点是让常用信息可找到并保持简短。Skills 文档讨论按需加载、参数、独立上下文和工具许可。给一个 Skill 写十条“不要”不如同时缩小工具集、给出结构化输出、明确失败状态，再用正反例测试。</p>
+<span id="官方-mcphooksplugins"></span><h2 data-heading-alias="官方-mcphooksplugins" id="h6b0d9705512e">官方 MCP、Hooks、Plugins</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>MCP 注册一条连接；scope 决定配置属于本地项目、共享项目或用户。共享配置可能启动外部程序，因此需要检查命令和参数。服务器返回的内容属于资料，不是更高优先级的指令。撤销连接也不自动撤销已经泄露的凭证。</p>
+<p>Hook 的输入是事件数据，输出与退出状态具有特定语义。先观察事件名，再学习阻断规则，避免一次配置错误导致所有工作无法继续。日志默认最少化；令牌、文件内容、访问记录不能随意交给第三方收集服务。</p>
+<p>Plugin 把可重用组件作为版本一起发布；Marketplace 是版本与来源索引。升级前保留可恢复版本，测试安装和卸载，不把“安装成功”当“权限正确”。本课以本地配置练习为主，不要求发布市场。</p>
+<span id="subagent-cookbook15-个场景都用同一张委派卡"></span><h2 data-heading-alias="subagent-cookbook15-个场景都用同一张委派卡" id="h42ce7ba5faa3">Subagent Cookbook：15 个场景都用同一张委派卡</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>给工作者什么</th>
+<th>应收回什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提交前审查</td>
+<td>diff、规范、测试</td>
+<td>文件位置、问题和影响</td>
+</tr>
+<tr>
+<td>新仓库定位</td>
+<td>问题与可读目录</td>
+<td>入口、调用链、证据路径</td>
+</tr>
+<tr>
+<td>重构计划</td>
+<td>行为约束与代码</td>
+<td>最小变更步骤和回归点</td>
+</tr>
+<tr>
+<td>跨语言一致性</td>
+<td>原文与多语版本</td>
+<td>差异和缺失，不擅改含义</td>
+</tr>
+<tr>
+<td>多源查证</td>
+<td>待核断言、允许来源</td>
+<td>支持、矛盾、无法确认</td>
+</tr>
+<tr>
+<td>符号定位</td>
+<td>名称、目标行为</td>
+<td>定义、调用者、相关测试</td>
+</tr>
+<tr>
+<td>论文核对</td>
+<td>claim、论文、页码</td>
+<td>原句和适用范围</td>
+</tr>
+<tr>
+<td>发布检查</td>
+<td>版本、配置、变更</td>
+<td>阻断项和回滚入口</td>
+</tr>
+<tr>
+<td>架构影响</td>
+<td>变更目标、依赖边界</td>
+<td>受影响模块与风险</td>
+</tr>
+<tr>
+<td>多目标并行</td>
+<td>各自独立的输入</td>
+<td>同格式结果和冲突列表</td>
+</tr>
+<tr>
+<td>跨仓库实现</td>
+<td>接口契约、版本</td>
+<td>各仓库变更与兼容证据</td>
+</tr>
+<tr>
+<td>结构化 Judge</td>
+<td>rubric、候选产物</td>
+<td>分项分数和可核理由</td>
+</tr>
+<tr>
+<td>UI/无障碍</td>
+<td>页面、设备、标准</td>
+<td>可复现问题和截图位置</td>
+</tr>
+<tr>
+<td>功能查证</td>
+<td>功能名、当前版本</td>
+<td>官方支持范围及限制</td>
+</tr>
+<tr>
+<td>表单验证</td>
+<td>字段规则、边界输入</td>
+<td>无效/有效案例与错误呈现</td>
+</tr>
+</tbody>
+</table>
+<p>这些场景完整模板已随原仓库 subagent-cookbook 本地化。学习时不必背下 15 种身份。每次委派都要给足完成任务所需的信息，限定可用资料，并要求对方提供证据。复杂实现不适合只给一句“帮我做好”。</p>
+<span id="subagent-进阶排错"></span><h2 data-heading-alias="subagent-进阶排错" id="h5b118e9eac24">Subagent 进阶排错</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>按顺序检查：配置有没有加载；description 是否能区分使用条件；允许工具是否足够又不过量；任务是否缺少主会话背景；模型、轮数与成本是否匹配。description 太宽会误触发，过长会让关键条件不突出。不要依靠大写 PROACTIVELY 当魔法开关。</p>
+<p>Parallel 是独立任务并发；Pipeline 是前后依赖；Meta-agent 是继续委派的角色。它们需要不同的结束和合并规则。当前文档允许嵌套不代表每个任务都值得嵌套。原资料中“不能嵌套”等旧表述以这里的版本提醒为准。</p>
+<span id="agent-sdk运行循环与托管"></span><h2 data-heading-alias="agent-sdk运行循环与托管" id="hfe21d6afa72b">Agent SDK、运行循环与托管</h2><div class="study-section"><span class="study-badge study-mixed">必读概念 · 实作按需</span><p class="study-section-note">运行循环的停止与权限边界必读；SDK 接入和托管实作选做。</p></div>
+<p>SDK 消息包含不同类型：模型文本、工具结果和终止结果。程序必须分别处理，尤其检查错误和预算终止。部署时还要考虑每个用户的工作目录、身份、会话存储、网络、资源上限、日志和清理；本机运行成功，只验证了当前环境；多个用户共用服务时，这些问题还要逐项处理。</p>
+<p>完整原资料及所有项目清单在本课阅读入口中。上游客户端代码只说明接口包装，不能仅凭这些代码判断闭源运行时内部的全部实现。</p>
+<p>Quickstart 的连续操作见<a href="00-first-session.html">安装与首次会话</a>；Plugin、Dynamic workflows、SDK 的完整项目与答案见<a href="04-extensions.html">选修实作</a>。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="01-guide.html">← 第五课：规则、Skill、MCP、Hook 和 Subagent</a><a href="03-workshop.html">从规则到可验证的扩展 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

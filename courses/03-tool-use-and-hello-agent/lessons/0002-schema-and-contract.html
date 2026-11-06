@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工具接口与参数验证 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 02</p><h1>工具接口与参数验证</h1><p class="lede">读懂 Schema，理解它与函数实现、权限检查的边界。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必读；结合本单元案例理解，并在单元 8 完成基础验收。</p></aside>
+<h2>1. 一个工具必须有三部分</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p><strong>Schema</strong>告诉模型如何请求；<strong>函数实现</strong>负责真正计算或查询；<strong>派发与验证</strong>决定这个请求能不能执行。只写一个 Python 函数，不会自动让远端模型知道它存在。把函数源码塞进 Prompt，也不等于安全执行。</p>
+<h2>2. 逐个理解 Schema 字段</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>字段</th><th>作用</th><th>容易误解的地方</th></tr>
+<tr><td>type: function</td><td>这是函数型工具</td><td>不是把函数当字符串执行</td></tr>
+<tr><td>function.name</td><td>程序派发时匹配的名称</td><td>必须与白名单的键一致</td></tr>
+<tr><td>description</td><td>告诉模型何时使用、何时不用</td><td>“处理数据”不足以帮助选择</td></tr>
+<tr><td>parameters.type: object</td><td>参数整体是一个 JSON 对象</td><td>不接受数组代替对象</td></tr>
+<tr><td>properties</td><td>声明允许的字段及其类型</td><td>仅声明字段不表示必填</td></tr>
+<tr><td>required</td><td>必须提供哪些字段</td><td>不自动禁止额外字段</td></tr>
+<tr><td>additionalProperties: false</td><td>不接受未声明的字段</td><td>仍须确认接口是否实施该约束</td></tr>
+<tr><td>enum / minimum / maximum</td><td>限制选项和数值范围</td><td>不能替代业务权限校验</td></tr></table>
+<p>JSON 是用文本表示的数据，Python dict 是程序内存中的对象。接口传输的是 JSON，程序解析后才得到 dict。Chat Completions 的 function.arguments 通常是 JSON 字符串；Anthropic 的 tool_use.input 是已解析对象。</p>
+<h2>3. 本课的三个工具为什么这样分</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>get_weather 只查固定数据；calculator 只做两个数的一次四则运算；convert_temperature 只做已知温度的单位换算。每个工具有一个清晰职责，才能看出模型是否正确组合了它们。</p>
+<p>计算器不接受任意 Python 表达式，而是 operation、left、right 三个字段。这样可以用明确枚举控制能力范围，不需要 eval。工具函数的参数检查放在统一执行入口中；模型产生的请求只能经过这个入口派发。</p>
+<h2>4. 为什么 Schema 写了，程序还要再检查</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>模型可能填错；兼容接口可能只接受部分约束；即使格式合规，也可能请求无权访问的城市或业务对象。Schema 描述接口，权限来自程序可信配置。</p>
+<p>执行入口依次做：确认本次工具集合允许该名称；解析参数；确认字段与类型；确认枚举和范围；执行函数；包装结果。未出现在本次 tools 列表里的工具，即使在全局实现里，也不能调用。</p>
+<p>本课还拒绝布尔值、非有限数和额外字段。Python 中 isinstance(True, int) 是 True，所以数字验证使用精确类型检查；NaN、Infinity 不能作为正常计算输入。</p>
+<h2>5. 完整工具文件</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>这份文件被全部案例共用，以下是实际运行的完整内容。天气字典仅有三个城市，不会请求气象网站；26、18、22 都是教学常量。</p>
+<section class="code-panel" id="tools-py"><div class="code-title"><a href="../examples/tools.py">tools.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;提供第三课使用的只读工具；天气数据固定，仅用于教学，不代表实时天气。&quot;&quot;&quot;
+
+# 导入 json，用于解析模型生成的 JSON 参数字符串。
+import json
+# 导入 math，用于确认数值参数不是无穷大或 NaN。
+import math
+
+# 保存固定的示例气温；键是支持的城市，值是摄氏温度。
+WEATHER = {&quot;台北&quot;: 26.0, &quot;北京&quot;: 18.0, &quot;上海&quot;: 22.0}
+
+
+# 根据中文城市名查询固定教学气温，不访问网络或真实天气服务。
+def get_weather(city):
+    # 只允许查询 WEATHER 中明确列出的三个城市。
+    if city not in WEATHER:
+        # 对不支持的城市给出可理解的错误和支持范围。
+        raise ValueError(&quot;没有该城市的示例数据；支持台北、北京、上海&quot;)
+
+    # 返回结构化结果，让模型能明确识别城市、温度、单位和数据来源。
+    return {
+        # 把城市和气温放在同一份结果中，多城市查询时才不会把某城市的数值套给另一座城市。
+        &quot;city&quot;: city,
+        # 数值来自宿主维护的固定数据，模型只负责提出查询，不能自行填造工具结果。
+        &quot;temperature&quot;: WEATHER[city],
+        # 明确标注单位，避免模型猜测数值是摄氏还是华氏。
+        &quot;unit&quot;: &quot;celsius&quot;,
+        # 提醒模型和用户这是教学数据，不能当作实时天气。
+        &quot;source&quot;: &quot;教学固定数据，非实时&quot;,
+    }
+
+
+# 对两个数执行一次加、减、乘或除运算。
+def calculator(operation, left, right):
+    # 按已经验证过的运算枚举分支；让宿主完成精确运算，避免依赖模型心算。
+    if operation == &quot;add&quot;:
+        # 这里得到最终数值，后续统一用 result 字段交回模型，便于下一次工具调用取用。
+        result = left + right
+    # 减法区分左右次序；工具接口明确 left 和 right，不能把两个数当无序集合。
+    elif operation == &quot;subtract&quot;:
+        # 按调用者指定的 left − right 计算，避免把“从右数减去左数”当作同一个任务。
+        result = left - right
+    # 只做一项二元运算，复合表达式须由循环拆成多步，轨迹中才能逐步核对。
+    elif operation == &quot;multiply&quot;:
+        # 乘法仍返回统一结果字段，多步任务无需为不同运算编写不同的取值方式。
+        result = left * right
+    # 参数验证保证剩余的合法 operation 只能是 divide。
+    else:
+        # 除法开始前先检查除数，避免 Python 抛出 ZeroDivisionError。
+        if right == 0:
+            # 用业务错误说明失败原因，稍后 execute 会把它转换为工具错误结果。
+            raise ValueError(&quot;除数不能为零&quot;)
+        # 除法可能返回小数；保留数值类型，下一工具才能继续计算，而不是从描述里提取数字。
+        result = left / right
+
+    # 使用字典返回结果，保持所有工具都提供结构化输出。
+    return {&quot;result&quot;: result}
+
+
+# 在摄氏度和华氏度之间转换一个已知温度。
+def convert_temperature(value, from_unit, to_unit):
+    # 输入、输出单位相同时不需要计算，直接保留原值。
+    if from_unit == to_unit:
+        # 同单位转换应保持数值不变；这条路径避免错误地重复套用温度公式。
+        result = value
+    # 输入单位为摄氏度时，按公式转换为华氏度。
+    elif from_unit == &quot;celsius&quot;:
+        # 华氏度 = 摄氏度 × 9 ÷ 5 + 32。
+        result = value * 9 / 5 + 32
+    # 参数验证保证剩余情况是从华氏度转换为摄氏度。
+    else:
+        # 摄氏度 =（华氏度 - 32）× 5 ÷ 9。
+        result = (value - 32) * 5 / 9
+
+    # 将结果保留两位小数，并明确返回目标单位。
+    return {&quot;value&quot;: round(result, 2), &quot;unit&quot;: to_unit}
+
+
+# 定义提供给模型看的工具目录；这里只描述接口，不直接执行任何函数。
+TOOLS = [
+    {
+        # 本例的 Chat Completions 协议用 function 表示宿主函数工具；这不表示服务端会自动执行 Python。
+        &quot;type&quot;: &quot;function&quot;,
+        # function 对象描述工具名称、用途和参数结构。
+        &quot;function&quot;: {
+            # 名称必须与 TOOL_IMPL 中实际执行函数的键一致。
+            &quot;name&quot;: &quot;get_weather&quot;,
+            # 描述帮助模型判断什么时候应该调用该工具。
+            &quot;description&quot;: &quot;查询台北、北京、上海的固定示例气温，单位摄氏。需要气温时使用；不是实时天气，不用于计算。&quot;,
+            # parameters 使用 JSON Schema 风格描述模型应生成的参数。
+            &quot;parameters&quot;: {
+                # 工具参数整体必须是一个对象。
+                &quot;type&quot;: &quot;object&quot;,
+                # properties 列出对象中允许出现的字段及其规则。
+                &quot;properties&quot;: {
+                    # city 是字符串，并通过描述提示模型使用中文城市名。
+                    &quot;city&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;中文城市名，例如台北&quot;},
+                },
+                # city 是必填字段，缺少它就无法查询天气。
+                &quot;required&quot;: [&quot;city&quot;],
+                # 禁止模型添加未定义参数，减少格式错误和意外输入。
+                &quot;additionalProperties&quot;: False,
+            },
+        },
+    },
+    {
+        # 计算器也按同一函数协议声明，模型在同一 tools 列表中按任务选择名称。
+        &quot;type&quot;: &quot;function&quot;,
+        # 把计算器的名称、用途和参数放在同一接口描述中，模型提出的请求必须能对应到本地实现。
+        &quot;function&quot;: {
+            # 工具名 calculator 与实际 Python 函数名保持一致。
+            &quot;name&quot;: &quot;calculator&quot;,
+            # 描述限定它只做一次四则运算，并把温度换算交给专用工具。
+            &quot;description&quot;: &quot;对两个有限数字做一次四则运算。复合运算请分步调用；温度换算使用 convert_temperature。&quot;,
+            # 定义计算器所需参数及限制。
+            &quot;parameters&quot;: {
+                # 所有参数组合成一个 JSON 对象。
+                &quot;type&quot;: &quot;object&quot;,
+                # properties 分别定义运算名称和两个操作数。
+                &quot;properties&quot;: {
+                    # operation 只能从四种允许的运算名称中选择。
+                    &quot;operation&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;enum&quot;: [&quot;add&quot;, &quot;subtract&quot;, &quot;multiply&quot;, &quot;divide&quot;],
+                        &quot;description&quot;: &quot;四则运算名称&quot;,
+                    },
+                    # left 是减法的被减数或除法的被除数；上下限是本例的输入边界，执行器还会拒绝 NaN 和布尔值。
+                    &quot;left&quot;: {
+                        &quot;type&quot;: &quot;number&quot;,
+                        &quot;minimum&quot;: -1000000,
+                        &quot;maximum&quot;: 1000000,
+                        &quot;description&quot;: &quot;左操作数&quot;,
+                    },
+                    # right 是减数或除数；数值范围不能排除除零，所以除法实现还要单独检查 0。
+                    &quot;right&quot;: {
+                        &quot;type&quot;: &quot;number&quot;,
+                        &quot;minimum&quot;: -1000000,
+                        &quot;maximum&quot;: 1000000,
+                        &quot;description&quot;: &quot;右操作数&quot;,
+                    },
+                },
+                # 一次计算必须同时提供运算名称及左右操作数。
+                &quot;required&quot;: [&quot;operation&quot;, &quot;left&quot;, &quot;right&quot;],
+                # 拒绝计算器接口未定义的额外字段。
+                &quot;additionalProperties&quot;: False,
+            },
+        },
+    },
+    {
+        # 温度换算作为独立函数公开，让模型能把“查询气温”和“转换单位”拆成有依赖的两步。
+        &quot;type&quot;: &quot;function&quot;,
+        # 接口同时要求数值、来源单位和目标单位，避免模型只给一个温度却让程序猜转换方向。
+        &quot;function&quot;: {
+            # 工具名与 convert_temperature Python 函数对应。
+            &quot;name&quot;: &quot;convert_temperature&quot;,
+            # 描述强调该工具只换算已有数值，不负责查询天气。
+            &quot;description&quot;: &quot;在摄氏与华氏之间换算已知温度。不查天气；需要先从天气结果取得温度。&quot;,
+            # 定义待换算值、输入单位和输出单位。
+            &quot;parameters&quot;: {
+                # 三个参数同样放在一个 JSON 对象中。
+                &quot;type&quot;: &quot;object&quot;,
+                # properties 描述每个允许字段的类型和取值范围。
+                &quot;properties&quot;: {
+                    # value 必须是前一步取得的实际温度；这里的范围仅限制教学输入，不能证明气温真实或物理合理。
+                    &quot;value&quot;: {
+                        &quot;type&quot;: &quot;number&quot;,
+                        &quot;minimum&quot;: -1000,
+                        &quot;maximum&quot;: 1000,
+                        &quot;description&quot;: &quot;待换算的数值&quot;,
+                    },
+                    # from_unit 只能是摄氏或华氏的英文标识。
+                    &quot;from_unit&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;enum&quot;: [&quot;celsius&quot;, &quot;fahrenheit&quot;],
+                        &quot;description&quot;: &quot;输入单位&quot;,
+                    },
+                    # to_unit 也只能是摄氏或华氏的英文标识。
+                    &quot;to_unit&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;enum&quot;: [&quot;celsius&quot;, &quot;fahrenheit&quot;],
+                        &quot;description&quot;: &quot;输出单位&quot;,
+                    },
+                },
+                # 三个字段缺一不可，否则无法明确完成换算。
+                &quot;required&quot;: [&quot;value&quot;, &quot;from_unit&quot;, &quot;to_unit&quot;],
+                # 禁止温度换算接口出现未定义字段。
+                &quot;additionalProperties&quot;: False,
+            },
+        },
+    },
+]
+
+
+# 建立“公开工具名 → 实际 Python 函数”的唯一执行映射。
+TOOL_IMPL = {
+    # 将模型使用的 get_weather 名称绑定到本地天气函数。
+    &quot;get_weather&quot;: get_weather,
+    # 将模型使用的 calculator 名称绑定到本地计算函数。
+    &quot;calculator&quot;: calculator,
+    # 将模型使用的 convert_temperature 名称绑定到本地换算函数。
+    &quot;convert_temperature&quot;: convert_temperature,
+}
+
+
+# 按本课三个固定接口的规则验证工具名和参数，不实现完整 JSON Schema。
+def validate_args(name, args):
+    &quot;&quot;&quot;验证工具是否存在，以及参数字段、类型、范围和枚举值是否合法。&quot;&quot;&quot;
+
+    # 工具名必须存在于唯一执行映射中，不能执行任意 Python 函数。
+    if name not in TOOL_IMPL:
+        # 拒绝未知工具，避免模型生成的任意名字进入执行流程。
+        raise ValueError(&quot;未知工具，拒绝执行&quot;)
+
+    # 在提供给模型的 TOOLS 描述中找到当前工具的参数规则。
+    schema = next(
+        # 取出匹配工具的 parameters 对象作为验证依据。
+        tool[&quot;function&quot;][&quot;parameters&quot;]
+        # 从同一份 TOOLS 定义取规则，避免给模型看的 Schema 与执行器验证规则各写一份而逐渐不一致。
+        for tool in TOOLS
+        # 只选择名称与本次调用相同的工具。
+        if tool[&quot;function&quot;][&quot;name&quot;] == name
+    )
+
+    # 参数必须是字典，并且字段集合必须与 required 完全相同。
+    if not isinstance(args, dict) or set(args) != set(schema[&quot;required&quot;]):
+        # 同时拒绝缺失字段和额外字段，保持教学接口严格、可预测。
+        raise ValueError(&quot;参数必须是对象，且字段必须与工具定义完全一致&quot;)
+
+    # 逐个检查 schema 中声明的每个参数字段。
+    for key, rule in schema[&quot;properties&quot;].items():
+        # 后面的类型、范围和枚举检查都针对模型实际提交的这个值，而不是只相信 Schema 已经约束生成。
+        value = args[key]
+
+        # 字符串必须类型正确、去空白后非空，并限制在 80 个字符以内。
+        if rule[&quot;type&quot;] == &quot;string&quot; and (
+            not isinstance(value, str) or not value.strip() or len(value) &gt; 80
+        ):
+            # 字符串不合格时指出具体字段，方便模型或开发者修正。
+            raise ValueError(f&quot;{key} 必须是 1–80 字符的非空字符串&quot;)
+
+        # 数字字段需要额外检查 Python 类型、有限性和范围。
+        if rule[&quot;type&quot;] == &quot;number&quot;:
+            # 精确检查 int/float；bool 虽是 int 子类，但不能当作数值参数。
+            if type(value) not in (int, float) or not math.isfinite(value):
+                # 拒绝布尔值、字符串、NaN 和正负无穷。
+                raise ValueError(f&quot;{key} 必须是有限数字，不能是布尔值&quot;)
+
+            # 按工具定义中的 minimum 和 maximum 检查数值范围。
+            if not rule[&quot;minimum&quot;] &lt;= value &lt;= rule[&quot;maximum&quot;]:
+                # 范围外数值可能无意义或导致不必要的大数运算，因此拒绝。
+                raise ValueError(f&quot;{key} 超出允许范围&quot;)
+
+        # 带 enum 的字段只能使用 schema 明确列出的值。
+        if &quot;enum&quot; in rule and value not in rule[&quot;enum&quot;]:
+            # 拒绝未知运算名或未知单位，防止函数进入错误分支。
+            raise ValueError(f&quot;{key} 不在允许枚举中&quot;)
+
+
+# 统一完成授权检查、参数解析、参数验证、函数执行和错误封装。
+def execute(name, raw_args, allowed_names):
+    &quot;&quot;&quot;执行一次已授权工具调用，并始终返回可交给模型的成功或错误字典。&quot;&quot;&quot;
+
+    # 捕获可预期的输入和计算错误，不把 Python 异常堆栈暴露给模型。
+    try:
+        # 工具既要被本轮白名单允许，也要存在于全局实现映射中。
+        if name not in allowed_names or name not in TOOL_IMPL:
+            # 模型请求未授权或不存在的工具时，明确拒绝执行。
+            raise ValueError(&quot;该工具未授权，拒绝执行&quot;)
+
+        # 对字符串形式的参数设置长度上限，避免解析超大输入。
+        if isinstance(raw_args, str) and len(raw_args) &gt; 4096:
+            # 参数过长时在 json.loads 前终止，减少不必要的资源消耗。
+            raise ValueError(&quot;参数文本过长&quot;)
+
+        # 模型通常返回 JSON 字符串；若调用方已传字典，则直接沿用。
+        # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+        args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+
+        # 在真正调用 Python 函数前验证全部参数规则。
+        validate_args(name, args)
+
+        # **args 把参数字典展开为关键字参数，并返回统一的成功结构。
+        return {&quot;ok&quot;: True, &quot;data&quot;: TOOL_IMPL[name](**args)}
+
+    # 只捕获预期的工具输入或计算错误；编程错误仍会向外抛出以便修复。
+    except (ValueError, TypeError, OverflowError) as error:
+        # 把异常转换成稳定的错误字典，让模型可以阅读原因并继续响应。
+        return {
+            &quot;ok&quot;: False,
+            &quot;error&quot;: {&quot;type&quot;: &quot;tool_error&quot;, &quot;message&quot;: str(error)},
+        }</code></pre></section>
+<h2>6. 白名单的正确理解</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>模型给的名字只能作为字典查找的键。不要拿它拼命令、运行 globals 查找的任意函数，或用 eval 解释。对于真实账户查询，登录用户身份应由服务端传入；不能让模型自己填 user_id 就获得别人的权限。</p>
+<p>本课全部工具只读。以后接发邮件、付款、删除文件时，需要额外的人类确认、幂等键和审计记录；这些不靠 Prompt 的一句“请谨慎”实现。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s5">S5</a>、<a href="../reference/readings.html#s9">S9</a>、<a href="../reference/readings.html#s12">S12</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="0" data-correct="required 决定是否必填，additionalProperties 决定是否接受未声明字段。" data-incorrect="required 决定是否必填，additionalProperties 决定是否接受未声明字段。"><fieldset><legend>required 和 additionalProperties 的职责分别是什么？</legend><label><input type="radio" name="qa2" value="0"> 必填字段；额外字段</label><label><input type="radio" name="qa2" value="1"> 字段长度；数值大小</label><label><input type="radio" name="qa2" value="2"> 执行权限；费用上限</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0001-map-and-setup.html">← 学习地图与运行环境</a><a href="0003-first-tool.html">单工具的完整往返 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

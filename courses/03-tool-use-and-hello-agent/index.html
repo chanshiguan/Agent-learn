@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工具使用与第一个 Agent Loop · 第三课</title><link rel="stylesheet" href="../../assets/course.css">
+<link rel="stylesheet" href="assets/course.css"><link rel="stylesheet" href="../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../index.html">总课程目录</a><a href="index.html">第三课首页</a><a href="reference/readings.html">本地必修阅读</a><a href="reference/cheatsheet.html">术语与协议速查</a><a href="reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · Tool Use &amp; Hello Agent</p>
+<h1>工具使用与<br>第一个 Agent Loop</h1>
+<p class="lede">让模型提出请求，让 Python 安全执行，再根据结果继续。沿用你现有的 Ollama 环境，写出不依赖框架、能测试、会停止的第一个 Agent。</p>
+<div class="callout success"><strong>直接在本项目学习。</strong>讲解、三份必修阅读的中文知识整理、完整代码、测试、参考速查与课后练习全部在这里。无需回原始网站完成学习步骤。</div>
+<p class="meta">开始前，你需要能运行 Python，认识函数、list 和 dict，并学过第二课的 Prompt 内容。主线使用 Ollama + gemma4:e4b，第三课单独存放，不覆盖第二课。</p>
+<p><strong>扩展选读（单元9–15）：</strong>流式、工具选择、真正并发、ReAct研究与检索、Self-Refine/Reflexion、Instructor/Outlines、CodeAct及对应练习。需要这些能力时再学，每个案例均有完整代码。</p>
+<aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>单元 1–8 是主线必读与必做；单元 9–15 为扩展选读、选做。ReAct 的基础必读内容已在单元 7 整理。</p></aside><h2>按顺序学习</h2><ol class="lesson-list"><li><span class="study-badge study-core">主线必读</span><a href="lessons/0001-map-and-setup.html">学习地图与运行环境</a><small>分清谁提出请求、谁执行代码；准备可验证的环境。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0002-schema-and-contract.html">工具接口与参数验证</a><small>读懂 Schema，理解它与函数实现、权限检查的边界。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0003-first-tool.html">单工具的完整往返</a><small>运行第一个案例，逐条检查消息历史。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0004-agent-loop.html">多工具与第一个 Agent Loop</a><small>让模型根据观察继续行动，完成有依赖的多步骤任务。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0005-errors-and-boundaries.html">错误恢复与执行边界</a><small>处理坏参数、未知工具、失败请求和无限循环。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0006-schema-and-eval.html">Schema 对比与固定评测</a><small>用实际轨迹和明确标准比较两种工具说明。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0007-reading-and-protocols.html">三份必修阅读与协议对照</a><small>在本地读完必要知识；运行结构化输出与 Anthropic 案例。</small></li><li><span class="study-badge study-core">主线必读</span><a href="lessons/0008-exercises.html">基础练习与综合项目</a><small>先完成主线验收，再按需选择单元9–15的扩展内容。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0009-streaming-tools.html">流式工具调用</a><small>把分片参数组装完整，验证完成后再执行。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0010-choice-and-concurrency.html">工具选择控制与并发执行</a><small>控制模型何时调用工具，正确关联并发结果。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0011-react-paper.html">ReAct论文详解与检索实验</a><small>理解研究方法、对照实验和失败类型，跑通两跳查询。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0012-feedback-and-memory.html">Self-Refine与Reflexion</a><small>让反馈能修正输出、形成可复用经验，同时防止越改越错。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0013-instructor-and-outlines.html">Instructor与Outlines完整实战</a><small>区分类型校验、失败重试与生成约束，运行同一抽取任务。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0014-codeact.html">CodeAct与代码执行边界</a><small>用代码组合工具，在受限解释器中观察执行反馈。</small></li><li><span class="study-badge study-extra">扩展选读</span><a href="lessons/0015-extended-exercises.html">补充课后练习与综合验收</a><small>闭卷解释、运行新案例，用证据检验全部补充内容。</small></li></ol>
+<h2>本地资料</h2><div class="two-col"><div><h3>必要阅读</h3><p><a href="reference/readings.html">Ollama、Anthropic、ReAct 中文讲义</a></p><p>学习本阶段需要的知识已整合，不额外布置英文原文阅读。</p></div>
+<div><h3>复习与实操</h3><p><a href="reference/cheatsheet.html">术语与消息协议速查</a></p><p><a href="reference/code-library.html">所有完整案例与测试</a></p><p><a href="reference/coverage.html">原路线知识覆盖表</a></p></div></div>
+<h2>先跑一个不用模型的验证</h2><pre><code># 切换到 /Users/owen/Documents/ai-learn，让后面的相对路径从这里开始计算；已在该目录时可跳过。
+cd /Users/owen/Documents/ai-learn
+# 在当前终端激活指定虚拟环境，让后面的 python 使用该环境中的解释器与依赖。
+source .venv/bin/activate
+# 切换到 courses/03-tool-use-and-hello-agent/examples，让后面的相对路径从这里开始计算；已在该目录时可跳过。
+cd courses/03-tool-use-and-hello-agent/examples
+# 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest discover -p &#x27;test_*.py&#x27; -v
+# 观察坏参数、失败结果与恢复行为。
+python 05_error_recovery.py</code></pre>
+<h2>学完能交付什么</h2><ul><li>单工具、多工具和有依赖的连续调用。</li><li>白名单、参数检查、错误结果和明确停止条件。</li><li>一份固定五题的 Schema 评测记录。</li><li>只读天气小助手及课后练习的可验证结果。</li></ul>
+<p>本课包含阶段 3 的教学目标和六组练习。扩展仓库作为参考方向保留，没有收录它们的全部源码或论文附录。天气案例使用固定教学数据，不是实时预报。</p>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../assets/quiz.js"></script><script src="assets/course.js"></script></body></html>

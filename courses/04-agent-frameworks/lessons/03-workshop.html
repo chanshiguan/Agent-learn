@@ -1,0 +1,208 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从一个状态对象，到可恢复的摘要流程</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">4 · Workflow Graph 与 Agent 框架</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="从一个状态对象到可恢复的摘要流程"></span><h1 data-heading-alias="从一个状态对象到可恢复的摘要流程" id="hdd85e1179855">从一个状态对象，到可恢复的摘要流程</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#ha258cb17c159">开始前：只准备本题需要的环境</a></li><li><a href="#h2cea55149f0c">单元一：State、Node、Edge 各负责什么</a></li><li><a href="#hfeafd4cecd2d">单元二：先观察暂停，再在另一进程恢复</a></li><li><a href="#hf757715d6713">单元三：完整答案及代码阅读顺序</a></li><li><a href="#hddb7931f1cd8">单元四：原五题怎样逐一学习</a></li><li><a href="#h50bbe1a7aea0">单元五：何时选择哪种编排</a></li><li><a href="#hfdcc2e617c64">课末验收补充</a></li></ul></aside>
+<span id="开始前只准备本题需要的环境"></span><h2 data-heading-alias="开始前只准备本题需要的环境" id="ha258cb17c159">开始前：只准备本题需要的环境</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>你在 ai-learn 根目录执行以下命令。<code>.venv/bin/python</code> 是原项目解释器；<code>courses/.venv-verification/bin/python</code> 是后续课程独立验证环境。使用完整路径就不需要先 activate，也不重复 cd。<code>-m pip</code> 表示让这个解释器运行安装工具；<code>-r</code> 表示按文本中的包名安装。安装依赖只在环境缺包时做，不是每次运行前都要做。</p>
+<pre><code class="language-bash"># 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-verification/bin/python -m pip install -r courses/04-agent-frameworks/examples/requirements-summary.txt
+</code></pre>
+<p>本题不需要模型密钥或下载模型；摘要节点使用固定资料，让你先看清控制过程。原五个框架案例仍在完整代码页，各目录自己的 requirements 只装进独立环境。不要将其 openai 版本范围混装进主 <code>.venv</code>。</p>
+<span id="单元一statenodeedge-各负责什么"></span><h2 data-heading-alias="单元一statenodeedge-各负责什么" id="h2cea55149f0c">单元一：State、Node、Edge 各负责什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>把状态想成随流程传递的表单。本例有 topic（主题）、draft（草稿）、source_ids（来源）、checked（是否通过检查）、status（状态）、published（本地接受标记）。节点拿到表单，返回需要改变的字段；边决定下一个节点。</p>
+<p><code>TypedDict</code> 为开发者说明字段形状，并不是运行时安全检查器。<code>check_sources</code> 才执行真实检查。草稿被新草稿替换是合理的；消息历史通常需追加，所以原工具循环使用消息 reducer。两个并行节点都覆盖同一字段时，不能指望框架替你决定谁正确，应分别写字段或使用明确的合并规则。</p>
+<p>流程为：开始 → 摘录资料 → 检查来源 → 等待人审 → 接受/拒绝 → 结束。无来源直接进入 blocked，不进入人审。图不是多 Agent 的同义词：这整个图可以只有一个生成节点，其余全是普通函数。</p>
+<span id="单元二先观察暂停再在另一进程恢复"></span><h2 data-heading-alias="单元二先观察暂停再在另一进程恢复" id="hfeafd4cecd2d">单元二：先观察暂停，再在另一进程恢复</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>以下路径请使用新的数据库名，避免与以前练习混淆。</p>
+<pre><code class="language-bash"># 运行 courses/04-agent-frameworks/examples/summary_workflow.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/summary_workflow.py --db /tmp/course4-review.sqlite --thread first
+# 运行 courses/04-agent-frameworks/examples/summary_workflow.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/summary_workflow.py --db /tmp/course4-review.sqlite --thread first --decision reject
+# 运行 courses/04-agent-frameworks/examples/summary_workflow.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/summary_workflow.py --db /tmp/course4-review.sqlite --thread second
+# 运行 courses/04-agent-frameworks/examples/summary_workflow.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/summary_workflow.py --db /tmp/course4-review.sqlite --thread second --decision accept
+# 运行 courses/04-agent-frameworks/examples/summary_workflow.py，按本行参数完成当前案例并核对输出。
+courses/.venv-verification/bin/python courses/04-agent-frameworks/examples/summary_workflow.py --db /tmp/course4-review.sqlite --thread missing --topic unknown
+</code></pre>
+<p>第一步应有 awaiting_review、published=false、next 含 review。第二步 rejected、published=false、next=[]。第四步 accepted、published=true；这里没有网络发布，只是本地字段。第五步 blocked，不能出现人审成功。</p>
+<p><code>thread_id</code> 是取回哪份执行状态的键；数据库是存状态的地方。只有键但换了数据库，读不回原任务。<code>Command(resume=...)</code> 将人的决定传给暂停点。中断节点恢复可能从头再跑，所以不要把付款、发送等副作用写在 interrupt 前。程序还拒绝对已经完成的任务重复批准。</p>
+<span id="单元三完整答案及代码阅读顺序"></span><h2 data-heading-alias="单元三完整答案及代码阅读顺序" id="hf757715d6713">单元三：完整答案及代码阅读顺序</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先看 <code>execute</code> 如何打开 SQLite 与设置 thread，再看 <code>build</code> 的边，最后看三个节点。<code>check_sources</code> 不只检查 ID 存在，还要求固定摘要等于资料摘录。这是本题可确定评分的条件；接真实模型改写后，要增加人工事实复核，不能沿用“ID 存在就正确”。</p>
+<pre><code class="language-python">&quot;&quot;&quot;真实 LangGraph：固定证据摘要→来源检查→人工批准；SQLite 跨进程恢复。&quot;&quot;&quot;
+
+# 先读 execute 的新建/恢复分支，再看 build 的连接关系和三个节点。
+import argparse
+import json
+from pathlib import Path
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+# interrupt 会把图暂停在审核点并保存待处理信息；收到恢复值之前，后续节点不会继续执行。
+# Command 携带恢复值或跳转信息；恢复暂停节点时要将人的决定放入 resume。
+from langgraph.types import interrupt, Command
+# SQLite 检查点把状态写入磁盘，因此可在另一个进程恢复；外部动作是否重复仍需幂等控制。
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+SOURCES = {'course-3': '工具调用由模型提出，应用执行，并把结果交回模型。'}
+
+
+# 这些字段描述共享状态的形状；TypedDict 本身不执行运行时校验。
+# 节点只返回自己更新的字段，状态会逐步补齐，因此 total=False 允许字段暂时缺失；TypedDict 不负责运行时拦截坏数据。
+class State(TypedDict, total=False):
+    topic: str
+    # draft：保存尚未批准的候选内容，把“生成成功”和“允许发布”分成两个不同阶段。
+    draft: str
+    source_ids: list[str]
+    checked: bool
+    status: str
+    published: bool
+
+
+def summarize(state):
+    # 固定摘录让本题只考流程；真实生成可以替换此节点，仍须走后续检查。
+    return {'draft': SOURCES.get(state['topic'], ''),
+            'source_ids': [state['topic']] if state['topic'] in SOURCES else [], 'published': False}
+
+
+# 本题要求草稿等于固定资料摘录，来源存在且内容匹配才进入人工审核。
+def check_sources(state):
+    refs = state['source_ids']
+    valid = bool(refs) and all(x in SOURCES for x in refs)
+    valid = valid and state['draft'] == '\n'.join(SOURCES[x] for x in refs)
+    return {'checked': valid, 'status': 'awaiting_review' if valid else 'blocked'}
+
+
+# interrupt 暂停后等待外部传入布尔决定；恢复时本节点可能从头再跑。
+def review(state):
+    # 把待审草稿带到暂停事件中，等待人给出明确决定；恢复时该节点可能重新执行，暂停前不要放不可重复的外部动作。
+    decision = interrupt({'draft': state['draft'], 'source_ids': state['source_ids'],
+                          'action': '仅标记本地接受，不向外发布'})
+    if type(decision) is not bool:
+        raise ValueError('批准必须为布尔值')
+    return {'status': 'accepted' if decision else 'rejected', 'published': decision}
+
+
+# 来源检查失败直接结束，通过才进入 review；检查点由调用者传入。
+def build(saver):
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    g = StateGraph(State)
+    # 把 summarize 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('summarize', summarize)
+    # 把 check 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('check', check_sources)
+    # 把 review 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node('review', review)
+    # START 完成后进入 summarize，将这两步的执行先后固定在程序中。
+    g.add_edge(START, 'summarize')
+    # summarize 完成后进入 check，将这两步的执行先后固定在程序中。
+    g.add_edge('summarize', 'check')
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    g.add_conditional_edges('check', lambda s: 'review' if s['checked'] else END)
+    # review 完成后进入 END，将这两步的执行先后固定在程序中。
+    g.add_edge('review', END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    # checkpointer：把图的中间状态交给检查点保存器；暂停后恢复需要这份状态，单靠再次调用图无法找回进度。
+    return g.compile(checkpointer=saver)
+
+
+# 同一数据库和 thread_id 才指向同一个任务；已结束任务不能再次批准。
+def execute(database, thread, topic='course-3', decision=None):
+    # 运行配置必须在暂停和恢复时保持同一个会话标识，否则恢复会找不到刚才待审核的状态。
+    # configurable：传递可在每次运行时指定的图配置；会话标识放在这里，供检查点系统定位历史状态。
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    config = {'configurable': {'thread_id': thread}}
+    # 检查点写入磁盘，下一进程使用同一数据库和 thread_id 才能继续。
+    # 打开检查点数据库连接；路径决定保存在哪里，后续进程必须打开同一个库才能恢复。
+    with SqliteSaver.from_conn_string(str(database)) as saver:
+        graph = build(saver)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        if decision is None:
+            if snapshot.values:
+                raise ValueError('任务编号已存在；请恢复任务或换新编号')
+            graph.invoke({'topic': topic}, config)
+        else:
+            if not snapshot.next or snapshot.values.get('status') != 'awaiting_review':
+                raise ValueError('该任务不在等待批准状态，不能重复或越过批准')
+            # 把外部决定交回原暂停点，不重新创建一个跳过检查的新任务。
+            graph.invoke(Command(resume=decision), config)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        return {'state': snapshot.values, 'next': list(snapshot.next)}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument('--db', type=Path, required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument('--thread', required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--topic', default='course-3')
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument('--decision', choices=['accept', 'reject'])
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    a = p.parse_args()
+    decision = None if a.decision is None else a.decision == 'accept'
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(execute(a.db, a.thread, a.topic, decision), ensure_ascii=False, indent=2))
+
+</code></pre>
+<span id="单元四原五题怎样逐一学习"></span><h2 data-heading-alias="单元四原五题怎样逐一学习" id="hddb7931f1cd8">单元四：原五题怎样逐一学习</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>原题</th>
+<th>先看代码哪一层</th>
+<th>保持不变</th>
+<th>必测失败</th>
+<th>应交证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 同任务两个框架</td>
+<td>工具定义与调用入口</td>
+<td>同问题、同搜索资料、同模型</td>
+<td>找不到资料</td>
+<td>两次工具输入输出与结果，不只运行时间</td>
+</tr>
+<tr>
+<td>02 角色协作</td>
+<td>researcher 的资料怎样给 writer</td>
+<td>相同任务</td>
+<td>作者拿不到来源</td>
+<td>各角色产物与交接资料</td>
+</tr>
+<tr>
+<td>03 图式流程</td>
+<td>条件边、状态、interrupt</td>
+<td>同一 thread</td>
+<td>人工拒绝、缺来源</td>
+<td>暂停和恢复前后的状态</td>
+</tr>
+<tr>
+<td>04 CodeAct/JSON</td>
+<td>参数调用与代码执行器</td>
+<td>同计算任务</td>
+<td>非法表达式</td>
+<td>被拒路径；Docker 未运行不得写隔离通过</td>
+</tr>
+<tr>
+<td>05 类型化输出</td>
+<td>Schema、output_type、返回 output</td>
+<td>同一问题</td>
+<td>confidence 越界、空 sources</td>
+<td>字段错误确实触发验证</td>
+</tr>
+</tbody>
+</table>
+<p>执行每题前打开同目录 README 的代码页了解该题入口。本地的路径统一为 <code>courses/04-agent-frameworks/examples/upstream/题目目录/</code>，不用猜原仓库的 examples 路径。原题不是本章改造答案；上面的 summary_workflow 才对应“摘要＋来源检查＋跨进程人审”的新增综合要求。</p>
+<span id="单元五何时选择哪种编排"></span><h2 data-heading-alias="单元五何时选择哪种编排" id="h50bbe1a7aea0">单元五：何时选择哪种编排</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>固定审核顺序用代码边；资料不确定但动作集合明确，可以让模型选择工具。主管把专家当工具时，专家结果回主管整合；handoff 则把后续交互权交给接收者，需要连同目标、已知事实与限制交接。并行任务最好写不同结果字段，合并时指出冲突，不按最后返回者覆盖。</p>
+<p>Crew 的角色适合表达分工，Flow 管事件和状态；Pydantic 管结构约束；CodeAct 用程序组合多步动作，但执行权限更大。没有失败证据时，从原 SDK 循环开始就够了。框架比较报告至少写透明度、恢复、类型约束、部署依赖和实际失败，不能用代码行数或角色数量判胜负。</p>
+<span id="课末验收补充"></span><h2 data-heading-alias="课末验收补充" id="hfdcc2e617c64">课末验收补充</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>必须做到：缺少来源时阻止继续；用户拒绝后保持拒绝状态；换进程后仍能恢复；使用错误的 thread 不能恢复原任务；重复批准被拒绝。每项保留命令与输出。解释题：为什么 SQLite 不保证外部邮件只发一次？答案：数据库只保存图状态，邮件服务的效果是另一份状态，需幂等键与收据协调。完成这些后再接真实模型，能分清模型错误与流程错误。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="06-framework-apis.html">← 必读 API 实作：动态分工与交接</a><a href="99-exercises.html">第四课课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

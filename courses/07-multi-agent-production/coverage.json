@@ -1,0 +1,74 @@
+[
+  {
+    "requirement": "Demystifying Evals：题目、trial、grader",
+    "lesson": "lessons/03-workshop.html#hbbd9e98a9100",
+    "example": "examples/upstream/02-eval/starter.py",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "有收据的研究助手",
+    "lesson": "lessons/03-workshop.html#h42880fd167b6",
+    "example": "examples/production_case.py",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "Tracing/Observability 与日志",
+    "lesson": "lessons/03-workshop.html#ha5df55a0f203",
+    "example": "examples/upstream/03-observability/starter.py",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "HITL、Persistence、Interrupts",
+    "lesson": "lessons/03-workshop.html#h3f3278f98d35",
+    "example": "examples/production_case.py",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "部署、缓存与流式输出",
+    "lesson": "lessons/03-workshop.html#hd473f334cd38",
+    "example": "text/05-original-labs.md",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "核心练习和评分",
+    "lesson": "lessons/03-workshop.html#he77a208adc59",
+    "example": "examples/production_case.py",
+    "assessment": "lessons/03-workshop.html#he77a208adc59"
+  },
+  {
+    "requirement": "原练习 多角色辩论（选修）",
+    "lesson": "lessons/05-original-labs.html#hbfed171266ec",
+    "example": "examples/upstream/01-multi-agent-debate/starter.py",
+    "assessment": "lessons/05-original-labs.html#hbfed171266ec"
+  },
+  {
+    "requirement": "原练习 评测",
+    "lesson": "lessons/05-original-labs.html#h9b49b0415cfc",
+    "example": "examples/upstream/02-eval/starter.py",
+    "assessment": "lessons/05-original-labs.html#h9b49b0415cfc"
+  },
+  {
+    "requirement": "原练习 观测",
+    "lesson": "lessons/05-original-labs.html#h120db7916de2",
+    "example": "examples/upstream/03-observability/starter.py",
+    "assessment": "lessons/05-original-labs.html#h120db7916de2"
+  },
+  {
+    "requirement": "原练习 SDK 进阶（选修）",
+    "lesson": "lessons/05-original-labs.html#hb018bfc1134f",
+    "example": "examples/upstream/04-sdk-advanced/starter.py",
+    "assessment": "lessons/05-original-labs.html#hb018bfc1134f"
+  },
+  {
+    "requirement": "原练习 本地 API",
+    "lesson": "lessons/05-original-labs.html#h1e2052daaa15",
+    "example": "examples/upstream/05-deploy/starter.py",
+    "assessment": "lessons/05-original-labs.html#h1e2052daaa15"
+  },
+  {
+    "requirement": "原练习 安全执行",
+    "lesson": "lessons/05-original-labs.html#h2e7fff402edc",
+    "example": "examples/upstream/06-safe-execution/starter.py",
+    "assessment": "lessons/05-original-labs.html#h2e7fff402edc"
+  }
+]

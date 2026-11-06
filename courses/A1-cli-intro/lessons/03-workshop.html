@@ -1,0 +1,163 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>一次可检查、可撤回的小改动</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">A1 · 选一个 CLI agent，安全完成第一个任务</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="一次可检查可撤回的小改动"></span><h1 data-heading-alias="一次可检查可撤回的小改动" id="h4fb9ef53b8c0">一次可检查、可撤回的小改动</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#he0fc50339ff0">单元一：建立独立演示目录</a></li><li><a href="#h36a3d158afa9">单元二：给当前 CLI 的完整任务</a></li><li><a href="#h64021f382cbf">单元三：验证和撤回</a></li><li><a href="#hf5ab579ae8b5">单元四：规则加载与两个 Harness 的对照</a></li><li><a href="#h1d7ae9c4ab4d">单元五：四类报错的答案</a></li><li><a href="#h19d181e1b82c">CLI-4 完整故障实验：先分开两种认证失败</a></li></ul></aside>
+<span id="单元一建立独立演示目录"></span><h2 data-heading-alias="单元一建立独立演示目录" id="he0fc50339ff0">单元一：建立独立演示目录</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>已在 ai-learn 根目录时不要重复 cd。下面只在临时目录建演示仓库，避免把学习操作应用到实际项目。<code>cp -R</code> 复制资料；<code>git init</code> 初始化该副本；commit 保存起点；命令中的姓名邮箱只用于本次虚构演示提交，不改全局配置。</p>
+<pre><code class="language-bash"># 创建本例需要的目录。
+mkdir -p /tmp/ai-learn-a1
+# 将指定文件复制到本例目录，供后续操作。
+cp -R courses/A1-cli-intro/examples/demo /tmp/ai-learn-a1/demo
+# 切换到 /tmp/ai-learn-a1/demo，让后面的相对路径从这里开始计算；已在该目录时可跳过。
+cd /tmp/ai-learn-a1/demo
+# 在本例独立演示目录初始化版本记录。
+git init
+# 把明确列出的演示文件加入暂存区。
+git add README.md check.py
+# 执行本行指定的 Git 操作，范围以当前演示目录和参数为准。
+git -c user.name='Course Demo' -c user.email='demo@example.invalid' commit -m 'docs: 保存演示基线'
+# 运行 check.py，按本行参数完成当前案例并核对输出。
+python3 check.py
+</code></pre>
+<p>若该目录已用过，不要再次复制嵌套；换一个新的临时目录名。起点检查应通过，因为本题不是修坏程序，而是在保留原约束下补文档。</p>
+<span id="单元二给当前-cli-的完整任务"></span><h2 data-heading-alias="单元二给当前-cli-的完整任务" id="h36a3d158afa9">单元二：给当前 CLI 的完整任务</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>请在当前 Codex 或你已登录的 CLI 中显式选中演示目录，交下面任务卡。不要让它猜当前目录：</p>
+<pre><code>任务：先读取 README.md 和 check.py，解释项目用途与检查方式，然后提出一个仅修改 README.md 的计划。
+范围：当前演示目录。
+禁止：未经确认修改文件；联网；安装依赖；读取目录外文件；提交或推送。
+成功条件：说明引用实际文件；计划只增加学习记录说明，保留原检查命令；得到用户确认后才修改；运行 python check.py 并展示 diff。
+
+</code></pre>
+<p>第一轮只读：它应说明用途是虚构学习演示，验证命令是 python check.py，允许改 README。第二轮明确让它增加提交学习记录说明。第三轮核对 diff，检查有没有误删原命令或改 check.py。下面是一份完整允许的最终文件，不是唯一措辞：</p>
+<pre><code># 学习演示项目
+
+本项目使用虚构资料练习只读摘要与可撤销文档修改。
+
+## 目标
+
+运行检查，说明项目用途，再增加一段如何提交学习记录的说明。
+
+## 检查
+
+python check.py
+
+## 提交学习记录
+
+在自己的学习记录中写明任务、实际运行命令、输出、一次错误及原因。
+把记录交给教师核对；不要把“检查通过”直接写成“已掌握”。
+
+</code></pre>
+<span id="单元三验证和撤回"></span><h2 data-heading-alias="单元三验证和撤回" id="h64021f382cbf">单元三：验证和撤回</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<pre><code class="language-bash"># 查看或保存实际改动，核对是否仅涉及授权范围。
+git diff -- README.md
+# 运行 check.py，按本行参数完成当前案例并核对输出。
+python3 check.py
+# 查看演示目录中已改动和未跟踪的文件。
+git status --short
+# 按本行范围恢复演示文件；执行前先核对自己的未保存修改。
+git restore -- README.md
+# 查看或保存实际改动，核对是否仅涉及授权范围。
+git diff --exit-code
+</code></pre>
+<p>期待只有 README 改动，检查仍通过，撤回后 diff 为空。<code>git restore</code> 在这里安全是因为演示目录只有你这一次未提交的改动；真实项目有其他改动时先逐块审查，不照抄整文件撤回。回到主项目用 <code>cd /Users/owen/Documents/ai-learn</code>。</p>
+<p>你实际交付的是修改前后文件、diff、检查输出和撤回结果。参考文件存在不算你完成了 CLI 实践，也不能用脚本自动生成结果冒充模型执行。</p>
+<span id="单元四规则加载与两个-harness-的对照"></span><h2 data-heading-alias="单元四规则加载与两个-harness-的对照" id="hf5ab579ae8b5">单元四：规则加载与两个 Harness 的对照</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>规则卡写四行：用途=虚构文档练习；范围=只改 README；禁止=修改检查器；验证=python3 check.py；交付=diff与实际输出。放在所用宿主支持的项目规则位置，并让它用具体路径说明本次加载了哪份规则。</p>
+<p>对照表的完整格式为：宿主及版本、provider、model、规则位置、工具权限、同一输入、是否越界、检查结果、用时和未验证项。第二宿主拿干净副本；没有账号时填未执行，不把两个不同模型的差异都归因于工具。</p>
+<p>Provider 决定服务入口，Model 决定模型能力，Harness 决定工具和工作循环。网页聊天、CLI、后台任务与多 Agent 编排是不同交互方式；选择依据是任务是否需要文件、长期状态、外部工具或用户即时反馈，不是名称里有“Agent”就更高级。</p>
+<span id="单元五四类报错的答案"></span><h2 data-heading-alias="单元五四类报错的答案" id="h1d7ae9c4ab4d">单元五：四类报错的答案</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>首先检查</th>
+<th>不应先做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>认证失败</td>
+<td>登录状态、凭证所属服务、账户权限</td>
+<td>修改业务提示词</td>
+</tr>
+<tr>
+<td>模型不可用</td>
+<td>确切模型标识、当前账户支持情况</td>
+<td>反复重装 Python</td>
+</tr>
+<tr>
+<td>工具被拒绝</td>
+<td>宿主权限、路径范围、操作授权</td>
+<td>让模型忽略规则</td>
+</tr>
+<tr>
+<td>连接失败</td>
+<td>服务是否运行、地址、端口、代理</td>
+<td>把错误当空模型回答</td>
+</tr>
+</tbody>
+</table>
+<p>本地模拟这些分类足以先理解定位；实际账号诊断不用改坏工作凭证。本课最终通过要求是完成有限改动、验证和撤回，并能解释这四类错误。两天后不看任务卡重新写一份；一周后换另一份虚构文档。</p>
+<span id="cli-4-完整故障实验先分开两种认证失败"></span><h2 data-heading-alias="cli-4-完整故障实验先分开两种认证失败" id="h19d181e1b82c">CLI-4 完整故障实验：先分开两种认证失败</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>“没有登录会话”和“provider 拒绝 API key”不能合成一种错误：前者通常先恢复所选登录方式，后者核对服务入口和凭证归属。模型不存在、权限拒绝也不能用反复登录来修。本例增加连接失败作第五个对照。</p>
+<pre><code class="language-bash"># 运行 courses/A1-cli-intro/examples/auth_failures.py，按本行参数完成当前案例并核对输出。
+python3 courses/A1-cli-intro/examples/auth_failures.py
+</code></pre>
+<pre><code class="language-python">&quot;&quot;&quot;不连接服务、不读取环境变量的认证与权限故障注入。&quot;&quot;&quot;
+
+# 模拟登录、密钥、模型、权限、连接五种失败；不读取正式凭证或联系服务。
+import json
+
+
+class LabError(Exception):
+    def __init__(self, category, message):
+        self.category = category
+        super().__init__(message)
+
+
+# 检查在哪一层失败就抛对应错误，不把服务认证与本地工具权限混为一谈。
+def request(*, logged_in=True, fake_key='DEMO_ACCEPTED', model='demo-model', action='read', available=True):
+    if not available:
+        raise LabError('connection', '模拟连接失败：演示服务未启动')
+    if not logged_in:
+        raise LabError('login', '模拟未登录：没有登录会话')
+    if fake_key != 'DEMO_ACCEPTED':
+        raise LabError('api_key', '模拟 401：provider 拒绝凭证；不回显凭证')
+    if model != 'demo-model':
+        raise LabError('model', '模拟 404：模型不在允许列表')
+    if action != 'read':
+        raise LabError('permission', '模拟工具阻挡：当前仅允许 read')
+    return '虚构文档读取成功'
+
+
+CASES = [
+    ('login', {'logged_in': False}, '恢复登录会话；不修改任务提示词'),
+    ('api_key', {'fake_key': 'not-a-real-key'}, '核对 provider 与凭证来源；不粘贴真实 key'),
+    ('model', {'model': 'nonexistent-course-model'}, '选择账户实际可用的模型标识'),
+    ('permission', {'action': 'write'}, '确认任务授权与工具范围；不绕过限制'),
+    ('connection', {'available': False}, '确认服务、地址、端口和代理'),
+]
+
+
+# 逐个注入故障，再用正常配置作为对照，记录预期与实际分类。
+def run():
+    records = []
+    for expected, config, remedy in CASES:
+        try:
+            request(**config)
+        except LabError as error:
+            records.append({'mode': 'mock', 'expected': expected, 'observed': error.category,
+                            'message': str(error), 'remedy': remedy,
+                            'passed': error.category == expected})
+    return {'mode': 'mock', 'network_calls': 0, 'credentials_read': False,
+            'records': records, 'healthy_control': request()}
+
+
+if __name__ == '__main__':
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(run(), ensure_ascii=False, indent=2))
+
+</code></pre>
+<p>参考顺序为 login、api_key、model、permission、connection，五项 passed 都为 true，healthy_control 为“虚构文档读取成功”。每个 case 真的走对应检查分支并抛出异常；这仍是模拟服务，不是五家产品的真实报错。它不读取正式凭证，也不改变登录状态。</p>
+<p>原题真实宿主验证的完整做法：开一个可丢弃终端和无秘密的 demo，先记录 CLI 版本、认证方式、模型与权限；用未登录的独立配置观察登录错误；采用 API key 认证时只在该进程设置 <code>not-a-real-key</code>（不要改 .env 或 shell 启动文件）；恢复正确的认证方式后选择一个不存在的模型名，记录模型错误；最后在只读权限下请求改 demo 文件，记录阻挡。每次只改一个变量，结束关闭演示终端，确认未保存真实 key。不同 CLI 的独立配置与认证命令不能混用；你已在使用的 Codex 可直接通过新 demo 会话检查权限，Claude 的独立环境步骤见第五课安装章。付费认证步骤由你自己的账户完成，模拟记录不计入真实认证已验证。</p>
+<p>验收日志格式：场景、认证方式（不含值）、原始错误去除秘密后的文本、定位层、恢复步骤、恢复后结果、mock/真实标记。上面程序的五条记录就是 mock 路径的完整参考答案。独立练习打乱五项配置再分类；如果 api_key 与 permission 混淆，回到“请求有没有到达模型服务”这一层判断。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← A1 必修入口的本地说明</a><a href="99-exercises.html">A1 课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

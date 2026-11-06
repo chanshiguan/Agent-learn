@@ -1,0 +1,144 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="核心练习把-agent-放进-fastapi-与-docker"></span><h1 data-heading-alias="核心练习把-agent-放进-fastapi-与-docker" id="hb0b8a355c56a">核心练习：把 Agent 放进 FastAPI 与 Docker</h1>
+<p>你会把一个模型调用包成两个 HTTP endpoint：<code>/health</code> 说明服务还活着，<code>/chat</code> 接收问题并返回答案。</p>
+<p>对应 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 — Agent 上线工程：可测、可看、可停、可恢复</a> 核心练习 4。先完成 Eval、Observability 与 Safe Execution，再把服务交给别人使用。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<ul>
+<li>用 <strong>Pydantic</strong> 挡住空白、过长文字与过大的 <code>max_tokens</code>。</li>
+<li>分辨 <strong>liveness</strong> 与真正的上游 readiness；健康检查不调用模型。</li>
+<li>用非 root container、loopback port 与 read-only filesystem 缩小风险。</li>
+</ul>
+<span id="先跑不开-server-的测试"></span><h2 data-heading-alias="先跑不开-server-的测试" id="h36e1bd78aa72">先跑不开 Server 的测试</h2>
+<p>在这个文件夹打开 PowerShell，直接复制：</p>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe test.py
+.\.venv\Scripts\python.exe test_anthropic.py
+</code></pre>
+<p>看到两份 <code>🎉</code>，代表 200、422、429、502、503 与输入界线都有离线测试。TestClient 不会开真实网络 port。</p>
+<details markdown="1">
+<summary>Path A：在本机启动 Ollama API</summary>
+<pre><code class="language-powershell">ollama pull qwen3.5:4b
+ollama serve
+</code></pre>
+<p>另开 PowerShell：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m uvicorn starter:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>再开第三个 PowerShell：</p>
+<pre><code class="language-powershell">Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/chat `
+  -ContentType &quot;application/json&quot; `
+  -Body '{&quot;message&quot;:&quot;请用一句话解释 Agent。&quot;,&quot;max_tokens&quot;:100}'
+</code></pre>
+<p>Ollama 不收模型 API 费，但硬件、电力和时间仍有成本。</p>
+</details>
+<details markdown="1">
+<summary>Path B：在本机启动 Anthropic API</summary>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY = &quot;贴上你的金钥&quot;
+$env:MODEL = &quot;claude-haiku-4-5-20251001&quot;
+.\.venv\Scripts\python.exe -m uvicorn starter_anthropic:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>Haiku 4.5 的单价是 input <code>$1 / 1M</code> tokens、output <code>$5 / 1M</code> tokens：</p>
+<pre><code class="language-text">估算费用 = (input_tokens × $1 / 1M) + (output_tokens × $5 / 1M)
+</code></pre>
+<p>先在供应商 Console 设 <code>$1</code> spend limit。API 回复里的 input/output tokens 可用来估算，不要把短 Prompt 的固定金额写成永久价格。</p>
+</details>
+<span id="五个重要词"></span><h2 data-heading-alias="五个重要词" id="h1fd2dcb34d0e">五个重要词</h2>
+<ul>
+<li><strong>Endpoint</strong>：服务对外提供的一个入口，例如 <code>POST /chat</code>。</li>
+<li><strong>Schema validation</strong>：先检查输入形状与范围，不合规就回 422。</li>
+<li><strong>Liveness</strong>：程序还活着。这份 <code>/health</code> 只做便宜的程序检查。</li>
+<li><strong>Request ID</strong>：一次请求的追踪号码；log 只记 ID，不记完整 Prompt。</li>
+<li><strong>Non-root container</strong>：container 内的程序不是系统管理员，能减少部分伤害。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>状况</th>
+<th style="text-align:right">HTTP code</th>
+<th>调用端怎么做</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>成功回答</td>
+<td style="text-align:right">200</td>
+<td>使用答案</td>
+</tr>
+<tr>
+<td>输入缺少或超出范围</td>
+<td style="text-align:right">422</td>
+<td>修正 request，不要重试原数据</td>
+</tr>
+<tr>
+<td>供应商限流</td>
+<td style="text-align:right">429</td>
+<td>等候并依 <code>Retry-After</code>／backoff 重试</td>
+</tr>
+<tr>
+<td>模型回空答案</td>
+<td style="text-align:right">502</td>
+<td>记录并有限次重试或转人工</td>
+</tr>
+<tr>
+<td>上游连接失败</td>
+<td style="text-align:right">503</td>
+<td>稍后有限次重试</td>
+</tr>
+<tr>
+<td>未预期的程序错误</td>
+<td style="text-align:right">500</td>
+<td>告警并修程序</td>
+</tr>
+</tbody>
+</table>
+<span id="只改一件事"></span><h2 data-heading-alias="只改一件事" id="h3e24b238085c">只改一件事</h2>
+<p>把 <code>max_tokens</code> 改成 <code>1001</code> 送到 <code>/chat</code>。确认 FastAPI 回 422，而且模型完全没有被调用。</p>
+<span id="成功检查"></span><h2 data-heading-alias="成功检查" id="h10fc3e9baba8">成功检查</h2>
+<ul>
+<li>[ ] <code>/health</code> 不会调用 Ollama 或 Anthropic。</li>
+<li>[ ] 空白 message、4,001 字符和 <code>max_tokens=1001</code> 都被拒绝。</li>
+<li>[ ] Log 有 request ID，但没有完整用户 Prompt 或 API key。</li>
+<li>[ ] 你知道 Docker 设置只能降低风险，并不是完整的 sandbox。</li>
+</ul>
+<details markdown="1">
+<summary>用较安全的默认值启动 Docker</summary>
+<pre><code class="language-powershell">docker build -t stage7-agent-api .
+</code></pre>
+<p>Ollama Path A：</p>
+<pre><code class="language-powershell">docker run --rm --read-only --tmpfs /tmp `
+  -p 127.0.0.1:8000:8000 `
+  -e OLLAMA_API_BASE=http://host.docker.internal:11434/v1 `
+  stage7-agent-api
+</code></pre>
+<p>Anthropic Path B：</p>
+<pre><code class="language-powershell">docker run --rm --read-only --tmpfs /tmp `
+  -p 127.0.0.1:8000:8000 `
+  -e ANTHROPIC_API_KEY=$env:ANTHROPIC_API_KEY `
+  stage7-agent-api `
+  uvicorn starter_anthropic:app --host 0.0.0.0 --port 8000
+</code></pre>
+<p>这些设置提供非 root 用户、loopback port 和 read-only filesystem。仍不能把它们当成 sandbox，也不会替你加入 TLS、authentication、authorization、rate limit、egress policy 或 secret manager。</p>
+</details>
+<details markdown="1">
+<summary>Production 还要补什么、常见问题</summary>
+<ul>
+<li>对外服务先加 authentication、authorization、TLS 与 rate limit。</li>
+<li>liveness 保持便宜；若需要 readiness，另做有 timeout 和快取的依赖检查。</li>
+<li>API key 放 secret manager 或受保护的环境变数，不写进 image、程序或 README。</li>
+<li>设定 request body、并发、timeout、重试与每日 token 上限。</li>
+<li>需要 streaming 时，用 SSE／WebSocket 并处理中断与取消。</li>
+<li>正式部署前扫描 image 与 Python dependencies，再锁定可重现版本。</li>
+</ul>
+</details>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sd77ca9787156">FastAPI 官方教学</a>：schema、errors、dependencies 与部署的第一手文件。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s3cbb6d8ffee8">Dockerfile best practices</a>：创建较小、可更新且非 root 的 image。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s1e53417c513d">Docker port publishing</a>：理解为什么 <code>127.0.0.1:8000:8000</code> 比默认公开所有界面更保守。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s95e2f11879a2"><code>awesome-harness-engineering</code></a>：需要更多 harness pattern 时使用。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a>：章节式 Agent production 背景。</li>
+</ul>
+<p>完整清单见 <a href="stages--07-multi-agent-production.zh-Hans.md.html#-精选-projects范本--sdk--工具-collection">Stage 7 精选 Projects</a>。</p>
+<p><small>模型、价格、套件、部署文件与连结查核：2026-08-28 UTC。</small></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

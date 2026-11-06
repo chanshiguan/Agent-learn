@@ -1,0 +1,118 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用最小改动证明问题已解决</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">开发分支 · 开发者延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="用最小改动证明问题已解决"></span><h1 data-heading-alias="用最小改动证明问题已解决" id="hf592e2b70523">用最小改动证明问题已解决</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hdaaa5d5cbeab">单元一：看实际代码，再决定怎样改</a></li><li><a href="#h545d598aedd6">单元二：完整参考与人工判断</a></li><li><a href="#ha4a53c29f88f">单元三：权限和工具生态</a></li><li><a href="#hec30e8a244d9">单元四：从单文件走向团队</a></li><li><a href="#hc6e63aff78cc">课末提交与验收</a></li></ul></aside>
+<span id="单元一看实际代码再决定怎样改"></span><h2 data-heading-alias="单元一看实际代码再决定怎样改" id="hdaaa5d5cbeab">单元一：看实际代码，再决定怎样改</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>开发任务先找入口、读相关实现与项目规则，再提出可验证修改。Diff 表示本次改变了什么，测试表示指定条件是否成立；两者必须一起看。通过测试不能自动授权 push、merge 或 deploy。</p>
+<p>本课原任务是 README 小改；完整参考包含只读分析、计划、前后文件、diff、验证和撤回。附加空列表 bug 用于迁移，不替代原任务。请先运行临时目录演示：</p>
+<pre><code class="language-bash"># 运行 courses/branch-developer/examples/develop_demo.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-developer/examples/develop_demo.py
+</code></pre>
+<p>输出应为修改前退出非零、修改后 PASS、只有 README 内容差异、撤回验证 true。脚本按固定步骤演示修改，没有调用 CLI Agent。独立作业仍需要你实际使用 CLI 完成。</p>
+<pre><code class="language-python">&quot;&quot;&quot;临时目录内复现修改、验证和定点撤回；不会更改项目文件。&quot;&quot;&quot;
+
+# 在临时副本里演示修改、检查和撤回；固定脚本的结果不能冒充 CLI Agent 实测。
+import difflib
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+
+def run():
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    data=json.loads(Path(__file__).with_name('reference-work.json').read_text())
+    with tempfile.TemporaryDirectory() as folder:
+        root=Path(folder)
+        readme=root/'README.md'
+        # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+        readme.write_text(data['before'])
+        checker=root/'check.py'
+        # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+        checker.write_text(&quot;from pathlib import Path\ntext=Path('README.md').read_text()\nassert '## 运行' in text and 'python check.py' in text, '缺运行说明'\nprint('PASS')\n&quot;)
+        # cwd：限定命令的工作目录，防止相对路径落到用户的其他项目或错误位置。
+        # capture_output：保存子进程的真实输出，后续报告才能引用实际结果而不是声称“已运行”。
+        # text：按文本而不是字节接收子进程输出，便于检查断言和生成可读报告。
+        before=subprocess.run([sys.executable,'check.py'],cwd=root,capture_output=True,text=True)
+        # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+        readme.write_text(data['after'])
+        # cwd：限定命令的工作目录，防止相对路径落到用户的其他项目或错误位置。
+        # capture_output：保存子进程的真实输出，后续报告才能引用实际结果而不是声称“已运行”。
+        # text：按文本而不是字节接收子进程输出，便于检查断言和生成可读报告。
+        after=subprocess.run([sys.executable,'check.py'],cwd=root,capture_output=True,text=True)
+        # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+        diff=''.join(difflib.unified_diff(data['before'].splitlines(True),readme.read_text().splitlines(True),fromfile='README.md',tofile='README.md'))
+        # 将当前产物保存到明确文件，供另一次运行或人工复核；保存成功本身不代表内容已通过验收。
+        readme.write_text(data['before'])
+        # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+        assert before.returncode!=0 and after.returncode==0 and readme.read_text()==data['before']
+        return {'before_exit':before.returncode,'after_output':after.stdout.strip(),'diff':diff,'rollback_verified':True}
+
+
+if __name__=='__main__':
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(run(),ensure_ascii=False,indent=2))
+
+</code></pre>
+<span id="单元二完整参考与人工判断"></span><h2 data-heading-alias="单元二完整参考与人工判断" id="h545d598aedd6">单元二：完整参考与人工判断</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-json">{
+  &quot;analysis&quot;: {
+    &quot;scope&quot;: &quot;只修改 README.md 的运行说明&quot;,
+    &quot;baseline&quot;: &quot;先保留 python check.py，未知测试状态不能写通过&quot;,
+    &quot;excluded&quot;: [
+      &quot;全仓格式化&quot;,
+      &quot;改 check.py&quot;,
+      &quot;安装无关包&quot;
+    ]
+  },
+  &quot;plan&quot;: [
+    &quot;读 README.md 与 check.py&quot;,
+    &quot;在隔离演示目录补运行说明&quot;,
+    &quot;显示单文件 diff&quot;,
+    &quot;执行 check.py 并保留真实输出&quot;,
+    &quot;只撤回 README.md 本次改动&quot;
+  ],
+  &quot;before&quot;: &quot;# 演示项目\n用于练习文档修改。\n&quot;,
+  &quot;after&quot;: &quot;# 演示项目\n用于练习文档修改。\n\n## 运行\n在本目录执行：python check.py\n成功时输出 PASS。\n&quot;,
+  &quot;diff&quot;: &quot;--- README.md\n+++ README.md\n@@ -1,2 +1,6 @@\n # 演示项目\n 用于练习文档修改。\n+\n+## 运行\n+在本目录执行：python check.py\n+成功时输出 PASS。\n&quot;,
+  &quot;verification&quot;: {
+    &quot;status&quot;: &quot;示范预期，实际运行以 develop_demo.py 输出为准&quot;,
+    &quot;command&quot;: &quot;python check.py&quot;,
+    &quot;expected&quot;: &quot;PASS&quot;
+  },
+  &quot;rollback&quot;: &quot;先看 diff 确认只含本人改动，再在演示仓库执行 git restore -- README.md；有他人改动时逐块撤回。&quot;,
+  &quot;transfer&quot;: {
+    &quot;bug&quot;: &quot;取列表首项前未检查空列表&quot;,
+    &quot;before&quot;: &quot;def first(xs): return xs[0]&quot;,
+    &quot;after&quot;: &quot;def first(xs): return xs[0] if xs else None&quot;,
+    &quot;cases&quot;: [
+      {
+        &quot;input&quot;: [],
+        &quot;expected&quot;: null
+      },
+      {
+        &quot;input&quot;: [
+          7
+        ],
+        &quot;expected&quot;: 7
+      }
+    ]
+  }
+}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>2</td><td><code>  &quot;analysis&quot;: {</code></td><td>保存当前对象的 analysis 字段，按本例题目或配置读取。</td></tr><tr><td>3</td><td><code>    &quot;scope&quot;: &quot;只修改 README.md 的运行说明&quot;,</code></td><td>保存当前对象的 scope 字段，按本例题目或配置读取。</td></tr><tr><td>4</td><td><code>    &quot;baseline&quot;: &quot;先保留 python check.py，未知测试状态不能写通过&quot;,</code></td><td>保存当前对象的 baseline 字段，按本例题目或配置读取。</td></tr><tr><td>5</td><td><code>    &quot;excluded&quot;: [</code></td><td>保存当前对象的 excluded 字段，按本例题目或配置读取。</td></tr><tr><td>6</td><td><code>      &quot;全仓格式化&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>7</td><td><code>      &quot;改 check.py&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>8</td><td><code>      &quot;安装无关包&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>9</td><td><code>    ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>10</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>11</td><td><code>  &quot;plan&quot;: [</code></td><td>保存当前对象的 plan 字段，按本例题目或配置读取。</td></tr><tr><td>12</td><td><code>    &quot;读 README.md 与 check.py&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>13</td><td><code>    &quot;在隔离演示目录补运行说明&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>14</td><td><code>    &quot;显示单文件 diff&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>15</td><td><code>    &quot;执行 check.py 并保留真实输出&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>16</td><td><code>    &quot;只撤回 README.md 本次改动&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>17</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>18</td><td><code>  &quot;before&quot;: &quot;# 演示项目\n用于练习文档修改。\n&quot;,</code></td><td>保存当前对象的 before 字段，按本例题目或配置读取。</td></tr><tr><td>19</td><td><code>  &quot;after&quot;: &quot;# 演示项目\n用于练习文档修改。\n\n## 运行\n在本目录执行：python check.py\n成功时输出 PASS。\n&quot;,</code></td><td>保存当前对象的 after 字段，按本例题目或配置读取。</td></tr><tr><td>20</td><td><code>  &quot;diff&quot;: &quot;--- README.md\n+++ README.md\n@@ -1,2 +1,6 @@\n # 演示项目\n 用于练习文档修改。\n+\n+## 运行\n+在本目录执行：python check.py\n+成功时输出 PASS。\n&quot;,</code></td><td>保存当前对象的 diff 字段，按本例题目或配置读取。</td></tr><tr><td>21</td><td><code>  &quot;verification&quot;: {</code></td><td>保存当前对象的 verification 字段，按本例题目或配置读取。</td></tr><tr><td>22</td><td><code>    &quot;status&quot;: &quot;示范预期，实际运行以 develop_demo.py 输出为准&quot;,</code></td><td>区分通过、失败、待复核或支持性状态。</td></tr><tr><td>23</td><td><code>    &quot;command&quot;: &quot;python check.py&quot;,</code></td><td>指定启动命令。</td></tr><tr><td>24</td><td><code>    &quot;expected&quot;: &quot;PASS&quot;</code></td><td>给出验收时应核对的结果。</td></tr><tr><td>25</td><td><code>  },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>26</td><td><code>  &quot;rollback&quot;: &quot;先看 diff 确认只含本人改动，再在演示仓库执行 git restore -- README.md；有他人改动时逐块撤回。&quot;,</code></td><td>保存当前对象的 rollback 字段，按本例题目或配置读取。</td></tr><tr><td>27</td><td><code>  &quot;transfer&quot;: {</code></td><td>保存当前对象的 transfer 字段，按本例题目或配置读取。</td></tr><tr><td>28</td><td><code>    &quot;bug&quot;: &quot;取列表首项前未检查空列表&quot;,</code></td><td>保存当前对象的 bug 字段，按本例题目或配置读取。</td></tr><tr><td>29</td><td><code>    &quot;before&quot;: &quot;def first(xs): return xs[0]&quot;,</code></td><td>保存当前对象的 before 字段，按本例题目或配置读取。</td></tr><tr><td>30</td><td><code>    &quot;after&quot;: &quot;def first(xs): return xs[0] if xs else None&quot;,</code></td><td>保存当前对象的 after 字段，按本例题目或配置读取。</td></tr><tr><td>31</td><td><code>    &quot;cases&quot;: [</code></td><td>列出独立验收题。</td></tr><tr><td>32</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>33</td><td><code>        &quot;input&quot;: [],</code></td><td>保存当前对象的 input 字段，按本例题目或配置读取。</td></tr><tr><td>34</td><td><code>        &quot;expected&quot;: null</code></td><td>给出验收时应核对的结果。</td></tr><tr><td>35</td><td><code>      },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>36</td><td><code>      {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>37</td><td><code>        &quot;input&quot;: [</code></td><td>保存当前对象的 input 字段，按本例题目或配置读取。</td></tr><tr><td>38</td><td><code>          7</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>39</td><td><code>        ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>40</td><td><code>        &quot;expected&quot;: 7</code></td><td>给出验收时应核对的结果。</td></tr><tr><td>41</td><td><code>      }</code></td><td>结束当前对象或数组。</td></tr><tr><td>42</td><td><code>    ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>43</td><td><code>  }</code></td><td>结束当前对象或数组。</td></tr><tr><td>44</td><td><code>}</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details><p>“顺手格式化全仓”不属于改运行说明，应该拒绝扩大范围。真实项目有未提交改动时，不能直接整文件 restore；先找属于本任务的差异，定点撤回。并行工作可用独立工作树减少文件冲突，但账号、网络和外部服务仍共享，需要另外约束。</p>
+<span id="单元三权限和工具生态"></span><h2 data-heading-alias="单元三权限和工具生态" id="ha4a53c29f88f">单元三：权限和工具生态</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>IDE/Surface 是交互入口，Harness 管工具循环，Provider/Router 管模型请求去向，Model/Runtime 执行推理。换 provider 不会自动改变仓库权限。Sandbox 限制文件和网络等访问，Approval 决定遇到某类动作是否需要人确认；项目规则则提供文本约束，三者不能混同。</p>
+<p>Claude 的 allow/ask/deny、Codex 权限配置、Copilot 云端环境、Pi 的容器化方式各有不同实现。共同检查是：可读目录、可写目录、可执行命令、网络、凭证和结果交付。云端编码 Agent 还要考虑代码上传与依赖获取；本地客户端也可能连接云模型。</p>
+<p>OpenRouter 选择供应商与模型时，要核对实际路由、数据处理与工具调用兼容性。Ollama 的本地模型可以用于低成本实验，但工具结构输出是否稳定要实测。不要一次换模型、框架和权限，再把收益归因于其中一个。</p>
+<span id="单元四从单文件走向团队"></span><h2 data-heading-alias="单元四从单文件走向团队" id="hec30e8a244d9">单元四：从单文件走向团队</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>代码审查列具体触发条件、位置、影响和修复方向，不把个人风格喜好包装成 bug。批量改动先挑一个文件试点，建立检查，再分批推进。长期任务写进度、版本和下一项验收，避免新会话根据过时记忆继续。</p>
+<p>CLI/IDE 工具、代码搜索与仓库打包、远程执行、评测平台服务不同需求。第三方 Skills 或 prompt 库先读实际步骤与权限，再在 demo 正反例验证；名称流行不代表适合当前任务。</p>
+<span id="课末提交与验收"></span><h2 data-heading-alias="课末提交与验收" id="hc6e63aff78cc">课末提交与验收</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-developer/examples/check_work.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-developer/examples/check_work.py /tmp/developer-work.json
+</code></pre>
+<p>必过：范围只有目标文件；检查器没被改弱；实际 diff 与报告一致；测试状态真实；撤回不影响他人改动。空列表迁移题参考为 <code>return xs[0] if xs else None</code>，必须用空列表与非空列表验证，并说明接口允许返回 None。两天后只凭报告复现，一周后换一个有复现的 bug。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 开发者分支必读整合</a><a href="99-exercises.html">开发者分支课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

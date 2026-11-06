@@ -1,0 +1,268 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>学习顺序与验收 · AI Learn</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="assets/later.css"></head><body><main><nav class="course-nav"><a href="index.html">全部课程与路线</a></nav><article class="lesson-body"><span id="top"></span><span id="ai-learn-学习顺序与验收"></span><h1 data-heading-alias="ai-learn-学习顺序与验收" id="ha59eb26a2a02">AI Learn 学习顺序与验收</h1>
+<p>从第四课开始，以 <strong>B 线：自己构建 Agent</strong> 为主线。你正在学 Python、工具调用和本地模型，这条线与当前目标一致。A 线和身份分支按需要补，不用同时展开所有路线。</p>
+<nav class="course-nav" aria-label="学习路线导航"><a href="#route-b">B 线必修</a><a href="#electives">选修范围</a><a href="#route-a">A 线路线</a><a href="#branches">身份分支</a><a href="#completion">怎样算学会</a><a href="#hours">时间估算</a></nav>
+<section class="route">
+<p><strong>你的主线</strong><br>第四课 → 第五课 → 第六课 → 第七课 → 第 7.5 课 → 第八课 → 结业 B</p>
+<p><strong>下一步</strong>：打开<a href="04-agent-frameworks/lessons/01-guide.html">第四课主讲义</a>，先弄清流程怎么走、状态怎么变、什么时候必须停。</p>
+<p><strong>预计投入</strong>：阅读讲解并理解案例约 33–47 小时；完成核心练习与结业项目共约 108–160 小时，后者已经包含阅读时间。</p>
+</section>
+<p>必修是所选路线的核心要求；选修按需求深入；身份分支是应用场景，不是额外五个必修关卡。原必读内容所需的中文讲解、代码、答案与标准都在项目内，外部来源用于核对，不要求另去网站补课。</p>
+<p>每课目录、文章页首和二级小节都标有学习要求：<strong>主线必读</strong>对应 B 线；<strong>A 线必读</strong>只在选择 A 线时必修；<strong>扩展选读</strong>和<strong>身份分支选读</strong>可按需学习；<strong>参考查阅</strong>用于查找代码或核对来源。标为“必读概念 · 实作按需”的小节，需要理解概念，但不要求接入所有产品或实现全部方法。课后练习中的核心验收仍须完成。</p>
+<p>第三课的单元 1–8 是基础主线，单元 9–15 是扩展。基础验收通过后可以进入第四课，之后需要流式、并发或其他扩展能力时再返回对应单元。</p>
+<p><span id="route-b"></span></p>
+<span id="b-线从第四课开始的必修顺序"></span><h2 data-heading-alias="b-线从第四课开始的必修顺序" id="h9852d54d8e4f">B 线：从第四课开始的必修顺序</h2>
+<p>先确认第三课能解释并运行“模型提出工具调用 → 程序检查并执行 → 结果返回模型”的循环，且有参数检查和最大轮数。第三课是本路线的先修。</p>
+<p>每课链接进入本课目录；“课后验收”进入题目与参考答案。下列标准用于判断你的学习成果，项目自带测试通过不等于你已掌握。</p>
+<span id="1-第四课--workflow-graph-与框架b-线必修"></span><h3 data-heading-alias="1-第四课--workflow-graph-与框架b-线必修" id="hd2e2d83060d3">1. 第四课 · Workflow Graph 与框架【B 线必修】</h3>
+<p><a href="04-agent-frameworks/index.html">打开课程</a> · <a href="04-agent-frameworks/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：五项原练习；状态、条件分支、角色交接、暂停恢复和类型约束；动态工作者与两种交接对照。先用一个框架做主实现，其他框架用于比较，不要求全部精通。</p>
+<p><strong>进入第五课前</strong>：</p>
+<ul>
+<li>能画出流程，解释下一步由程序还是模型决定，以及状态如何更新。</li>
+<li>用同一任务比较两个框架，保存五项练习的输入、输出与失败分析。</li>
+<li>完成“生成摘要 → 检查来源 → 人工批准或拒绝”；拒绝不继续，循环有上限，缺来源不能通过。</li>
+<li>能演示跨进程恢复，并说明保存状态为什么不能自动防止外部动作重复。</li>
+<li>自己换一个输入或要求，制造并定位一次失败。没有运行的隔离或云端路径单列待验收。</li>
+</ul>
+<span id="2-第五课--工具规则与-claude-code-生态ab-共用"></span><h3 data-heading-alias="2-第五课--工具规则与-claude-code-生态ab-共用" id="h9df4debd2611">2. 第五课 · 工具、规则与 Claude Code 生态【A/B 共用】</h3>
+<p><a href="05-claude-code-ecosystem/index.html">打开课程</a> · <a href="05-claude-code-ecosystem/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：B 线理解 5.1–5.7，并完成规则、Skill、Hook、MCP、Subagent 五项原练习。5.1–5.4 是 A 线核心；5.8 Claude Agent SDK 是选修。首次使用宿主时先读本课首次会话章，不必为了 B 线先完成全部 A1–A3。</p>
+<p><strong>进入第六课前</strong>：</p>
+<ul>
+<li>能分别选择规则、Skill、Hook、MCP、Subagent 和 Plugin，并解释它们的作用范围。</li>
+<li>Skill 能发现缺资料，Hook 日志不保存测试秘密；MCP 合法读取成功，越界请求失败。</li>
+<li>只读 Subagent 能指出无来源断言，并提供对应证据。</li>
+<li>能说明规则与权限控制的区别，实际检查所用配置的加载与撤销。程序测试和宿主实际触发分开记录。</li>
+</ul>
+<span id="3-第六课--rag-与-memoryb-线必修"></span><h3 data-heading-alias="3-第六课--rag-与-memoryb-线必修" id="h312f29b71a13">3. 第六课 · RAG 与 Memory【B 线必修】</h3>
+<p><a href="06-memory-rag/index.html">打开课程</a> · <a href="06-memory-rag/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：五项原练习、完整检索回答、记忆生命周期；直接支线里的检索与记忆练习；本地 20 题 A/B/C 对照实验。先完成一套本地实现，不要求安装每一家数据库或记忆产品。</p>
+<p><strong>进入第七课前</strong>：</p>
+<ul>
+<li>用自己的三份获授权资料完成检索与回答，逐条核对引用是否支持答案。</li>
+<li>覆盖同义表达、例外、无答案、权限外资料；区分真实 embedding 与字符向量教学基线。</li>
+<li>保存检索对照结果，能解释改进有效、无收益或退步，不能只展示成功的一题。</li>
+<li>记忆能跨进程读取、更新、删除；另一用户看不到，旧版本更新会被拒绝。</li>
+<li>能把失败定位到解析、切分、检索、排序、生成或记忆层，而不是统称“模型不行”。</li>
+</ul>
+<span id="4-第七课--可测可看可停可恢复b-线必修"></span><h3 data-heading-alias="4-第七课--可测可看可停可恢复b-线必修" id="hebdb1f6ccaee">4. 第七课 · 可测、可看、可停、可恢复【B 线必修】</h3>
+<p><a href="07-multi-agent-production/index.html">打开课程</a> · <a href="07-multi-agent-production/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：评测、观测、批准与恢复、本地部署四项核心，以及有收据的研究助理。多 Agent 辩论、Streaming 与 Prompt caching 是选修。</p>
+<p><strong>进入第 7.5 课前</strong>：</p>
+<ul>
+<li>有可重跑的版本化题集、逐题结果和单 Agent 或固定流程基线；完成原 5+3 示例题及综合项目五类控制题。</li>
+<li>能从一次 trace 定位失败，说明结果是否正确与执行过程是否合规是两种判断。</li>
+<li>三来源摘要带来源与取得时间；修改产生新版本，批准绑定版本，拒绝不执行。</li>
+<li>跨进程恢复与重复恢复不重复登记；损坏状态会停止，收据能对应实际产物。</li>
+<li>本地接口覆盖正常请求、坏输入、模型不可用；不要求公开上线。</li>
+</ul>
+<span id="5-第-75-课--是否值得增加复杂度b-线必修阅读与决策"></span><h3 data-heading-alias="5-第-75-课--是否值得增加复杂度b-线必修阅读与决策" id="h16773dd3652e">5. 第 7.5 课 · 是否值得增加复杂度【B 线必修阅读与决策】</h3>
+<p><a href="07.5-advanced-agentic-concepts/index.html">打开课程</a> · <a href="07.5-advanced-agentic-concepts/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：评估者—优化者、故障注入、自主权层级、模型与运行设施适配四个核心概念。其他模式按问题选择，不要求全部实现，也不要求购买 API。</p>
+<p><strong>进入第八课前</strong>：提交一份决策记录，包含问题证据、基线表现、唯一拟改动、事前接受标准、停止或撤销方法；完成“保留、简化或移除”的判断。没有真实失败时写待验证假设，可以决定不增加复杂度，不能编造收益。权限与必要审批不能用成本降低来抵消。</p>
+<span id="6-第八课--浏览器操作界面与隔离b-线必修a-线建议"></span><h3 data-heading-alias="6-第八课--浏览器操作界面与隔离b-线必修a-线建议" id="hff16abf23a26">6. 第八课 · 浏览器、操作界面与隔离【B 线必修；A 线建议】</h3>
+<p><a href="08-agent-interfaces/index.html">打开课程</a> · <a href="08-agent-interfaces/lessons/99-exercises.html">课后验收</a></p>
+<p><strong>学习范围</strong>：B 线做练习 1–4；A 线至少做安全打开网页与核对结果的练习 1。实现选择一条合适路线，不需要同时掌握所有浏览器或桌面框架。</p>
+<p><strong>完成 B 线本课的条件</strong>：</p>
+<ul>
+<li>合法读取能执行；发送等待批准；离域、file URL 和未知动作被阻止。</li>
+<li>执行前检查页面与批准是否仍有效，执行后重新读取实际结果，保存截图与收据。</li>
+<li>在隔离环境完成固定 CSV 绘图：输入只读、输出可取回、网络关闭、没有宿主凭证挂载。</li>
+<li>完整动作循环能处理拒绝、页面变化与执行失败。没有实际运行 Docker 等隔离环境时，隔离练习仍是待验收，不能用本机成功替代。</li>
+</ul>
+<span id="7-结业-b--独立完成一个可验证系统b-线必修"></span><h3 data-heading-alias="7-结业-b--独立完成一个可验证系统b-线必修" id="h066d7ab91e3f">7. 结业 B · 独立完成一个可验证系统【B 线必修】</h3>
+<p><a href="capstone-b/index.html">打开课程</a> · <a href="capstone-b/lessons/99-exercises.html">最终验收</a></p>
+<p>RAG 或多 Agent 二选一，不为凑架构添加角色。使用自己的获授权资料，运行至少一条真实模型路径并保留工具轨迹；准备 5 个开发题和 3 个新的冻结保留题，基线与候选方案至少三次试跑。人工核对引用、条件、否定和数字，提交失败与回归报告、七维自评及 200 字内反思。从干净环境只靠 README 重跑成功，才算结业；看过答案的示范保留题不能再算自己的盲测。</p>
+<p><span id="electives"></span></p>
+<span id="选修不挡住主线但不能冒报完成"></span><h2 data-heading-alias="选修不挡住主线但不能冒报完成" id="h5c181a8b2dfe">选修：不挡住主线，但不能冒报完成</h2>
+<table>
+<thead>
+<tr>
+<th>所在课程</th>
+<th>可按需要深入的内容</th>
+<th>核心必须保留</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第四课</td>
+<td>更多框架与生产级复杂编排</td>
+<td>原五题的比较与流程控制能力；框架目录不等于安装清单</td>
+</tr>
+<tr>
+<td>第五课</td>
+<td>5.8 Agent SDK、复杂并行与大型插件组合</td>
+<td>B 线核心概念和原五题；A 线 5.1–5.4，不能把基础 Plugin 概念一起跳过</td>
+</tr>
+<tr>
+<td>第六课</td>
+<td>云端受管检索、更多向量库及记忆产品</td>
+<td>本地完整检索、证据核对、记忆生命周期与规定对照实验</td>
+</tr>
+<tr>
+<td>第七课</td>
+<td>多 Agent 辩论、Streaming、Prompt caching</td>
+<td>Eval、观测、批准恢复、本地部署四项核心</td>
+</tr>
+<tr>
+<td>第 7.5 课</td>
+<td>扩展模式的实际实现</td>
+<td>四个核心概念与决策记录；整课不是可跳过站点</td>
+</tr>
+<tr>
+<td>部署与服务</td>
+<td>多家云平台比较、公开部署</td>
+<td>本地可重跑与异常验证，不用为了学习先公开上线</td>
+</tr>
+</tbody>
+</table>
+<p><span id="route-a"></span></p>
+<span id="a-线使用现成-cli-agent-完成工作"></span><h2 data-heading-alias="a-线使用现成-cli-agent-完成工作" id="h266c159475e1">A 线：使用现成 CLI Agent 完成工作</h2>
+<p><strong>A1 → A2 → 第五课核心 5.1–5.4 → A3 → 结业 A。</strong> 原路线建议 A3 后接第八课，但它不阻止开始结业 A。已经在 B 线学过第五课时，只补缺少的实际 CLI 操作，不重复读整课。</p>
+<table>
+<thead>
+<tr>
+<th>课程与性质</th>
+<th>进入下一阶段的验收标准</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="A1-cli-intro/index.html">A1 · A 线必修</a></td>
+<td>完成 CLI-1–4：先只读、再作限定修改，检查真实 diff 并定点撤回；规则实际加载；分清模型、服务与运行工具。第二宿主对照、认证实验要注明实际运行或模拟。</td>
+</tr>
+<tr>
+<td><a href="A2-cli-workflow/index.html">A2 · A 线必修</a></td>
+<td>完成 CLI-5–8：规则卡、真实 Git diff 审查 Skill、双 README 四步修改、可迁移任务卡；错误命令与失效链接能给出证据，未授权不修改。</td>
+</tr>
+<tr>
+<td><a href="05-claude-code-ecosystem/index.html">第五课核心 · A/B 共用</a></td>
+<td>能使用并区分项目规则、MCP、Skill 与 Plugin，检查加载和移除。A 线 5.5–5.8 按工作需要选学。</td>
+</tr>
+<tr>
+<td><a href="A3-cli-production/index.html">A3 · A 线必修</a></td>
+<td>完成 CLI-9–12：受限 MCP 连接、实际差异审查、诚实收据、团队 Skill 打包与撤销；在第二个干净 demo 按 README 重做。远端 CI 未运行不能计作集成通过。</td>
+</tr>
+<tr>
+<td><a href="08-agent-interfaces/index.html">第八课 · A 线建议</a></td>
+<td>至少做练习 1：安全打开示例页，核对标题、最终地址、截图并停止。可与结业 A 准备并行。</td>
+</tr>
+<tr>
+<td><a href="capstone-a/index.html">结业 A · A 线必修</a></td>
+<td>CLI 实际参与自己的任务，至少使用一项 MCP 或自写 Skill/command；提交成品、README、成功与失败证据、自评和 150 字内反思。换干净目录能重跑，缺资料不编造，不发生未经批准的外部动作。</td>
+</tr>
+</tbody>
+</table>
+<p><span id="branches"></span></p>
+<span id="身份分支五选一或按需增加"></span><h2 data-heading-alias="身份分支五选一或按需增加" id="hafa76ffa3283">身份分支：五选一或按需增加</h2>
+<p>分支可以与主线并行，不是所有人的先修。建议先沿 B 线往下学；需要使用 AI 修改项目时，再补 A 线和开发者分支。</p>
+<table>
+<thead>
+<tr>
+<th>分支【均为按需选修】</th>
+<th>何时加入</th>
+<th>本分支完成标准</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="branch-developer/index.html">开发者</a></td>
+<td>建议 A2 后，结合第五课与 A3</td>
+<td>一处有只读分析、计划、真实 diff、实际检查和定点撤回步骤的修改；不触及他人工作。</td>
+</tr>
+<tr>
+<td><a href="branch-researcher/index.html">研究人员</a></td>
+<td>现在即可，第六课后深化检索</td>
+<td>核对论文三个问题；每项有原文定位，区分支持、不支持与不确定；未跑实验不写成功。</td>
+</tr>
+<tr>
+<td><a href="branch-teacher/index.html">教师</a></td>
+<td>现在即可</td>
+<td>完成 15 分钟影子活动、两层提示、两题退出检测、事实核查，以及虚构回答的评分标准与错误分组；目标、题目、评价一致。</td>
+</tr>
+<tr>
+<td><a href="branch-knowledge-worker/index.html">知识工作者</a></td>
+<td>现在即可，A2 后便于复用</td>
+<td>会议记录变成六字段行动表，每项可追溯；负责人、相对日期和预算未确认时保持未知，不自动发送。</td>
+</tr>
+<tr>
+<td><a href="branch-everyday-users/index.html">日常用户</a></td>
+<td>随时，也可独立学习</td>
+<td>消息整理为草稿、已知事实、待确认项；不把“可能”改成确定，不编日期，不声称已发送或已创建提醒。</td>
+</tr>
+</tbody>
+</table>
+<p><span id="completion"></span></p>
+<span id="每课怎么学怎样判断可以继续"></span><h2 data-heading-alias="每课怎么学怎样判断可以继续" id="he435c3da0033">每课怎么学，怎样判断可以继续</h2>
+<ol>
+<li><strong>理解</strong>：先读主讲义与本地必读讲解，用自己的话说清本课解决的问题。</li>
+<li><strong>跟做</strong>：完成分步案例，核对真实输入、输出与执行过程。</li>
+<li><strong>补齐</strong>：结合原题读对应补充章，不遗漏本课标为核心的实验。</li>
+<li><strong>独立做</strong>：最后进入课后练习，先作答再展开答案，换一个输入或要求重新完成。</li>
+<li><strong>排错</strong>：主动制造一次可恢复的失败，定位并修正，保留前后证据。</li>
+</ol>
+<p>每课留一份学习记录：做了什么、如何运行、输入与输出、失败原因、修复结果、待补项目。两天后不看答案解释关键区别，一周后换一份资料复做，不要求死记 API 名字。</p>
+<p><strong>必修能力达标后进入下一课；选修未做不阻挡主线。</strong> 缺账户或运行环境时可以先阅读后面的课，也可以开始准备结业选题，但将相关必修实操列为待验收，补齐后才能标记该课及整条路线完成。程序通过、人工内容复核、真实集成和独立掌握分别记录；NEEDS_REVIEW 不是自动通过。</p>
+<p><span id="hours"></span></p>
+<span id="大概需要多少小时"></span><h2 data-heading-alias="大概需要多少小时" id="h693322267367">大概需要多少小时</h2>
+<p>这是针对当前本地课程和你已学到第三课的情况做的<strong>学习规划估算，不是实测平均时长或保证</strong>。只计算第四课起的 B 线；不重算第二、三课。</p>
+<p>“阅读理解”指阅读主讲义、本地必读讲解并看懂核心代码，不含实际完成练习，不要求逐字读完所有参考目录和选修代码。“完整学习”已经包含阅读，再加亲手运行、独立修改、排错、验收与结业项目；两列不要相加。</p>
+<table>
+<thead>
+<tr>
+<th>B 线阶段</th>
+<th style="text-align:right">阅读理解</th>
+<th style="text-align:right">完整学习，含阅读与核心实作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第四课</td>
+<td style="text-align:right">6–8 小时</td>
+<td style="text-align:right">16–22 小时</td>
+</tr>
+<tr>
+<td>第五课</td>
+<td style="text-align:right">5–7 小时</td>
+<td style="text-align:right">12–18 小时</td>
+</tr>
+<tr>
+<td>第六课</td>
+<td style="text-align:right">8–11 小时</td>
+<td style="text-align:right">24–34 小时</td>
+</tr>
+<tr>
+<td>第七课</td>
+<td style="text-align:right">7–10 小时</td>
+<td style="text-align:right">22–32 小时</td>
+</tr>
+<tr>
+<td>第 7.5 课</td>
+<td style="text-align:right">2–3 小时</td>
+<td style="text-align:right">4–6 小时</td>
+</tr>
+<tr>
+<td>第八课</td>
+<td style="text-align:right">4–6 小时</td>
+<td style="text-align:right">12–18 小时</td>
+</tr>
+<tr>
+<td>结业 B</td>
+<td style="text-align:right">1–2 小时阅读任务与示例</td>
+<td style="text-align:right">18–30 小时</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td style="text-align:right"><strong>33–47 小时</strong></td>
+<td style="text-align:right"><strong>108–160 小时</strong></td>
+</tr>
+</tbody>
+</table>
+<p>按每天 1 小时，阅读约 5–7 周；按每周 8 小时完成练习与结业，约 14–20 周。若 Python、终端和环境排错仍不熟，完整学习额外预留约 20% 时间。下载模型、等待外部账户或远端审批的被动等待不计入上述专注学习时间。</p>
+<p>额外选择 A 线时，A1 约 4–6 小时、A2 约 6–10 小时、A3 约 8–12 小时、结业 A 约 8–14 小时，合计增加约 <strong>26–42 小时</strong>；已在 B 线完成的第五、八课不重复计时。身份分支的首次完整任务每条约 <strong>3–6 小时</strong>；选修框架深挖和公开部署没有统一上限，不算进主线总量。</p>
+<p>先完成第四课再用实际投入校准后面的估算。进度以能完成验收为准，不以看完页面数量为准。</p>
+<span id="基础课程与核对入口"></span><h2 data-heading-alias="基础课程与核对入口" id="hc75c8f6777d6">基础课程与核对入口</h2>
+<p><a href="../lessons/index.html">第二课：Prompt Engineering</a> · <a href="03-tool-use-and-hello-agent/index.html">第三课：工具与 Agent Loop</a></p>
+<p><a href="reference/exercise-correspondence.html">原题与答案逐项对应</a> · <a href="REVIEW-FULL-2026-11-04.md">完整审查报告</a> · <a href="VERIFICATION.md">验证记录与未验证项目</a> · <a href="reference/source-readings.html">本地参考知识卡</a></p>
+<p>路线依据项目内固定版本的原课程与各课作业；时间是本地学习计划估算。第二、三课仍使用各自的独立目录。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="reference/version-notes.md">版本差异说明</a></footer></main><script src="assets/later.js"></script></body></html>

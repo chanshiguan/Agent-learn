@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基础练习与综合项目 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 08</p><h1>基础练习与综合项目</h1><p class="lede">先完成主线验收，再按需选择单元9–15的扩展内容。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必做：完成六组原练习与综合项目；扩展实验不作为进入第四课的前提。</p><p><a href="../../04-agent-frameworks/index.html">主线验收通过后，进入第四课 →</a></p></aside>
+<h2>1. 先闭卷回忆，再运行程序</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>这一页是课后练习。先不翻正文写出答案，再展开核对。代码练习直接修改本课副本，保留原始可运行版本作为对照。每题都有可观察的验收条件。</p>
+<h3>题 1：用自己的话写出五步往返</h3>
+<p>按 schema、call、execute、result、answer 解释每一步由谁负责。再说明为什么一次查天气通常要问模型两次。</p>
+<details><summary>参考答案与检查点</summary><p>程序定义 Schema；模型提出工具请求；程序验证并执行函数；程序把对应 ID 的结果交回；模型根据结果回答。第一轮还没有结果，第二轮才看得到结果。完整消息历史必须包含 assistant 请求和 tool 结果。</p></details>
+<h3>题 2：只会写 JSON，算不算调用了工具</h3>
+<p>模型 content 打印出一个含 name 和 arguments 的 JSON，但 tool_calls 为空。它是否完成了本课原生工具调用？程序应该自动执行这段文字吗？</p>
+<details><summary>参考答案与检查点</summary><p>没有。它生成了普通文字，没有按当前原生协议返回工具请求。不能把文字里看起来像函数的片段直接执行。记录原始响应，核对工具支持和请求格式。</p></details>
+<h3>题 3：检查一条消息序列</h3>
+<p>历史只有 user 问题和 tool 结果，遗漏 assistant 工具请求。指出缺失的角色、ID 的关联，以及修复位置。</p>
+<details><summary>参考答案与检查点</summary><p>应先保存包含 tool_calls 的完整 assistant 消息，再为每个 call 添加同 ID 的 tool 结果；不能只把一个城市名或结果贴回历史。</p></details>
+<h2>2. 编码练习：能运行才算完成</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<h3>题 4：增加一个城市，仍然是固定数据</h3>
+<p>在 tools.py 的 WEATHER 中加入“广州”=30.0，并同步更新工具用途说明和未知城市错误说明。运行单工具问题查询广州。不要把固定值包装成实时天气。</p>
+<p><strong>验收：</strong>有 get_weather 请求、参数为广州、observation 为 30.0、最终回答标明教学数据。已有测试仍通过。</p>
+<details><summary>完整参考补丁</summary><p>下面的完整补丁对应当前 tools.py：更新固定数据、工具说明和错误说明，并同步修改相关注释。请在未做过这项练习的副本上应用，其他文件使用项目中完整版本。先检查，再应用：</p>
+<pre><code># 预演补丁是否能应用，不修改文件；-p1 去掉补丁路径的首级目录。
+patch --dry-run -p1 -i exercise_04_solution.patch
+# 将已检查的答案补丁应用到当前目录的对应文件。
+patch -p1 -i exercise_04_solution.patch
+# 运行有界工具循环。
+python 03_agent_loop.py &quot;查询广州的示例气温。&quot;</code></pre><section class="code-panel" id="exercise_04_solution-patch"><div class="code-title"><a href="../examples/exercise_04_solution.patch">exercise_04_solution.patch · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>--- a/tools.py
++++ b/tools.py
+@@ -6,15 +6,15 @@
+ import math
+ 
+ # 保存固定的示例气温；键是支持的城市，值是摄氏温度。
+-WEATHER = {&quot;台北&quot;: 26.0, &quot;北京&quot;: 18.0, &quot;上海&quot;: 22.0}
++WEATHER = {&quot;台北&quot;: 26.0, &quot;北京&quot;: 18.0, &quot;上海&quot;: 22.0, &quot;广州&quot;: 30.0}
+ 
+ 
+ # 根据中文城市名查询固定教学气温，不访问网络或真实天气服务。
+ def get_weather(city):
+-    # 只允许查询 WEATHER 中明确列出的三个城市。
++    # 只允许查询 WEATHER 中明确列出的四个城市。
+     if city not in WEATHER:
+         # 对不支持的城市给出可理解的错误和支持范围。
+-        raise ValueError(&quot;没有该城市的示例数据；支持台北、北京、上海&quot;)
++        raise ValueError(&quot;没有该城市的示例数据；支持台北、北京、上海、广州&quot;)
+ 
+     # 返回结构化结果，让模型能明确识别城市、温度、单位和数据来源。
+     return {
+@@ -85,7 +85,7 @@
+             # 名称必须与 TOOL_IMPL 中实际执行函数的键一致。
+             &quot;name&quot;: &quot;get_weather&quot;,
+             # 描述帮助模型判断什么时候应该调用该工具。
+-            &quot;description&quot;: &quot;查询台北、北京、上海的固定示例气温，单位摄氏。需要气温时使用；不是实时天气，不用于计算。&quot;,
++            &quot;description&quot;: &quot;查询台北、北京、上海、广州的固定示例气温，单位摄氏。需要气温时使用；不是实时天气，不用于计算。&quot;,
+             # parameters 使用 JSON Schema 风格描述模型应生成的参数。
+             &quot;parameters&quot;: {
+                 # 工具参数整体必须是一个对象。</code></pre></section></details>
+<h3>题 5：用已有代码完成一个新计算</h3>
+<p>让 Agent 先计算 18+7，再将结果除以 5。不能在入口文件里硬编码答案。</p>
+<pre><code># 运行有界工具循环。
+python 03_agent_loop.py &quot;先用工具计算 18 加 7，再把实际结果除以 5。&quot;</code></pre>
+<p><strong>验收：</strong>出现 add 与 divide，两次调用在不同模型轮次；第二次 left=25、right=5；最后答案为 5。若模型一次写出两个调用且提前猜参数，这一题不通过。</p>
+<details><summary>完整参考实现在哪里</summary><p>原有 tools.py、agent.py、model_client.py 与 03_agent_loop.py 已支持此题，无需补充代码。<a href="../reference/code-library.html">完整代码集</a>包含全部四个文件。先证明已有通用循环能完成新问题，再考虑加代码。</p></details>
+<h3>题 6：错误一定不会执行</h3>
+<p>运行离线测试，定位“额外字段”“除以零”“未知工具”对应测试。再找出校验发生在执行函数之前的那一行。</p>
+<p><strong>验收：</strong>三类输入均返回 ok=false；未授权工具不会执行；模型拿到的是错误结果而非伪造成功。完整测试是<a href="../reference/code-library.html#test_agent-py">test_agent.py</a>，可直接运行，无空函数需要补。</p>
+<h3>题 7：证明循环会停</h3>
+<p>运行 test_step_limit，阅读两轮持续请求的测试替身。说明为什么“模型不继续”与“程序强制停止”是两种独立停止条件。</p>
+<pre><code># 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest test_agent.LoopTests.test_step_limit -v</code></pre>
+<p><strong>验收：</strong>持续请求在两轮后抛出上限错误；普通问候一轮即结束。不靠人工按 Ctrl+C 验收。</p>
+<h3>题 8：Schema 实验</h3>
+<p>先跑 good 的一轮五题，再跑 weak 与 good 各五轮。将结果按失败类型分类。之后只恢复弱版本的 description，再重新比较，验证描述是否真有帮助。</p>
+<p><strong>验收：</strong>记录真实任务数和成功数；保留答案及轨迹；不混改模型、题目和循环；不把离线脚本成绩写成模型成绩。完整评测代码和题目已经提供。</p>
+<h2>3. 综合项目：两个工具的天气助手</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>项目入口使用 04_multi_step.py，只暴露 get_weather 和 convert_temperature。完整实现已经包含在本目录；先跑通参考版，再闭卷尝试自己重写循环，最后对照测试找差距。</p>
+<table><tr><th>固定任务</th><th>验收</th></tr>
+<tr><td>查询台北示例气温</td><td>天气工具、26°C、注明固定数据</td></tr>
+<tr><td>查询上海并换成华氏</td><td>先取得 22°C，再换算 71.6°F</td></tr>
+<tr><td>把 0°C 换成华氏</td><td>只需换算工具，结果 32°F</td></tr>
+<tr><td>查询火星</td><td>明确工具失败，不虚构温度</td></tr>
+<tr><td>一句问候</td><td>不调用工具，正常结束</td></tr></table>
+<p>逐题运行下面的命令，保存完整输出，再根据实际调用过程判断五题是否通过。</p>
+<pre><code># 检验有依赖的多步骤工具任务。
+python 04_multi_step.py &quot;查询台北的示例气温。&quot;
+# 检验有依赖的多步骤工具任务。
+python 04_multi_step.py &quot;查询上海的示例气温，再用工具换算为华氏。&quot;
+# 检验有依赖的多步骤工具任务。
+python 04_multi_step.py &quot;请用工具把摄氏 0 度换算为华氏。&quot;
+# 检验有依赖的多步骤工具任务。
+python 04_multi_step.py &quot;查询火星的示例气温，没有就说明没有。&quot;
+# 检验有依赖的多步骤工具任务。
+python 04_multi_step.py &quot;你好，用一句话回应。&quot;</code></pre>
+<h2>4. 评分与复习安排</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>概念题 1–3 每题 10 分；编码题 4–7 每题 10 分；Schema 实验 10 分；综合项目 20 分，共 100 分。概念说对但无法跑通，不计对应代码分；存在未授权执行或没有上限时，先修边界再进入下一阶段。</p>
+<p>学完当下：独立画出五步往返。第二天：不看正文重写循环骨架，并运行停止测试。一周后：混合运行天气、计算、错误和问候，解释每种情况为什么需要或不需要工具。</p>
+<h2>5. 进入补充单元前的基础检查</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<ul class="checklist"><li>能解释 Tool Call 与 Tool Result，知道谁执行代码。</li><li>能写工具接口，也能在程序中验证输入与权限。</li><li>单工具、多工具、依赖任务各成功运行过一次。</li><li>至少看过一次明确失败，并能解释错误所在层次。</li><li>循环能自然结束，也能在次数上限强制结束。</li><li>能用固定题和真实记录比较 Schema。</li></ul>
+<p>完成基础自检后继续单元9–14，最后在单元15完成补充课后练习。第四阶段再学习工作流图与框架。如果卡在某题，把题号和完整输出发给我。</p>
+<div class="next-prev"><a href="0007-reading-and-protocols.html">← 三份必修阅读与协议对照</a><a href="0009-streaming-tools.html">流式工具调用 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

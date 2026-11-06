@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "原 README 修改与真实检查",
+    "lesson": "lessons/03-workshop.html#hdaaa5d5cbeab",
+    "example": "examples/develop_demo.py",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "完整 diff、回滚和迁移",
+    "lesson": "lessons/03-workshop.html#h545d598aedd6",
+    "example": "examples/develop_demo.py",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "权限、Harness、Provider 与模型",
+    "lesson": "lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "examples/develop_demo.py",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "代码审查与团队协作",
+    "lesson": "lessons/03-workshop.html#hec30e8a244d9",
+    "example": "examples/develop_demo.py",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "提交与验收",
+    "lesson": "lessons/03-workshop.html#hc6e63aff78cc",
+    "example": "examples/develop_demo.py",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  }
+]

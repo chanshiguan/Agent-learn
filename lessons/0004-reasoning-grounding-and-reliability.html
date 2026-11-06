@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>04 · 推理、Grounding 与可靠性</title><link rel="stylesheet" href="../assets/course.css"></head>
+<body><main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><a href="0003-output-and-few-shot.html">03 输出与范例</a><span class="current">04 推理与可靠性</span><a href="0005-complex-prompts-tools-and-agents.html">05 工具与 Agent</a></nav>
+  <p class="eyebrow">Lesson 04 · Reliability</p>
+  <h1>错答时，先判断是“没想清”还是“没有资料”</h1>
+  <p class="lede">推理、上下文、引用、搜索和代码执行解决的不是同一类问题。如果不先诊断失败类型，就会不断“优化 Prompt”却没有实质改善。</p>
+
+  <h2>1. 四类常见失败</h2>
+  <table>
+    <thead><tr><th>失败</th><th>典型现象</th><th>优先解法</th></tr></thead>
+    <tbody>
+      <tr><td>任务理解错误</td><td>答的是另一个问题</td><td>重写目标、边界和输出</td></tr>
+      <tr><td>推理错误</td><td>资料足够，但组合或判断错</td><td>给可检查的步骤，或换更合适模型</td></tr>
+      <tr><td>知识/资料缺失</td><td>询问实时事实或私有政策</td><td>补上下文、检索或调工具</td></tr>
+      <tr><td>计算/执行错误</td><td>算术、计数、查库或实际操作失败</td><td>调计算器、代码执行或专用 API</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. 分步处理有用，但不应索要私有思维链</h2>
+  <p>Anthropic 旧教程的第 6 章使用“让模型把思考全部说出来”改善复杂分类。这是当时的 Prompting 方法，但不能直接当成现代通用规则。</p>
+  <div class="callout warning"><strong>现代做法：</strong>推理模型可以在内部生成 thinking/reasoning token，不需要向用户公开全部内部思路。需要审查时，要求“给出简短理由、证据或可验证步骤”。</div>
+  <p>比如分类任务可以这样要求：</p>
+  <pre><code>处理方法：
+1. 检查是否与付款或发票有关。
+2. 检查是否描述功能异常。
+3. 都不符合时选 other。
+
+输出：只返回最终标签。</code></pre>
+  <p>这里提供的是可执行判断顺序，不是要求暴露无限长的私有推理。</p>
+
+  <h2>3. 顺序偏差与选项敏感性</h2>
+  <p>旧教程演示了正反两方观点的顺序可能影响结论。这不意味着“永远选第二个”，而是说 Prompt 本身也可能带有位置偏差。</p>
+  <p>可验证的方法是建立对称测试：把 A/B 顺序交换后再跑，检查结论是否发生不合理变化。</p>
+
+  <h2>4. 幻觉是什么</h2>
+  <p>幻觉是模型产生了不真实、无证据或不受资料支持的陈述。模型往往是为了显得有帮助而猜测，所以只说“请准确”不足以解决。</p>
+  <h3>降低幻觉的四层方法</h3>
+  <ol>
+    <li><strong>允许不知道：</strong>明确说“信息不足时说无法确定”。</li>
+    <li><strong>先找证据：</strong>从文档提取支持结论的片段，再基于证据回答。</li>
+    <li><strong>提供可靠上下文：</strong>将企业资料、说明书或搜索结果放入 Prompt。</li>
+    <li><strong>使用工具：</strong>新闻、实时数据用搜索；数学、计数用代码执行。</li>
+  </ol>
+
+  <h2>5. Context 和 RAG</h2>
+  <p>上下文是这次请求提供给模型的参考资料。RAG（检索增强生成）是先从向量库、文件、搜索系统或其他来源找到相关片段，再将它们放入模型上下文。</p>
+  <pre><code># Context
+&lt;manual&gt;
+缓慢闪烁黄灯：表示网络连接异常。
+检查路由器与调制解调器的网线和电源。
+&lt;/manual&gt;
+
+# Question
+路由器正在缓慢闪黄灯，怎么处理？
+
+# Rule
+只使用 manual 中的信息；没写的信息说“资料中没有说明”。</code></pre>
+  <p>上下文不是越多越好。模型有 context window 限制，大量无关资料会掩盖真正证据。要优先放相关、可信、有清晰边界的资料。</p>
+
+  <h2>6. 先提取证据，再回答</h2>
+  <p>对长文档问答，可以将流程拆成：</p>
+  <div class="flow"><span>读问题</span><b>→</b><span>提取相关证据</span><b>→</b><span>检查证据是否足够</span><b>→</b><span>基于证据回答</span></div>
+  <p>证据不足时，输出“无法从资料确定”，而不是用相似但不相关的句子拼出结论。</p>
+
+  <h2>7. Grounding 和代码执行</h2>
+  <table>
+    <thead><tr><th>需求</th><th>工具</th><th>原因</th></tr></thead>
+    <tbody>
+      <tr><td>当前新闻、价格、时间敏感信息</td><td>搜索/Grounding</td><td>模型训练知识不是实时数据库</td></tr>
+      <tr><td>精确算术、统计、计数</td><td>计算器/代码执行</td><td>语言生成不是数值运算引擎</td></tr>
+      <tr><td>公司内部规章</td><td>文件检索/RAG</td><td>模型未必看过该私有内容</td></tr>
+    </tbody>
+  </table>
+  <p>工具不只是“额外能力”，也是可验证性的来源：计算结果、数据库行和搜索来源都可以被重复检查。</p>
+
+  <h2>8. Temperature 和幻觉</h2>
+  <p>旧 Anthropic 教程建议某些幻觉可以通过降低 temperature 减轻。它可以减少输出变化，却不会创造缺失的事实。而且新模型可能忽略自定义采样参数或建议保持默认。因此优先级是：<strong>资料与证据 &gt; 任务规则 &gt; 采样参数</strong>。</p>
+
+  <h2>9. 检索练习</h2>
+  <div class="quiz" data-quiz data-answer="b" data-correct="模型没有私有政策时，必须提供资料或检索来源。" data-incorrect="这是知识缺失，不是语气或思考步骤问题。">
+    <fieldset><legend>1. 要求模型回答公司最新退款政策，但未给政策文档。首选解法是？</legend>
+      <label><input type="radio" name="r1" value="a"> 要求认真思考</label><label><input type="radio" name="r1" value="b"> 提供政策资料</label><label><input type="radio" name="r1" value="c"> 提高随机程度</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="quiz" data-quiz data-answer="a" data-correct="不确定时拒绝猜测，是降低幻觉的基础策略。" data-incorrect="对缺失事实继续生成或提高随机性只会增加风险。">
+    <fieldset><legend>2. 资料中找不到答案时，最可靠的默认行为是？</legend>
+      <label><input type="radio" name="r2" value="a"> 明确说无法确定</label><label><input type="radio" name="r2" value="b"> 根据常识补齐答案</label><label><input type="radio" name="r2" value="c"> 提高温度获得答案</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+
+  <div class="next-prev"><a href="0003-output-and-few-shot.html">← 上一课：输出与 Few-Shot</a><a href="0005-complex-prompts-tools-and-agents.html">下一课：工具与 Agent →</a></div>
+  <footer><p>如果你不确定某个错答属于哪种失败，把 Prompt、输入、输出和 <code>finish_reason</code> 一起发给我。</p></footer>
+</main><script src="../assets/quiz.js"></script></body></html>

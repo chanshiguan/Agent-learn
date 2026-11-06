@@ -1,0 +1,128 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>两条进阶支线的直接必读知识</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">6 · RAG 与 Memory</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="两条进阶支线的直接必读知识"></span><h1 data-heading-alias="两条进阶支线的直接必读知识" id="hcaf48e835329">两条进阶支线的直接必读知识</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h3477c9f71eab">Contextual Retrieval：先补背景，再索引</a></li><li><a href="#h23fa32f69293">Qdrant 与 Weaviate：融合到底合什么</a></li><li><a href="#h1ad98989be48">Ragas：把评测拆成可解释的指标</a></li><li><a href="#h4705565b95ea">Memory overview 与 Add/manage memory</a></li><li><a href="#h20068724e7ba">CoALA 与 Generative Agents：研究模型的边界</a></li><li><a href="#h5f610c8ca1c5">Mem0 与 Letta：实现选择和原题</a></li><li><a href="#hf21bf3feb35b">本章练习与参考答案</a></li><li><a href="#he254be139829">原 Memory 五步的完整对应答案</a></li></ul></aside>
+<span id="contextual-retrieval先补背景再索引"></span><h2 data-heading-alias="contextual-retrieval先补背景再索引" id="h3477c9f71eab">Contextual Retrieval：先补背景，再索引</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>片段“该服务可在24小时内取消”离开全文会丢掉主语。建索引前可给它附一段简短背景，例如“以下条款适用于虚构周末课程报名，版本v1”；原片段仍原样保存。背景和原文一起用于关键词/向量索引，回答引用仍回到原文位置。背景不是新的政策证据；若模型把条件补错，检索就会被污染，所以抽样核对背景、记录来源版本并在更新时重建受影响索引。</p>
+<p>它与 query transformation 的区别在时点：前者处理入库资料，后者处理用户问题。不要把两者同时加入实验后把收益归因于某一个。最小练习把两份同名“该服务”条款标上各自项目，检查问题能否命中正确项目；参考判断是先区分范围，再比较检索，并非背景越长越好。</p>
+<span id="qdrant-与-weaviate融合到底合什么"></span><h2 data-heading-alias="qdrant-与-weaviate融合到底合什么" id="h23fa32f69293">Qdrant 与 Weaviate：融合到底合什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Qdrant 的 hybrid query 可以先执行多路候选查询，再融合或重排；prefetch 是候选阶段，不是最终答案。用 RRF 时只使用名次，适合无法直接比较的分数。Weaviate 的 hybrid search 将关键词与向量信号合并，alpha 控制两者权重；相对分数融合先把每路分数缩放到可比较范围。过滤范围与候选数仍应一致。</p>
+<p>下面用同样的三份文档比较差别。完整代码实现了排名融合的计算，没有启动 Qdrant/Weaviate 服务：</p>
+<pre><code class="language-python">&quot;&quot;&quot;说明相对分数融合与排名融合的不同；不是远端向量数据库客户端。&quot;&quot;&quot;
+
+# 同一份排名分别按分数和名次融合；观察 b 的分数优势在两种方法里如何体现。
+from ranking_lab import reciprocal_rank_fusion
+
+
+# 每路先缩放分数，再按权重相加；这个权重不是答案正确的概率。
+def relative_fusion(dense, lexical, alpha=0.5):
+    if not 0 &lt;= alpha &lt;= 1:
+        raise ValueError('alpha 必须在 0 到 1 之间')
+    scores = {}
+    for source, weight in [(dense, alpha), (lexical, 1-alpha)]:
+        if not source:
+            continue
+        low, high = min(source.values()), max(source.values())
+        for key, value in source.items():
+            normalized = (value-low)/(high-low) if high&gt;low else 1.0
+            scores[key] = scores.get(key,0)+weight*normalized
+    return sorted(scores, key=lambda key:(-scores[key],key))
+
+
+if __name__ == '__main__':
+    dense={'a':0.9,'b':0.89,'c':0.1}
+    lexical={'a':1.0,'b':10.0,'c':0.0}
+    print('相对分数融合:',relative_fusion(dense,lexical))
+    print('排名融合:',reciprocal_rank_fusion([['a','b','c'],['b','a','c']]))
+
+</code></pre>
+<pre><code class="language-bash"># 运行 courses/06-memory-rag/examples/fusion_comparison.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/06-memory-rag/examples/fusion_comparison.py
+</code></pre>
+<p>参考结果：相对分数融合 b、a、c；排名融合 a、b、c（a/b 同分时按 ID）。原因是分数融合保留了 b 在词法分数上的大优势，RRF 只知道两路分别第一、第二。不要把 alpha=0.5 解读为某一篇文档有50%概率正确。</p>
+<span id="ragas把评测拆成可解释的指标"></span><h2 data-heading-alias="ragas把评测拆成可解释的指标" id="h1ad98989be48">Ragas：把评测拆成可解释的指标</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>评测记录至少有 question、response、retrieved_contexts 和可选 reference。检索侧问“该来的证据来了吗、噪声多吗”，答案侧问“答了问题吗、断言受证据支持吗”。Faithfulness 不能只数引用 ID 是否存在：引用是真的但不支持断言，也会失败。Judge 的模型、提示和版本要记录，先用人工样本校准；评估模型本身也可能有偏差。</p>
+<p>本课的 20 题实验给出了可重跑数据、检索指标、答案及人工复核入口，属于独立实现的透明基线，不是 Ragas 库已经运行。参考练习：给正确摘录加“且全年免费”，引用保持原 ID。ID 检查可能成功，人工忠实度应失败，因为资料没有价格事实。不能用关键词评分把这条断言算成正确。</p>
+<span id="memory-overview-与-addmanage-memory"></span><h2 data-heading-alias="memory-overview-与-addmanage-memory" id="h4705565b95ea">Memory overview 与 Add/manage memory</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>thread 内的 state/checkpoint 保存当前任务进度；跨 thread 的 store 保存获允许复用的信息。namespace 相当于资料所属空间，应由可信身份建立，不能直接相信用户输入“我是另一个人”。semantic search 是在存储中按意义找候选，不代表检索出的事实仍然有效；读回还要核对来源、时间、版本与授权。</p>
+<p>本课 MemoryStore 的 SQLite 表提供用户隔离、版本比较、过期、删除与重启读取；summary_workflow 提供 thread 检查点。两者分别处理记忆和执行状态；这里的 preference 表没有实现 LangGraph 的完整 store API。原记忆练习使用 Chroma PersistentClient；Mem0 与 Letta 是后续产品选择。</p>
+<p>写入可在回答过程中完成，也可后台提取。后台写入晚到时要防止旧版本覆盖新偏好；删除还需检查缓存和衍生索引。参考判断：用户改为长答后，迟到的短答写入不应覆盖新版。没有同意的敏感推断不保存。</p>
+<span id="coala-与-generative-agents研究模型的边界"></span><h2 data-heading-alias="coala-与-generative-agents研究模型的边界" id="h20068724e7ba">CoALA 与 Generative Agents：研究模型的边界</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>CoALA 把语言 Agent 看成记忆、行动空间和决策过程的组合。工作记忆承载当前上下文；长期记忆可分为语义事实、情节经历和程序性方法。外部行动改变环境，内部行动读写记忆、推理或规划。这个分类帮助问“信息存在哪里、由哪一步使用”，不表示给文件夹换三个名称就实现了论文系统。</p>
+<p>Generative Agents 的设计将经历保存为记忆流，检索考虑近期性、重要性和相关性，再用反思整理高层认识、用计划组织行为。三种信号的尺度需要处理；近期事件不必最重要，相关叙述也不必真实。反思是由已有经历生成的推断，应保留依据，不能覆盖原始观察。论文研究模拟行为，不能把角色显得可信当事实助理准确率。</p>
+<p>自测参考：用户上周说喜欢短答、今天明确改长答，应该优先当前明确选择；不能仅因旧短答被检索得更相似就采用。角色根据多次经历总结偏好时，必须区分观察、推断和待确认。</p>
+<span id="mem0-与-letta实现选择和原题"></span><h2 data-heading-alias="mem0-与-letta实现选择和原题" id="h5f610c8ca1c5">Mem0 与 Letta：实现选择和原题</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原支线要求完成记忆生命周期，没有要求必须安装 Mem0 或 Letta，更没有规定只能二选一。本课原练习采用 Chroma PersistentClient，补充实现用 SQLite 完成同意、更新、删除、隔离与期限；步骤在<a href="05-original-labs.html">原记忆实验</a>和本章末尾。Mem0 面向事实提取、合并与记忆检索，适合想复用这些组件的应用；Letta 围绕有状态 Agent 组织可编辑记忆与工具循环。选择取决于需要独立记忆组件还是整套有状态执行方式；两种产品均不是本课必装前提。</p>
+<p>验收相同：保存一项明确授权偏好、换问题读回、修改并验证新值、删除再查不到、检查另一个用户不能读到。只看到 add 返回成功不够。Chroma 原例的持久化通过不等于完整生命周期通过，综合任务还须运行本课更新、删除与隔离案例。</p>
+<span id="本章练习与参考答案"></span><h2 data-heading-alias="本章练习与参考答案" id="hf21bf3feb35b">本章练习与参考答案</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>提交融合输出、一个引用存在却不支持的反例、记忆旧写入冲突与删除结果。完整代码在本章与实作章，验收是能解释哪一层负责什么：融合决定顺序；证据检查决定能否支持；授权决定能否读取；版本决定能否覆盖。四种责任不能用同一个相似度分数替代。</p>
+<span id="原-memory-五步的完整对应答案"></span><h2 data-heading-alias="原-memory-五步的完整对应答案" id="he254be139829">原 Memory 五步的完整对应答案</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原题要求先保存短版回答偏好，再改成“先给表格”，同时记录来源、时间和保存期限。下面程序依次写入、结束第一个进程、另起进程读回、修改为表格、在删除前检查另一用户不可见、删除再查。它不是仅仅改了数据库值，grounded_rag 实际根据新偏好输出表格。</p>
+<pre><code class="language-python">&quot;&quot;&quot;原 Memory 支线五步：跨进程读取、改表格、隔离、删除。&quot;&quot;&quot;
+
+# 按保存、跨进程读取、修改、用户隔离、删除的顺序验证，不能用同一对象里的值证明持久化。
+import argparse
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from memory_store import MemoryStore
+from grounded_rag import run
+
+
+def finish(db):
+    store = MemoryStore(db)
+    try:
+        before = store.get('alice', 'answer_style')
+        if before is None:
+            raise ValueError('第二进程未找到第一进程的偏好')
+        other = store.get('bob', 'answer_style')
+        version = store.put('alice', 'answer_style', '先给表格', consent=True,
+                            expected_version=before['version'], source='虚构用户在 thread-B 明确更新', ttl=3600)
+        after = store.get('alice', 'answer_style')
+    # 无论成功还是失败，都执行这里的收尾步骤。
+    finally:
+        store.close()
+    answer = run('报名截止时间', 'alice', db)
+    store = MemoryStore(db)
+    try:
+        store.delete('alice', 'answer_style')
+        deleted = store.get('alice', 'answer_style')
+    # 无论成功还是失败，都执行这里的收尾步骤。
+    finally:
+        store.close()
+    return {'thread': 'B', 'read_from_thread_A': before, 'other_user_before_deletion': other,
+            'updated': after, 'display': answer['display_answer'], 'deleted': deleted,
+            'passed': before['value'] == '先短后长' and other is None and version == 2
+            and after['value'] == '先给表格' and answer['display_answer'].startswith('| 摘录 |') and deleted is None}
+
+
+def demo():
+    with tempfile.TemporaryDirectory(prefix='course6-memory-') as directory:
+        db = Path(directory) / 'memory.sqlite'
+        store = MemoryStore(db)
+        store.put('alice', 'answer_style', '先短后长', consent=True, expected_version=0,
+                  source='虚构用户在 thread-A 明确选择', ttl=3600)
+        store.close()
+        # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+        # text：按文本而不是字节接收子进程输出，便于检查断言和生成可读报告。
+        # 把相对路径变成绝对路径并解析符号链接；涉及目录权限时，还要检查解析后的位置是否在允许目录内。
+        return json.loads(subprocess.check_output([sys.executable, str(Path(__file__).resolve()), '--continue-db', str(db)], text=True))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument('--continue-db', type=Path)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(finish(args.continue_db) if args.continue_db else demo(), ensure_ascii=False, indent=2))
+
+</code></pre>
+<pre><code class="language-bash"># 运行 courses/06-memory-rag/examples/memory_lifecycle.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/06-memory-rag/examples/memory_lifecycle.py
+</code></pre>
+<p>参考：read_from_thread_A.value=先短后长；updated.value=先给表格，version=2；updated_at 是写入时间，expires_at 减 updated_at 为3600秒；display 以表格开头；other_user_before_deletion=null；deleted=null；passed=true。这里用 thread-A/B 标记两个教学会话，没有调用 LangGraph thread API。</p>
+<p>此题完整底层代码是本课 memory_store.py 与 grounded_rag.py，完整代码页均可读。旧数据库增加 updated_at 时历史值保持 null，表示未知，不把迁移当天当成历史写入时间。独立作业将有效期改短，再验证到期查不到；若其他用户在删除后才查不到，不能据此证明用户隔离，必须在资料仍存在时检查。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="04-advanced.html">← 进阶检索与长期记忆：按失败原因选择方法</a><a href="06-abc-experiment.html">进阶实作：20 题、三组检索与重排对照 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

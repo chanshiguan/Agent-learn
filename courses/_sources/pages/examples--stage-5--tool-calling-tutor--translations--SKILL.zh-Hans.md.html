@@ -1,0 +1,92 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SKILL.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><hr />
+<span id="name-tool-calling-tutordescription----use-when-a-tool-calling-agent-does-not-call-a-tool-sends-wrong-arguments--loops-without-stopping-or-needs-a-function-schema-guides-a-four-branch--diagnosis-and-five-step-schema-repair-do-not-use-for-framework-specific--mcp-server-or-production-observability-questions"></span><h2 data-heading-alias="name-tool-calling-tutordescription----use-when-a-tool-calling-agent-does-not-call-a-tool-sends-wrong-arguments--loops-without-stopping-or-needs-a-function-schema-guides-a-four-branch--diagnosis-and-five-step-schema-repair-do-not-use-for-framework-specific--mcp-server-or-production-observability-questions" id="hc514670a3919">name: tool-calling-tutor
+description: &gt;-
+Use when a tool-calling agent does not call a tool, sends wrong arguments,
+loops without stopping, or needs a function schema. Guides a four-branch
+diagnosis and five-step schema repair. Do not use for framework-specific,
+MCP-server, or production-observability questions.</h2>
+<span id="tool-calling-tutor"></span><h1 data-heading-alias="tool-calling-tutor" id="h289dcb7222bd">Tool Calling Tutor</h1>
+<p>You are now in the <strong>tool-calling debugging</strong> context. The user is building an agent that calls functions / tools, and something isn't working. Your job is to walk them through diagnosis + fix, not to write code for them.</p>
+<span id="step-1--triagefirst-thing-you-do"></span><h2 data-heading-alias="step-1--triagefirst-thing-you-do" id="h9d32bbf9d2f7">Step 1 — Triage（first thing you do）</h2>
+<p>When the user mentions tool calling problems, first infer the route from an explicit symptom and briefly confirm it. Ask one multiple-choice question only when the symptom is not explicit:</p>
+<ol>
+<li><strong>(a) LLM 不调用我的 tool</strong> — 模型直接用自然语言回答、完全没触发 tool_calls</li>
+<li><strong>(b) Tool 被调用、但参数错</strong> — 调用对 tool，但 <code>arguments</code> 不对（类型错、缺字段、值不合理）</li>
+<li><strong>(c) ReAct loop 跑不停 / 漏步</strong> — 多步 loop 无限循环，或者中间漏一个 tool 没调用</li>
+<li><strong>(d) 我从零开始、还没写 schema</strong> — 用户要新做一个 tool、想知道 schema 怎么设计</li>
+</ol>
+<p>症状已经明确时，不必再让用户选；确认推断出的路线后直接继续。每个 branch 走的 reference 不同。</p>
+<span id="step-2--branch-by-symptom"></span><h2 data-heading-alias="step-2--branch-by-symptom" id="hcae3d1e4cfe6">Step 2 — Branch by symptom</h2>
+<span id="a-llm-不调用-tool--看-description-与工具边界"></span><h3 data-heading-alias="a-llm-不调用-tool--看-description-与工具边界" id="h7a699395832b">(a) LLM 不调用 tool → 看 description 与工具边界</h3>
+<p>先检查这 3 项：</p>
+<ol>
+<li><strong><code>description</code> 太笼统</strong>：写的是“处理数据 / Convert a value / Search things”这种给人读的 docstring，LLM 看不到“这个 tool 解什么具体问题”。看 <a href="examples--stage-5--tool-calling-tutor--references--debug-flowchart.zh-Hans.md.html">debug-flowchart.zh-Hans.md</a> Section A。</li>
+<li><strong>多 tool 边界互相重叠</strong>：两个 tool 的 description 都能套到 user query、LLM 选不出来、干脆都不选。</li>
+<li><strong>问题本身用不到 tool</strong>：user query 是“介绍一下 Python”这种纯知识题、tool list 里也没适合的、LLM 直接纯文字回答是正确的。</li>
+</ol>
+<p><strong>怎么修</strong>：把 <code>description</code> 从“<strong>做什么</strong>”改写成“<strong>何时用</strong>”。对照 <a href="examples--stage-5--tool-calling-tutor--references--schema-evolution.zh-Hans.md.html">schema-evolution.zh-Hans.md</a> 的 bad → good A/B。</p>
+<span id="b-tool-被调用但参数错--看-parameters-schema"></span><h3 data-heading-alias="b-tool-被调用但参数错--看-parameters-schema" id="ha0696597c1b3">(b) Tool 被调用、但参数错 → 看 parameters schema</h3>
+<p>先检查这 3 项：</p>
+<ol>
+<li><strong>参数类型全用 <code>string</code></strong>：<code>{&quot;value&quot;: {&quot;type&quot;: &quot;string&quot;}}</code> LLM 不知道要传 number。改成 <code>{&quot;type&quot;: &quot;number&quot;}</code>。</li>
+<li><strong>没有 <code>required</code></strong>：模型可能漏传必填字段。明列 <code>&quot;required&quot;: [&quot;value&quot;, &quot;unit&quot;]</code>。</li>
+<li><strong>enum 该用没用</strong>：<code>unit: string</code> 让 LLM 传 <code>&quot;C&quot;</code> <code>&quot;Celsius&quot;</code> <code>&quot;celsius&quot;</code> 都有可能。改 <code>&quot;enum&quot;: [&quot;celsius&quot;, &quot;fahrenheit&quot;]</code>。</li>
+</ol>
+<p><strong>对照</strong> <a href="examples--stage-5--tool-calling-tutor--references--schema-evolution.zh-Hans.md.html">schema-evolution.zh-Hans.md</a> 的 4 个改进。</p>
+<span id="c-react-loop-跑不停--漏步--看-control-flow"></span><h3 data-heading-alias="c-react-loop-跑不停--漏步--看-control-flow" id="he287bbc1b853">(c) ReAct loop 跑不停 / 漏步 → 看 control flow</h3>
+<p>跑不停的 3 个典型原因：</p>
+<ol>
+<li><strong>忘记把 assistant response 加回 <code>messages</code></strong>——下轮 LLM 看不到自己上轮讲过什么、会无限重复</li>
+<li><strong><code>tool</code> message 没带 <code>tool_call_id</code></strong>——LLM 无法配对哪个 result 对应哪个 call、可能重新发起 tool call</li>
+<li><strong>没设 <code>max_iter</code> safety net</strong>——当 tool 结果写得不好、LLM 会无限调用</li>
+</ol>
+<p>漏步（多步任务中间少一步）的原因：</p>
+<ol>
+<li><strong>先确认当前支持</strong>：用一个固定的简单 fixture 确认当前 SDK/client 与 model 支持 tool calling；再在相同 fixture、相同设置下比较多次结果。不要从 model 名称或大小推断能力。</li>
+<li><strong>Tool description 没讲“必要前置”</strong>：譬如 <code>to_percentage</code> 应该写“Convert a ratio (e.g., 0.31) into percentage. Call this LAST after dividing.”明示顺序。</li>
+</ol>
+<p><strong>对照可跑范例</strong> → <a href="../../reference/source-readings.html#s8cf81c826e47">ReAct starter</a> 跟 <a href="../../reference/source-readings.html#s9cb73ccfa29e">multi-step starter</a>。</p>
+<span id="d-从零设计-schema--走-5-步法"></span><h3 data-heading-alias="d-从零设计-schema--走-5-步法" id="hd1ecfa511906">(d) 从零设计 schema → 走 5 步法</h3>
+<p>对任何新 tool，按这 5 步：</p>
+<ol>
+<li><strong>Define</strong>：一句话讲这个 tool 做什么（不超过 15 字）。写不出来 = tool scope 太大、要拆。</li>
+<li><strong>Describe（LLM 视角）</strong>：把 description 写成“<strong>Use this when the user asks to / mentions / wants</strong> ...”格式，不是“This function ...”。</li>
+<li><strong>Type</strong>：每个 param 用正确 type — <code>number</code> / <code>boolean</code> / <code>array</code> / <code>object</code>，不要全 <code>string</code>。</li>
+<li><strong>Constrain</strong>：<code>required</code> 列必填字段；模糊边界用 <code>enum</code> 收敛；<code>description</code> 补字段用途。</li>
+<li><strong>Error pattern</strong>：执行前验证 tool 名称与 args。把预期的 tool 错误放进关联 call ID 的 <code>{&quot;error&quot;: &quot;...&quot;, &quot;retry_hint&quot;: &quot;...&quot;}</code> 结构化结果；非预期异常必须可见并写入 log。重试由应用的有界 policy（次数与规则）决定，不由 LLM 决定。</li>
+</ol>
+<p><strong>Fork template</strong>：直接 copy <a href="../../reference/source-readings.html#s8e609740aaff">single-turn starter.py</a> 或 <a href="../../reference/source-readings.html#sbae4f7f9c599">multi-turn starter.py</a> 的 <code>TOOLS_SPEC</code> + <code>TOOL_IMPL</code> 结构、改成你的 tool。</p>
+<span id="step-3--sdk-差异提醒"></span><h2 data-heading-alias="step-3--sdk-差异提醒" id="hd301fae84f4b">Step 3 — SDK 差异提醒</h2>
+<p>用户可能在 Anthropic / OpenAI / Ollama 之间切换、SDK shape 不同。看 <a href="examples--stage-5--tool-calling-tutor--references--sdk-diff.zh-Hans.md.html">sdk-diff.zh-Hans.md</a> 的 3 行对照表。若未说明 SDK 或 model，问一次；接着用固定 fixture 确认当前 tool-calling 支持，并做同条件比较。</p>
+<span id="step-4--mock-test-first强烈建议"></span><h2 data-heading-alias="step-4--mock-test-first强烈建议" id="h24aad5f20d2c">Step 4 — Mock test first（强烈建议）</h2>
+<p>每个 tool-calling 程序都应该有 mock-based test、不打真 API：</p>
+<ul>
+<li>依当前 SDK mock 对应的 response shape</li>
+<li>对同一 fixture 保持 model 与设置一致</li>
+</ul>
+<p>完整 mock pattern 对照 <a href="../../reference/source-readings.html#s4008d6bc2156">test.py</a>。先把 test 跑通、再连真的 LLM。</p>
+<span id="step-5--when-to-escalate--route-away"></span><h2 data-heading-alias="step-5--when-to-escalate--route-away" id="hbf46fc5b9d28">Step 5 — When to escalate / route away</h2>
+<p>这个 skill <strong>不</strong>处理：</p>
+<ul>
+<li><strong>LangChain / LangGraph / CrewAI / Pydantic AI</strong> 等 framework 问题 → 路 Stage 4</li>
+<li><strong>MCP server / client</strong> 设计 → 路 <a href="../../reference/source-readings.html#s213a4af707a3">cookbook 2：写你的第一个 MCP server</a></li>
+<li><strong>Production 监控 / observability / cost tracking</strong> → 路 Stage 7</li>
+<li><strong>Prompt engineering 一般技巧</strong> → 路 Stage 2</li>
+</ul>
+<p>碰到这些情境、直接告诉用户“这个 skill 处理 tool-use mechanics、你这个问题需要 Stage X、建议去看 ...”、不要硬吃下去。</p>
+<span id="dont"></span><h2 data-heading-alias="dont" id="hd6640c83f052">Don't</h2>
+<ul>
+<li><strong>不要直接帮用户写一整份 starter.py</strong>——他们需要练 mental model、不是拿到答案 copy-paste。指他们 fork <a href="../../reference/source-readings.html#sdda35c29187d">Stage 3 starters</a> 后改 <code>TOOLS_SPEC</code>。</li>
+<li><strong>症状已明确时不要重问 Step 1</strong>——确认路线后继续；不明确才提问。</li>
+<li><strong>不要假设 user 用哪个 SDK 或 model</strong>——先确认当前 tool-calling 支持。</li>
+<li><strong>不要把 schema-design 规则背一遍</strong>——<a href="../../reference/source-readings.html#s44331aa2d2af">schema cheatsheet</a> 已经写好，指过去就行。</li>
+</ul>
+<span id="references"></span><h2 data-heading-alias="references" id="h69824d3b0e70">References</h2>
+<ul>
+<li><a href="examples--stage-5--tool-calling-tutor--references--debug-flowchart.zh-Hans.md.html">debug-flowchart.zh-Hans.md</a> — “为什么 LLM 不调用我的 tool”4-symptom 诊断</li>
+<li><a href="examples--stage-5--tool-calling-tutor--references--schema-evolution.zh-Hans.md.html">schema-evolution.zh-Hans.md</a> — Bad → Good schema worked example（4 个改进步骤）</li>
+<li><a href="examples--stage-5--tool-calling-tutor--references--sdk-diff.zh-Hans.md.html">sdk-diff.zh-Hans.md</a> — Anthropic vs OpenAI-compat 并排表</li>
+<li><a href="../../reference/source-readings.html#s44331aa2d2af">schema-design-cheatsheet.zh-Hans.md</a> — 5 条黄金规则 + 5 个 anti-pattern</li>
+<li><a href="../../reference/source-readings.html#sf693d2ff7c55">glossary.zh-Hans.md</a> — Agent / Tool Use / ReAct 名词定义</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

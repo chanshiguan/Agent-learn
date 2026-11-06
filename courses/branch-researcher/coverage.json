@@ -1,0 +1,62 @@
+[
+  {
+    "requirement": "原论文三问",
+    "lesson": "lessons/03-workshop.html#h60b9ffd9005c",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h0d516681cbc8"
+  },
+  {
+    "requirement": "引用与证据核对",
+    "lesson": "lessons/03-workshop.html#h24bb8409be9e",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h0d516681cbc8"
+  },
+  {
+    "requirement": "完整原题与复现参考",
+    "lesson": "lessons/03-workshop.html#hb54bf69dc492",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h0d516681cbc8"
+  },
+  {
+    "requirement": "Notebook/Zotero/DVC/Zenodo/PaperQA",
+    "lesson": "lessons/03-workshop.html#h4e1502014496",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h0d516681cbc8"
+  },
+  {
+    "requirement": "学生提交与量规",
+    "lesson": "lessons/03-workshop.html#h0d516681cbc8",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#h0d516681cbc8"
+  },
+  {
+    "requirement": "研究必读操作：Notebook 与 Zotero：先保证来源可回到原位置",
+    "lesson": "lessons/04-reproducibility.html#hab4f06ea431b",
+    "example": "examples/repro-demo/measure.py",
+    "assessment": "lessons/04-reproducibility.html#h71438fcce066"
+  },
+  {
+    "requirement": "研究必读操作：最小可复现实验：代码、数据、指标分开",
+    "lesson": "lessons/04-reproducibility.html#h49e1dc914b84",
+    "example": "examples/repro-demo/measure.py",
+    "assessment": "lessons/04-reproducibility.html#h71438fcce066"
+  },
+  {
+    "requirement": "研究必读操作：可选 DVC 路径：完整管线",
+    "lesson": "lessons/04-reproducibility.html#h1563b1dbc9cf",
+    "example": "examples/repro-demo/measure.py",
+    "assessment": "lessons/04-reproducibility.html#h71438fcce066"
+  },
+  {
+    "requirement": "研究必读操作：实验跟踪、发布与人工筛选",
+    "lesson": "lessons/04-reproducibility.html#h5c8124c436e6",
+    "example": "examples/repro-demo/measure.py",
+    "assessment": "lessons/04-reproducibility.html#h71438fcce066"
+  },
+  {
+    "requirement": "研究必读操作：独立练习与参考标准",
+    "lesson": "lessons/04-reproducibility.html#h71438fcce066",
+    "example": "examples/repro-demo/measure.py",
+    "assessment": "lessons/04-reproducibility.html#h71438fcce066"
+  }
+]

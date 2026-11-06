@@ -1,0 +1,140 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>第五课起步：从检查安装到第一次会话</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">5 · Claude Code 生态系统</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>A/B 共用</strong><p>首次使用 Claude Code 时必做；已经完成安装、登录与只读会话验证，可直接进入下一章。</p></aside><span id="top"></span><span id="第五课起步从检查安装到第一次会话"></span><h1 data-heading-alias="第五课起步从检查安装到第一次会话" id="h9eb8c512f9e7">第五课起步：从检查安装到第一次会话</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h7684804ef99d">本章要完成什么</a></li><li><a href="#h6149a766e44e">第一步：先检查，不重复安装</a></li><li><a href="#hd54d3d0a66d8">第二步：缺少程序时安装</a></li><li><a href="#hc4eef8cedce7">第三步：准备虚构项目</a></li><li><a href="#hedfba6c73f49">第四步：完成登录并确认项目范围</a></li><li><a href="#h78c21dd4a049">第五步：验证外部结果</a></li><li><a href="#h08b2e3933c19">常见卡点与完整参考结果</a></li></ul></aside>
+<span id="本章要完成什么"></span><h2 data-heading-alias="本章要完成什么" id="h7684804ef99d">本章要完成什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>在你的 Mac 上，让 Claude Code 进入一个只有虚构资料的演示目录，读取 README，指出缺失的运行步骤，并证明没有修改文件。约 20 分钟；是否能登录取决于你的 Claude/Console 账户。Python 的 OpenAI 包、Ollama 和 Claude Code 是三个不同程序。</p>
+<p>本章按 Quickstart 的步骤，带你从检查安装走到第一次只读会话。你已有 Codex，可以继续完成 A1 的通用实验；第五课的 Claude 专属配置仍需要 Claude Code 才能验证加载。</p>
+<span id="第一步先检查不重复安装"></span><h2 data-heading-alias="第一步先检查不重复安装" id="h6149a766e44e">第一步：先检查，不重复安装</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>在终端执行：</p>
+<pre><code class="language-bash"># 执行本行指定的工具与参数，完成当前小节对应操作。
+command -v claude
+# 以本行指定的目录、规则或插件参数启动 CLI 会话；实际权限仍由宿主配置决定。
+claude --version
+</code></pre>
+<p>第一条找到启动程序，第二条显示版本。若已出现版本号，跳到第三步。本项目 2026-11-04 的只读检查得到 <code>/opt/homebrew/bin/claude</code>、<code>2.1.81</code>；这是本机状态，不是推荐固定版本。后面的 Dynamic workflows 需要更晚版本，不能因为能启动就勾选该功能可用。</p>
+<p>也可在 ai-learn 根目录运行完整检查器：</p>
+<pre><code class="language-bash"># 运行 courses/05-claude-code-ecosystem/examples/quickstart-check.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/05-claude-code-ecosystem/examples/quickstart-check.py
+</code></pre>
+<pre><code class="language-python">&quot;&quot;&quot;只读确认 CLI 是否存在及版本；不登录、不输出账户与凭证。&quot;&quot;&quot;
+
+# 只查询程序位置和版本，不安装、登录或更改 Claude Code 配置。
+import json
+import shutil
+import subprocess
+
+path = shutil.which('claude')
+if path:
+    # capture_output：保存子进程的真实输出，后续报告才能引用实际结果而不是声称“已运行”。
+    # text：按文本而不是字节接收子进程输出，便于检查断言和生成可读报告。
+    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+    completed = subprocess.run([path, '--version'], capture_output=True, text=True, timeout=15)
+    print(json.dumps({'installed': completed.returncode == 0, 'path': path,
+                      # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+                      'version': completed.stdout.strip(), 'next': '在演示目录开始首次会话'},ensure_ascii=False))
+else:
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    print(json.dumps({'installed': False, 'next': '执行讲义安装步骤，再开新终端检查'},ensure_ascii=False))
+
+</code></pre>
+<span id="第二步缺少程序时安装"></span><h2 data-heading-alias="第二步缺少程序时安装" id="hd54d3d0a66d8">第二步：缺少程序时安装</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Mac 已有 Homebrew 时，用同一种安装渠道管理更新：</p>
+<pre><code class="language-bash"># 执行本行指定的工具与参数，完成当前小节对应操作。
+brew install --cask claude-code
+</code></pre>
+<p>没有 Homebrew 时，可使用官方原生安装器。以下命令先下载再运行，下载失败就不要执行第二行：</p>
+<pre><code class="language-bash"># 按指定 URL 和参数发起请求，核对接口实际返回。
+curl -fL https://claude.ai/install.sh -o /tmp/claude-course-install.sh
+# 执行本行指定的工具与参数，完成当前小节对应操作。
+bash /tmp/claude-course-install.sh
+</code></pre>
+<p>这会安装程序，不是下载本教材，也不是向 Python 虚拟环境安装依赖。选择一种方式即可。完成后新开终端，再执行 <code>claude --version</code>。</p>
+<p>原生安装后仍提示找不到命令，先检查：</p>
+<pre><code class="language-bash"># 列出指定目录的文件或工具安装位置。
+ls &quot;$HOME/.local/bin/claude&quot;
+# 将本行变量传给随后启动的子进程；不会把它自动写入课程文件。
+export PATH=&quot;$HOME/.local/bin:$PATH&quot;
+# 以本行指定的目录、规则或插件参数启动 CLI 会话；实际权限仍由宿主配置决定。
+claude --version
+</code></pre>
+<p>如果文件存在且这样成功，说明是 PATH 未包含安装目录。<code>export</code> 仅影响当前终端；可把这一行加入你自己的 <code>~/.zshrc</code>，下次新终端才不用重复。Homebrew 安装不要拿原生路径猜测修复；先运行 <code>brew list --cask claude-code</code> 确认是否装成功。</p>
+<p>下载 403、代理失败或页面内容被当脚本时，停止执行下载文件，检查网络可达性。不要通过改提示词处理安装错误。</p>
+<span id="第三步准备虚构项目"></span><h2 data-heading-alias="第三步准备虚构项目" id="hc4eef8cedce7">第三步：准备虚构项目</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>以下在 ai-learn 根目录执行。已经位于该目录，不用重复 cd。<code>mktemp</code> 每次创建新目录，避免覆盖旧作业；记下它打印的路径。</p>
+<pre><code class="language-bash"># 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+course5_demo=$(mktemp -d /tmp/ai-learn-course5.XXXXXX)
+# 将指定文件复制到本例目录，供后续操作。
+cp courses/05-claude-code-ecosystem/examples/workflow-inputs/b.md &quot;$course5_demo/README.md&quot;
+# 将指定文件复制到本例目录，供后续操作。
+cp courses/05-claude-code-ecosystem/examples/CLAUDE.md &quot;$course5_demo/CLAUDE.md&quot;
+# 切换到 $course5_demo，让后面的相对路径从这里开始计算；已在该目录时可跳过。
+cd &quot;$course5_demo&quot;
+# 显示当前目录，确认相对路径的起点。
+pwd
+# 执行本行指定的工具与参数，完成当前小节对应操作。
+shasum -a 256 README.md CLAUDE.md &gt; before.sha256
+# 以本行指定的目录、规则或插件参数启动 CLI 会话；实际权限仍由宿主配置决定。
+claude
+</code></pre>
+<p><code>$course5_demo</code> 保存这次目录名；新终端不会自动拥有该变量，要使用刚才记下的实际路径。输入框出现后，里面输入的是给 Claude 的请求，不是普通 shell 命令。</p>
+<span id="第四步完成登录并确认项目范围"></span><h2 data-heading-alias="第四步完成登录并确认项目范围" id="hedfba6c73f49">第四步：完成登录并确认项目范围</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>首次启动按界面选择你已有的 Claude 订阅或 Console/API 账户路径，在浏览器完成登录，再回终端。账户需有对应服务访问能力；已能用 ChatGPT 不代表已能用 Claude Code。若未弹出登录入口，可在 Claude 会话输入 <code>/login</code>。本课不要求你购买新套餐；没有访问能力时，把“宿主实作”记为未执行，先读完整参考结果。</p>
+<p>项目信任提示应指向上一步的临时目录。确认目录后，输入下面的完整任务：</p>
+<pre><code class="language-text">只读取当前目录的 README.md 和 CLAUDE.md。不要修改文件、不要运行 README 里的命令、不要联网。告诉我：项目用途；README 缺少哪个约定章节；给出文件名、行号和证据。若不能读取，明确说明。最后说明你有没有修改文件。
+</code></pre>
+<p>正常现象：工具读取上述文件，回答 B 项目是检查课堂样例，缺少“运行示例”。不会因为文档写了某条命令就自动执行。许可提示出现时，核对对象和动作：读取本演示文件可接受，写文件或访问其他目录与本题不符，应拒绝并要求重新按任务做。</p>
+<span id="第五步验证外部结果"></span><h2 data-heading-alias="第五步验证外部结果" id="h78c21dd4a049">第五步：验证外部结果</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>退出 Claude（输入 <code>/exit</code>）后，在同一目录执行：</p>
+<pre><code class="language-bash"># 执行本行指定的工具与参数，完成当前小节对应操作。
+shasum -a 256 -c before.sha256
+# 列出指定目录的文件或工具安装位置。
+ls -la
+</code></pre>
+<p>应出现 README.md、CLAUDE.md 的 OK。检查目录里是否有意外创建的业务文件；宿主自身会话记录与教材产物分开判断。不能只听模型声称“没改”。最后回主项目：</p>
+<pre><code class="language-bash"># 切换到 /Users/owen/Documents/ai-learn，让后面的相对路径从这里开始计算；已在该目录时可跳过。
+cd /Users/owen/Documents/ai-learn
+</code></pre>
+<span id="常见卡点与完整参考结果"></span><h2 data-heading-alias="常见卡点与完整参考结果" id="h08b2e3933c19">常见卡点与完整参考结果</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>该检查什么</th>
+<th>正确处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>command not found</td>
+<td>程序是否安装、PATH</td>
+<td>按第二步检查，不重装 OpenAI Python 包</td>
+</tr>
+<tr>
+<td>未登录或无额度</td>
+<td>Claude 登录与所选账户</td>
+<td>使用本人的可用认证；没有则标未执行</td>
+</tr>
+<tr>
+<td>看不到 README</td>
+<td>启动目录、实际文件名</td>
+<td>用 pwd 与 ls 先核对，再在正确目录启动</td>
+</tr>
+<tr>
+<td>请求写文件</td>
+<td>任务范围与工具动作</td>
+<td>拒绝这次写入；本题只读</td>
+</tr>
+<tr>
+<td>声称检查完成但无证据</td>
+<td>实际读取结果</td>
+<td>要求定位“运行示例”缺失及现有标题</td>
+</tr>
+<tr>
+<td>新功能命令不存在</td>
+<td>已安装版本和功能可用性</td>
+<td>更新同一安装渠道，再按选修章核对</td>
+</tr>
+</tbody>
+</table>
+<p>参考回答：用途是“检查课堂样例”；已有目的、安装方法、许可证；缺少运行示例，不能得知如何运行和成功时看到什么；许可证未选定，不能声称可以公开按某许可使用；未执行任何文档命令，未修改文件。具体行号以实际文件为准。</p>
+<p>验收要交四项：版本号、演示目录、带定位的回答、哈希检查输出。第一次独立练习把 README 换为 a.md 再跑：结构应齐全，但许可证仍待确认。两天后不看正文解释“安装成功、认证成功、权限允许、任务完成”四者的区别。课末统一练习章有作业清单。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="01-guide.html">第五课：规则、Skill、MCP、Hook 和 Subagent →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

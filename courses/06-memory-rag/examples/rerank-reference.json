@@ -1,0 +1,3948 @@
+{
+  "embedding": "字符计数教学基线",
+  "reranker": "基于问题与正文的规则基线",
+  "candidate_k": 8,
+  "answer_k": 5,
+  "generation": "完整证据摘录基线，没有模型生成",
+  "cost": {
+    "external_paid_calls": 0,
+    "local_generation_calls": 0,
+    "local_embedding_requests": 0,
+    "hardware_cost": "未估算"
+  },
+  "scope": "公开开发题；规则按开发样例设计，不是盲测或通用语义效果",
+  "summary": {
+    "A": {
+      "mean_recall": 1.0,
+      "mrr": 0.972,
+      "empty_cases_correct": 1
+    },
+    "B": {
+      "mean_recall": 1.0,
+      "mrr": 1.0,
+      "empty_cases_correct": 1
+    },
+    "C": {
+      "mean_recall": 1.0,
+      "mrr": 1.0,
+      "empty_cases_correct": 1
+    }
+  },
+  "rows": [
+    {
+      "variant": "A",
+      "question": "课程几点开始",
+      "candidates": [
+        "schedule",
+        "materials",
+        "place",
+        "refund",
+        "contact",
+        "recording",
+        "exception",
+        "signup"
+      ],
+      "selected": [
+        "schedule",
+        "materials",
+        "place",
+        "refund",
+        "contact"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n课程咨询电话为虚构号码000-1234。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.478
+    },
+    {
+      "variant": "B",
+      "question": "课程几点开始",
+      "candidates": [
+        "schedule",
+        "place",
+        "materials",
+        "refund",
+        "signup",
+        "contact",
+        "recording",
+        "parking"
+      ],
+      "selected": [
+        "schedule",
+        "place",
+        "materials",
+        "refund",
+        "signup"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n课程地点为教学楼二层201教室。\n报名成功可下载本课程电子资料，不含其他课程。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.176
+    },
+    {
+      "variant": "C",
+      "question": "课程几点开始",
+      "candidates": [
+        "schedule",
+        "place",
+        "materials",
+        "refund",
+        "signup",
+        "contact",
+        "recording",
+        "parking"
+      ],
+      "selected": [
+        "schedule",
+        "place",
+        "refund",
+        "contact",
+        "materials"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n课程地点为教学楼二层201教室。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.23
+    },
+    {
+      "variant": "A",
+      "question": "报名截止时间",
+      "candidates": [
+        "signup",
+        "invoice",
+        "exception",
+        "materials",
+        "refund"
+      ],
+      "selected": [
+        "signup",
+        "invoice",
+        "exception",
+        "materials",
+        "refund"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名成功可下载本课程电子资料，不含其他课程。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.175
+    },
+    {
+      "variant": "B",
+      "question": "报名截止时间",
+      "candidates": [
+        "signup",
+        "invoice",
+        "materials",
+        "refund",
+        "exception",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "signup",
+        "invoice",
+        "materials",
+        "refund",
+        "exception"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n报名成功可下载本课程电子资料，不含其他课程。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.216
+    },
+    {
+      "variant": "C",
+      "question": "报名截止时间",
+      "candidates": [
+        "signup",
+        "invoice",
+        "materials",
+        "refund",
+        "exception",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "signup",
+        "invoice",
+        "materials",
+        "food",
+        "recording"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n报名成功可下载本课程电子资料，不含其他课程。\n课堂不提供午餐，饮水机位于门厅。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.346
+    },
+    {
+      "variant": "A",
+      "question": "未满18岁可以报名吗",
+      "candidates": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording"
+      ],
+      "selected": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n报名成功可下载本课程电子资料，不含其他课程。\n发票在付款后7天内发到报名邮箱。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 2.988
+    },
+    {
+      "variant": "B",
+      "question": "未满18岁可以报名吗",
+      "candidates": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording",
+        "refund"
+      ],
+      "selected": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording",
+        "refund"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n报名成功可下载本课程电子资料，不含其他课程。\n发票在付款后7天内发到报名邮箱。\n本课程不提供录像，缺席者可以下载讲义。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.108
+    },
+    {
+      "variant": "C",
+      "question": "未满18岁可以报名吗",
+      "candidates": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording",
+        "refund"
+      ],
+      "selected": [
+        "signup",
+        "materials",
+        "invoice",
+        "recording",
+        "refund"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n报名成功可下载本课程电子资料，不含其他课程。\n发票在付款后7天内发到报名邮箱。\n本课程不提供录像，缺席者可以下载讲义。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.17
+    },
+    {
+      "variant": "A",
+      "question": "提前取消退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "signup"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.006
+    },
+    {
+      "variant": "B",
+      "question": "提前取消退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup",
+        "invoice",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "signup",
+        "invoice",
+        "food"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n课堂不提供午餐，饮水机位于门厅。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.167
+    },
+    {
+      "variant": "C",
+      "question": "提前取消退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup",
+        "invoice",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "signup",
+        "food",
+        "invoice"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n课堂不提供午餐，饮水机位于门厅。\n发票在付款后7天内发到报名邮箱。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.151
+    },
+    {
+      "variant": "A",
+      "question": "主办方取消课程退款",
+      "candidates": [
+        "exception",
+        "refund",
+        "materials",
+        "contact",
+        "place",
+        "recording",
+        "schedule"
+      ],
+      "selected": [
+        "exception",
+        "refund",
+        "materials",
+        "contact",
+        "place"
+      ],
+      "gold": [
+        "exception",
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名成功可下载本课程电子资料，不含其他课程。\n课程咨询电话为虚构号码000-1234。\n课程地点为教学楼二层201教室。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.049
+    },
+    {
+      "variant": "B",
+      "question": "主办方取消课程退款",
+      "candidates": [
+        "exception",
+        "refund",
+        "materials",
+        "contact",
+        "place",
+        "recording",
+        "schedule",
+        "invoice"
+      ],
+      "selected": [
+        "exception",
+        "refund",
+        "materials",
+        "contact",
+        "place"
+      ],
+      "gold": [
+        "exception",
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名成功可下载本课程电子资料，不含其他课程。\n课程咨询电话为虚构号码000-1234。\n课程地点为教学楼二层201教室。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.198
+    },
+    {
+      "variant": "C",
+      "question": "主办方取消课程退款",
+      "candidates": [
+        "exception",
+        "refund",
+        "materials",
+        "contact",
+        "place",
+        "recording",
+        "schedule",
+        "invoice"
+      ],
+      "selected": [
+        "exception",
+        "refund",
+        "contact",
+        "materials",
+        "place"
+      ],
+      "gold": [
+        "exception",
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.25
+    },
+    {
+      "variant": "A",
+      "question": "报读截止时间",
+      "candidates": [
+        "exception",
+        "signup",
+        "refund"
+      ],
+      "selected": [
+        "exception",
+        "signup",
+        "refund"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.246
+    },
+    {
+      "variant": "B",
+      "question": "报读截止时间",
+      "candidates": [
+        "signup",
+        "refund",
+        "exception",
+        "invoice",
+        "materials",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "signup",
+        "refund",
+        "exception",
+        "invoice",
+        "materials"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n发票在付款后7天内发到报名邮箱。\n报名成功可下载本课程电子资料，不含其他课程。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.593
+    },
+    {
+      "variant": "C",
+      "question": "报读截止时间",
+      "candidates": [
+        "signup",
+        "refund",
+        "exception",
+        "invoice",
+        "materials",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "signup",
+        "invoice",
+        "materials",
+        "food",
+        "recording"
+      ],
+      "gold": [
+        "signup"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n报名成功可下载本课程电子资料，不含其他课程。\n课堂不提供午餐，饮水机位于门厅。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.575
+    },
+    {
+      "variant": "A",
+      "question": "火星天气",
+      "candidates": [
+        "invoice"
+      ],
+      "selected": [
+        "invoice"
+      ],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": false,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 2.952
+    },
+    {
+      "variant": "B",
+      "question": "火星天气",
+      "candidates": [
+        "invoice",
+        "signup"
+      ],
+      "selected": [
+        "invoice",
+        "signup"
+      ],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": false,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.091
+    },
+    {
+      "variant": "C",
+      "question": "火星天气",
+      "candidates": [
+        "invoice",
+        "signup"
+      ],
+      "selected": [
+        "invoice",
+        "signup"
+      ],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": false,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.104
+    },
+    {
+      "variant": "A",
+      "question": "Bob私人预约编号",
+      "candidates": [],
+      "selected": [],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": true,
+      "evidence": [],
+      "answer": {
+        "claims": [],
+        "answer": "资料不足，无法回答。",
+        "review": "REFUSED"
+      },
+      "milliseconds": 0.003
+    },
+    {
+      "variant": "B",
+      "question": "Bob私人预约编号",
+      "candidates": [],
+      "selected": [],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": true,
+      "evidence": [],
+      "answer": {
+        "claims": [],
+        "answer": "资料不足，无法回答。",
+        "review": "REFUSED"
+      },
+      "milliseconds": 0.002
+    },
+    {
+      "variant": "C",
+      "question": "Bob私人预约编号",
+      "candidates": [],
+      "selected": [],
+      "gold": [],
+      "candidate_recall": null,
+      "hit": null,
+      "recall": null,
+      "reciprocal_rank": 0,
+      "empty_correct": true,
+      "evidence": [],
+      "answer": {
+        "claims": [],
+        "answer": "资料不足，无法回答。",
+        "review": "REFUSED"
+      },
+      "milliseconds": 0.002
+    },
+    {
+      "variant": "A",
+      "question": "课程几点结束",
+      "candidates": [
+        "schedule",
+        "materials",
+        "place",
+        "contact",
+        "recording",
+        "refund",
+        "exception"
+      ],
+      "selected": [
+        "schedule",
+        "materials",
+        "place",
+        "contact",
+        "recording"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。\n课程咨询电话为虚构号码000-1234。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.185
+    },
+    {
+      "variant": "B",
+      "question": "课程几点结束",
+      "candidates": [
+        "schedule",
+        "materials",
+        "place",
+        "contact",
+        "recording",
+        "refund",
+        "exception",
+        "food"
+      ],
+      "selected": [
+        "schedule",
+        "materials",
+        "place",
+        "contact",
+        "recording"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。\n课程咨询电话为虚构号码000-1234。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.089
+    },
+    {
+      "variant": "C",
+      "question": "课程几点结束",
+      "candidates": [
+        "schedule",
+        "materials",
+        "place",
+        "contact",
+        "recording",
+        "refund",
+        "exception",
+        "food"
+      ],
+      "selected": [
+        "schedule",
+        "place",
+        "contact",
+        "exception",
+        "materials"
+      ],
+      "gold": [
+        "schedule"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          }
+        ],
+        "answer": "入门课程每周六上午09:00开始，12:00结束。\n课程地点为教学楼二层201教室。\n课程咨询电话为虚构号码000-1234。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名成功可下载本课程电子资料，不含其他课程。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.211
+    },
+    {
+      "variant": "A",
+      "question": "提前多少小时取消全额退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup",
+        "parking"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "signup",
+        "parking"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n停车场周六08:00开放，停车每小时5元。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.204
+    },
+    {
+      "variant": "B",
+      "question": "提前多少小时取消全额退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup",
+        "parking",
+        "invoice",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "signup",
+        "parking",
+        "invoice"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n停车场周六08:00开放，停车每小时5元。\n发票在付款后7天内发到报名邮箱。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.347
+    },
+    {
+      "variant": "C",
+      "question": "提前多少小时取消全额退款",
+      "candidates": [
+        "refund",
+        "exception",
+        "signup",
+        "parking",
+        "invoice",
+        "food",
+        "recording"
+      ],
+      "selected": [
+        "refund",
+        "exception",
+        "parking",
+        "signup",
+        "food"
+      ],
+      "gold": [
+        "refund"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          }
+        ],
+        "answer": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n停车场周六08:00开放，停车每小时5元。\n报名须在开课前一天18:00前提交，满18岁可报名。\n课堂不提供午餐，饮水机位于门厅。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.359
+    },
+    {
+      "variant": "A",
+      "question": "主办方取消不足24小时能退款吗",
+      "candidates": [
+        "exception",
+        "refund"
+      ],
+      "selected": [
+        "exception",
+        "refund"
+      ],
+      "gold": [
+        "exception"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 2.995
+    },
+    {
+      "variant": "B",
+      "question": "主办方取消不足24小时能退款吗",
+      "candidates": [
+        "exception",
+        "refund",
+        "parking",
+        "invoice",
+        "food",
+        "recording",
+        "materials"
+      ],
+      "selected": [
+        "exception",
+        "refund",
+        "parking",
+        "invoice",
+        "food"
+      ],
+      "gold": [
+        "exception"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n停车场周六08:00开放，停车每小时5元。\n发票在付款后7天内发到报名邮箱。\n课堂不提供午餐，饮水机位于门厅。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.249
+    },
+    {
+      "variant": "C",
+      "question": "主办方取消不足24小时能退款吗",
+      "candidates": [
+        "exception",
+        "refund",
+        "parking",
+        "invoice",
+        "food",
+        "recording",
+        "materials"
+      ],
+      "selected": [
+        "exception",
+        "refund",
+        "parking",
+        "food",
+        "invoice"
+      ],
+      "gold": [
+        "exception"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          }
+        ],
+        "answer": "主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n停车场周六08:00开放，停车每小时5元。\n课堂不提供午餐，饮水机位于门厅。\n发票在付款后7天内发到报名邮箱。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.381
+    },
+    {
+      "variant": "A",
+      "question": "停车每小时多少钱",
+      "candidates": [
+        "parking",
+        "exception",
+        "refund"
+      ],
+      "selected": [
+        "parking",
+        "exception",
+        "refund"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.104
+    },
+    {
+      "variant": "B",
+      "question": "停车每小时多少钱",
+      "candidates": [
+        "parking",
+        "exception",
+        "refund",
+        "schedule"
+      ],
+      "selected": [
+        "parking",
+        "exception",
+        "refund",
+        "schedule"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n入门课程每周六上午09:00开始，12:00结束。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.334
+    },
+    {
+      "variant": "C",
+      "question": "停车每小时多少钱",
+      "candidates": [
+        "parking",
+        "exception",
+        "refund",
+        "schedule"
+      ],
+      "selected": [
+        "parking",
+        "exception",
+        "refund",
+        "schedule"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n入门课程每周六上午09:00开始，12:00结束。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.194
+    },
+    {
+      "variant": "A",
+      "question": "停车场什么时候开放",
+      "candidates": [
+        "parking",
+        "refund",
+        "exception"
+      ],
+      "selected": [
+        "parking",
+        "refund",
+        "exception"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.114
+    },
+    {
+      "variant": "B",
+      "question": "停车场什么时候开放",
+      "candidates": [
+        "parking",
+        "refund",
+        "exception",
+        "schedule",
+        "signup"
+      ],
+      "selected": [
+        "parking",
+        "refund",
+        "exception",
+        "schedule",
+        "signup"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n入门课程每周六上午09:00开始，12:00结束。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.301
+    },
+    {
+      "variant": "C",
+      "question": "停车场什么时候开放",
+      "candidates": [
+        "parking",
+        "refund",
+        "exception",
+        "schedule",
+        "signup"
+      ],
+      "selected": [
+        "parking",
+        "refund",
+        "exception",
+        "schedule",
+        "signup"
+      ],
+      "gold": [
+        "parking"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "parking",
+          "text": "停车场周六08:00开放，停车每小时5元。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "停车场周六08:00开放，停车每小时5元。",
+            "source_id": "parking"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "停车场周六08:00开放，停车每小时5元。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n主办方取消课程时，不受24小时限制，一律全额退款。\n入门课程每周六上午09:00开始，12:00结束。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.383
+    },
+    {
+      "variant": "A",
+      "question": "报名后能下载其他课程资料吗",
+      "candidates": [
+        "materials",
+        "recording",
+        "signup",
+        "invoice",
+        "contact",
+        "place",
+        "refund",
+        "schedule"
+      ],
+      "selected": [
+        "materials",
+        "recording",
+        "signup",
+        "invoice",
+        "contact"
+      ],
+      "gold": [
+        "materials"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          }
+        ],
+        "answer": "报名成功可下载本课程电子资料，不含其他课程。\n本课程不提供录像，缺席者可以下载讲义。\n报名须在开课前一天18:00前提交，满18岁可报名。\n发票在付款后7天内发到报名邮箱。\n课程咨询电话为虚构号码000-1234。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.332
+    },
+    {
+      "variant": "B",
+      "question": "报名后能下载其他课程资料吗",
+      "candidates": [
+        "materials",
+        "recording",
+        "invoice",
+        "signup",
+        "contact",
+        "place",
+        "refund",
+        "schedule"
+      ],
+      "selected": [
+        "materials",
+        "recording",
+        "invoice",
+        "signup",
+        "contact"
+      ],
+      "gold": [
+        "materials"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          }
+        ],
+        "answer": "报名成功可下载本课程电子资料，不含其他课程。\n本课程不提供录像，缺席者可以下载讲义。\n发票在付款后7天内发到报名邮箱。\n报名须在开课前一天18:00前提交，满18岁可报名。\n课程咨询电话为虚构号码000-1234。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.48
+    },
+    {
+      "variant": "C",
+      "question": "报名后能下载其他课程资料吗",
+      "candidates": [
+        "materials",
+        "recording",
+        "invoice",
+        "signup",
+        "contact",
+        "place",
+        "refund",
+        "schedule"
+      ],
+      "selected": [
+        "materials",
+        "recording",
+        "invoice",
+        "signup",
+        "contact"
+      ],
+      "gold": [
+        "materials"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          }
+        ],
+        "answer": "报名成功可下载本课程电子资料，不含其他课程。\n本课程不提供录像，缺席者可以下载讲义。\n发票在付款后7天内发到报名邮箱。\n报名须在开课前一天18:00前提交，满18岁可报名。\n课程咨询电话为虚构号码000-1234。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.511
+    },
+    {
+      "variant": "A",
+      "question": "课程咨询电话",
+      "candidates": [
+        "contact",
+        "materials",
+        "place",
+        "recording",
+        "refund",
+        "schedule",
+        "exception"
+      ],
+      "selected": [
+        "contact",
+        "materials",
+        "place",
+        "recording",
+        "refund"
+      ],
+      "gold": [
+        "contact"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。\n本课程不提供录像，缺席者可以下载讲义。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.168
+    },
+    {
+      "variant": "B",
+      "question": "课程咨询电话",
+      "candidates": [
+        "contact",
+        "materials",
+        "place",
+        "recording",
+        "refund",
+        "schedule",
+        "exception",
+        "food"
+      ],
+      "selected": [
+        "contact",
+        "materials",
+        "place",
+        "recording",
+        "refund"
+      ],
+      "gold": [
+        "contact"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。\n课程地点为教学楼二层201教室。\n本课程不提供录像，缺席者可以下载讲义。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.403
+    },
+    {
+      "variant": "C",
+      "question": "课程咨询电话",
+      "candidates": [
+        "contact",
+        "materials",
+        "place",
+        "recording",
+        "refund",
+        "schedule",
+        "exception",
+        "food"
+      ],
+      "selected": [
+        "contact",
+        "materials",
+        "exception",
+        "place",
+        "recording"
+      ],
+      "gold": [
+        "contact"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。\n主办方取消课程时，不受24小时限制，一律全额退款。\n课程地点为教学楼二层201教室。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.32
+    },
+    {
+      "variant": "A",
+      "question": "课程地点在哪层哪个教室",
+      "candidates": [
+        "place",
+        "materials",
+        "refund",
+        "contact",
+        "recording",
+        "schedule"
+      ],
+      "selected": [
+        "place",
+        "materials",
+        "refund",
+        "contact",
+        "recording"
+      ],
+      "gold": [
+        "place"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "课程地点为教学楼二层201教室。\n报名成功可下载本课程电子资料，不含其他课程。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n课程咨询电话为虚构号码000-1234。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.059
+    },
+    {
+      "variant": "B",
+      "question": "课程地点在哪层哪个教室",
+      "candidates": [
+        "place",
+        "refund",
+        "materials",
+        "contact",
+        "recording",
+        "schedule",
+        "signup",
+        "invoice"
+      ],
+      "selected": [
+        "place",
+        "refund",
+        "materials",
+        "contact",
+        "recording"
+      ],
+      "gold": [
+        "place"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "课程地点为教学楼二层201教室。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名成功可下载本课程电子资料，不含其他课程。\n课程咨询电话为虚构号码000-1234。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.2
+    },
+    {
+      "variant": "C",
+      "question": "课程地点在哪层哪个教室",
+      "candidates": [
+        "place",
+        "refund",
+        "materials",
+        "contact",
+        "recording",
+        "schedule",
+        "signup",
+        "invoice"
+      ],
+      "selected": [
+        "place",
+        "refund",
+        "contact",
+        "materials",
+        "recording"
+      ],
+      "gold": [
+        "place"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "place",
+          "text": "课程地点为教学楼二层201教室。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课程地点为教学楼二层201教室。",
+            "source_id": "place"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "课程地点为教学楼二层201教室。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n课程咨询电话为虚构号码000-1234。\n报名成功可下载本课程电子资料，不含其他课程。\n本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.316
+    },
+    {
+      "variant": "A",
+      "question": "课程提供午餐吗",
+      "candidates": [
+        "food",
+        "recording",
+        "materials",
+        "schedule",
+        "refund",
+        "contact",
+        "place",
+        "exception"
+      ],
+      "selected": [
+        "food",
+        "recording",
+        "materials",
+        "schedule",
+        "refund"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。\n本课程不提供录像，缺席者可以下载讲义。\n报名成功可下载本课程电子资料，不含其他课程。\n入门课程每周六上午09:00开始，12:00结束。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.088
+    },
+    {
+      "variant": "B",
+      "question": "课程提供午餐吗",
+      "candidates": [
+        "food",
+        "recording",
+        "schedule",
+        "materials",
+        "refund",
+        "contact",
+        "place",
+        "signup"
+      ],
+      "selected": [
+        "food",
+        "recording",
+        "schedule",
+        "materials",
+        "refund"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "materials",
+          "text": "报名成功可下载本课程电子资料，不含其他课程。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "报名成功可下载本课程电子资料，不含其他课程。",
+            "source_id": "materials"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。\n本课程不提供录像，缺席者可以下载讲义。\n入门课程每周六上午09:00开始，12:00结束。\n报名成功可下载本课程电子资料，不含其他课程。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.278
+    },
+    {
+      "variant": "C",
+      "question": "课程提供午餐吗",
+      "candidates": [
+        "food",
+        "recording",
+        "schedule",
+        "materials",
+        "refund",
+        "contact",
+        "place",
+        "signup"
+      ],
+      "selected": [
+        "food",
+        "recording",
+        "refund",
+        "schedule",
+        "contact"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "schedule",
+          "text": "入门课程每周六上午09:00开始，12:00结束。"
+        },
+        {
+          "source_id": "contact",
+          "text": "课程咨询电话为虚构号码000-1234。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "入门课程每周六上午09:00开始，12:00结束。",
+            "source_id": "schedule"
+          },
+          {
+            "text": "课程咨询电话为虚构号码000-1234。",
+            "source_id": "contact"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。\n本课程不提供录像，缺席者可以下载讲义。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n入门课程每周六上午09:00开始，12:00结束。\n课程咨询电话为虚构号码000-1234。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.23
+    },
+    {
+      "variant": "A",
+      "question": "饮水机在哪里",
+      "candidates": [
+        "food"
+      ],
+      "selected": [
+        "food"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.117
+    },
+    {
+      "variant": "B",
+      "question": "饮水机在哪里",
+      "candidates": [
+        "food",
+        "invoice",
+        "signup",
+        "refund"
+      ],
+      "selected": [
+        "food",
+        "invoice",
+        "signup",
+        "refund"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。\n发票在付款后7天内发到报名邮箱。\n报名须在开课前一天18:00前提交，满18岁可报名。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.19
+    },
+    {
+      "variant": "C",
+      "question": "饮水机在哪里",
+      "candidates": [
+        "food",
+        "invoice",
+        "signup",
+        "refund"
+      ],
+      "selected": [
+        "food",
+        "invoice",
+        "refund",
+        "signup"
+      ],
+      "gold": [
+        "food"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "food",
+          "text": "课堂不提供午餐，饮水机位于门厅。"
+        },
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "课堂不提供午餐，饮水机位于门厅。",
+            "source_id": "food"
+          },
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "课堂不提供午餐，饮水机位于门厅。\n发票在付款后7天内发到报名邮箱。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.233
+    },
+    {
+      "variant": "A",
+      "question": "发票付款后几天收到",
+      "candidates": [
+        "invoice"
+      ],
+      "selected": [
+        "invoice"
+      ],
+      "gold": [
+        "invoice"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.149
+    },
+    {
+      "variant": "B",
+      "question": "发票付款后几天收到",
+      "candidates": [
+        "invoice",
+        "refund",
+        "signup",
+        "exception"
+      ],
+      "selected": [
+        "invoice",
+        "refund",
+        "signup",
+        "exception"
+      ],
+      "gold": [
+        "invoice"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名须在开课前一天18:00前提交，满18岁可报名。\n主办方取消课程时，不受24小时限制，一律全额退款。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.33
+    },
+    {
+      "variant": "C",
+      "question": "发票付款后几天收到",
+      "candidates": [
+        "invoice",
+        "refund",
+        "signup",
+        "exception"
+      ],
+      "selected": [
+        "invoice",
+        "exception",
+        "refund",
+        "signup"
+      ],
+      "gold": [
+        "invoice"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "invoice",
+          "text": "发票在付款后7天内发到报名邮箱。"
+        },
+        {
+          "source_id": "exception",
+          "text": "主办方取消课程时，不受24小时限制，一律全额退款。"
+        },
+        {
+          "source_id": "refund",
+          "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。"
+        },
+        {
+          "source_id": "signup",
+          "text": "报名须在开课前一天18:00前提交，满18岁可报名。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "发票在付款后7天内发到报名邮箱。",
+            "source_id": "invoice"
+          },
+          {
+            "text": "主办方取消课程时，不受24小时限制，一律全额退款。",
+            "source_id": "exception"
+          },
+          {
+            "text": "取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。",
+            "source_id": "refund"
+          },
+          {
+            "text": "报名须在开课前一天18:00前提交，满18岁可报名。",
+            "source_id": "signup"
+          }
+        ],
+        "answer": "发票在付款后7天内发到报名邮箱。\n主办方取消课程时，不受24小时限制，一律全额退款。\n取消课程须在开课前24小时提出才可全额退款；不足24小时不退款。\n报名须在开课前一天18:00前提交，满18岁可报名。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.307
+    },
+    {
+      "variant": "A",
+      "question": "缺席能看录像吗",
+      "candidates": [
+        "recording"
+      ],
+      "selected": [
+        "recording"
+      ],
+      "gold": [
+        "recording"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.144
+    },
+    {
+      "variant": "B",
+      "question": "缺席能看录像吗",
+      "candidates": [
+        "recording"
+      ],
+      "selected": [
+        "recording"
+      ],
+      "gold": [
+        "recording"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.287
+    },
+    {
+      "variant": "C",
+      "question": "缺席能看录像吗",
+      "candidates": [
+        "recording"
+      ],
+      "selected": [
+        "recording"
+      ],
+      "gold": [
+        "recording"
+      ],
+      "candidate_recall": 1.0,
+      "hit": true,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "empty_correct": null,
+      "evidence": [
+        {
+          "source_id": "recording",
+          "text": "本课程不提供录像，缺席者可以下载讲义。"
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "text": "本课程不提供录像，缺席者可以下载讲义。",
+            "source_id": "recording"
+          }
+        ],
+        "answer": "本课程不提供录像，缺席者可以下载讲义。",
+        "review": "EXTRACT_ONLY"
+      },
+      "milliseconds": 3.269
+    }
+  ]
+}

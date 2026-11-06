@@ -1,0 +1,19 @@
+# 选择示例所用的基础 Python 镜像。
+FROM python:3.11-slim
+# 专用普通用户负责运行任务，避免默认使用 root。
+# 构建镜像时执行这条固定命令，准备依赖或普通用户。
+RUN useradd --create-home --uid 10001 learner
+# 设置后续命令在容器内的工作目录。
+WORKDIR /app
+# 先装固定依赖，再复制业务脚本，代码改动时可复用依赖层。
+# 将明确列出的文件复制到容器指定位置。
+COPY requirements-sdk.txt /app/requirements-sdk.txt
+# 构建镜像时执行这条固定命令，准备依赖或普通用户。
+RUN pip install --no-cache-dir -r requirements-sdk.txt
+# 将明确列出的文件复制到容器指定位置。
+COPY sdk_job.py /app/sdk_job.py
+# 后续以这个普通用户身份运行，避免默认使用 root。
+USER learner
+# 任务目录由运行时挂载；demo 不需要密钥，live 的凭证通过环境注入。
+# 指定容器入口；运行时提供的额外参数会交给此程序。
+ENTRYPOINT ["python", "/app/sdk_job.py"]

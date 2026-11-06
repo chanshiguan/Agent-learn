@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>结业 B：构建并评测一个小型系统</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">结业 B · Agent Builder 结业专题</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="结业-b构建并评测一个小型系统"></span><h1 data-heading-alias="结业-b构建并评测一个小型系统" id="h040b87e4d29a">结业 B：构建并评测一个小型系统</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hbd939d837cf5">原课要求</a></li><li><a href="#hd278acf26428">示范选 RAG 路线</a></li><li><a href="#h522bec6dc72a">所有代码与数据</a></li><li><a href="#h0f2daf568a93">评分器边界</a></li><li><a href="#h0a6804967f42">架构与失败分析</a></li><li><a href="#h91d9b5c26d7c">交付物</a></li></ul></aside>
+<p>把第三至第八课的能力接起来：工具循环负责执行，检索提供证据，评测判断结果，批准与恢复控制动作。先读完整 RAG 示范及评分边界，再换自己的任务和题集。最终交付要同时包含代码、逐题结果和失败分析。</p>
+<span id="原课要求"></span><h2 data-heading-alias="原课要求" id="hbd939d837cf5">原课要求</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>完成 B 线含第 7.5 课的自我检查。题目二选一：至少两个有分工和编排的 Agent，或完整检索加生成 RAG。两者都要有 tool use、CLI/API/chat 任一对外接口、明确评测、失败分析和架构说明。</p>
+<p>Eval suite 至少五个 development 和三个冻结 holdout，保存版本、成功条件、grader、trial 次数、baseline 与逐题结果。不能把手工试了几个问题当完整评测。</p>
+<span id="示范选-rag-路线"></span><h2 data-heading-alias="示范选-rag-路线" id="hd278acf26428">示范选 RAG 路线</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>虚构学习室制度存 documents.json；retrieve 是透明的关键词检索工具；模型实际提出工具请求，程序验证后执行，把结果交回模型生成带来源的答案。CLI 是对外接口。工具最多两次，模型最多四轮，单请求有超时，来源必须来自本次检索。</p>
+<p>这里故意先用简单检索，不依赖向量库，便于你看懂失败。它能处理已登记关键词，遇到未收录的同义词会漏检；这是这个基线的限制：它还不具备语义检索能力。以后可用第六课 embedding 替换 retrieve，再保持其他条件不变比较。</p>
+<span id="所有代码与数据"></span><h2 data-heading-alias="所有代码与数据" id="h522bec6dc72a">所有代码与数据</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>rag_agent.py 包含工具 Schema、检索、真实 Ollama 调用、消息历史、参数验证、终止和引用检查。evaluate.py 读取版本化题集，逐题计时、记成功或错误。没有省略模型接入或评分函数。</p>
+<pre><code class="language-bash"># 运行 courses/capstone-b/examples/rag_agent.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/capstone-b/examples/rag_agent.py &quot;周一几点开放？&quot;
+# 运行 courses/capstone-b/examples/rag_agent.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/capstone-b/examples/rag_agent.py &quot;周一几点开放？&quot; --live
+# 运行 courses/capstone-b/examples/evaluate.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/capstone-b/examples/evaluate.py
+# 运行 courses/capstone-b/examples/evaluate.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/capstone-b/examples/evaluate.py --live --trials 3
+</code></pre>
+<p>第一条是检索摘录基线，没有生成模型；第二条才是完整工具检索加生成。第三条默认 development 基线；第四条真实本地模型进行五题三次，共15次任务，可能较慢。Ollama 需要已运行且有 gemma4:e4b。</p>
+<span id="评分器边界"></span><h2 data-heading-alias="评分器边界" id="h0f2daf568a93">评分器边界</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>评分程序会核对来源、检索轨迹和可信摘录。只有确定符合的摘录自动 PASS；结构错误 FAIL；自由改写进入 NEEDS_REVIEW，由人工逐项核对主体、数字、否定、条件和额外事实。待复核不计入自动通过率。</p>
+<p>本课提供公开教学 holdout 示例；你读过答案、根据它改过实现后，它就不再是盲测。结业时请另建至少三题冻结保留集，记录冻结时间，不用于调参。公开答案用于学习，不得借此宣称严格盲测成绩。</p>
+<span id="架构与失败分析"></span><h2 data-heading-alias="架构与失败分析" id="h0a6804967f42">架构与失败分析</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>CLI → 有界模型循环 → retrieve 工具 → 固定资料 → 证据 → JSON 答案 → 格式/引用检查 → Eval 报告。资料不足拒答；未知工具、错误参数、重复 call ID、超限和截断停止；连接失败报告，不伪造回答。</p>
+<p>当前未包含生产身份认证、多租户、持久审计与向量语义召回。因此，它目前适合作为可运行的教学项目，还不是生产服务。真实结业项目根据问题增加必要措施，并用评测证明收益。</p>
+<span id="交付物"></span><h2 data-heading-alias="交付物" id="h91d9b5c26d7c">交付物</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>程序、架构图或数据流说明、版本化 Eval 报告、运行 README、失败模式及200字内反思。报告分别列 baseline 和候选版本、development 和 holdout、每题每次结果、自动评分与人工核对。最终按问题定义、架构、正确性、评测、韧性、接口文档、反思七维自评。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">结业 B 知识整合 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

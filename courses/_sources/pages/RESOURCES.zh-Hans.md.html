@@ -1,0 +1,140 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RESOURCES.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="相关资源"></span><h1 data-heading-alias="相关资源" id="h029c5c3b67be">相关资源</h1>
+<blockquote>
+<p><a href="README.zh-Hans.md.html">← 返回主路线 README</a></p>
+</blockquote>
+<span id="-先选你现在要做的事"></span><h2 data-heading-alias="-先选你现在要做的事" id="h772e48e0ace1">📌 先选你现在要做的事</h2>
+<p>不用把整份清单读完。先选择你现在要做的事：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">我现在想要……</th>
+<th style="text-align:left">从这里开始</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">从头学习 AI Agent</td>
+<td style="text-align:left"><a href="stages--00-foundations.zh-Hans.md.html">Stage 0</a><br>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left">分清模型怎么学会与怎么被使用</td>
+<td style="text-align:left"><a href="resources--model-training-guide.zh-Hans.md.html">模型训练与调整指南</a><br>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left">查一个不懂的词</td>
+<td style="text-align:left"><a href="resources--glossary.zh-Hans.md.html">Glossary</a><br>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left">选择一个 CLI Agent</td>
+<td style="text-align:left"><a href="resources--cli-agents-guide.zh-Hans.md.html">CLI Agents Guide</a><br>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left">把 Agent 接到外部工具</td>
+<td style="text-align:left"><a href="resources--mcp-skills-catalog.zh-Hans.md.html">MCP / Skills Catalog</a><br>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td style="text-align:left">跟着步骤做一个小项目</td>
+<td style="text-align:left"><a href="resources--cookbook.zh-Hans.md.html">Cookbook</a><br>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p><a id="三个核心用语mcp--skills--plugins"></a></p>
+<span id="-三个核心词mcpskillplugin"></span><h2 data-heading-alias="-三个核心词mcpskillplugin" id="ha7f2a6fddb0b">🧩 三个核心词：MCP、Skill、Plugin</h2>
+<p><strong>MCP（Model Context Protocol）</strong>：让 AI 应用用共同方法连接外部数据和工具的开放协议。它能做什么仍取决于 server、账号权限和用户批准。</p>
+<p><strong>Skill</strong>：一包可重复使用的做事方法，也可以包含脚本、模板和参考资料。不同产品放置和加载 Skill 的方式可能不同。</p>
+<p><strong>Plugin</strong>：某个 host 提供的安装包，可以一起带入 Skill、命令、hook 或 MCP 设置；Plugin 不是 MCP 规范的一部分。</p>
+<p>想亲手做一次，前往 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5</a>。想先分清 App / Connector、CLI Agent 和 MCP Server，查看 <a href="resources--cli-agents-guide.zh-Hans.md.html">CLI Agents Guide</a>。</p>
+<span id="-五个安全起点"></span><h2 data-heading-alias="-五个安全起点" id="hd70ea759a47a">📚 五个安全起点</h2>
+<p>先从官方入口或完整教材开始，再评估社群项目。这里是本项目的编辑评分，不是 GitHub stars。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">起点</th>
+<th style="text-align:left">先学什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sd8397b2e8faf">Official MCP Registry</a><br>⭐⭐⭐⭐⭐</td>
+<td style="text-align:left">找已发布的 MCP Server；安装前仍要检查维护者、权限和来源</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#scb8f252ccaaf">servers</a><br>⭐⭐⭐⭐⭐</td>
+<td style="text-align:left">看 MCP 功能如何实现；这是教学用 reference implementations，不等于 production 推荐</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s82a901da1b9b">skills</a><br>⭐⭐⭐⭐⭐</td>
+<td style="text-align:left">看 Agent Skill 的文件夹、指令和资源如何组合</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sfaa318861b48">github-mcp-server</a><br>⭐⭐⭐⭐⭐</td>
+<td style="text-align:left">通过官方实现了解 OAuth、工具组和 repository 权限</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#see7e0e584b26">hello-agents</a><br>⭐⭐⭐⭐⭐</td>
+<td style="text-align:left">用中文教材系统学习 Agent 原理和实现</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>先少给钥匙</strong>：MCP Server 可能读取、创建、发送或删除真实数据。先用只读、最小权限和测试 workspace；write、send、delete 前保留 <strong>Human Approval（人工批准）</strong>。</p>
+</blockquote>
+<p><a id="daily-tool-integrations"></a>
+<a id="接日常工具常用-mcp-server--skill"></a></p>
+<span id="-常用集成分类"></span><h2 data-heading-alias="-常用集成分类" id="ha9c4d9b22878">🔌 常用集成分类</h2>
+<p>下面直接显示精选项目和官方入口。从你需要的分类开始看；只有更长的补充清单才会收合。</p>
+<div class="reader-resource-catalog" role="region" tabindex="0" aria-label="精选资源表">
+<table align="center">
+<thead><tr><th scope="col">分类</th><th scope="col">项目／文档</th><th scope="col">评分</th><th scope="col">用途</th><th scope="col">限制</th></tr></thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">笔记 / 知识库</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s6328c9f616a7">Notion MCP</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 搜索、创建和更新 Notion 内容</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 hosted MCP；需要用户 OAuth，权限跟随登录用户</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sa5204a5cbb36">mcp-obsidian</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 通过 Obsidian REST API 读写 vault</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群项目；只授予需要的 vault 和写入范围</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sa409b2e62854">Gemini Notebook（旧名 NotebookLM）</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 用自己的来源做摘要、提问和学习</td><td><div data-field="limits"><strong>状态 / 限制：</strong> Google 服务；地区、账号和功能可用性会变化</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s9e0892762e05">notebooklm-py</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 用 Python / CLI 操作 Gemini Notebook</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 非官方接口；Google 改版时可能失效</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="3" align="center" valign="middle" width="80">办公文件</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s82a901da1b9b">skills</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 阅读 Agent Skill 示例与文档工作流</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方示例；不同 Claude surface 可用的内建 Skill 不完全相同</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s5ed847656b3c">claude-office-skills</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 补充 Office 文件自动化流程</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群 Skills；写入前先备份文件并核对输出</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s7c05c0605a20">Google Workspace MCP</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 连接 Gmail、Drive、Docs、Sheets、Slides、Calendar 和 Chat</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 <strong>Developer Preview</strong>；每个产品都有专用 server，并遵循 OAuth 2.0 和用户 / 组织治理</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">开发协作</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sfaa318861b48">GitHub MCP Server</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 查询和处理 issue、PR 与 repository</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 MCP；使用 OAuth 或最小权限 token，高影响写入需人工批准</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s81d0da3191c1">Atlassian Rovo MCP</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 搜索或更新 Jira、Confluence 和 Bitbucket 工作</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 hosted remote MCP；使用 OAuth 2.1，权限跟随登录用户；写入真实数据前要人工批准</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#se75585340ec9">Linear MCP</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 搜索和更新 Linear issue / project</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 hosted remote MCP，使用 Streamable HTTP；提供官方只读选项</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sa8f7a8f2ff93">Slack MCP</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 搜索 Slack、发送消息并管理 canvas</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 官方 MCP；它不只是读操作，发送或修改内容前要先确认</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">研究工作流</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s08b129c9d81a">ai-research-skills</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 把研究步骤整理成可复用的 Skill</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群项目；只安装与当前任务有关的 Skill</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s1837f989d824">research-hub</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 连接 Zotero、Obsidian 和研究工作流</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群 workspace；先检查数据位置、备份和权限</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sac6b7dd812cd">zotero-skills</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 用 Skill 整理 Zotero 数据</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群 Skill；批量修改前先备份 library</td></tr>
+<tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s541fa6779834">codex-delegate</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 把范围清楚的重复工作交给另一个 Agent</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群工具；委派前锁定文件、验收标准和停止条件</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="1" align="center" valign="middle" width="80">中文生态</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s66e7686c80b9">feishu-docx</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="use"><strong>用途：</strong> 在飞书（Lark）文档和 Markdown 之间转换</td><td><div data-field="limits"><strong>状态 / 限制：</strong> 社群工具；先确认文档分享和写入权限</td></tr>
+</tbody>
+</table>
+<p><a id="research-workflow"></a>
+<a id="研究工作流本-repo-维护者出品"></a>
+<a id="topic-awesome-lists"></a>
+<a id="同主题的清单型-awesome-lists"></a></p>
+<details markdown="1">
+<summary>展开更多清单、课程和设计工具</summary>
+<ul>
+<li><a href="../../reference/source-readings.html#sd8397b2e8faf">MCP Registry</a>：已发布 Server 的官方 discovery 入口。</li>
+<li><a href="../../reference/source-readings.html#s61a57c93de29">punkpeye/awesome-mcp-servers</a>：按分类浏览社群 Server；安装前自行审查。</li>
+<li><a href="../../reference/source-readings.html#s7765e623bebd">hesreallyhim/awesome-claude-code</a>：Claude Code 社群资源。</li>
+<li><a href="../../reference/source-readings.html#s9d1ddd1a7f4f">travisvn/awesome-claude-skills</a>：Agent Skills 社群清单。</li>
+<li><a href="../../reference/source-readings.html#sbc0f48f48b73">Canva MCP</a>：官方 remote MCP；功能、方案和权限取决于账号，不写固定工具数。</li>
+<li><a href="resources--courses.zh-Hans.md.html">课程清单</a>：按学习目标挑课程，不把证书当成学位。</li>
+<li><a href="resources--agent-paradigms.zh-Hans.md.html">Agent paradigms</a>：用图比较常见 Agent 形态。</li>
+</ul>
+</details>
+<p><a id="what-else"></a></p>
+<span id="-下一站"></span><h2 data-heading-alias="-下一站" id="hb982e159ffd9">✅ 下一站</h2>
+<ul>
+<li>不懂名词：打开 <a href="resources--glossary.zh-Hans.md.html"><code>resources/glossary.zh-Hans.md</code></a>。</li>
+<li>想直接做：打开 <a href="resources--cookbook.zh-Hans.md.html"><code>resources/cookbook.zh-Hans.md</code></a>。</li>
+<li>想了解训练选择：打开 <a href="resources--model-training-guide.zh-Hans.md.html"><code>resources/model-training-guide.zh-Hans.md</code></a>。</li>
+<li>想贡献或翻译：先看 <a href="resources--style-guide.zh-Hans.md.html"><code>resources/style-guide.zh-Hans.md</code></a> 和 <a href="CONTRIBUTING.zh-Hans.md.html"><code>CONTRIBUTING.zh-Hans.md</code></a>。</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

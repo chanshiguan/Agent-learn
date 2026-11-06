@@ -1,0 +1,138 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-1同一个-agent两个-frameworklanggraph--crewai"></span><h1 data-heading-alias="练习-1同一个-agent两个-frameworklanggraph--crewai" id="hd60942a74624">练习 1：同一个 agent、两个 framework（LangGraph + CrewAI）</h1>
+<p>对应 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4 — Workflow Graph 与 Agent 框架</a> 练习 1。</p>
+<blockquote>
+<p>🎓 <strong>学习模式</strong>：先运行提供的 <code>starter.py</code>（<code>python starter.py</code>），然后只改一个小地方，再重新运行现有测试 <code>python test.py</code>。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 <a href="docs--HOW_TO_USE.md.html"><code>docs/HOW_TO_USE.md</code></a>。</p>
+</blockquote>
+<blockquote>
+<p>📚 <strong>想要 chapter-length 深入版？</strong> 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a> ⭐ 中文圈最完整、章节式 + 16 种 production 能力。<strong>本练习对应 hello-agents 的 framework 对照 / orchestration 章节</strong></li>
+<li><a href="../../reference/source-readings.html#s06e34fb7a09a">LangGraph Quickstart</a> + <a href="../../reference/source-readings.html#s959fcba3f7dc">CrewAI 官方 docs</a></li>
+<li>完整 references 见 <a href="stages--04-agent-frameworks.zh-Hans.md.html#-精选-projects">Stage 4 精选 Projects</a></li>
+</ul>
+</blockquote>
+<span id="任务"></span><h2 data-heading-alias="任务" id="h5253040db864">任务</h2>
+<p>最简单的 search + summarize agent：</p>
+<ul>
+<li>给一个 query（譬如“summarize Taipei”）</li>
+<li>Agent 用 <code>search</code> tool 拿 knowledge base 资料</li>
+<li>LLM 把 search result 摘成 1-2 句</li>
+</ul>
+<p>用 <strong>LangGraph</strong> 跟 <strong>CrewAI</strong> 各做一次、比较风格差异。</p>
+<span id="怎么跑--两条路径--两个-framework"></span><h2 data-heading-alias="怎么跑--两条路径--两个-framework" id="heb4f8fe15c12">怎么跑 — 两条路径 + 两个 framework</h2>
+<blockquote>
+<p>⚠️ <strong>每个练习都要有自己的 Python 3.11 <code>.venv</code>。</strong> 不要把五个 <code>requirements.txt</code> 混在一起安装；它们示范不同 framework，套件需求可能互相冲突。</p>
+</blockquote>
+<span id="path-a默认本机免费"></span><h3 data-heading-alias="path-a默认本机免费" id="hb0c1e438cbd6">Path A（默认、本机免费）</h3>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+
+.\.venv\Scripts\python.exe starter.py # LangGraph + Ollama
+.\.venv\Scripts\python.exe starter_crewai.py # CrewAI + Ollama（对照）
+</code></pre>
+<p>预算：模型 API 是 <strong>$0</strong>；电脑记忆体、电力与下载时间仍有成本。</p>
+<span id="path-banthropic比较云端结果"></span><h3 data-heading-alias="path-banthropic比较云端结果" id="h0e3c77158554">Path B（Anthropic、比较云端结果）</h3>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py # LangGraph + Claude
+</code></pre>
+<p>预设固定型号：<code>claude-haiku-4-5-20251001</code>。Haiku 4.5 为每百万 input tokens <strong>$1</strong>、output tokens <strong>$5</strong>。若一次请求用 2,000 input + 1,000 output tokens，算式是 <code>2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007</code>。Framework 可能调用多次；本练习先把供应商支出上限设为 <strong>$0.05</strong>，不要把估算当帐单保证。</p>
+<details markdown="1">
+<summary>macOS／Linux 指令与查核资讯</summary>
+<pre><code class="language-bash">python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+</code></pre>
+<p>官方来源：<a href="../../reference/source-readings.html#s399cf6369bd3">LangGraph overview</a>｜<a href="../../reference/source-readings.html#s959fcba3f7dc">CrewAI docs</a>｜<a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic pricing</a></p>
+<p><small>套件、model ID、价格与官方连结查核：2026-08-28 UTC。</small></p>
+</details>
+<span id="不花钱验证程序逻辑mock-based"></span><h2 data-heading-alias="不花钱验证程序逻辑mock-based" id="h660f2bbd824f">不花钱验证程序逻辑（mock-based）</h2>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe test.py # LangGraph 行为
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 路径行为
+.\.venv\Scripts\python.exe test_crewai.py # CrewAI 行为
+</code></pre>
+<span id="两个-framework-的并排比较"></span><h2 data-heading-alias="两个-framework-的并排比较" id="h48eb5294d7cd">两个 framework 的并排比较</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LangGraph</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心抽象</td>
+<td><code>StateGraph</code> + node + edge</td>
+<td><code>Agent</code> + <code>Task</code> + <code>Crew</code></td>
+</tr>
+<tr>
+<td>思考方式</td>
+<td>“状态怎么流动”</td>
+<td>“角色怎么分工”</td>
+</tr>
+<tr>
+<td>Loop 控制</td>
+<td>显式 conditional edge</td>
+<td>隐藏在 <code>Crew.kickoff()</code> 里</td>
+</tr>
+<tr>
+<td>Debug 路径</td>
+<td>看 graph state 与 checkpoint</td>
+<td>看 task output 与 verbose log</td>
+</tr>
+<tr>
+<td>适合场景</td>
+<td>需要明确状态与分支的 workflow</td>
+<td>用角色与任务快速表达合作流程</td>
+</tr>
+<tr>
+<td>学习曲线</td>
+<td>中-高</td>
+<td>低</td>
+</tr>
+</tbody>
+</table>
+<span id="langgraph-风格精简"></span><h3 data-heading-alias="langgraph-风格精简" id="h4461caf5ef17">LangGraph 风格（精简）</h3>
+<pre><code class="language-python">g = StateGraph(State)
+g.add_node(&quot;agent&quot;, agent_node)
+g.add_node(&quot;tools&quot;, tool_node)
+g.add_conditional_edges(&quot;agent&quot;, should_continue, {&quot;tools&quot;: &quot;tools&quot;, END: END})
+g.add_edge(&quot;tools&quot;, &quot;agent&quot;)
+</code></pre>
+<p>“我要显式地告诉系统：状态长这样、节点互相连这样、条件分支看 <code>should_continue</code>。”</p>
+<span id="crewai-风格精简"></span><h3 data-heading-alias="crewai-风格精简" id="he1eea48ec44e">CrewAI 风格（精简）</h3>
+<pre><code class="language-python">researcher = Agent(role=&quot;Researcher&quot;, goal=&quot;...&quot;, tools=[search], llm=MODEL)
+task = Task(description=query, expected_output=&quot;...&quot;, agent=researcher)
+crew = Crew(agents=[researcher], tasks=[task])
+crew.kickoff()
+</code></pre>
+<p>“我要描述：这个角色是谁、要完成什么任务、有什么工具。框架自己决定怎么跑。”</p>
+<span id="观察重点"></span><h2 data-heading-alias="观察重点" id="h46b68dad0067">观察重点</h2>
+<ol>
+<li><strong>抽象代价</strong>：CrewAI 隐藏的多、写得少；要 debug 时 stack 比较深</li>
+<li><strong>小 model 友善度</strong>：两边都要实测；角色描述、工具 schema 与任务长度都会影响结果</li>
+<li><strong>可控性</strong>：LangGraph 你能看到每个 state 变化；CrewAI 偏向“结果导向”</li>
+<li><strong>何时选哪个</strong>：需要逐步看状态时先试 LangGraph；想先表达角色分工时先试 CrewAI，再用自己的任务测量</li>
+</ol>
+<span id="常见坑"></span><h2 data-heading-alias="常见坑" id="h6059316299d0">常见坑</h2>
+<ul>
+<li><strong>LangGraph <code>bind_tools</code></strong>：要 <code>llm.bind_tools([search])</code> 才会把 tool schema 给 LLM。没 bind 模型就不知道 tool 存在</li>
+<li><strong>CrewAI LLM 设定</strong>：要用 LiteLLM 格式（譬如 <code>&quot;ollama/qwen2.5:3b&quot;</code>、不是 <code>&quot;qwen2.5:3b&quot;</code>）。写错 provider 前缀可能连到不同后端，所以执行前要打印设定并确认</li>
+<li><strong>CrewAI 结果型别</strong>：<code>crew.kickoff()</code> 回 <code>CrewOutput</code> 对象、<code>str(result)</code> 拿文字。直接 <code>print(result)</code> 有可能拿到 repr</li>
+</ul>
+<span id="想看更聪明的答案"></span><h2 data-heading-alias="想看更聪明的答案" id="hb467a865ca0e">想看更聪明的答案？</h2>
+<pre><code class="language-powershell">$env:MODEL=&quot;claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+</code></pre>
+<span id="延伸"></span><h2 data-heading-alias="延伸" id="h949c392db6d0">延伸</h2>
+<ul>
+<li><strong>改成 streaming</strong>：LangGraph 用 <code>graph.stream(...)</code> 边跑边看 state；CrewAI 在创建 <code>Crew(..., stream=True)</code> 时开启，再调用 <code>crew.kickoff()</code></li>
+<li><strong>加 checkpointing</strong>：LangGraph 加 <code>MemorySaver</code> 就能 time-travel debug</li>
+<li><strong>加 human-in-the-loop</strong>：练习 3 会做</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

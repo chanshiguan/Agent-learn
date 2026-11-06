@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三份必修阅读与协议对照 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 07</p><h1>三份必修阅读与协议对照</h1><p class="lede">在本地读完必要知识；运行结构化输出与 Anthropic 案例。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必读；结合本单元案例理解，并在单元 8 完成基础验收。</p></aside>
+<h2>1. 三份必修阅读已经在哪里</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原路线要求阅读 Ollama Tool Calling、Anthropic How Tool Use Works 和 ReAct 摘要。本课把学习这些材料所需的概念、区别、限制和练习都写入了<a href="../reference/readings.html">本地必修阅读讲义</a>。直接在本项目学习即可，来源名称不表示还要去外站完成作业。</p>
+<p>本地讲义讲解本阶段需要掌握的知识，不包含论文全部实验附录或供应商产品页的逐字翻译。原路线中的扩展仓库作为参考目录保留，按需要查看即可。</p>
+<h2>2. Function Calling 与结构化输出的分界</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>问“查台北的气温”，需要执行查询；问“从这句话抽出城市和温度”，信息已经在句子里。前者主要解决行动与外部数据，后者主要解决答案形状。</p>
+<table><tr><th>方法</th><th>通常约束什么</th><th>不能由它保证什么</th></tr>
+<tr><td>仅在 Prompt 要求 JSON</td><td>给模型一个格式目标</td><td>不能可靠保证合法 JSON</td></tr>
+<tr><td>JSON mode</td><td>通常保证可解析 JSON</td><td>不等于字段符合你的 Schema</td></tr>
+<tr><td>Structured Output</td><td>在服务支持范围内约束结构</td><td>不保证事实正确、完整、没有拒答</td></tr>
+<tr><td>Function Calling</td><td>给出工具名称与参数请求</td><td>不等于已执行、已授权或已成功</td></tr></table>
+<p>两者可以组合：工具先获取可信结果，模型再把最终数据按 Schema 返回。为了先看懂区别，当前抽取示例没有 tools 参数，也没有工具执行入口。</p>
+<section class="code-panel" id="07_structured_output-py"><div class="code-title"><a href="../examples/07_structured_output.py">07_structured_output.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;从给定句子抽取数据，不查天气、不执行工具。&quot;&quot;&quot;
+
+# 结构化输出限制回答字段；解析成功后，仍要检查温度数值和数据来源。
+
+import json
+
+from openai import OpenAI
+import os
+
+# properties：逐字段描述参数结构，帮助模型知道怎样填写请求；这些描述不会自动执行 Python 函数。
+SCHEMA = {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {
+    &quot;city&quot;: {&quot;type&quot;: &quot;string&quot;},
+    &quot;temperature&quot;: {&quot;type&quot;: &quot;number&quot;},
+    # enum：把可选值限制在已实现的分支内，避免出现程序没有处理的拼写或选项。
+    &quot;unit&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;celsius&quot;]},
+}, &quot;required&quot;: [&quot;city&quot;, &quot;temperature&quot;, &quot;unit&quot;], &quot;additionalProperties&quot;: False}
+
+
+def main():
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+    # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+    client = OpenAI(base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;, timeout=60, max_retries=0)
+    response = client.chat.completions.create(
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=os.environ.get(&quot;OLLAMA_MODEL&quot;, &quot;gemma4:e4b&quot;),
+        # messages：传入本轮模型要读取的角色与内容；工具循环还须保留历史请求和结果，模型才知道前一步实际发生了什么。
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;从这句话抽取 JSON，不要查询：台北的示例气温为摄氏 26 度。&quot;}],
+        # response_format：约束回答的外形，便于程序解析；结构正确不代表数值、事实或引用正确。
+        response_format={&quot;type&quot;: &quot;json_schema&quot;, &quot;json_schema&quot;: {&quot;name&quot;: &quot;weather_record&quot;, &quot;schema&quot;: SCHEMA}},
+        # reasoning_effort：配置模型支持的推理行为；这里的值必须与所用服务兼容，不能当作所有模型通用的开关。
+        # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+        # max_tokens：限制本次响应最多生成多少 token，约束延迟和输出规模；达到上限后必须检查是否截断。
+        reasoning_effort=&quot;none&quot;, temperature=0, max_tokens=256,
+    )
+    choice = response.choices[0]
+    if choice.finish_reason != &quot;stop&quot; or choice.message.refusal:
+        raise RuntimeError(&quot;输出截断或拒答，不能当作成功 JSON&quot;)
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    record = json.loads(choice.message.content or &quot;&quot;)
+    if not isinstance(record, dict) or set(record) != {&quot;city&quot;, &quot;temperature&quot;, &quot;unit&quot;}:
+        raise ValueError(&quot;结构错误&quot;)
+    if record != {&quot;city&quot;: &quot;台北&quot;, &quot;temperature&quot;: 26, &quot;unit&quot;: &quot;celsius&quot;}:
+        raise ValueError(&quot;JSON 合法但没有忠实抽取原句&quot;)
+    if type(record[&quot;temperature&quot;]) not in (int, float):
+        raise ValueError(&quot;温度类型错误&quot;)
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    print(json.dumps(record, ensure_ascii=False))
+
+
+if __name__ == &quot;__main__&quot;:
+    # 进入本文件的演示入口。
+    main()</code></pre></section><pre><code># 验证结构化结果与业务约束。
+python 07_structured_output.py</code></pre>
+<p>正常得到 city=台北、temperature=26、unit=celsius。代码还检查这些值是否忠实于输入，所以 JSON 合法但温度写成 30 仍然报错。本课使用本地 Ollama 的兼容结构化接口；不承诺任意 compatible endpoint 都支持相同字段。</p>
+<h2>3. 严格模式不是跨供应商统一开关</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>OpenAI strict 模式在其支持的 Schema 子集中要求对象关闭额外字段，并将属性列入 required；可选含义常用允许 null 表达。这个模式的保证不能仅凭在兼容请求里加 strict=true 就自动获得。</p>
+<p>Anthropic 使用自己的 tools/input_schema 和严格工具约束；Ollama 原生结构化输出使用 format。实际调用前要检查服务及模型支持。本课主线没有使用 OpenAI 云端的 strict 保障，仍会在 Python 中验证结果。</p>
+<h2>4. Anthropic 的完整替代实现</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Claude 消息没有 role=tool：assistant 返回 tool_use 块，你用 user 消息送 tool_result，tool_use_id 关联原请求。工具结果消息紧接对应 assistant，批次里每个请求都要有结果，失败加 is_error=true。</p>
+<p>如果模型返回 thinking 或带签名的内容块，历史中原样保留完整 assistant 内容；只在最终展示时提取 text。不要为了“让历史更干净”过滤并重建原响应。</p>
+<section class="code-panel" id="08_anthropic_agent-py"><div class="code-title"><a href="../examples/08_anthropic_agent.py">08_anthropic_agent.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;Anthropic 原生消息格式。默认离线；只有 --live 才访问云端。&quot;&quot;&quot;
+
+# 阅读顺序：run_claude 的消息循环 → mock_create 的离线响应 → main 的模式选择。
+
+import argparse
+import json
+import os
+import time
+from types import SimpleNamespace
+
+from agent import SYSTEM
+from tools import TOOLS, execute
+
+
+# 保留 assistant 的完整内容块，并用对应的 tool_use_id 返回每个工具结果。
+def run_claude(create, question, model, max_steps=6, max_calls=8, max_tokens=20000, max_seconds=180):
+    tools = [{&quot;name&quot;: tool[&quot;function&quot;][&quot;name&quot;], &quot;description&quot;: tool[&quot;function&quot;][&quot;description&quot;],
+              &quot;input_schema&quot;: tool[&quot;function&quot;][&quot;parameters&quot;]} for tool in TOOLS]
+    # 执行白名单取自本轮公开的工具，防止模型用一个实现中存在、但本轮未授权的函数名绕过限制。
+    allowed = {tool[&quot;name&quot;] for tool in tools}
+    # 这份历史同时保存问题、模型请求和工具观察；下一轮需要它们才能沿用真实结果，保持调用与结果的顺序。
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}]
+    # 跨轮记录已见过的调用 ID，避免模型重复使用同一个 ID 导致结果无法可靠关联。
+    seen_ids = set()
+    # 累计的是实际工具次数，与模型轮数不同；一轮可能同时请求多个工具，所以要单独限额。
+    call_count = 0
+    # 累加服务报告的用量，作为停止依据之一；服务漏报时这里只能观察，不能保证严格账单上限。
+    used_tokens = 0
+    # 记录循环开始的时刻，后面在请求前后检查总耗时，避免每轮各自未超时却总任务无限拖长。
+    started = time.monotonic()
+    for step in range(1, max_steps + 1):
+        if time.monotonic() - started &gt;= max_seconds:
+            raise RuntimeError(&quot;达到时长检查上限&quot;)
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        # max_tokens：限制本次响应最多生成多少 token，约束延迟和输出规模；达到上限后必须检查是否截断。
+        # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+        # messages：传入本轮模型要读取的角色与内容；工具循环还须保留历史请求和结果，模型才知道前一步实际发生了什么。
+        response = create(model=model, max_tokens=1024, system=SYSTEM, tools=tools, messages=messages)
+        # 用量来自服务实际报告，用于成本和预算核对；缺失时保留未知，不自行估算成确定账单。
+        usage = getattr(response, &quot;usage&quot;, None)
+        if usage:
+            used_tokens += usage.input_tokens + usage.output_tokens
+        if used_tokens &gt;= max_tokens or time.monotonic() - started &gt;= max_seconds:
+            raise RuntimeError(&quot;达到 token 或时长检查上限&quot;)
+        if response.stop_reason not in (&quot;tool_use&quot;, &quot;end_turn&quot;):
+            raise RuntimeError(f&quot;停止原因需处理，不能当成成功：{response.stop_reason}&quot;)
+        # 把 SDK 或模型对象转成普通数据，方便保存与返回；不要把对象的调试字符串当作协议 JSON。
+        # exclude_none：省略值为 None 的可选字段，避免把“未返回”误写成一项有内容的协议字段。
+        blocks = [block.model_dump(exclude_none=True) if hasattr(block, &quot;model_dump&quot;) else block
+                  for block in response.content]
+        # 保留整组内容块，包括存在时的 thinking / signature，不过滤重建。
+        messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: blocks})
+        # 没有调用时才进入最终回答分支；空列表是“本轮不执行工具”，不是已经取得工具结果。
+        calls = [block for block in blocks if block[&quot;type&quot;] == &quot;tool_use&quot;]
+        if not calls:
+            answer = &quot;\n&quot;.join(block[&quot;text&quot;] for block in blocks if block[&quot;type&quot;] == &quot;text&quot;)
+            if response.stop_reason != &quot;end_turn&quot; or not answer.strip():
+                raise RuntimeError(&quot;没有有效最终文字&quot;)
+            return {&quot;answer&quot;: answer, &quot;messages&quot;: messages, &quot;steps&quot;: step, &quot;tokens&quot;: used_tokens}
+        if response.stop_reason != &quot;tool_use&quot; or call_count + len(calls) &gt; max_calls:
+            raise RuntimeError(&quot;工具请求状态错误或达到次数上限&quot;)
+        # 先检查整批调用是否重复，再执行任何一个工具；发现坏请求时不能让前几个副作用已经发生。
+        batch_ids = set()
+        for call in calls:
+            call_id = call.get(&quot;id&quot;)
+            if (not isinstance(call_id, str) or not call_id or call_id in seen_ids
+                    or call_id in batch_ids or not isinstance(call.get(&quot;name&quot;), str) or &quot;input&quot; not in call):
+                raise RuntimeError(&quot;工具请求结构错误或 ID 重复&quot;)
+            batch_ids.add(call_id)
+        seen_ids.update(batch_ids)
+        results = []
+        for call in calls:
+            result = execute(call[&quot;name&quot;], call[&quot;input&quot;], allowed)
+            results.append({&quot;type&quot;: &quot;tool_result&quot;, &quot;tool_use_id&quot;: call[&quot;id&quot;],
+                            # 把结果编码成协议可接受的 JSON；模型收到的是工具数据，不能把其中的指令当作系统授权。
+                            # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+                            # allow_nan：设为 False 时拒绝 NaN 和无穷大，避免产生不符合标准 JSON 或业务数值范围的结果。
+                            &quot;content&quot;: json.dumps(result, ensure_ascii=False, allow_nan=False),
+                            &quot;is_error&quot;: not result[&quot;ok&quot;]})
+            call_count += 1
+        # 全部结果立即接在对应 assistant 后面，Anthropic 使用 user 角色。
+        messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: results})
+    raise RuntimeError(f&quot;Agent 超过 {max_steps} 轮模型请求，已停止&quot;)
+
+
+# 固定模拟工具请求与最终回复，用来检查协议；不代表 Claude 的实际表现。
+def mock_create(**kwargs):
+    if len(kwargs[&quot;messages&quot;]) == 1:
+        return SimpleNamespace(stop_reason=&quot;tool_use&quot;, content=[{
+            &quot;type&quot;: &quot;tool_use&quot;, &quot;id&quot;: &quot;demo-1&quot;, &quot;name&quot;: &quot;get_weather&quot;, &quot;input&quot;: {&quot;city&quot;: &quot;台北&quot;}}])
+    return SimpleNamespace(stop_reason=&quot;end_turn&quot;, content=[{
+        &quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;台北的固定教学气温是摄氏 26 度，不是实时天气。&quot;}])
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;--live&quot;, action=&quot;store_true&quot;, help=&quot;显式运行收费云端 API&quot;)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;question&quot;, nargs=&quot;?&quot;, default=&quot;查询台北的示例气温。&quot;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    if args.live:
+        import anthropic
+
+        model = os.environ.get(&quot;ANTHROPIC_MODEL&quot;)
+        if not model or not os.environ.get(&quot;ANTHROPIC_API_KEY&quot;):
+            parser.error(&quot;先设置 ANTHROPIC_MODEL 和 ANTHROPIC_API_KEY；模型必须是账号当前可用 ID&quot;)
+        # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+        # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+        client = anthropic.Anthropic(timeout=60.0, max_retries=1)
+        result = run_claude(client.messages.create, args.question, model)
+    else:
+        print(&quot;离线固定脚本；不代表 Claude 的真实表现。&quot;)
+        result = run_claude(mock_create, args.question, &quot;offline-demo&quot;)
+    print(result[&quot;answer&quot;])
+    # 把结果编码成协议可接受的 JSON；模型收到的是工具数据，不能把其中的指令当作系统授权。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(result[&quot;messages&quot;], ensure_ascii=False, indent=2))
+
+
+if __name__ == &quot;__main__&quot;:
+    # 进入本文件的演示入口。
+    main()</code></pre></section>
+<h3>默认离线，先理解消息形状</h3>
+<pre><code># 观察 Anthropic 消息与工具结果往返。
+python 08_anthropic_agent.py</code></pre>
+<p>这会打印固定脚本的消息往返，不需安装 Anthropic SDK，不需密钥，不收云端费用。协议测试也已提供，不能把它当成真实 Claude 质量测试。</p>
+<h3>可选：自己运行云端路径</h3>
+<p>只想学本课时，完成本地案例即可。需要比较供应商时，在账号中确认可用模型 ID 和价格，并配置费用控制。密钥通过终端环境读取，不写到 Python 文件或课程页面。</p>
+<pre><code># 在所用环境中安装本例列出的依赖及版本；这不会下载课程正文。
+python -m pip install anthropic
+# 从终端读取输入；-s 隐藏密钥输入，值只保存在当前 shell 变量中。
+read -s &quot;ANTHROPIC_API_KEY?输入你的 Anthropic 密钥：&quot;
+# 将本行变量传给随后启动的子进程；不会把它自动写入课程文件。
+export ANTHROPIC_API_KEY
+# 从终端读取本次配置值，保存到本行指定的变量。
+read &quot;ANTHROPIC_MODEL?输入账号可用的模型 ID：&quot;
+# 将本行变量传给随后启动的子进程；不会把它自动写入课程文件。
+export ANTHROPIC_MODEL
+# 观察 Anthropic 消息与工具结果往返；--live 会进入真实服务路径，需先满足本章环境要求。
+python 08_anthropic_agent.py --live</code></pre>
+<p>以上 read 写法适用于你当前 macOS zsh。云端代码不硬编码一个可能过期的模型 ID，不设置 temperature 等跨模型不通用参数。max_tokens=1024 如果不足，程序会明确报告 max_tokens 停止；按实际模型能力和预算调整，不能把截断当成完整结果。</p>
+<h2>5. 四种模式不要混用名称</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>模式</th><th>控制重点</th><th>本课位置</th></tr>
+<tr><td>ReAct</td><td>行动与观察交替，更新下一步</td><td>有界工具循环</td></tr>
+<tr><td>Reflection</td><td>根据反馈改进下一次尝试</td><td>单元12结合失败反馈展开</td></tr>
+<tr><td>Reflexion</td><td>记录文字经验，在后续尝试中利用</td><td>单元12含完整流程与轻量文件记忆</td></tr>
+<tr><td>Self-Refine</td><td>生成、反馈、修订当前输出</td><td>单元12含修订与防退步验证</td></tr></table>
+<p>这些模式不自动意味着更可靠。模型可能批评错、把正确答案改坏，或者重复同样的动作。要判断它是否可靠，仍需核对实际结果、检查权限和执行限制，并运行评测。更长的 planning、持久记忆、工作流图与框架属于后续阶段。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s2">S2</a>、<a href="../reference/readings.html#s6">S6</a>、<a href="../reference/readings.html#s7">S7</a>、<a href="../reference/readings.html#s8">S8</a>、<a href="../reference/readings.html#s12">S12</a>、<a href="../reference/readings.html#s13">S13</a>、<a href="../reference/readings.html#s14">S14</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="1" data-correct="结构合规不能证明事实、业务语义或工具执行正确。" data-incorrect="结构合规不能证明事实、业务语义或工具执行正确。"><fieldset><legend>Structured Output 输出的温度格式合法，意味着什么？</legend><label><input type="radio" name="qa7" value="0"> 已查询真实天气</label><label><input type="radio" name="qa7" value="1"> 只说明结构合规</label><label><input type="radio" name="qa7" value="2"> 业务语义必定对</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0006-schema-and-eval.html">← Schema 对比与固定评测</a><a href="0008-exercises.html">基础练习与综合项目 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

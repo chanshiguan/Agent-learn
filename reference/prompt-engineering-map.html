@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Engineering 速查地图</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <nav class="course-nav"><a href="../lessons/index.html">课程首页</a><span class="current">速查地图</span><a href="prompt-glossary.html">术语表</a><a href="source-coverage.html">覆盖矩阵</a></nav>
+  <p class="eyebrow">Quick Reference</p>
+  <h1>Prompt Engineering 速查地图</h1>
+  <p class="lede">不要先问“有什么神奇句式”，先问“失败发生在哪一层”。</p>
+
+  <h2>Prompt 四部分</h2>
+  <table>
+    <thead><tr><th>部分</th><th>要回答的问题</th><th>客服分类示例</th></tr></thead>
+    <tbody>
+      <tr><td>目标</td><td>模型要完成什么？</td><td>把留言分到三类</td></tr>
+      <tr><td>资料</td><td>这一次处理什么？</td><td><code>&lt;input_data&gt;...&lt;/input_data&gt;</code></td></tr>
+      <tr><td>规则</td><td>如何判断，有何边界？</td><td>不确定选 <code>other</code></td></tr>
+      <tr><td>输出</td><td>答案必须长什么样？</td><td>只返回一个合法标签</td></tr>
+    </tbody>
+  </table>
+
+  <h2>失败诊断顺序</h2>
+  <div class="flow">
+    <span>1. 输出被截断？</span><b>→</b>
+    <span>2. 任务说清了？</span><b>→</b>
+    <span>3. 资料够用？</span><b>→</b>
+    <span>4. 边界范例够用？</span><b>→</b>
+    <span>5. 模型有能力？</span><b>→</b>
+    <span>6. 工具或代码正确？</span>
+  </div>
+
+  <h2>什么时候用哪个技巧</h2>
+  <table>
+    <thead><tr><th>现象</th><th>先尝试</th><th>不要立即做</th></tr></thead>
+    <tbody>
+      <tr><td>答非所问</td><td>清晰化目标与输入</td><td>无限增加形容词</td></tr>
+      <tr><td>格式不稳定</td><td>明确格式 + Few-Shot</td><td>相信“返回 JSON”就足够</td></tr>
+      <tr><td>事实不准</td><td>补可信上下文</td><td>只改语气</td></tr>
+      <tr><td>边界分类错</td><td>补一个边界范例</td><td>一次加十几个范例</td></tr>
+      <tr><td>答案是空的</td><td>检查 <code>finish_reason</code> 和 token 上限</td><td>认定是 Prompt 错了</td></tr>
+      <tr><td>修改后“感觉更好”</td><td>用同一组 Eval 重跑</td><td>换题再比较</td></tr>
+    </tbody>
+  </table>
+
+  <h2>一次可信的 Prompt 实验</h2>
+  <ol>
+    <li>固定模型、参数、测试题和评分规则。</li>
+    <li>记录原版分数和具体错例。</li>
+    <li>只修改 Prompt 的一个部分。</li>
+    <li>重跑同一组题，对比总分和错误类型。</li>
+    <li>没有证据时，结论写“还不确定”。</li>
+  </ol>
+
+  <footer>
+    <a href="../lessons/index.html">返回 Prompt Engineering 中文完整课程</a>
+  </footer>
+</main>
+</body>
+</html>

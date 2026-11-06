@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "CLI-1 环境与可撤销基线",
+    "lesson": "lessons/03-workshop.html#he0fc50339ff0",
+    "example": "examples/demo/check.py",
+    "assessment": "lessons/03-workshop.html#h1d7ae9c4ab4d"
+  },
+  {
+    "requirement": "CLI-1 完整任务与产物",
+    "lesson": "lessons/03-workshop.html#h36a3d158afa9",
+    "example": "examples/reference-readme.md",
+    "assessment": "lessons/03-workshop.html#h1d7ae9c4ab4d"
+  },
+  {
+    "requirement": "CLI-1 验证与撤回",
+    "lesson": "lessons/03-workshop.html#h64021f382cbf",
+    "example": "text/03-workshop.md",
+    "assessment": "lessons/03-workshop.html#h1d7ae9c4ab4d"
+  },
+  {
+    "requirement": "CLI-2 规则和 CLI-3 Harness 对照",
+    "lesson": "lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "examples/task.md",
+    "assessment": "lessons/03-workshop.html#h1d7ae9c4ab4d"
+  },
+  {
+    "requirement": "CLI-4 四类错误定位",
+    "lesson": "lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "example": "text/03-workshop.md",
+    "assessment": "lessons/03-workshop.html#h1d7ae9c4ab4d"
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "analysis": {
+    "scope": "只修改 README.md 的运行说明",
+    "baseline": "先保留 python check.py，未知测试状态不能写通过",
+    "excluded": [
+      "全仓格式化",
+      "改 check.py",
+      "安装无关包"
+    ]
+  },
+  "plan": [
+    "读 README.md 与 check.py",
+    "在隔离演示目录补运行说明",
+    "显示单文件 diff",
+    "执行 check.py 并保留真实输出",
+    "只撤回 README.md 本次改动"
+  ],
+  "before": "# 演示项目\n用于练习文档修改。\n",
+  "after": "# 演示项目\n用于练习文档修改。\n\n## 运行\n在本目录执行：python check.py\n成功时输出 PASS。\n",
+  "diff": "--- README.md\n+++ README.md\n@@ -1,2 +1,6 @@\n # 演示项目\n 用于练习文档修改。\n+\n+## 运行\n+在本目录执行：python check.py\n+成功时输出 PASS。\n",
+  "verification": {
+    "status": "示范预期，实际运行以 develop_demo.py 输出为准",
+    "command": "python check.py",
+    "expected": "PASS"
+  },
+  "rollback": "先看 diff 确认只含本人改动，再在演示仓库执行 git restore -- README.md；有他人改动时逐块撤回。",
+  "transfer": {
+    "bug": "取列表首项前未检查空列表",
+    "before": "def first(xs): return xs[0]",
+    "after": "def first(xs): return xs[0] if xs else None",
+    "cases": [
+      {
+        "input": [],
+        "expected": null
+      },
+      {
+        "input": [
+          7
+        ],
+        "expected": 7
+      }
+    ]
+  }
+}

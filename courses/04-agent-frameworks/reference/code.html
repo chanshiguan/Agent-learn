@@ -1,0 +1,2792 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>完整代码</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="readings.html">本地阅读</a><a href="code.html">完整代码</a><a href="../lessons/99-exercises.html">课后练习</a></nav><article class="lesson-body"><h1>完整代码与配置</h1><p>下列内容直接读取实际文件，注释解释步骤的用途、参数含义与设计原因。提示词、示例问题和工具返回已改成简体中文；JSON 和多行文本另附行号说明，避免把注释变成模型输入。examples/upstream 为原课程 MIT 示例的中文教学副本，输入与对应的匹配规则、断言同步维护；原始快照另存供核对。先按中文讲义选一个案例运行。</p><p><a href="line-notes.md">下载与文件行号对应的数据说明</a></p><details id="fdb542c602756"><summary>examples/dynamic_workers.py</summary><p><a href="../examples/dynamic_workers.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;真实 LangGraph Send 与 reducer；工作函数固定，离线检验编排。&quot;&quot;&quot;
+
+# 一个文档对应一个工作者输入；本例验证真实图的动态分发，不调用生成模型。
+import argparse
+import json
+import operator
+# Annotated 在类型上附带额外处理规则；这里的 reducer 决定状态更新时是追加消息还是覆盖旧消息。
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing import Annotated, TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Send
+
+
+# checks 使用加法 reducer 合并并行结果，避免后返回的结果覆盖前一个。
+class State(TypedDict):
+    documents: list[dict]
+    checks: Annotated[list[dict], operator.add]
+    report: dict
+
+
+# 每个工作者只接收自己负责的文档，避免依赖未分配的共享输入。
+class WorkerState(TypedDict):
+    document: dict
+
+
+# 先拒绝空输入和重复 ID，否则汇总时无法判断有没有漏查或覆盖。
+def validate(state):
+    documents = state[&#x27;documents&#x27;]
+    ids = [doc[&#x27;id&#x27;] for doc in documents]
+    if not documents or len(ids) != len(set(ids)):
+        raise ValueError(&#x27;文档不能为空，ID 不能重复&#x27;)
+    return {&#x27;report&#x27;: {}}
+
+
+# 文档数量决定 Send 的数量；每条 Send 指定节点名和该节点收到的状态。
+def dispatch(state):
+    return [Send(&#x27;check_document&#x27;, {&#x27;document&#x27;: doc}) for doc in state[&#x27;documents&#x27;]]
+
+
+# 只检查约定的两个词，返回状态更新；不要把它当内容正确性审查。
+def check_document(state: WorkerState):
+    doc = state[&#x27;document&#x27;]
+    missing = [word for word in (&#x27;目的&#x27;, &#x27;运行&#x27;) if word not in doc[&#x27;text&#x27;]]
+    return {&#x27;checks&#x27;: [{&#x27;id&#x27;: doc[&#x27;id&#x27;], &#x27;missing&#x27;: missing, &#x27;ok&#x27;: not missing}]}
+
+
+# 先核对结果数量，再按 ID 排序；只有全部工作者通过，整份报告才通过。
+def merge(state):
+    checks = sorted(state[&#x27;checks&#x27;], key=lambda row: row[&#x27;id&#x27;])
+    if len(checks) != len(state[&#x27;documents&#x27;]):
+        raise ValueError(&#x27;工作者结果不完整&#x27;)
+    return {&#x27;report&#x27;: {&#x27;status&#x27;: &#x27;PASS&#x27; if all(x[&#x27;ok&#x27;] for x in checks) else &#x27;FAIL&#x27;,
+                       &#x27;checks&#x27;: checks}}
+
+
+def run(documents):
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    graph = StateGraph(State)
+    # 把 validate 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&#x27;validate&#x27;, validate)
+    # 把 check_document 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&#x27;check_document&#x27;, check_document)
+    # 把 merge 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&#x27;merge&#x27;, merge)
+    # START 完成后进入 validate，将这两步的执行先后固定在程序中。
+    graph.add_edge(START, &#x27;validate&#x27;)
+    # dispatch 返回的 Send 决定这次有多少工作者，不是提前固定两条分支。
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    graph.add_conditional_edges(&#x27;validate&#x27;, dispatch, [&#x27;check_document&#x27;])
+    # check_document 完成后进入 merge，将这两步的执行先后固定在程序中。
+    graph.add_edge(&#x27;check_document&#x27;, &#x27;merge&#x27;)
+    # merge 完成后进入 END，将这两步的执行先后固定在程序中。
+    graph.add_edge(&#x27;merge&#x27;, END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    return graph.compile().invoke({&#x27;documents&#x27;: documents, &#x27;checks&#x27;: [], &#x27;report&#x27;: {}})[&#x27;report&#x27;]
+
+
+if __name__ == &#x27;__main__&#x27;:
+    parser = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&#x27;--fixed&#x27;, action=&#x27;store_true&#x27;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    docs = [{&#x27;id&#x27;: &#x27;a&#x27;, &#x27;text&#x27;: &#x27;目的：演示。运行：python app.py&#x27;},
+            {&#x27;id&#x27;: &#x27;b&#x27;, &#x27;text&#x27;: &#x27;目的：核查。&#x27; + (&#x27;运行：python check.py&#x27; if args.fixed else &#x27;&#x27;)}]
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(run(docs), ensure_ascii=False, indent=2))
+</code></pre></details><details id="fe24c0a161da4"><summary>examples/local_runner.py</summary><p><a href="../examples/local_runner.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;当前项目的 LangGraph 本地入口，复用原课程图；不读取代理环境。&quot;&quot;&quot;
+
+# 复用原题的图，只配置本机模型与 HTTP 客户端；先确认 Ollama 已有对应模型。
+import importlib.util
+import json
+import sys
+from pathlib import Path
+from langchain_openai import ChatOpenAI
+from openai import DefaultHttpxClient, DefaultAsyncHttpxClient
+
+path = Path(__file__).with_name(&quot;upstream&quot;) / &quot;01-same-agent-two-frameworks/starter.py&quot;
+spec = importlib.util.spec_from_file_location(&quot;course4_original&quot;, path)
+original = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = original
+spec.loader.exec_module(original)
+
+
+def main():
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    llm = ChatOpenAI(base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;, model=&quot;gemma4:e4b&quot;,
+                    # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+                    # reasoning_effort：配置模型支持的推理行为；这里的值必须与所用服务兼容，不能当作所有模型通用的开关。
+                    # max_tokens：限制本次响应最多生成多少 token，约束延迟和输出规模；达到上限后必须检查是否截断。
+                    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+                    # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+                    temperature=0, reasoning_effort=&quot;none&quot;, max_tokens=600, timeout=60, max_retries=0,
+                    # http_client：显式注入底层 HTTP 客户端，让代理、超时等行为与这个案例的运行条件一致。
+                    # trust_env：设为 False 可避免继承系统代理等环境配置，使本地请求路径更可控；不会关闭 TLS 证书校验。
+                    http_client=DefaultHttpxClient(trust_env=False),
+                    # trust_env：设为 False 可避免继承系统代理等环境配置，使本地请求路径更可控；不会关闭 TLS 证书校验。
+                    http_async_client=DefaultAsyncHttpxClient(trust_env=False), http_socket_options=())
+    question = &quot;调用 search 时把 query 设为“台北”。只用中文概括返回的固定资料，并明确说明这是教学数据。&quot;
+    result = original.run(question, llm)
+    if result[&quot;steps&quot;] &lt; 4:
+        raise RuntimeError(&quot;没有完成可见的工具往返&quot;)
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == &quot;__main__&quot;:
+    # 进入本文件的演示入口。
+    main()
+</code></pre></details><details id="fa1f9eead4a15"><summary>examples/patterns.py</summary><p><a href="../examples/patterns.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;五种编排的可运行控制流样例；用固定函数隔离模型随机性。&quot;&quot;&quot;
+
+# 五个函数分别演示五种控制流程；输入和检查均固定，便于先看懂步骤如何连接。
+# 线程池让独立的等待型调用重叠执行；它不能让有前后数据依赖的工具提前运行。
+from concurrent.futures import ThreadPoolExecutor
+import json
+
+
+# 前一步没有产物就停止，避免把空输入继续传给后面的步骤。
+def chain(text):
+    draft=text.strip()
+    if not draft:
+        return {&#x27;status&#x27;:&#x27;blocked&#x27;,&#x27;reason&#x27;:&#x27;第一阶段没有产物&#x27;}
+    return {&#x27;status&#x27;:&#x27;done&#x27;,&#x27;summary&#x27;:draft[:30]}
+
+
+# 只处理已登记的任务类别；未知类别返回澄清信息。
+def route(task):
+    handlers={&#x27;事实核对&#x27;:lambda:{&#x27;expert&#x27;:&#x27;证据检查&#x27;,&#x27;result&#x27;:&#x27;必须附来源&#x27;},
+              &#x27;格式核对&#x27;:lambda:{&#x27;expert&#x27;:&#x27;格式检查&#x27;,&#x27;result&#x27;:&#x27;必须有标题&#x27;}}
+    if task not in handlers:
+        return {&#x27;expert&#x27;:None,&#x27;result&#x27;:&#x27;未支持的任务，请澄清&#x27;}
+    return handlers[task]()
+
+
+# 两项检查彼此独立，分别返回不同字段，再合并结果。
+def parallel(text):
+    checks=[lambda:{&#x27;format&#x27;:text.startswith(&#x27;# &#x27;)},lambda:{&#x27;source&#x27;:&#x27;[d1]&#x27; in text}]
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results=list(pool.map(lambda fn:fn(),checks))
+    return {key:value for result in results for key,value in result.items()}
+
+
+# 先限制任务数并去重，再给每项任务分配来源标识。
+def orchestrate(topics):
+    if len(topics)&gt;3 or len(topics)!=len(set(topics)):
+        raise ValueError(&#x27;任务最多三个且不能重复&#x27;)
+    jobs=[{&#x27;topic&#x27;:topic,&#x27;source&#x27;:&#x27;d&#x27;+str(i+1)} for i,topic in enumerate(topics)]
+    return [{&#x27;topic&#x27;:job[&#x27;topic&#x27;],&#x27;draft&#x27;:&#x27;需核对 &#x27;+job[&#x27;topic&#x27;],&#x27;source&#x27;:job[&#x27;source&#x27;]} for job in jobs]
+
+
+# 每轮记录具体缺项，再补相应内容；轮数耗尽时返回 stopped。
+def optimize(text, limit=2):
+    history=[]
+    for attempt in range(limit+1):
+        missing=[]
+        if not text.startswith(&#x27;# &#x27;): missing.append(&#x27;标题&#x27;)
+        if &#x27;[d1]&#x27; not in text: missing.append(&#x27;引用&#x27;)
+        history.append({&#x27;attempt&#x27;:attempt,&#x27;missing&#x27;:missing})
+        if not missing: return {&#x27;status&#x27;:&#x27;done&#x27;,&#x27;text&#x27;:text,&#x27;history&#x27;:history}
+        if attempt==limit: break
+        if &#x27;标题&#x27; in missing: text=&#x27;# 摘要\n&#x27;+text
+        if &#x27;引用&#x27; in missing: text+=&#x27; [d1]&#x27;
+    return {&#x27;status&#x27;:&#x27;stopped&#x27;,&#x27;text&#x27;:text,&#x27;history&#x27;:history}
+
+
+if __name__==&#x27;__main__&#x27;:
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    print(json.dumps({&#x27;chain&#x27;:chain(&#x27;固定资料摘要&#x27;),&#x27;route&#x27;:route(&#x27;事实核对&#x27;),
+        &#x27;parallel&#x27;:parallel(&#x27;# 摘要 [d1]&#x27;),&#x27;workers&#x27;:orchestrate([&#x27;成本&#x27;,&#x27;来源&#x27;]),
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+        &#x27;optimizer&#x27;:optimize(&#x27;固定资料&#x27;)},ensure_ascii=False,indent=2))
+</code></pre></details><details id="ff84c537d99b0"><summary>examples/requirements-orchestration.txt</summary><p><a href="../examples/requirements-orchestration.txt">打开完整文件</a></p><pre><code>langgraph==1.2.19
+openai-agents==0.24.0
+</code></pre></details><details id="f4e416c2e16f4"><summary>examples/requirements-summary.txt</summary><p><a href="../examples/requirements-summary.txt">打开完整文件</a></p><pre><code>langgraph&gt;=1.2,&lt;2
+langgraph-checkpoint-sqlite&gt;=3,&lt;4
+</code></pre></details><details id="f4dc4f627f598"><summary>examples/sdk_orchestration.py</summary><p><a href="../examples/sdk_orchestration.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;真实 Agents SDK 编排；默认脚本模型，--live 才接本地 Ollama。&quot;&quot;&quot;
+
+# 同一问题做两次实验：专家作为工具时主管回答，handoff 后由专家回答。
+import argparse
+import asyncio
+import json
+from agents import Agent, Runner, Model, ModelResponse, Usage, set_tracing_disabled, set_trace_provider
+from agents.tracing.provider import DefaultTraceProvider
+from openai.types.responses import ResponseOutputMessage, ResponseOutputText, ResponseFunctionToolCall
+
+
+# 构造 SDK 可消费的文本消息对象，作为离线模型的预设输出。
+def text_item(text):
+    return ResponseOutputMessage(id=&#x27;msg_demo&#x27;, type=&#x27;message&#x27;, role=&#x27;assistant&#x27;, status=&#x27;completed&#x27;,
+        content=[ResponseOutputText(type=&#x27;output_text&#x27;,text=text,annotations=[])])
+
+
+class ScriptedModel(Model):
+    &quot;&quot;&quot;模型替身只控制响应；工具调用、交接与运行循环由真实 SDK 执行。&quot;&quot;&quot;
+    def __init__(self, outputs):
+        self.outputs = list(outputs)
+
+    async def get_response(self, *args, **kwargs):
+        if not self.outputs:
+            raise RuntimeError(&#x27;脚本响应耗尽，可能发生非预期循环&#x27;)
+        return ModelResponse(output=self.outputs.pop(0), usage=Usage(), response_id=None)
+
+    async def stream_response(self, *args, **kwargs):
+        raise NotImplementedError(&#x27;本教学例仅验证非流式路径&#x27;)
+        if False:
+            # 保留异步生成器接口的语法形状；上方已明确抛错，这个分支不会实际产出值。
+            yield None
+
+
+# 只有 live 模式使用本机 Ollama；客户端不会读取系统代理设置。
+def local_model(name):
+    from agents import OpenAIChatCompletionsModel
+    from openai import AsyncOpenAI, DefaultAsyncHttpxClient
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # timeout：限制当前等待操作的时长，避免它一直阻塞；这个局部超时不等于整个 Agent 的总时限。
+    # max_retries：控制客户端自动重试次数。设为 0 可把重试统一交给外层，避免两层重试相乘。
+    client = AsyncOpenAI(base_url=&#x27;http://localhost:11434/v1&#x27;,api_key=&#x27;ollama&#x27;,timeout=60,max_retries=0,
+                         # http_client：显式注入底层 HTTP 客户端，让代理、超时等行为与这个案例的运行条件一致。
+                         # trust_env：设为 False 可避免继承系统代理等环境配置，使本地请求路径更可控；不会关闭 TLS 证书校验。
+                         http_client=DefaultAsyncHttpxClient(trust_env=False))
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    return OpenAIChatCompletionsModel(model=name, openai_client=client)
+
+
+async def run(live=False, model_name=&#x27;gemma4:e4b&#x27;):
+    # 不注册网络 exporter，避免离线案例也初始化代理客户端。
+    set_trace_provider(DefaultTraceProvider())
+    set_tracing_disabled(True)
+    specialist = Agent(name=&#x27;specialist&#x27;, instructions=&#x27;依据固定虚构资料回答：报名截止时间为周五18:00。&#x27;,
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([[text_item(&#x27;周五18:00 [signup]&#x27;)]]))
+    # 专家包装成工具后，返回值仍交回主管，由主管组织最后回答。
+    expert_tool = specialist.as_tool(tool_name=&#x27;ask_specialist&#x27;,tool_description=&#x27;查询虚构报名截止时间&#x27;)
+    manager = Agent(name=&#x27;manager&#x27;, instructions=&#x27;必须先用 ask_specialist 查询报名时间，再由你总结并保留来源。&#x27;,
+        # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        tools=[expert_tool], model=local_model(model_name) if live else ScriptedModel([
+            [ResponseFunctionToolCall(type=&#x27;function_call&#x27;,call_id=&#x27;call_demo&#x27;,name=&#x27;ask_specialist&#x27;,
+                                      # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+                                      arguments=json.dumps({&#x27;input&#x27;:&#x27;报名截止时间？&#x27;}))],
+            [text_item(&#x27;主管汇总：周五18:00 [signup]&#x27;)]]))
+    # max_turns：限制 Agent 与模型交互的总轮数，避免角色交接或工具调用迟迟不能结束。
+    managed = await Runner.run(manager,&#x27;报名截止时间？&#x27;,max_turns=4)
+    # 两次实验使用独立 Agent 和模型实例，避免脚本队列/会话相互影响。
+    receiving = Agent(name=&#x27;specialist&#x27;, instructions=&#x27;直接回答用户：报名截止时间为周五18:00，来源signup。&#x27;,
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([[text_item(&#x27;周五18:00 [signup]&#x27;)]]))
+    # handoff 则改变接下来回答的 Agent；最后检查 last_agent 来验证区别。
+    triage = Agent(name=&#x27;triage&#x27;, instructions=&#x27;将报名问题交给 specialist，不自行作答。&#x27;,handoffs=[receiving],
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        model=local_model(model_name) if live else ScriptedModel([
+            [ResponseFunctionToolCall(type=&#x27;function_call&#x27;,call_id=&#x27;handoff_demo&#x27;,
+                                      name=&#x27;transfer_to_specialist&#x27;,arguments=&#x27;{}&#x27;)]]))
+    # max_turns：限制 Agent 与模型交互的总轮数，避免角色交接或工具调用迟迟不能结束。
+    handed = await Runner.run(triage,&#x27;报名截止时间？&#x27;,max_turns=4)
+    rows = []
+    for name,result in [(&#x27;manager_as_tools&#x27;,managed),(&#x27;handoff&#x27;,handed)]:
+        rows.append({&#x27;pattern&#x27;:name,&#x27;final_agent&#x27;:result.last_agent.name,
+                     &#x27;answer&#x27;:result.final_output,
+                     &#x27;events&#x27;:[{&#x27;type&#x27;:item.type,&#x27;agent&#x27;:item.agent.name} for item in result.new_items]})
+    return {&#x27;mode&#x27;:&#x27;本地模型&#x27; if live else &#x27;真实 SDK + 脚本模型，非模型能力评测&#x27;,&#x27;rows&#x27;:rows}
+
+
+if __name__ == &#x27;__main__&#x27;:
+    parser = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&#x27;--live&#x27;,action=&#x27;store_true&#x27;)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&#x27;--model&#x27;,default=&#x27;gemma4:e4b&#x27;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(asyncio.run(run(args.live,args.model)),ensure_ascii=False,indent=2))
+</code></pre></details><details id="fea52415dc8e5"><summary>examples/summary_workflow.py</summary><p><a href="../examples/summary_workflow.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;真实 LangGraph：固定证据摘要→来源检查→人工批准；SQLite 跨进程恢复。&quot;&quot;&quot;
+
+# 先读 execute 的新建/恢复分支，再看 build 的连接关系和三个节点。
+import argparse
+import json
+from pathlib import Path
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+# interrupt 会把图暂停在审核点并保存待处理信息；收到恢复值之前，后续节点不会继续执行。
+# Command 携带恢复值或跳转信息；恢复暂停节点时要将人的决定放入 resume。
+from langgraph.types import interrupt, Command
+# SQLite 检查点把状态写入磁盘，因此可在另一个进程恢复；外部动作是否重复仍需幂等控制。
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+SOURCES = {&#x27;course-3&#x27;: &#x27;工具调用由模型提出，应用执行，并把结果交回模型。&#x27;}
+
+
+# 这些字段描述共享状态的形状；TypedDict 本身不执行运行时校验。
+# 节点只返回自己更新的字段，状态会逐步补齐，因此 total=False 允许字段暂时缺失；TypedDict 不负责运行时拦截坏数据。
+class State(TypedDict, total=False):
+    topic: str
+    # draft：保存尚未批准的候选内容，把“生成成功”和“允许发布”分成两个不同阶段。
+    draft: str
+    source_ids: list[str]
+    checked: bool
+    status: str
+    published: bool
+
+
+def summarize(state):
+    # 固定摘录让本题只考流程；真实生成可以替换此节点，仍须走后续检查。
+    return {&#x27;draft&#x27;: SOURCES.get(state[&#x27;topic&#x27;], &#x27;&#x27;),
+            &#x27;source_ids&#x27;: [state[&#x27;topic&#x27;]] if state[&#x27;topic&#x27;] in SOURCES else [], &#x27;published&#x27;: False}
+
+
+# 本题要求草稿等于固定资料摘录，来源存在且内容匹配才进入人工审核。
+def check_sources(state):
+    refs = state[&#x27;source_ids&#x27;]
+    valid = bool(refs) and all(x in SOURCES for x in refs)
+    valid = valid and state[&#x27;draft&#x27;] == &#x27;\n&#x27;.join(SOURCES[x] for x in refs)
+    return {&#x27;checked&#x27;: valid, &#x27;status&#x27;: &#x27;awaiting_review&#x27; if valid else &#x27;blocked&#x27;}
+
+
+# interrupt 暂停后等待外部传入布尔决定；恢复时本节点可能从头再跑。
+def review(state):
+    # 把待审草稿带到暂停事件中，等待人给出明确决定；恢复时该节点可能重新执行，暂停前不要放不可重复的外部动作。
+    decision = interrupt({&#x27;draft&#x27;: state[&#x27;draft&#x27;], &#x27;source_ids&#x27;: state[&#x27;source_ids&#x27;],
+                          &#x27;action&#x27;: &#x27;仅标记本地接受，不向外发布&#x27;})
+    if type(decision) is not bool:
+        raise ValueError(&#x27;批准必须为布尔值&#x27;)
+    return {&#x27;status&#x27;: &#x27;accepted&#x27; if decision else &#x27;rejected&#x27;, &#x27;published&#x27;: decision}
+
+
+# 来源检查失败直接结束，通过才进入 review；检查点由调用者传入。
+def build(saver):
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    g = StateGraph(State)
+    # 把 summarize 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node(&#x27;summarize&#x27;, summarize)
+    # 把 check 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node(&#x27;check&#x27;, check_sources)
+    # 把 review 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node(&#x27;review&#x27;, review)
+    # START 完成后进入 summarize，将这两步的执行先后固定在程序中。
+    g.add_edge(START, &#x27;summarize&#x27;)
+    # summarize 完成后进入 check，将这两步的执行先后固定在程序中。
+    g.add_edge(&#x27;summarize&#x27;, &#x27;check&#x27;)
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    g.add_conditional_edges(&#x27;check&#x27;, lambda s: &#x27;review&#x27; if s[&#x27;checked&#x27;] else END)
+    # review 完成后进入 END，将这两步的执行先后固定在程序中。
+    g.add_edge(&#x27;review&#x27;, END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    # checkpointer：把图的中间状态交给检查点保存器；暂停后恢复需要这份状态，单靠再次调用图无法找回进度。
+    return g.compile(checkpointer=saver)
+
+
+# 同一数据库和 thread_id 才指向同一个任务；已结束任务不能再次批准。
+def execute(database, thread, topic=&#x27;course-3&#x27;, decision=None):
+    # 运行配置必须在暂停和恢复时保持同一个会话标识，否则恢复会找不到刚才待审核的状态。
+    # configurable：传递可在每次运行时指定的图配置；会话标识放在这里，供检查点系统定位历史状态。
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    config = {&#x27;configurable&#x27;: {&#x27;thread_id&#x27;: thread}}
+    # 检查点写入磁盘，下一进程使用同一数据库和 thread_id 才能继续。
+    # 打开检查点数据库连接；路径决定保存在哪里，后续进程必须打开同一个库才能恢复。
+    with SqliteSaver.from_conn_string(str(database)) as saver:
+        graph = build(saver)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        if decision is None:
+            if snapshot.values:
+                raise ValueError(&#x27;任务编号已存在；请恢复任务或换新编号&#x27;)
+            graph.invoke({&#x27;topic&#x27;: topic}, config)
+        else:
+            if not snapshot.next or snapshot.values.get(&#x27;status&#x27;) != &#x27;awaiting_review&#x27;:
+                raise ValueError(&#x27;该任务不在等待批准状态，不能重复或越过批准&#x27;)
+            # 把外部决定交回原暂停点，不重新创建一个跳过检查的新任务。
+            graph.invoke(Command(resume=decision), config)
+        # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+        snapshot = graph.get_state(config)
+        return {&#x27;state&#x27;: snapshot.values, &#x27;next&#x27;: list(snapshot.next)}
+
+
+if __name__ == &#x27;__main__&#x27;:
+    p = argparse.ArgumentParser()
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument(&#x27;--db&#x27;, type=Path, required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    # required：明确哪些字段不可缺少；有默认值与必须提供是两种不同的接口约定。
+    p.add_argument(&#x27;--thread&#x27;, required=True)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument(&#x27;--topic&#x27;, default=&#x27;course-3&#x27;)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    p.add_argument(&#x27;--decision&#x27;, choices=[&#x27;accept&#x27;, &#x27;reject&#x27;])
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    a = p.parse_args()
+    decision = None if a.decision is None else a.decision == &#x27;accept&#x27;
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(execute(a.db, a.thread, a.topic, decision), ensure_ascii=False, indent=2))
+</code></pre></details><details id="f3287c80af6c2"><summary>examples/upstream/01-same-agent-two-frameworks/README.zh-Hans.md</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/README.zh-Hans.md">打开完整文件</a></p><pre><code>&lt;div align=&quot;right&quot;&gt;
+  &lt;a href=&quot;./README.md&quot;&gt;繁体中文&lt;/a&gt; | &lt;strong&gt;简体中文&lt;/strong&gt; | &lt;a href=&quot;./README.en.md&quot;&gt;English&lt;/a&gt;
+&lt;/div&gt;
+
+# 练习 1：同一个 agent、两个 framework（LangGraph + CrewAI）
+
+对应 [Stage 4 — Workflow Graph 与 Agent 框架](../../../stages/04-agent-frameworks.zh-Hans.md) 练习 1。
+&gt; 🎓 **学习模式**：先运行提供的 `starter.py`（`python starter.py`），然后只改一个小地方，再重新运行现有测试 `python test.py`。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 [`docs/HOW_TO_USE.md`](../../../docs/HOW_TO_USE.md)。
+
+&gt; 📚 **想要 chapter-length 深入版？** 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：
+&gt; - [`datawhalechina/hello-agents`](https://github.com/datawhalechina/hello-agents) ⭐ 中文圈最完整、章节式 + 16 种 production 能力。**本练习对应 hello-agents 的 framework 对照 / orchestration 章节**
+&gt; - [LangGraph Quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart) + [CrewAI 官方 docs](https://docs.crewai.com/)
+&gt; - 完整 references 见 [Stage 4 精选 Projects](../../../stages/04-agent-frameworks.zh-Hans.md#-精选-projects)
+
+
+## 任务
+
+最简单的 search + summarize agent：
+
+- 给一个 query（譬如“请概括台北的信息”）
+- Agent 用 `search` tool 拿 knowledge base 资料
+- LLM 把 search result 摘成 1-2 句
+
+用 **LangGraph** 跟 **CrewAI** 各做一次、比较风格差异。
+
+## 怎么跑 — 两条路径 + 两个 framework
+
+&gt; ⚠️ **每个练习都要有自己的 Python 3.11 `.venv`。** 不要把五个 `requirements.txt` 混在一起安装；它们示范不同 framework，套件需求可能互相冲突。
+
+### Path A（默认、本机免费）
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+
+.\.venv\Scripts\python.exe starter.py # LangGraph + Ollama
+.\.venv\Scripts\python.exe starter_crewai.py # CrewAI + Ollama（对照）
+```
+
+预算：模型 API 是 **$0**；电脑记忆体、电力与下载时间仍有成本。
+
+### Path B（Anthropic、比较云端结果）
+
+```powershell
+$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py # LangGraph + Claude
+```
+
+预设固定型号：`claude-haiku-4-5-20251001`。Haiku 4.5 为每百万 input tokens **$1**、output tokens **$5**。若一次请求用 2,000 input + 1,000 output tokens，算式是 `2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007`。Framework 可能调用多次；本练习先把供应商支出上限设为 **$0.05**，不要把估算当帐单保证。
+
+&lt;details markdown=&quot;1&quot;&gt;
+&lt;summary&gt;macOS／Linux 指令与查核资讯&lt;/summary&gt;
+
+```bash
+python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+```
+
+官方来源：[LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)｜[CrewAI docs](https://docs.crewai.com/)｜[Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+
+&lt;small&gt;套件、model ID、价格与官方连结查核：2026-08-28 UTC。&lt;/small&gt;
+&lt;/details&gt;
+
+## 不花钱验证程序逻辑（mock-based）
+
+```powershell
+.\.venv\Scripts\python.exe test.py # LangGraph 行为
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 路径行为
+.\.venv\Scripts\python.exe test_crewai.py # CrewAI 行为
+```
+
+## 两个 framework 的并排比较
+
+| 维度 | LangGraph | CrewAI |
+|---|---|---|
+| 核心抽象 | `StateGraph` + node + edge | `Agent` + `Task` + `Crew` |
+| 思考方式 | “状态怎么流动” | “角色怎么分工” |
+| Loop 控制 | 显式 conditional edge | 隐藏在 `Crew.kickoff()` 里 |
+| Debug 路径 | 看 graph state 与 checkpoint | 看 task output 与 verbose log |
+| 适合场景 | 需要明确状态与分支的 workflow | 用角色与任务快速表达合作流程 |
+| 学习曲线 | 中-高 | 低 |
+
+### LangGraph 风格（精简）
+
+```python
+g = StateGraph(State)
+g.add_node(&quot;agent&quot;, agent_node)
+g.add_node(&quot;tools&quot;, tool_node)
+g.add_conditional_edges(&quot;agent&quot;, should_continue, {&quot;tools&quot;: &quot;tools&quot;, END: END})
+g.add_edge(&quot;tools&quot;, &quot;agent&quot;)
+```
+
+“我要显式地告诉系统：状态长这样、节点互相连这样、条件分支看 `should_continue`。”
+
+### CrewAI 风格（精简）
+
+```python
+researcher = Agent(role=&quot;Researcher&quot;, goal=&quot;...&quot;, tools=[search], llm=MODEL)
+task = Task(description=query, expected_output=&quot;...&quot;, agent=researcher)
+crew = Crew(agents=[researcher], tasks=[task])
+crew.kickoff()
+```
+
+“我要描述：这个角色是谁、要完成什么任务、有什么工具。框架自己决定怎么跑。”
+
+## 观察重点
+
+1. **抽象代价**：CrewAI 隐藏的多、写得少；要 debug 时 stack 比较深
+2. **小 model 友善度**：两边都要实测；角色描述、工具 schema 与任务长度都会影响结果
+3. **可控性**：LangGraph 你能看到每个 state 变化；CrewAI 偏向“结果导向”
+4. **何时选哪个**：需要逐步看状态时先试 LangGraph；想先表达角色分工时先试 CrewAI，再用自己的任务测量
+
+## 常见坑
+
+- **LangGraph `bind_tools`**：要 `llm.bind_tools([search])` 才会把 tool schema 给 LLM。没 bind 模型就不知道 tool 存在
+- **CrewAI LLM 设定**：要用 LiteLLM 格式（譬如 `&quot;ollama/qwen2.5:3b&quot;`、不是 `&quot;qwen2.5:3b&quot;`）。写错 provider 前缀可能连到不同后端，所以执行前要打印设定并确认
+- **CrewAI 结果型别**：`crew.kickoff()` 回 `CrewOutput` 对象、`str(result)` 拿文字。直接 `print(result)` 有可能拿到 repr
+
+## 想看更聪明的答案？
+
+```powershell
+$env:MODEL=&quot;claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+```
+
+## 延伸
+
+- **改成 streaming**：LangGraph 用 `graph.stream(...)` 边跑边看 state；CrewAI 在创建 `Crew(..., stream=True)` 时开启，再调用 `crew.kickoff()`
+- **加 checkpointing**：LangGraph 加 `MemorySaver` 就能 time-travel debug
+- **加 human-in-the-loop**：练习 3 会做
+</code></pre></details><details id="fafd2b8151bc4"><summary>examples/upstream/01-same-agent-two-frameworks/requirements.txt</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/requirements.txt">打开完整文件</a></p><pre><code>langgraph&gt;=1.2,&lt;2.0
+langchain-openai&gt;=1.6,&lt;2.0
+langchain-anthropic&gt;=1.7,&lt;2.0
+langchain-core&gt;=1.6,&lt;2.0
+crewai&gt;=1.15,&lt;2.0
+</code></pre></details><details id="f98f17744b7ca"><summary>examples/upstream/01-same-agent-two-frameworks/starter.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/starter.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 1：同一个 agent、两个 framework — LangGraph + Ollama（Path A、默认）。
+
+任务：搜索 + 摘要的小 agent。给一个 query、agent 用 search tool 拿资料、回一段摘要。
+这份用 LangGraph。对照的 CrewAI 版本见 starter_crewai.py。
+
+运行方法：
+    pip install -r requirements.txt
+    ollama pull gemma4:e4b
+    ollama serve
+    python starter.py
+
+验证：
+    python test.py
+
+模型 API 预算：$0（Ollama）；本机硬体与电力仍有成本。对照 Anthropic 版见 starter_anthropic.py。
+&quot;&quot;&quot;
+
+# 保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+
+from __future__ import annotations
+
+import os
+import sys
+from typing import Any
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+# HumanMessage 标明用户输入的角色，避免把任务文字和工具观察混在一起。
+# ToolMessage 带工具请求 ID，告诉模型哪次调用产生了这份观察结果。
+from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
+# 消息 reducer 会合并新旧消息；节点只返回新增消息时，旧对话仍被保留而不会整段覆盖。
+from langgraph.graph.message import add_messages
+# Annotated 在类型上附带额外处理规则；这里的 reducer 决定状态更新时是追加消息还是覆盖旧消息。
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing_extensions import Annotated, TypedDict
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;gemma4:e4b&quot;)
+
+
+# === 模型可请求的工具 ===
+
+@tool
+def search(query: str) -&gt; str:
+    &quot;&quot;&quot;按主题检索固定的离线教学资料；支持“台北”和 react agent 两个查询键。&quot;&quot;&quot;
+    db = {
+        &quot;台北&quot;: &quot;台北是台湾地区的城市，示例人口约 260 万，以夜市闻名。&quot;,
+        &quot;react agent&quot;: &quot;ReAct（推理与行动）是一种让判断、行动与观察交替进行的 Agent 模式。&quot;,
+    }
+    return db.get(query.strip().lower(), f&quot;没有此条目：{query}&quot;)
+
+
+# === LangGraph 状态定义 ===
+
+class State(TypedDict):
+    # 把 add_messages 作为合并规则：新一轮消息追加到历史，而不是替换整段对话，工具结果才不会丢失。
+    messages: Annotated[list, add_messages]
+
+
+# 把节点和条件边连接成图；阅读分支函数，确认什么情况下继续、暂停或结束。
+def build_graph(llm: Any) -&gt; Any:
+    &quot;&quot;&quot;组一个 search → summarize 的图：LLM 看 query 决定要不要调用 search、看到 tool result 后给摘要。&quot;&quot;&quot;
+    # 把工具说明提供给模型，使它能提出结构化调用；真正执行仍由后面的工具节点负责。
+    llm_with_tools = llm.bind_tools([search])
+
+    def agent_node(state: State):
+        return {&quot;messages&quot;: [llm_with_tools.invoke(state[&quot;messages&quot;])]}
+
+    def tool_node(state: State):
+        msg = state[&quot;messages&quot;][-1]
+        results = []
+        for call in msg.tool_calls:
+            name = call.get(&quot;name&quot;)
+            args = call.get(&quot;args&quot;)
+            # 模型给出的名称只是请求；执行前再次校验白名单，防止模型请求一个未授权函数。
+            if name != &quot;search&quot;:
+                raise ValueError(f&quot;未知工具：{name!r}&quot;)
+            # 把输入边界一次检查清楚：必须是对象、只能有 query、值必须是字符串。Schema 描述本身不能替执行器做这项检查。
+            if not isinstance(args, dict) or set(args) != {&quot;query&quot;} or not isinstance(args[&quot;query&quot;], str):
+                raise ValueError(&quot;search 只接受一个名为 query 的字符串参数。&quot;)
+            # 直到名称和参数都通过验证才真正调用工具；返回值是观察数据，不是新的控制指令。
+            obs = search.invoke(args)
+            # 使用原请求 ID 封装工具观察，模型才能知道这份结果回答哪一次调用；多工具时尤其不能省略关联。
+            results.append(ToolMessage(content=obs, tool_call_id=call[&quot;id&quot;]))
+        return {&quot;messages&quot;: results}
+
+    def should_continue(state: State) -&gt; str:
+        # 最新模型消息仍含工具请求就进入执行节点，否则结束；退出依据是协议字段，不是模型文字中写了“完成”。
+        return &quot;tools&quot; if state[&quot;messages&quot;][-1].tool_calls else END
+
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    g = StateGraph(State)
+    # 把 agent 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node(&quot;agent&quot;, agent_node)
+    # 把 tools 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    g.add_node(&quot;tools&quot;, tool_node)
+    # 把这个节点设为新任务的入口，明确第一步由谁处理。
+    g.set_entry_point(&quot;agent&quot;)
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    g.add_conditional_edges(&quot;agent&quot;, should_continue, {&quot;tools&quot;: &quot;tools&quot;, END: END})
+    # 执行工具后回到模型，让模型依据观察决定继续调用还是给出答案。
+    g.add_edge(&quot;tools&quot;, &quot;agent&quot;)
+    # 流程图到这里才完成组装；实际请求要等 run 中的 invoke，便于先检查图结构再执行。
+    return g.compile()
+
+
+def run(query: str, llm: Any = None) -&gt; dict:
+    &quot;&quot;&quot;Public entrypoint: 跑一轮 agent、返回 final message + steps。&quot;&quot;&quot;
+    llm = llm or ChatOpenAI(
+        # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+        # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+        base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;,
+        # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+        # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+        model=MODEL, temperature=0,
+    )
+    graph = build_graph(llm)
+    # recursion_limit：限制图的执行步数，用来兜住意外循环；它不是 Python 函数递归深度。
+    final_state = graph.invoke({&quot;messages&quot;: [HumanMessage(content=query)]}, config={&quot;recursion_limit&quot;: 6})
+    return {
+        &quot;final&quot;: final_state[&quot;messages&quot;][-1].content,
+        &quot;steps&quot;: len(final_state[&quot;messages&quot;]),
+    }
+
+
+if __name__ == &quot;__main__&quot;:
+    query = &quot;请根据工具中的固定资料，用中文概括台北的信息。&quot;
+    print(f&quot;❓ 问题：{query}（使用 Ollama {MODEL}）&quot;)
+    print(&quot;-&quot; * 60)
+    result = run(query)
+    print(f&quot;✅ 最终结果：{result[&#x27;final&#x27;]}&quot;)
+    print(f&quot;   消息条数：{result[&#x27;steps&#x27;]}&quot;)
+    assert result[&quot;final&quot;], &quot;摘要不得为空&quot;
+    assert result[&quot;steps&quot;] &gt;= 2, &quot;应保留可观察的图执行轨迹&quot;
+    print(&quot;✅ 练习 1 通过 — LangGraph + Ollama qwen2.5:3b、模型 API $0&quot;)
+</code></pre></details><details id="fdefdb12a4b22"><summary>examples/upstream/01-same-agent-two-frameworks/starter_anthropic.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/starter_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 1：同一个 agent、两个 framework — LangGraph + Anthropic（Path B）。
+
+跟 starter.py 同样的 LangGraph 图、只把 LLM backend 换成 Claude。
+
+运行方法：
+    pip install -r requirements.txt
+    export ANTHROPIC_API_KEY=sk-ant-...
+    python starter_anthropic.py
+
+预算：每次 ≈ $0.001（claude-haiku-4-5）。
+Ollama 版本见 starter.py。
+&quot;&quot;&quot;
+
+# 保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+# 这是原题的另一供应商路径；共享的检索、工具或状态逻辑仍需遵守相同验收条件。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from langchain_anthropic import ChatAnthropic
+
+from starter import run
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;claude-haiku-4-5-20251001&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    query = &quot;请根据工具中的固定资料，用中文概括台北的信息。&quot;
+    print(f&quot;❓ 问题：{query}（使用 Anthropic {MODEL}）&quot;)
+    print(&quot;-&quot; * 60)
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+    llm = ChatAnthropic(model=MODEL, temperature=0)
+    result = run(query, llm=llm)
+    print(f&quot;✅ 最终结果：{result[&#x27;final&#x27;]}&quot;)
+    print(f&quot;   消息条数：{result[&#x27;steps&#x27;]}&quot;)
+    assert result[&quot;final&quot;], &quot;摘要不得为空&quot;
+    assert result[&quot;steps&quot;] &gt;= 2, &quot;应保留可观察的图执行轨迹&quot;
+    print(&quot;✅ 练习 1 (Anthropic path) 通过 — LangGraph + 固定 Anthropic model ID；费用依 tokens 计算&quot;)
+</code></pre></details><details id="fbed70414cf4c"><summary>examples/upstream/01-same-agent-two-frameworks/starter_crewai.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/starter_crewai.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 1：同一个 agent、CrewAI 版本对照（Ollama 预设）。
+
+跟 starter.py (LangGraph) 同一个任务：search + summarize。
+看程序码风格差异——CrewAI 用 Agent + Task 抽象、LangGraph 用 StateGraph + node。
+
+运行方法：
+    pip install -r requirements.txt   # 含 crewai
+    ollama pull gemma4:e4b
+    ollama serve
+    python starter_crewai.py
+
+模型 API 预算：$0（Ollama）；本机硬体与电力仍有成本。
+
+⚠️ 注意：模型、prompt 与工具描述都可能改变步数；用相同题组比较，不先假设哪个 backend 较稳。
+&quot;&quot;&quot;
+
+# 保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from crewai import Agent, Crew, Task
+from crewai.tools import tool
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;ollama/gemma4:e4b&quot;)  # LiteLLM 用提供商前缀识别请求应交给哪种后端
+OLLAMA_BASE = os.environ.get(&quot;OLLAMA_API_BASE&quot;, &quot;http://localhost:11434&quot;)
+
+
+# 查询固定教学资料，没有访问实时搜索服务；不存在的条目应明确返回缺失。
+def search_knowledge_base(query: str) -&gt; str:
+    &quot;&quot;&quot;按主题检索固定的离线教学资料；支持“台北”和 react agent 两个查询键。&quot;&quot;&quot;
+    db = {
+        &quot;台北&quot;: &quot;台北是台湾地区的城市，示例人口约 260 万，以夜市闻名。&quot;,
+        &quot;react agent&quot;: &quot;ReAct（推理与行动）是一种让判断、行动与观察交替进行的 Agent 模式。&quot;,
+    }
+    return db.get(query.strip().lower(), f&quot;没有此条目：{query}&quot;)
+
+
+@tool(&quot;search&quot;)
+def search(query: str) -&gt; str:
+    &quot;&quot;&quot;检索本例固定的离线资料库。&quot;&quot;&quot;
+    return search_knowledge_base(query)
+
+
+# 把角色和任务组织到同一个 Crew，重点看任务间的 context 如何传递。
+def build_crew(query: str, llm_model: str = MODEL) -&gt; Crew:
+    &quot;&quot;&quot;CrewAI 风格：一个 agent + 一个 task。&quot;&quot;&quot;
+    os.environ[&quot;OPENAI_API_BASE&quot;] = f&quot;{OLLAMA_BASE}/v1&quot;
+    os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;ollama&quot;
+
+    researcher = Agent(
+        # role：说明这名 Agent 的职责，帮助拆分工作；角色名称本身不会自动创建独立权限或可靠协作。
+        role=&#x27;研究者&#x27;,
+        # goal：告诉这个角色要完成什么成果；与角色名称相比，具体目标更能决定它会寻找哪些信息。
+        goal=&quot;查找指定主题，并用中文概括检索到的资料。&quot;,
+        # backstory：给模型补充角色职责与工作方式；它影响生成行为，但不能替代执行层的工具权限检查。
+        backstory=&quot;你负责检索资料库，并用中文给出简洁摘要。&quot;,
+        # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+        tools=[search],
+        llm=llm_model,
+        # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+        verbose=False,
+    )
+    task = Task(
+        description=query,
+        # expected_output：说明任务应交付什么，方便下一角色消费和人工核对；这段文字并不是自动验证器。
+        expected_output=&quot;依据检索结果写成的一到两句中文摘要。&quot;,
+        # agent：明确由哪个角色执行任务，防止任务说明存在却没有实际执行者。
+        agent=researcher,
+    )
+    # agents：列出这次协作允许使用的角色；固定名单使参与者和成本范围可检查。
+    # tasks：按工作顺序列出任务；任务顺序应与资料依赖一致，而不是为了多个 Agent 而拆分。
+    # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+    return Crew(agents=[researcher], tasks=[task], verbose=False)
+
+
+def run(query: str, llm_model: str = MODEL) -&gt; dict:
+    crew = build_crew(query, llm_model=llm_model)
+    # 让 Crew 真正开始按任务依赖执行；创建 Agent 和 Task 对象本身不会产生最终工作成果。
+    result = crew.kickoff()
+    return {&quot;final&quot;: str(result), &quot;steps&quot;: None}
+
+
+if __name__ == &quot;__main__&quot;:
+    query = &quot;请根据工具中的固定资料，用中文概括台北的信息。&quot;
+    print(f&quot;❓ 问题：{query}（使用 CrewAI 和 Ollama {MODEL}）&quot;)
+    print(&quot;-&quot; * 60)
+    result = run(query)
+    print(f&quot;✅ 最终结果：{result[&#x27;final&#x27;]}&quot;)
+    assert result[&quot;final&quot;], &quot;摘要不得为空&quot;
+    assert result[&quot;steps&quot;] is None
+    print(&quot;✅ CrewAI 版本通过 — 同样任务、不同 framework、模型 API $0&quot;)
+    print(&quot;   对照 starter.py（LangGraph）看程序码风格差异&quot;)
+</code></pre></details><details id="f0574c7266f2b"><summary>examples/upstream/01-same-agent-two-frameworks/test.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/test.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 1 自我验证 — Path A（Ollama starter.py，LangGraph 版）。
+
+运行方法：
+    python test.py
+
+用 mock LLM 取代真实 API、不打网路。
+&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+
+from __future__ import annotations
+
+import sys
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from langchain_core.messages import AIMessage
+
+from starter import build_graph, run, search
+
+
+def test_search_tool_basic():
+    assert &quot;台北&quot; in search.invoke({&quot;query&quot;: &quot;台北&quot;})
+    assert &quot;没有此条目&quot; in search.invoke({&quot;query&quot;: &quot;unknown_topic&quot;})
+    print(&quot;✅ test_search_tool_basic&quot;)
+
+
+def test_run_with_mock_llm():
+    &quot;&quot;&quot;Mock LangChain LLM — agent 第一轮叫 search、第二轮收尾。&quot;&quot;&quot;
+    llm = MagicMock()
+    # 第一轮：tool_calls (search Taipei)
+    tool_call_msg = AIMessage(
+        content=&quot;&quot;,
+        tool_calls=[{&quot;name&quot;: &quot;search&quot;, &quot;args&quot;: {&quot;query&quot;: &quot;台北&quot;}, &quot;id&quot;: &quot;call_1&quot;, &quot;type&quot;: &quot;tool_call&quot;}],
+    )
+    # 第二轮：纯文字 summary
+    final_msg = AIMessage(content=&quot;台北是台湾地区的城市，示例人口约 260 万。&quot;)
+    llm.bind_tools.return_value = llm  # 链式：bind_tools 回自己
+    llm.invoke.side_effect = [tool_call_msg, final_msg]
+
+    result = run(&quot;请概括台北的信息&quot;, llm=llm)
+    assert &quot;台北&quot; in result[&quot;final&quot;]
+    assert result[&quot;steps&quot;] &gt;= 3  # 检查完整消息链：用户问题、模型请求、工具结果、最终回答都必须保留
+    print(&quot;✅ test_run_with_mock_llm&quot;)
+
+
+def test_run_skip_tool_when_known():
+    &quot;&quot;&quot;Mock：LLM 直接给答案、不调用 tool。&quot;&quot;&quot;
+    llm = MagicMock()
+    final_msg = AIMessage(content=&quot;Python 是一种编程语言。&quot;, tool_calls=[])
+    llm.bind_tools.return_value = llm
+    llm.invoke.return_value = final_msg
+
+    result = run(&quot;Python 是什么&quot;, llm=llm)
+    assert &quot;Python&quot; in result[&quot;final&quot;]
+    assert result[&quot;steps&quot;] == 2
+    print(&quot;✅ test_run_skip_tool_when_known&quot;)
+
+
+def test_reject_unknown_tool_name():
+    &quot;&quot;&quot;模型不能把未知名称偷偷当成 search 执行。&quot;&quot;&quot;
+    llm = MagicMock()
+    llm.bind_tools.return_value = llm
+    llm.invoke.return_value = AIMessage(
+        content=&quot;&quot;,
+        tool_calls=[{&quot;name&quot;: &quot;delete_files&quot;, &quot;args&quot;: {&quot;query&quot;: &quot;台北&quot;}, &quot;id&quot;: &quot;call_bad&quot;, &quot;type&quot;: &quot;tool_call&quot;}],
+    )
+
+    try:
+        run(&quot;请概括台北的信息&quot;, llm=llm)
+    except ValueError as error:
+        assert &#x27;未知工具&#x27; in str(error)
+    else:
+        raise AssertionError(&quot;必须拒绝未授权的工具名&quot;)
+    print(&quot;✅ test_reject_unknown_tool_name&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    test_search_tool_basic()
+    test_run_with_mock_llm()
+    test_run_skip_tool_when_known()
+    test_reject_unknown_tool_name()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f0a383c01f692"><summary>examples/upstream/01-same-agent-two-frameworks/test_anthropic.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/test_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;离线验证 B 路径行为，不发送 Anthropic 请求。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+
+from __future__ import annotations
+
+import sys
+import os
+from unittest.mock import MagicMock
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from langchain_core.messages import AIMessage
+from starter import run
+from starter_anthropic import MODEL
+
+
+def test_pinned_provider_and_shared_graph_behavior() -&gt; None:
+    from langchain_anthropic import ChatAnthropic
+    assert MODEL == &quot;claude-haiku-4-5-20251001&quot;
+    os.environ.setdefault(&quot;ANTHROPIC_API_KEY&quot;, &quot;offline-test-key&quot;)
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+    assert ChatAnthropic(model=MODEL, temperature=0).model == MODEL
+    llm = MagicMock()
+    llm.bind_tools.return_value = llm
+    llm.invoke.side_effect = [
+        AIMessage(content=&quot;&quot;, tool_calls=[{&quot;name&quot;: &quot;search&quot;, &quot;args&quot;: {&quot;query&quot;: &quot;台北&quot;}, &quot;id&quot;: &quot;call_1&quot;, &quot;type&quot;: &quot;tool_call&quot;}]),
+        AIMessage(content=&quot;台北位于台湾地区。&quot;, tool_calls=[]),
+    ]
+    result = run(&quot;请概括台北的信息&quot;, llm=llm)
+    assert result[&quot;final&quot;].startswith(&quot;台北&quot;)
+    assert result[&quot;steps&quot;] &gt;= 4
+
+
+if __name__ == &quot;__main__&quot;:
+    test_pinned_provider_and_shared_graph_behavior()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="fc1707f32ba27"><summary>examples/upstream/01-same-agent-two-frameworks/test_crewai.py</summary><p><a href="../examples/upstream/01-same-agent-two-frameworks/test_crewai.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;离线核对 CrewAI 的角色和任务结构，不启动 Crew 或联网。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：保持问题和搜索资料相同，比较 LangGraph 的状态图与 CrewAI 的角色任务如何调用工具。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter_crewai import build_crew, search_knowledge_base
+
+
+def test_offline_search_and_visible_crewai_structure() -&gt; None:
+    assert &quot;台北&quot; in search_knowledge_base(&quot;台北&quot;)
+    assert &quot;没有此条目&quot; in search_knowledge_base(&quot;unknown&quot;)
+    crew = build_crew(&quot;请概括台北的信息&quot;)
+    assert [agent.role for agent in crew.agents] == [&#x27;研究者&#x27;]
+    assert len(crew.tasks) == 1
+    assert crew.tasks[0].agent.role == &#x27;研究者&#x27;
+
+
+if __name__ == &quot;__main__&quot;:
+    test_offline_search_and_visible_crewai_structure()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="fcbda0d4c670c"><summary>examples/upstream/02-multi-agent-roles/README.zh-Hans.md</summary><p><a href="../examples/upstream/02-multi-agent-roles/README.zh-Hans.md">打开完整文件</a></p><pre><code>&lt;div align=&quot;right&quot;&gt;
+  &lt;a href=&quot;./README.md&quot;&gt;繁体中文&lt;/a&gt; | &lt;strong&gt;简体中文&lt;/strong&gt; | &lt;a href=&quot;./README.en.md&quot;&gt;English&lt;/a&gt;
+&lt;/div&gt;
+
+# 练习 2：多 agent 角色分配（CrewAI）
+
+对应 [Stage 4 — Workflow Graph 与 Agent 框架](../../../stages/04-agent-frameworks.zh-Hans.md) 练习 2。
+&gt; 🎓 **学习模式**：先运行提供的 `starter.py`（`python starter.py`），然后只改一个小地方，再重新运行现有测试 `python test.py`。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 [`docs/HOW_TO_USE.md`](../../../docs/HOW_TO_USE.md)。
+
+&gt; 📚 **想要 chapter-length 深入版？** 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：
+&gt; - [`datawhalechina/hello-agents`](https://github.com/datawhalechina/hello-agents) ⭐ 中文圈最完整、章节式 + 16 种 production 能力。**本练习对应 hello-agents 的 multi-agent roles / Crew 章节**
+&gt; - [CrewAI Examples repo](https://github.com/crewAIInc/crewAI-examples)（官方 sequential / hierarchical 范本；⚠️ 已封存 2026-04、仍可当参考）
+&gt; - 完整 references 见 [Stage 4 精选 Projects](../../../stages/04-agent-frameworks.zh-Hans.md#-精选-projects)
+
+
+## 任务
+
+3 个 agent 各自负责一段、合作完成一篇 blog intro：
+
+```
+Researcher → Writer → Critic
+  (找资料) (写稿) (审稿、PASS/ISSUES)
+```
+
+这是 **role-based pipeline（角色式流水线）**：你描述每个角色、目标与任务，CrewAI 依顺序传递结果。
+
+## 怎么跑 — 两条路径
+
+&gt; ⚠️ **每个练习都要有自己的 Python 3.11 `.venv`。** 不要把 Stage 4 五个 `requirements.txt` 混装。
+
+### Path A（默认、本机免费）
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+```
+
+预算：模型 API 是 **$0**；执行时间依 CPU、记忆体、模型与 prompt 而变，请在自己的电脑量测。
+
+### Path B（Anthropic、比较云端结果）
+
+```powershell
+$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+```
+
+预设固定型号：`anthropic/claude-haiku-4-5-20251001`。以 2,000 input + 1,000 output tokens 的单次模型请求为例：`2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007`。三个角色可能各调用一次或重试；本练习先设供应商支出上限 **$0.10**。
+
+&lt;details markdown=&quot;1&quot;&gt;
+&lt;summary&gt;macOS／Linux 指令与查核资讯&lt;/summary&gt;
+
+```bash
+python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+```
+
+官方来源：[CrewAI docs](https://docs.crewai.com/)｜[LiteLLM docs](https://docs.litellm.ai/)｜[Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+
+&lt;small&gt;套件、model ID、价格与官方连结查核：2026-08-28 UTC。&lt;/small&gt;
+&lt;/details&gt;
+
+## 不花钱验证程序逻辑
+
+```powershell
+.\.venv\Scripts\python.exe test.py # 角色、任务、handoff 与停止条件
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 路径行为
+```
+
+离线测试不调用真模型，但会检查 3 个 agent、3 个 task、sequential process、context dependency、handoff 与可观察的停止条件。模型质量仍要另外实测。
+
+## CrewAI multi-agent 核心观念
+
+### Agent
+
+```python
+researcher = Agent(
+    role=&quot;Researcher&quot;,
+    goal=&quot;...&quot;, # 一句话讲「成功」长什么样
+    backstory=&quot;...&quot;, # 提供 persona context、影响 prompt
+    tools=[search],
+    llm=MODEL,
+)
+```
+
+**重点**：`role` 跟 `goal` 影响 prompt 质量很大。不要写“Agent”、要写“Researcher who finds factual data”。
+
+### Task
+
+```python
+research_task = Task(
+    description=&quot;Search for X and report findings.&quot;,
+    expected_output=&quot;A 1-2 sentence factual entry.&quot;,
+    agent=researcher,
+)
+```
+
+**重点**：`expected_output` 是给 LLM 看的“合格范本”。写成“两句、主动语态的开场”比“一些文字”更清楚；改善幅度要用自己的任务评测。
+
+### Context dependency
+
+```python
+write_task = Task(..., context=[research_task]) # writer 看 researcher 结果
+critic_task = Task(..., context=[research_task, write_task]) # critic 同时看两个
+```
+
+**重点**：`context` 是 CrewAI 的 dataflow 机制。`critic_task.context=[a, b]` 表示 critic 看到 a, b 两个 task 的 output。
+
+### Sequential vs Hierarchical Process
+
+```python
+Crew(..., process=Process.sequential) # 线性走完
+Crew(..., process=Process.hierarchical) # 多个 manager+worker、需设 manager_llm
+```
+
+这题用 sequential，因为顺序最容易看懂。Hierarchical 会由 manager 分派任务，适合需要动态分工、而且已有评测与停止条件的场景。
+
+## 两个 path 观察重点
+
+| 观察项 | Anthropic Claude haiku | Ollama qwen2.5:3b |
+|---|---|---|
+| Researcher 是否调用 tool | 看 log 与输出验证 | 看 log 与输出验证 |
+| Writer 是否使用研究结果 | 用测试案例检查 | 用相同测试案例检查 |
+| Critic 是否抓到错误 | 不预设一定成功 | 不预设一定成功 |
+| 速度 | 在自己的网络与任务量测 | 在自己的硬体与模型量测 |
+| 模型 API 成本 | 依 tokens 与调用次数计算 | $0 |
+
+**教学 punchline**：multi-agent 多了交接点；任何角色漏掉资讯，错误都可能往后传。模型大小不是唯一答案，还要测角色 prompt、工具结果、handoff 与停止条件。
+
+## 常见坑
+
+- **`expected_output` 太笼统**：写“Some output”没有清楚成功条件。改成“A 2-sentence blog intro paragraph in active voice”，再用测试案例比较
+- **`context` 漏设**：Writer 没设 `context=[research_task]`、就拿不到 researcher 结果、会凭空写
+- **小 model + 3 agent**：可能比较慢或漏步。先看 log；需要时再比较 `qwen2.5:7b` 或 Claude
+- **`allow_delegation=True` 慎用**：开启后 agent 可以叫其他 agent 帮忙、容易 loop。雏形阶段建议 `False`
+
+## 想看更聪明的答案？
+
+```powershell
+$env:MODEL=&quot;anthropic/claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;ollama/qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+```
+
+## 延伸
+
+- **加 manager**：`process=Process.hierarchical` + `manager_llm=...`、让 manager agent 动态分配
+- **加 memory**：CrewAI 有 `memory=True`、让 agent 跨 task 记住 context
+- **批次或异步执行**：`crew.kickoff_for_each(...)` 处理一批输入，`crew.kickoff_async(...)` 异步执行；两者都不是 streaming
+- **加 streaming**：创建 `Crew(..., stream=True)`，再调用 `crew.kickoff()`
+- **加 human-in-the-loop**：本题用练习 3 的 LangGraph 示范；CrewAI 也有自己的 human-feedback triggers
+</code></pre></details><details id="f1de4832761d6"><summary>examples/upstream/02-multi-agent-roles/requirements.txt</summary><p><a href="../examples/upstream/02-multi-agent-roles/requirements.txt">打开完整文件</a></p><pre><code>crewai[anthropic]&gt;=1.15,&lt;2.0
+litellm&gt;=1.98,&lt;2.0
+</code></pre></details><details id="f1c61f5867f5f"><summary>examples/upstream/02-multi-agent-roles/starter.py</summary><p><a href="../examples/upstream/02-multi-agent-roles/starter.py">打开完整文件</a></p><pre><code>r&quot;&quot;&quot;Stage 4 练习 2：用 CrewAI + Ollama 做有界的三角色交接。
+
+3 个 agent 各有角色：
+- Researcher 找资料（用 search tool）
+- Writer 写稿（拿 researcher 的结果写成 blog 段落）
+- Critic 审稿（检查 factual + tone）
+
+这里使用 ``Process.sequential``，让三个角色像接力一样依序交接。
+
+运行方法：
+    py -3.11 -m venv .venv
+    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+    ollama pull qwen2.5:3b
+    ollama serve
+    .\.venv\Scripts\python.exe starter.py
+
+验证：
+    .\.venv\Scripts\python.exe test.py
+
+模型 API 预算：$0（Ollama）。执行时间依硬体、模型与 prompt 而变。
+对照 Anthropic 版见 ``starter_anthropic.py``。
+&quot;&quot;&quot;
+
+# 沿着研究、写作、审核看资料如何传递；角色名字不能代替实际的任务上下文。
+
+from __future__ import annotations
+
+import os
+import sys
+from typing import Any
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from crewai import Agent, Crew, Process, Task
+from crewai.tools import tool
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;ollama/qwen2.5:3b&quot;)
+OLLAMA_BASE = os.environ.get(&quot;OLLAMA_API_BASE&quot;, &quot;http://localhost:11434&quot;)
+
+
+# === 模型可请求的工具 ===
+
+# 查询固定教学资料，没有访问实时搜索服务；不存在的条目应明确返回缺失。
+def search_knowledge_base(query: str) -&gt; str:
+    &quot;&quot;&quot;查询固定的离线示范资料表，不代表真正的搜索引擎。&quot;&quot;&quot;
+    db = {
+        &quot;react&quot;: &quot;ReAct（Yao 等，2022）将判断、行动和观察组织成交替循环，是本课讨论的 Agent 模式之一。&quot;,
+        &quot;langgraph&quot;: &quot;LangGraph 是 LangChain 提供的图式 Agent 编排框架，重点管理状态与检查点。&quot;,
+        &quot;crewai&quot;: &quot;CrewAI 按角色组织多个 Agent；定义 Agent、Task 和 Crew 后，通过 kickoff() 启动任务。&quot;,
+    }
+    return db.get(query.strip().lower(), f&quot;没有此条目：{query}&quot;)
+
+
+@tool(&quot;search&quot;)
+def search(query: str) -&gt; str:
+    &quot;&quot;&quot;从固定的离线资料库返回一个条目。
+
+    Args:
+        query: 要查询的小写主题键，例如 ``react``。
+    &quot;&quot;&quot;
+    return search_knowledge_base(query)
+
+
+# 用固定研究结果演示交接资料，便于检查写作与审核是否收到必要证据。
+def simulate_handoff(topic: str) -&gt; dict[str, str]:
+    &quot;&quot;&quot;离线走完 Researcher → Writer → Critic，让交接结果可以直接测试。&quot;&quot;&quot;
+    research = search_knowledge_base(topic)
+    draft = f&quot;{topic.title()}与 Agent 构建有关，资料如下：{research}&quot;
+    verdict = &quot;PASS&quot; if research != f&quot;没有此条目：{topic}&quot; and research in draft else &quot;ISSUES: 缺少有来源的研究资料&quot;
+    return {&quot;input&quot;: topic, &quot;research&quot;: research, &quot;draft&quot;: draft, &quot;verdict&quot;: verdict, &quot;stop_condition&quot;: &quot;固定三个角色；每个 Agent 的迭代上限为 max_iter=4。&quot;}
+
+
+# === Crew 设计 ===
+
+# 把角色和任务组织到同一个 Crew，重点看任务间的 context 如何传递。
+def build_crew(topic: str, llm_model: str = MODEL) -&gt; Crew:
+    &quot;&quot;&quot;建立三个固定角色；每个 agent 最多迭代四次且不能自行委派。&quot;&quot;&quot;
+    os.environ[&quot;OPENAI_API_BASE&quot;] = f&quot;{OLLAMA_BASE}/v1&quot;
+    os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;ollama&quot;
+
+    researcher = Agent(
+        # role：说明这名 Agent 的职责，帮助拆分工作；角色名称本身不会自动创建独立权限或可靠协作。
+        role=&#x27;研究者&#x27;,
+        # goal：告诉这个角色要完成什么成果；与角色名称相比，具体目标更能决定它会寻找哪些信息。
+        goal=f&quot;从资料库检索以下主题的简洁事实：{topic}。&quot;,
+        # backstory：给模型补充角色职责与工作方式；它影响生成行为，但不能替代执行层的工具权限检查。
+        backstory=&quot;你负责检索资料库，并用中文返回未经编造的原始事实条目。&quot;,
+        # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+        tools=[search],
+        llm=llm_model,
+        # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+        verbose=False,
+        # allow_delegation：禁止角色自行继续委派，保持本例只有明确安排的角色和任务，避免工作范围不断扩大。
+        allow_delegation=False,
+        # max_iter：限制这个角色自身的推理与工具迭代次数；多个角色仍会累加成本，需要分别设置上限。
+        max_iter=4,
+    )
+    writer = Agent(
+        # role：说明这名 Agent 的职责，帮助拆分工作；角色名称本身不会自动创建独立权限或可靠协作。
+        role=&#x27;写作者&#x27;,
+        # goal：告诉这个角色要完成什么成果；与角色名称相比，具体目标更能决定它会寻找哪些信息。
+        goal=f&quot;用两句中文介绍以下主题：{topic}.&quot;,
+        # backstory：给模型补充角色职责与工作方式；它影响生成行为，但不能替代执行层的工具权限检查。
+        backstory=&quot;你根据研究者提供的资料，写一段简洁的中文博客引言。&quot;,
+        llm=llm_model,
+        # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+        verbose=False,
+        # allow_delegation：禁止角色自行继续委派，保持本例只有明确安排的角色和任务，避免工作范围不断扩大。
+        allow_delegation=False,
+        # max_iter：限制这个角色自身的推理与工具迭代次数；多个角色仍会累加成本，需要分别设置上限。
+        max_iter=4,
+    )
+    critic = Agent(
+        # role：说明这名 Agent 的职责，帮助拆分工作；角色名称本身不会自动创建独立权限或可靠协作。
+        role=&#x27;审核者&#x27;,
+        # goal：告诉这个角色要完成什么成果；与角色名称相比，具体目标更能决定它会寻找哪些信息。
+        goal=&quot;核对写作者的引言是否有研究资料支持，并检查语气是否合适。&quot;,
+        # backstory：给模型补充角色职责与工作方式；它影响生成行为，但不能替代执行层的工具权限检查。
+        backstory=&quot;你是严格的编辑，负责指出没有依据的内容和语气问题，并用中文说明。&quot;,
+        llm=llm_model,
+        # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+        verbose=False,
+        # allow_delegation：禁止角色自行继续委派，保持本例只有明确安排的角色和任务，避免工作范围不断扩大。
+        allow_delegation=False,
+        # max_iter：限制这个角色自身的推理与工具迭代次数；多个角色仍会累加成本，需要分别设置上限。
+        max_iter=4,
+    )
+
+    research_task = Task(
+        description=f&quot;检索主题 `{topic}`，用中文报告查到的资料。&quot;,
+        # expected_output：说明任务应交付什么，方便下一角色消费和人工核对；这段文字并不是自动验证器。
+        expected_output=&quot;从资料库取得的一到两句中文事实说明。&quot;,
+        # agent：明确由哪个角色执行任务，防止任务说明存在却没有实际执行者。
+        agent=researcher,
+    )
+    write_task = Task(
+        description=&quot;使用研究者的资料，写两句中文博客引言。&quot;,
+        # expected_output：说明任务应交付什么，方便下一角色消费和人工核对；这段文字并不是自动验证器。
+        expected_output=&quot;由两句中文组成的引言段落。&quot;,
+        # agent：明确由哪个角色执行任务，防止任务说明存在却没有实际执行者。
+        agent=writer,
+        # context：把前面任务的实际结果交给当前任务。只在提示词里提到“研究者”并不能自动传递研究资料。
+        context=[research_task],
+    )
+    critic_task = Task(
+        description=&quot;检查引言是否得到研究资料支持。&quot;
+                    &quot;没有问题时报告 PASS，否则用中文列出问题。&quot;,
+        # expected_output：说明任务应交付什么，方便下一角色消费和人工核对；这段文字并不是自动验证器。
+        expected_output=&quot;输出 &#x27;PASS: [中文引言]&#x27; 或 &#x27;ISSUES: [中文问题列表]&#x27;。&quot;,
+        # agent：明确由哪个角色执行任务，防止任务说明存在却没有实际执行者。
+        agent=critic,
+        # context：把前面任务的实际结果交给当前任务。只在提示词里提到“研究者”并不能自动传递研究资料。
+        context=[research_task, write_task],
+    )
+
+    return Crew(
+        # agents：列出这次协作允许使用的角色；固定名单使参与者和成本范围可检查。
+        agents=[researcher, writer, critic],
+        # tasks：按工作顺序列出任务；任务顺序应与资料依赖一致，而不是为了多个 Agent 而拆分。
+        tasks=[research_task, write_task, critic_task],
+        # process：选择任务调度方式；sequential 让前一任务完成后再进入下一任务，不代表并行执行。
+        process=Process.sequential,
+        # verbose：关闭框架的详细过程输出，减少噪声；需要调试时查看明确记录的轨迹，而不是把终端文字当完整审计。
+        verbose=False,
+    )
+
+
+def run(topic: str, llm_model: str = MODEL) -&gt; dict:
+    &quot;&quot;&quot;执行 crew，并把最终结果与可观察的停止条件一起返回。&quot;&quot;&quot;
+    crew = build_crew(topic, llm_model=llm_model)
+    # 让 Crew 真正开始按任务依赖执行；创建 Agent 和 Task 对象本身不会产生最终工作成果。
+    result = crew.kickoff()
+    return {&quot;final&quot;: str(result), &quot;topic&quot;: topic, &quot;stop_condition&quot;: &quot;固定三个角色；每个 Agent 的迭代上限为 max_iter=4。&quot;}
+
+
+if __name__ == &quot;__main__&quot;:
+    topic = &quot;react&quot;
+    print(f&quot;❓ 主题：{topic}（使用 CrewAI 和 Ollama {MODEL}）&quot;)
+    print(f&quot;   三个角色：研究者 → 写作者 → 审核者（顺序执行）&quot;)
+    print(&quot;-&quot; * 60)
+    result = run(topic)
+    print(f&quot;✅ 最终结果（审核者判定）：\n{result[&#x27;final&#x27;]}&quot;)
+    assert result[&quot;final&quot;], &quot;审核者应给出明确判定&quot;
+    assert &quot;max_iter=4&quot; in result[&quot;stop_condition&quot;]
+    print(&quot;\n✅ 练习 2 通过 — 3-agent crew 跑完、模型 API $0&quot;)
+</code></pre></details><details id="ff7361ab277cc"><summary>examples/upstream/02-multi-agent-roles/starter_anthropic.py</summary><p><a href="../examples/upstream/02-multi-agent-roles/starter_anthropic.py">打开完整文件</a></p><pre><code>r&quot;&quot;&quot;Stage 4 练习 2 Path B：用 Anthropic 跑同一个三角色 CrewAI 流程。
+
+CrewAI 用 provider-prefixed model string 选择后端；
+``crewai[anthropic]`` 会安装 Anthropic provider，这份范例再固定 model ID。
+
+运行方法：
+    $env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+    .\.venv\Scripts\python.exe starter_anthropic.py
+
+实际费用依 tokens、调用次数与重试而变；README 提供公式与 $0.10 支出上限。
+&quot;&quot;&quot;
+
+# 沿着研究、写作、审核看资料如何传递；角色名字不能代替实际的任务上下文。
+# 这是原题的另一供应商路径；共享的检索、工具或状态逻辑仍需遵守相同验收条件。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import run
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;anthropic/claude-haiku-4-5-20251001&quot;)  # 提供商前缀让框架选择对应后端，模型名本身不足以确定调用路径
+
+
+if __name__ == &quot;__main__&quot;:
+    topic = &quot;react&quot;
+    print(f&quot;❓ 主题：{topic}（使用 CrewAI 和 Anthropic {MODEL}）&quot;)
+    print(f&quot;   三个角色：研究者 → 写作者 → 审核者（顺序执行）&quot;)
+    print(&quot;-&quot; * 60)
+    result = run(topic, llm_model=MODEL)
+    print(f&quot;✅ 最终结果（审核者判定）：\n{result[&#x27;final&#x27;]}&quot;)
+    assert result[&quot;final&quot;], &quot;审核者应给出明确判定&quot;
+    assert &quot;max_iter=4&quot; in result[&quot;stop_condition&quot;]
+    print(&quot;\n✅ 练习 2 (Anthropic path) 通过 — 3-agent crew 已走到有界停止条件&quot;)
+</code></pre></details><details id="f5427ec0a788e"><summary>examples/upstream/02-multi-agent-roles/test.py</summary><p><a href="../examples/upstream/02-multi-agent-roles/test.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;离线检查 A 路径的任务交接与实际 CrewAI 配置结构。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：沿着研究、写作、审核看资料如何传递；角色名字不能代替实际的任务上下文。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from crewai import Process
+from starter import build_crew, simulate_handoff
+
+
+def test_offline_research_writer_critic_handoff() -&gt; None:
+    result = simulate_handoff(&quot;react&quot;)
+    assert result[&quot;input&quot;] == &quot;react&quot;
+    assert &quot;ReAct&quot; in result[&quot;research&quot;]
+    assert result[&quot;research&quot;] in result[&quot;draft&quot;]
+    assert result[&quot;verdict&quot;] == &quot;PASS&quot;
+    assert result[&quot;stop_condition&quot;] == &quot;固定三个角色；每个 Agent 的迭代上限为 max_iter=4。&quot;
+
+
+def test_crewai_sequential_context_structure() -&gt; None:
+    crew = build_crew(&quot;react&quot;)
+    assert crew.process == Process.sequential
+    assert [agent.role for agent in crew.agents] == [&#x27;研究者&#x27;, &#x27;写作者&#x27;, &#x27;审核者&#x27;]
+    assert len(crew.tasks) == 3
+    assert crew.tasks[1].context == [crew.tasks[0]]
+    assert crew.tasks[2].context == [crew.tasks[0], crew.tasks[1]]
+    assert all(agent.max_iter == 4 for agent in crew.agents)
+
+
+if __name__ == &quot;__main__&quot;:
+    test_offline_research_writer_critic_handoff()
+    test_crewai_sequential_context_structure()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="fdf18f5e381c6"><summary>examples/upstream/02-multi-agent-roles/test_anthropic.py</summary><p><a href="../examples/upstream/02-multi-agent-roles/test_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;离线检查 B 路径的 Anthropic 后端配置与相同的任务交接。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：沿着研究、写作、审核看资料如何传递；角色名字不能代替实际的任务上下文。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import build_crew, simulate_handoff
+from starter_anthropic import MODEL
+
+
+def test_pinned_anthropic_provider_and_structure() -&gt; None:
+    assert MODEL == &quot;anthropic/claude-haiku-4-5-20251001&quot;
+    crew = build_crew(&quot;react&quot;, llm_model=MODEL)
+    assert [agent.role for agent in crew.agents] == [&#x27;研究者&#x27;, &#x27;写作者&#x27;, &#x27;审核者&#x27;]
+    assert len(crew.tasks[2].context) == 2
+
+
+def test_anthropic_path_offline_handoff_behavior() -&gt; None:
+    result = simulate_handoff(&quot;langgraph&quot;)
+    assert &quot;LangGraph&quot; in result[&quot;research&quot;]
+    assert result[&quot;verdict&quot;] == &quot;PASS&quot;
+    assert &quot;max_iter=4&quot; in result[&quot;stop_condition&quot;]
+
+
+if __name__ == &quot;__main__&quot;:
+    test_pinned_anthropic_provider_and_structure()
+    test_anthropic_path_offline_handoff_behavior()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f165a384ef421"><summary>examples/upstream/03-graph-workflow/README.zh-Hans.md</summary><p><a href="../examples/upstream/03-graph-workflow/README.zh-Hans.md">打开完整文件</a></p><pre><code>&lt;div align=&quot;right&quot;&gt;
+  &lt;a href=&quot;./README.md&quot;&gt;繁体中文&lt;/a&gt; | &lt;strong&gt;简体中文&lt;/strong&gt; | &lt;a href=&quot;./README.en.md&quot;&gt;English&lt;/a&gt;
+&lt;/div&gt;
+
+# 练习 3：图式 workflow（LangGraph 条件分支 + HITL）
+
+对应 [Stage 4 — Workflow Graph 与 Agent 框架](../../../stages/04-agent-frameworks.zh-Hans.md) 练习 3。
+&gt; 🎓 **学习模式**：先运行提供的 `starter.py`（`python starter.py`），然后只改一个小地方，再重新运行现有测试 `python test.py`。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 [`docs/HOW_TO_USE.md`](../../../docs/HOW_TO_USE.md)。
+
+&gt; 📚 **想要 chapter-length 深入版？** 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：
+&gt; - [`datawhalechina/hello-agents`](https://github.com/datawhalechina/hello-agents) ⭐ 中文圈最完整、章节式 + 16 种 production 能力。**本练习对应 hello-agents 的 graph workflow + HITL 章节**
+&gt; - [LangGraph interrupts (human-in-the-loop)](https://docs.langchain.com/oss/python/langgraph/interrupts) + [LangGraph time-travel docs](https://docs.langchain.com/oss/python/langgraph/use-time-travel)
+&gt; - 完整 references 见 [Stage 4 精选 Projects](../../../stages/04-agent-frameworks.zh-Hans.md#-精选-projects)
+
+
+## 任务
+
+`classify → [search?] → respond → [HITL] → final`
+
+- **`classify_node`**：看 query 决定 `needs_search`
+- **条件分支**：`needs_search=True` 走 `search` node、否则直接 `respond`
+- **HITL checkpoint**：`review_node` 用 `interrupt()` 暂停，等待人类回答
+- **`final_node`**：`approved=True` → PUBLISHED、否则 REJECTED
+
+这题用 LangGraph 示范 **graph state（图状态）**、**checkpoint（检查点）**、`interrupt()` 与 `Command(resume=...)`。你可以看见流程停在哪里，以及它如何从同一个 `thread_id` 继续。
+
+## 怎么跑 — 两条路径
+
+&gt; ⚠️ **每个练习都要有自己的 Python 3.11 `.venv`。** 不要把 Stage 4 五个 `requirements.txt` 混装。
+
+### Path A（Ollama、本机）
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+```
+
+预算：模型 API 是 **$0**；本机硬体、电力与下载仍有成本。这份 starter 会真的请 Ollama 写草稿，其他节点则使用可预测的 Python 逻辑。
+
+### Path B（Anthropic、比较云端结果）
+
+```powershell
+$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+```
+
+预设固定型号：`claude-haiku-4-5-20251001`。若一次请求用 2,000 input + 1,000 output tokens：`2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007`。本练习通常只需要短草稿，但仍可能重试；先设供应商支出上限 **$0.05**。
+
+&lt;details markdown=&quot;1&quot;&gt;
+&lt;summary&gt;macOS／Linux 指令与查核资讯&lt;/summary&gt;
+
+```bash
+python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+```
+
+官方来源：[LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts)｜[LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)｜[Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+
+&lt;small&gt;套件、model ID、价格与官方连结查核：2026-08-28 UTC。&lt;/small&gt;
+&lt;/details&gt;
+
+## 不花钱验证程序逻辑
+
+```powershell
+.\.venv\Scripts\python.exe test.py # 真正走分支、interrupt 与 resume
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 共用图行为
+```
+
+## LangGraph 图结构（精简）
+
+```python
+g = StateGraph(State)
+g.add_node(&quot;classify&quot;, classify_node)
+g.add_node(&quot;search&quot;, search_node)
+g.add_node(&quot;respond&quot;, respond_node)
+g.add_node(&quot;final&quot;, final_node)
+
+g.add_edge(START, &quot;classify&quot;)
+g.add_conditional_edges(&quot;classify&quot;, should_search, {&quot;search&quot;: &quot;search&quot;, &quot;respond&quot;: &quot;respond&quot;})
+g.add_edge(&quot;search&quot;, &quot;respond&quot;)
+g.add_edge(&quot;respond&quot;, &quot;review&quot;)
+g.add_edge(&quot;review&quot;, &quot;final&quot;)
+g.add_edge(&quot;final&quot;, END)
+
+graph = g.compile(checkpointer=InMemorySaver())
+```
+
+## HITL 怎么运作
+
+```python
+# 第一段：review_node 调用 interrupt()，图就把资料存进 checkpoint 并停下来
+config = {&quot;configurable&quot;: {&quot;thread_id&quot;: &quot;demo&quot;}}
+state_before = graph.invoke({&quot;query&quot;: ...}, config=config)
+# state_before[&quot;__interrupt__&quot;] 会带出草稿与问题
+
+# 第二段：人类回答后，用同一个 thread_id 恢复
+state_after = graph.invoke(Command(resume=True), config=config)
+```
+
+**关键**：`interrupt()` 是“先停一下”；`Command(resume=True/False)` 是“带着人的回答继续”。Production 可以把这个等待点接到 webhook、Slack 或前端按钮。
+
+## 为什么这个 pattern 重要
+
+| 情境 | 不用 HITL | 用 HITL |
+|---|---|---|
+| Agent 发 email | 直接送出（风险） | 显示草稿、人类按 approve |
+| Agent 改 production 设定 | 直接套用 | dry-run 后等核准 |
+| Agent 做退款 | 自动退 | 超过 $X 等审核 |
+
+有 **side effect（会改变外部世界的动作）** 时，先判断风险；寄信、退款或改 production 设定通常需要 HITL、权限检查与 audit log。低风险唯读动作不一定要每次人工核准。
+
+## 两个 path 观察重点
+
+两个 path 共用同一张图；`classify`、离线查询与路由是可预测的 Python，`respond` 则真的调用不同模型写草稿。**比较时只换模型，不要同时改 graph。**
+
+Node 里只负责暂停，拿到人的答案后再更新 state：
+
+```python
+from langgraph.types import interrupt
+
+def review_node(state):
+    approved = interrupt({&quot;draft&quot;: state[&quot;draft&quot;], &quot;question&quot;: &quot;Approve?&quot;})
+    return {&quot;approved&quot;: approved}
+```
+
+外面的 caller 收到真人答案后，才从同一个 `thread_id` 继续：
+
+```python
+from langgraph.types import Command
+
+human_answer = True
+result = graph.invoke(Command(resume=human_answer), config=config)
+```
+
+## 常见坑
+
+- **`checkpointer` 没设**：没有 checkpointer 就无法可靠地保存 pause/resume 状态
+- **`thread_id` 不一致**：第一段 `invoke` 与 `Command(resume=...)` 必须用同一个设定，否则找不到原来的 checkpoint
+- **在 `interrupt()` 前做 side effect**：恢复时节点可能重新执行。把寄信或扣款放在核准后，并加入 idempotency key
+- **conditional_edges 函数要回 string**：`should_search` return value 必须是 `add_conditional_edges` 第三个参数 dict 的 key、不能 return literal value 直接当 node name
+
+## 想看更聪明的答案？
+
+比较另一个模型，或把记忆体 checkpointer 换成适合部署环境的持久化储存。先确认官方 persistence 文件与失败恢复行为，再选资料库。
+
+## 延伸
+
+- **加 retry**：在 `search_node` 失败时 retry、用 LangGraph 的 `error` edge
+- **加多个 HITL**：在不同 review node 调用 `interrupt()`，并替每个核准动作定义清楚资料
+- **time-travel debug**：`graph.get_state_history(config)` 拿到所有 checkpoint、可以回到任一步 fork 新 thread
+- **加 streaming**：`for state in graph.stream(...)` 边跑边看 state
+</code></pre></details><details id="f978f9a564bde"><summary>examples/upstream/03-graph-workflow/requirements.txt</summary><p><a href="../examples/upstream/03-graph-workflow/requirements.txt">打开完整文件</a></p><pre><code>langgraph&gt;=1.2,&lt;2.0
+langchain-core&gt;=1.6,&lt;2.0
+langchain-openai&gt;=1.6,&lt;2.0
+langchain-anthropic&gt;=1.7,&lt;2.0
+</code></pre></details><details id="f45f73a1abed2"><summary>examples/upstream/03-graph-workflow/starter.py</summary><p><a href="../examples/upstream/03-graph-workflow/starter.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 3：用 LangGraph 做条件分支与真正可暂停的 HITL。
+
+流程像一条有岔路的轨道：先判断要不要查资料，再请模型写草稿，
+接着用 ``interrupt()`` 停下来等人决定。只有收到 ``Command(resume=...)``
+之后，图才会继续走到发布或拒绝。Path A 使用 Ollama；Path B 共用同一张图。
+&quot;&quot;&quot;
+
+# 先分类选择是否检索，再暂停等待决定；内存检查点只保留在当前进程中。
+
+from __future__ import annotations
+
+import os
+import sys
+# Literal 把允许返回的路由名写进类型说明，帮助核对条件边是否有对应目标。
+from typing import Any, Literal
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from langchain_openai import ChatOpenAI
+# 内存检查点能在同一进程内暂停和恢复；进程退出就丢失，跨进程演示应使用后面的磁盘保存器。
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END, START, StateGraph
+# Command 携带恢复值或跳转信息；恢复暂停节点时要将人的决定放入 resume。
+# interrupt 会把图暂停在审核点并保存待处理信息；收到恢复值之前，后续节点不会继续执行。
+from langgraph.types import Command, interrupt
+# TypedDict 描述共享状态有哪些字段，便于读代码和静态检查；它本身不会替你做运行时数据验证。
+from typing_extensions import TypedDict
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;gemma4:e4b&quot;)
+
+
+# 节点只返回自己更新的字段，状态会逐步补齐，因此 total=False 允许字段暂时缺失；TypedDict 不负责运行时拦截坏数据。
+class State(TypedDict, total=False):
+    # query：保留最初的问题，后续分类、检索与生成都围绕它工作；不要把检索结果覆盖成新的用户问题。
+    query: str
+    # needs_search：分类节点写入的路由决定，条件边据此选择检索或直接回答；这是程序规则，不是模型自行授权。
+    needs_search: bool
+    # search_result：保存实际查到的资料，生成节点必须读取这个字段，才有依据给出草稿。
+    search_result: str
+    # draft：保存尚未批准的候选内容，把“生成成功”和“允许发布”分成两个不同阶段。
+    draft: str
+    # approved：保存人工审核的布尔决定；必须明确为真或假，不能把任意非空字符串当作同意。
+    approved: bool
+    # final：保存审核之后的结果，供调用方确认本次最终是批准还是拒绝；本例的状态文字不代表真实外部发布。
+    final: str
+
+
+# 先确定任务类别，再把结果写回状态，后面的条件边据此选路。
+def classify_node(state: State) -&gt; dict[str, bool]:
+    &quot;&quot;&quot;用几个示范关键字决定要不要先走离线查询节点。&quot;&quot;&quot;
+    # 把检索关键词中的英文统一为小写，避免大小写差异改变路由；中文字符保持原样。
+    query = state[&quot;query&quot;].lower()
+    return {&quot;needs_search&quot;: any(word in query for word in (&quot;population&quot;, &quot;weather&quot;, &quot;latest&quot;, &quot;人口&quot;, &quot;天气&quot;, &quot;最新&quot;))}
+
+
+# 将检索结果写入状态，后续生成节点需要实际读到这些资料。
+def search_node(state: State) -&gt; dict[str, str]:
+    &quot;&quot;&quot;从很小的离线资料表取值；这里不代表真正的搜索引擎。&quot;&quot;&quot;
+    for key, value in {&quot;taipei&quot;: &quot;台北人口：约 260 万（固定教学数据）。&quot;, &quot;台北&quot;: &quot;台北人口：约 260 万（固定教学数据）。&quot;, &quot;天气&quot;: &quot;示例天气：晴，25 摄氏度。&quot;}.items():
+        if key in state[&quot;query&quot;].lower():
+            return {&quot;search_result&quot;: value}
+    return {&quot;search_result&quot;: &quot;离线资料库中没有匹配条目。&quot;}
+
+
+# 只决定下一条边，不在这个判断函数里执行检索。
+def should_search(state: State) -&gt; Literal[&quot;search&quot;, &quot;respond&quot;]:
+    # 返回的是条件边要使用的目标名称；这里只选路，不执行检索，也不会生成回答。
+    return &quot;search&quot; if state[&quot;needs_search&quot;] else &quot;respond&quot;
+
+
+def make_ollama_llm() -&gt; ChatOpenAI:
+    &quot;&quot;&quot;用 OpenAI-compatible 接口连到本机 Ollama。&quot;&quot;&quot;
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+    return ChatOpenAI(model=MODEL, base_url=&quot;http://localhost:11434/v1&quot;, api_key=&quot;ollama&quot;, temperature=0)
+
+
+# 把节点和条件边连接成图；阅读分支函数，确认什么情况下继续、暂停或结束。
+def build_graph(llm: Any, checkpointer: Any | None = None) -&gt; Any:
+    &quot;&quot;&quot;建立共用图；调用方可放入 Ollama 或 Anthropic chat model。&quot;&quot;&quot;
+    def respond_node(state: State) -&gt; dict[str, str]:
+        # 直接回答路径不会产生 search_result，因此提供明确的缺省说明；不能为了缺字段伪造一条检索结果。
+        context = state.get(&quot;search_result&quot;, &quot;本次无需检索。&quot;)
+        message = llm.invoke(f&quot;请谨慎地用一句中文回答：{state[&#x27;query&#x27;]}\n离线资料：{context}&quot;)
+        # 框架通常返回带 content 的消息对象，离线替身也可能直接返回文本；统一取正文并去除空白后才能判断是否真的有草稿。
+        draft = str(getattr(message, &quot;content&quot;, message)).strip()
+        if not draft:
+            raise RuntimeError(&quot;模型返回了空草稿。&quot;)
+        return {&quot;draft&quot;: draft}
+
+    def review_node(state: State) -&gt; dict[str, bool]:
+        # 把待审草稿带到暂停事件中，等待人给出明确决定；恢复时该节点可能重新执行，暂停前不要放不可重复的外部动作。
+        decision = interrupt({&quot;action&quot;: &quot;publish&quot;, &quot;draft&quot;: state[&quot;draft&quot;], &quot;question&quot;: &quot;是否批准这份草稿？&quot;})
+        # 只接受真正的布尔决定；字符串 &quot;false&quot; 在 Python 中也是真值，若直接判断真假会把拒绝误当作批准。
+        if not isinstance(decision, bool):
+            raise ValueError(&quot;人工审核必须用 true 或 false 恢复流程。&quot;)
+        return {&quot;approved&quot;: decision}
+
+    def final_node(state: State) -&gt; dict[str, str]:
+        # 把批准与拒绝分支明确区分，供测试核对路由；这里仅生成教学状态文本，没有调用真实发布接口。
+        prefix = &quot;PUBLISHED&quot; if state[&quot;approved&quot;] else &quot;REJECTED&quot;
+        # 把审核结论和对应草稿一起交还调用方，使人能确认被批准或拒绝的到底是哪一份内容。
+        return {&quot;final&quot;: f&quot;{prefix}: {state[&#x27;draft&#x27;]}&quot;}
+
+    # 以 State 作为图中各节点共享的数据约定；每个节点返回自己的更新，数据通过状态传递而非隐式全局变量。
+    graph = StateGraph(State)
+    # 把 classify 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&quot;classify&quot;, classify_node)
+    # 把 search 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&quot;search&quot;, search_node)
+    # 把 respond 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&quot;respond&quot;, respond_node)
+    # 把 review 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&quot;review&quot;, review_node)
+    # 把 final 注册为一个可调度节点；后面的连线使用这个名称找到对应处理函数。
+    graph.add_node(&quot;final&quot;, final_node)
+    # 每次新任务先分类，避免所有问题都机械地检索。
+    graph.add_edge(START, &quot;classify&quot;)
+    # 由路由函数返回目标名称，再通过这张映射选边；返回了未登记的名称就不能继续，路径必须可核对。
+    graph.add_conditional_edges(&quot;classify&quot;, should_search, {&quot;search&quot;: &quot;search&quot;, &quot;respond&quot;: &quot;respond&quot;})
+    # 检索完成后必须把结果交给生成节点，保证草稿用的是实际资料。
+    graph.add_edge(&quot;search&quot;, &quot;respond&quot;)
+    # 生成草稿后进入人工审核，不能直接把模型输出视为已获批准。
+    graph.add_edge(&quot;respond&quot;, &quot;review&quot;)
+    # 只有审核节点取得决定后才进入最终分支，保持生成与授权分开。
+    graph.add_edge(&quot;review&quot;, &quot;final&quot;)
+    # 批准或拒绝都在这里结束，避免完成之后意外继续循环。
+    graph.add_edge(&quot;final&quot;, END)
+    # 把节点与连线变成可运行的图；这一步是组装流程，还没有替用户执行一次任务。
+    # checkpointer：把图的中间状态交给检查点保存器；暂停后恢复需要这份状态，单靠再次调用图无法找回进度。
+    return graph.compile(checkpointer=checkpointer or InMemorySaver())
+
+
+def run(query: str, approve: bool, llm: Any | None = None, thread_id: str = &quot;stage4-demo&quot;) -&gt; dict[str, Any]:
+    &quot;&quot;&quot;先跑到人工审核点，再用同一个 ``thread_id`` 恢复执行。&quot;&quot;&quot;
+    graph = build_graph(llm or make_ollama_llm())
+    # 运行配置必须在暂停和恢复时保持同一个会话标识，否则恢复会找不到刚才待审核的状态。
+    # configurable：传递可在每次运行时指定的图配置；会话标识放在这里，供检查点系统定位历史状态。
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    config = {&quot;configurable&quot;: {&quot;thread_id&quot;: thread_id}}
+    # 第一次运行应停在人工审核点；此时只有待审草稿，不能声称已经发布。
+    paused = graph.invoke({&quot;query&quot;: query}, config=config)
+    if &quot;__interrupt__&quot; not in paused:
+        raise RuntimeError(&quot;发布前应先暂停并等待人工审核。&quot;)
+    # 把明确的批准或拒绝传回同一工作流；后面的检查用实际恢复结果判断是否完成。
+    resumed = graph.invoke(Command(resume=approve), config=config)
+    if not resumed.get(&quot;final&quot;):
+        raise RuntimeError(&quot;恢复后未生成最终结果。&quot;)
+    return resumed
+
+
+if __name__ == &quot;__main__&quot;:
+    approved = run(&quot;台北人口是多少？&quot;, approve=True)
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    rejected = run(&quot;请介绍 Python&quot;, approve=False, thread_id=&quot;stage4-reject&quot;)
+    print(approved[&quot;final&quot;])
+    print(rejected[&quot;final&quot;])
+    assert approved[&quot;final&quot;].startswith(&quot;PUBLISHED:&quot;)
+    assert rejected[&quot;final&quot;].startswith(&quot;REJECTED:&quot;)
+</code></pre></details><details id="f0b38af5c0cb1"><summary>examples/upstream/03-graph-workflow/starter_anthropic.py</summary><p><a href="../examples/upstream/03-graph-workflow/starter_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 3 Path B：把同一张 LangGraph 图接到 ChatAnthropic。
+
+流程、暂停点与人工核准规则都不变；只有负责写草稿的模型不同。
+&quot;&quot;&quot;
+
+# 先分类选择是否检索，再暂停等待决定；内存检查点只保留在当前进程中。
+# 这是原题的另一供应商路径；共享的检索、工具或状态逻辑仍需遵守相同验收条件。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from langchain_anthropic import ChatAnthropic
+from starter import run
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;claude-haiku-4-5-20251001&quot;)
+
+
+def make_anthropic_llm() -&gt; ChatAnthropic:
+    &quot;&quot;&quot;建立使用固定 model ID 的 Anthropic chat model。&quot;&quot;&quot;
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # temperature：降低采样随机性，便于比较实验结果；即使为 0，也不能保证每次输出完全相同或事实正确。
+    return ChatAnthropic(model=MODEL, temperature=0)
+
+
+if __name__ == &quot;__main__&quot;:
+    result = run(&quot;台北人口是多少？&quot;, approve=True, llm=make_anthropic_llm())
+    print(result[&quot;final&quot;])
+    assert result[&quot;final&quot;].startswith(&quot;PUBLISHED:&quot;)
+    assert &quot;台北&quot; in result[&quot;final&quot;]
+</code></pre></details><details id="f0e794e17ae78"><summary>examples/upstream/03-graph-workflow/test.py</summary><p><a href="../examples/upstream/03-graph-workflow/test.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path A 离线行为测试：真的走分支、暂停与恢复，但不连网。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：先分类选择是否检索，再暂停等待决定；内存检查点只保留在当前进程中。
+
+from __future__ import annotations
+
+import sys
+from types import SimpleNamespace
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import build_graph, classify_node, run, should_search, search_node
+
+
+class FakeLLM:
+    &quot;&quot;&quot;只回固定格式的假模型，让图的行为可以重复验证。&quot;&quot;&quot;
+    def invoke(self, prompt: str) -&gt; SimpleNamespace:
+        return SimpleNamespace(content=f&quot;草稿依据：{prompt.splitlines()[-1]}&quot;)
+
+
+def test_branch_choice_and_interrupt_resume() -&gt; None:
+    assert classify_node({&quot;query&quot;: &quot;台北最新人口&quot;})[&quot;needs_search&quot;] is True
+    assert should_search({&quot;needs_search&quot;: False}) == &quot;respond&quot;
+    # 中文问题必须命中中文教学资料，不能只翻译屏幕上的答案而漏掉检索键。
+    assert &quot;25 摄氏度&quot; in search_node({&quot;query&quot;: &quot;天气如何？&quot;})[&quot;search_result&quot;]
+    assert &quot;固定教学数据&quot; in search_node({&quot;query&quot;: &quot;台北人口是多少？&quot;})[&quot;search_result&quot;]
+    graph = build_graph(FakeLLM())
+    # 运行配置必须在暂停和恢复时保持同一个会话标识，否则恢复会找不到刚才待审核的状态。
+    # configurable：传递可在每次运行时指定的图配置；会话标识放在这里，供检查点系统定位历史状态。
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    config = {&quot;configurable&quot;: {&quot;thread_id&quot;: &quot;offline-approve&quot;}}
+    # 第一次运行应停在人工审核点；此时只有待审草稿，不能声称已经发布。
+    paused = graph.invoke({&quot;query&quot;: &quot;台北最新人口&quot;}, config=config)
+    assert &quot;__interrupt__&quot; in paused
+    # 读取指定会话已经保存的状态，用来确认暂停位置和待审核内容，而不是重新生成草稿。
+    checkpoint = graph.get_state(config)
+    assert &quot;台北人口&quot; in checkpoint.values[&quot;draft&quot;]
+    # Command 携带恢复值或跳转信息；恢复暂停节点时要将人的决定放入 resume。
+    from langgraph.types import Command
+    result = graph.invoke(Command(resume=True), config=config)
+    assert result[&quot;final&quot;].startswith(&quot;PUBLISHED:&quot;)
+
+
+def test_rejection_uses_a_separate_checkpoint_thread() -&gt; None:
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    result = run(&quot;请介绍 Python&quot;, approve=False, llm=FakeLLM(), thread_id=&quot;offline-reject&quot;)
+    assert result[&quot;final&quot;].startswith(&quot;REJECTED:&quot;)
+    assert &quot;本次无需检索&quot; in result[&quot;draft&quot;]
+
+
+if __name__ == &quot;__main__&quot;:
+    test_branch_choice_and_interrupt_resume()
+    test_rejection_uses_a_separate_checkpoint_thread()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f5dd810f531d2"><summary>examples/upstream/03-graph-workflow/test_anthropic.py</summary><p><a href="../examples/upstream/03-graph-workflow/test_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path B 离线行为测试：检查 Anthropic 设定，并用假模型跑共用图。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：先分类选择是否检索，再暂停等待决定；内存检查点只保留在当前进程中。
+
+from __future__ import annotations
+
+import sys
+import os
+from types import SimpleNamespace
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import run
+from starter_anthropic import MODEL, make_anthropic_llm
+
+
+class FakeAnthropicLLM:
+    &quot;&quot;&quot;不发出 API 请求，只提供可预测的 Anthropic-path 草稿。&quot;&quot;&quot;
+    def invoke(self, prompt: str) -&gt; SimpleNamespace:
+        return SimpleNamespace(content=&quot;Anthropic 路径的离线草稿&quot;)
+
+
+def test_anthropic_provider_construction() -&gt; None:
+    os.environ.setdefault(&quot;ANTHROPIC_API_KEY&quot;, &quot;offline-test-key&quot;)
+    llm = make_anthropic_llm()
+    assert llm.model == MODEL
+    assert MODEL == &quot;claude-haiku-4-5-20251001&quot;
+
+
+def test_anthropic_path_graph_behavior() -&gt; None:
+    # thread_id：定位同一条工作流的检查点。暂停和恢复必须使用同一个值；换值通常会进入另一条会话。
+    result = run(&quot;请介绍 Python&quot;, approve=True, llm=FakeAnthropicLLM(), thread_id=&quot;anthropic-offline&quot;)
+    assert result[&quot;final&quot;] == &quot;PUBLISHED: Anthropic 路径的离线草稿&quot;
+    assert result[&quot;approved&quot;] is True
+
+
+if __name__ == &quot;__main__&quot;:
+    test_anthropic_provider_construction()
+    test_anthropic_path_graph_behavior()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f72a1a670afbd"><summary>examples/upstream/04-codeact-vs-json-tool/README.zh-Hans.md</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/README.zh-Hans.md">打开完整文件</a></p><pre><code>&lt;div align=&quot;right&quot;&gt;
+  &lt;a href=&quot;./README.md&quot;&gt;繁体中文&lt;/a&gt; | &lt;strong&gt;简体中文&lt;/strong&gt; | &lt;a href=&quot;./README.en.md&quot;&gt;English&lt;/a&gt;
+&lt;/div&gt;
+
+# 练习 4：CodeAct vs JSON tool（Smolagents）
+
+对应 [Stage 4 — Workflow Graph 与 Agent 框架](../../../stages/04-agent-frameworks.zh-Hans.md) 练习 4。
+&gt; 🎓 **学习模式**：先运行提供的 `starter.py`（`python starter.py`），然后只改一个小地方，再重新运行现有测试 `python test.py`。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 [`docs/HOW_TO_USE.md`](../../../docs/HOW_TO_USE.md)。
+
+&gt; 📚 **想要 chapter-length 深入版？** 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：
+&gt; - [`datawhalechina/hello-agents`](https://github.com/datawhalechina/hello-agents) ⭐ 中文圈最完整、章节式 + 16 种 production 能力。**本练习对应 hello-agents 的 CodeAct vs JSON tool 章节**
+&gt; - [Smolagents 官方 cookbook](https://github.com/huggingface/smolagents/tree/main/examples) + [QuantaLogic/quantalogic](https://github.com/quantalogic/quantalogic)（另一个 CodeAct framework）
+&gt; - 完整 references 见 [Stage 4 精选 Projects](../../../stages/04-agent-frameworks.zh-Hans.md#-精选-projects)
+
+
+## 两种 agent action 路线对照
+
+| 路线 | 怎么 act | 范例 framework |
+|---|---|---|
+| **JSON tool** | LLM 回 `{&quot;name&quot;: &quot;tool_x&quot;, &quot;arguments&quot;: {...}}` | OpenAI function calling、LangGraph、CrewAI |
+| **CodeAct** | LLM 写 Python code、直接执行 | HuggingFace Smolagents |
+
+**这题用 CodeAct 解同题（人口比例）、跟练习 1 / 3 的 JSON tool 路线对照**。
+
+## 怎么跑 — 两条路径
+
+&gt; ⚠️ **每个练习都要有自己的 Python 3.11 `.venv`。** 这题还需要 Docker；不要把模型产生的程序码直接放到主机执行。这个教学容器仍可能连网，所以里面不要放密码或私密数据。
+
+### Path A（默认、本机免费）
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+docker version
+.\.venv\Scripts\python.exe test_docker_smoke.py
+.\.venv\Scripts\python.exe starter.py
+```
+
+预算：模型 API 是 **$0**；本机硬体、电力与 Docker 资源仍有成本。小模型可能需要更多修正步骤，所以程序把 `max_steps` 限制为 4。
+
+### Path B（Anthropic、比较云端结果）
+
+```powershell
+$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+```
+
+预设固定型号：`anthropic/claude-haiku-4-5-20251001`。单次 2,000 input + 1,000 output tokens 的例子为 `$0.007`；CodeAct 可能多轮调用，因此先设供应商支出上限 **$0.10**。实际费用看 tokens 与步数。
+
+&lt;details markdown=&quot;1&quot;&gt;
+&lt;summary&gt;macOS／Linux 指令与查核资讯&lt;/summary&gt;
+
+```bash
+python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+docker version
+./.venv/bin/python test.py
+./.venv/bin/python test_docker_smoke.py
+```
+
+价格公式：`input_tokens / 1,000,000 × $1 + output_tokens / 1,000,000 × $5`。
+
+官方来源：[Secure code execution](https://huggingface.co/docs/smolagents/tutorials/secure_code_execution)｜[Python executors](https://huggingface.co/docs/smolagents/reference/python_executors)｜[Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)｜[Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+
+&lt;small&gt;套件、model ID、价格与官方连结查核：2026-08-28 UTC。&lt;/small&gt;
+&lt;/details&gt;
+
+## 不花钱验证程序逻辑
+
+```powershell
+.\.venv\Scripts\python.exe test.py # AST、JSON allowlist、loopback 控制端口与资源限制
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 相同安全边界
+```
+
+这两个离线测试**不会**执行模型产生的程序码，也不需要 Docker daemon。`test_docker_smoke.py` 是另一个手动 smoke test：它真的启动 Jupyter executor，确认主机控制通道可用，而且控制端口只绑定到 `127.0.0.1`；先让 `docker version` 成功再运行。它不会假装容器不能连网。
+
+## CodeAct 是怎么运作的
+
+LLM 不回 JSON、而是**回 Python code block**：
+
+````
+（user）Find 台北人口, divide by NYC, give ratio.
+
+（LLM 回应）
+```python
+pop_taipei = lookup_fact(query=&quot;台北人口&quot;) # 2602000
+pop_nyc = lookup_fact(query=&quot;纽约人口&quot;) # 8336000
+ratio = calculator(expression=f&quot;{pop_taipei}/{pop_nyc}&quot;) # 0.3122
+print(ratio)
+```
+
+（Smolagents 执行这段 code、把 print 结果接回去给 LLM 继续）
+````
+
+这份示例明确使用 Docker executor。Jupyter 控制端口只绑定到主机的 `127.0.0.1`，并移除 Linux capabilities、禁止提权与 pickle，再限制内存、process 数与 agent 步数。一般 Docker bridge **仍可能让容器连接外部网络或主机服务**，所以这只是受控教学示例，不是 production sandbox。需要执行不可信程序码时，还要加真正的 egress／host 防火墙，或改用有正式隔离边界的远程 sandbox。
+
+## CodeAct vs JSON tool 对照
+
+| 维度 | JSON tool | CodeAct |
+|---|---|---|
+| LLM 输出形式 | 结构化 JSON | Python 程序码 |
+| 变数绑定 | LLM 要自己记得 / 重复调用 | 自然有 variable（`pop_taipei = ...`） |
+| 多步运算 | 每步一次 LLM call | 一次写好几行 code |
+| 一轮 token 数 | 较少 | 较多（code 较长） |
+| 对小 model | 较友善（稳定的 JSON） | 较吃力（要产正确 Python） |
+| Debug 友善 | tool call 看得清楚 | 看 code execution log |
+| 安全考量 | allowlist + 参数验证 | 不可信程序码，必须隔离、限权、限资源 |
+| 哪些题目擅长 | 单步、边界明确 | 多步运算、需要中间 variable |
+
+**HuggingFace 的观点**：CodeAct 更贴近“人类怎么解问题”——你也是用变数记中间结果、不是每步都重新查。
+
+## 两个 path 观察重点
+
+| 观察项 | Anthropic Claude haiku | Ollama qwen2.5:3b |
+|---|---|---|
+| 产出可执行 Python | 用相同测试题量测 | 用相同测试题量测 |
+| 变数命名 / 重用 | 看 execution log | 看 execution log |
+| 比例是否算对 | 验证最终值 | 验证最终值 |
+| 步数 | 由 `max_steps=4` 限制 | 由 `max_steps=4` 限制 |
+| 模型 API 成本 | 依 tokens 与步数 | $0 |
+
+**punchline**：CodeAct 比 JSON tool 多了一个“执行程序码”的风险面。不要先假设哪个模型或路线较好；用相同任务比较成功率、步数、成本与安全边界。
+
+## 常见坑
+
+- **`@tool` 函数 docstring 是 prompt 的一部分**：Smolagents 把 docstring 当 tool description 给 LLM 看。**docstring 没写好、LLM 不知道何时用这 tool**
+- **把 Docker 当完整 sandbox**：错。这份示例只缩小权限并把控制端口绑定到 loopback；上线前还要做镜像、权限、egress、host access、资源与记录审查
+- **`max_steps` 不够**：先看错在哪一步，不要只把数字调大；较大上限会增加费用与 loop 风险
+- **模型程序码有 syntax error**：Smolagents 可以把错误接回模型修正，但会增加步数；是否换模型要看评测结果
+
+## 想看更聪明的答案？
+
+```powershell
+$env:MODEL=&quot;anthropic/claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+```
+
+## 延伸
+
+- **加更多 tools**：`@tool` 装饰函数即自动 wrap、Smolagents 自动拿 docstring 当 description
+- **改 ToolCallingAgent**：Smolagents 也有非 CodeAct 的 `ToolCallingAgent`、用 JSON tool 路线。对照看
+- **接 Hugging Face Hub**：使用现行 `InferenceClientModel` 调用 HF inference（不需要本机 Ollama）
+- **看 [Anthropic Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents)**：Anthropic 的观点是两条路线都合理、看任务
+</code></pre></details><details id="fac0d5906b280"><summary>examples/upstream/04-codeact-vs-json-tool/requirements.txt</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/requirements.txt">打开完整文件</a></p><pre><code>smolagents[docker]&gt;=1.26,&lt;2.0
+litellm&gt;=1.98,&lt;2.0
+</code></pre></details><details id="fc43777b92943"><summary>examples/upstream/04-codeact-vs-json-tool/starter.py</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/starter.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 4：比较有界 CodeAct 与安全的 JSON tool 算术路径。
+
+JSON tool 只允许固定工具与固定参数；算式先转成 AST，再逐节点检查。
+CodeAct 会执行模型产生的 Python，所以只在受限制的 Docker 容器里示范。
+Jupyter 控制埠只绑到主机的 127.0.0.1；容器仍可能连网，因此这不是 production
+sandbox。两条路都设有步数与输入边界。
+&quot;&quot;&quot;
+
+# 比较 JSON 参数调用与代码行动；算术用 AST 白名单，CodeAct 的执行依赖受限 Docker。
+
+from __future__ import annotations
+
+import ast
+import os
+import sys
+from typing import Any
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from smolagents import CodeAgent, OpenAIServerModel, ToolCallingAgent, tool
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;qwen2.5:3b&quot;)
+OLLAMA_BASE = os.environ.get(&quot;OLLAMA_API_BASE&quot;, &quot;http://localhost:11434/v1&quot;)
+MAX_AST_NODES = 40
+MAX_NUMBER = 1_000_000
+
+
+# 解析表达式后只允许约定的算术节点，并限制数值与表达式规模。
+def evaluate_arithmetic(expression: str) -&gt; float:
+    &quot;&quot;&quot;只计算小型算术 AST；模型文字不会交给 ``eval`` 或 ``exec``。&quot;&quot;&quot;
+    if not isinstance(expression, str) or len(expression) &gt; 120:
+        raise ValueError(&quot;表达式必须是最多 120 字符的字符串。&quot;)
+    # 只把模型源码解析为语法树，不运行它；后面还要逐节点白名单检查，解析成功不代表安全。
+    tree = ast.parse(expression, mode=&quot;eval&quot;)
+    if sum(1 for _ in ast.walk(tree)) &gt; MAX_AST_NODES:
+        raise ValueError(&quot;表达式过于复杂。&quot;)
+
+    def visit(node: ast.AST) -&gt; float:
+        if isinstance(node, ast.Expression):
+            return visit(node.body)
+        if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+            value = float(node.value)
+            if abs(value) &gt; MAX_NUMBER:
+                raise ValueError(&quot;数值的绝对值超出允许范围。&quot;)
+            return value
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+            return visit(node.operand) if isinstance(node.op, ast.UAdd) else -visit(node.operand)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+            left, right = visit(node.left), visit(node.right)
+            if isinstance(node.op, ast.Add): return left + right
+            if isinstance(node.op, ast.Sub): return left - right
+            if isinstance(node.op, ast.Mult): return left * right
+            if right == 0: raise ValueError(&quot;除数不能为零。&quot;)
+            return left / right
+        raise ValueError(f&quot;不支持的算术语法：{type(node).__name__}&quot;)
+
+    value = visit(tree)
+    if abs(value) &gt; MAX_NUMBER:
+        raise ValueError(&quot;计算结果的绝对值超出允许范围。&quot;)
+    return value
+
+
+@tool
+def calculator(expression: str) -&gt; str:
+    &quot;&quot;&quot;在长度和数值范围限制内计算一个简单算术表达式。
+
+    Args:
+        expression: 只允许数字、括号，以及 +、-、*、/ 四种运算符。
+    &quot;&quot;&quot;
+    try:
+        return str(evaluate_arithmetic(expression))
+    except (SyntaxError, ValueError) as error:
+        return f&quot;错误：{error}&quot;
+
+
+@tool
+def lookup_fact(query: str) -&gt; str:
+    &quot;&quot;&quot;只从固定白名单返回一项离线事实。
+
+    Args:
+        query: Either ``台北人口`` or ``纽约人口``.
+    &quot;&quot;&quot;
+    facts = {&#x27;台北人口&#x27;: &quot;2602000&quot;, &#x27;纽约人口&#x27;: &quot;8336000&quot;}
+    return facts.get(query.strip().lower(), f&quot;未知条目：{query}&quot;)
+
+
+# 先验证工具名称和参数，再执行对应函数；模型字符串不会被当 Python 程序运行。
+def run_json_tool_call(call: dict[str, Any]) -&gt; str:
+    &quot;&quot;&quot;JSON tool 边界：工具名、参数形状与算式都要先通过检查。&quot;&quot;&quot;
+    if not isinstance(call, dict) or set(call) != {&quot;name&quot;, &quot;arguments&quot;}:
+        raise ValueError(&quot;工具请求必须且只能包含 name 和 arguments。&quot;)
+    if call[&quot;name&quot;] != &quot;calculator&quot; or not isinstance(call[&quot;arguments&quot;], dict) or set(call[&quot;arguments&quot;]) != {&quot;expression&quot;}:
+        raise ValueError(&quot;只允许调用 calculator，并传入 expression 参数。&quot;)
+    return calculator.forward(expression=call[&quot;arguments&quot;][&quot;expression&quot;])
+
+
+# Docker 控制通道与容器执行权限分开设置；有配置仍要通过真实容器测试。
+def codeact_executor_config() -&gt; dict[str, Any]:
+    &quot;&quot;&quot;缩小示范容器权限，并把 Jupyter 控制埠只绑到本机。&quot;&quot;&quot;
+    return {
+        &quot;allow_pickle&quot;: False,
+        &quot;host&quot;: &quot;127.0.0.1&quot;,
+        &quot;container_run_kwargs&quot;: {
+            &quot;network_mode&quot;: &quot;bridge&quot;,
+            &quot;mem_limit&quot;: &quot;256m&quot;,
+            &quot;pids_limit&quot;: 64,
+            &quot;cap_drop&quot;: [&quot;ALL&quot;],
+            &quot;security_opt&quot;: [&quot;no-new-privileges&quot;],
+        },
+    }
+
+
+# 把模型接到 CodeAgent 和受限执行器，运行前需要对应 Docker 环境。
+def build_codeact_agent(model: Any | None = None, executor_type: str = &quot;docker&quot;) -&gt; CodeAgent:
+    &quot;&quot;&quot;建立最多走四步、且预设只在 Docker 里执行程序码的 agent。&quot;&quot;&quot;
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    model = model or OpenAIServerModel(model_id=MODEL, api_base=OLLAMA_BASE, api_key=&quot;ollama&quot;)
+    executor_kwargs = codeact_executor_config() if executor_type == &quot;docker&quot; else {}
+    # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # max_steps：限制循环最多执行多少步；它是程序的停止条件，不能只在提示词里写“不要无限循环”。
+    return CodeAgent(tools=[calculator, lookup_fact], model=model, max_steps=4, additional_authorized_imports=[], executor_type=executor_type, executor_kwargs=executor_kwargs)
+
+
+# 模型通过结构化工具请求行动，工具内部仍负责输入检查。
+def build_json_agent(model: Any) -&gt; ToolCallingAgent:
+    &quot;&quot;&quot;建立同工具集合的 JSON tool 对照组。&quot;&quot;&quot;
+    # tools：只向模型公开本轮需要的工具说明。模型提出调用后，执行层仍须检查名称、参数与权限。
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    # max_steps：限制循环最多执行多少步；它是程序的停止条件，不能只在提示词里写“不要无限循环”。
+    return ToolCallingAgent(tools=[calculator, lookup_fact], model=model, max_steps=4)
+
+
+def run(question: str, model: Any | None = None) -&gt; dict[str, str]:
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    agent = build_codeact_agent(model=model)
+    try:
+        return {&quot;final&quot;: str(agent.run(question))}
+    # 无论成功还是失败，都执行这里的收尾步骤。
+    finally:
+        agent.cleanup()
+
+
+if __name__ == &quot;__main__&quot;:
+    result = run(&quot;查询台北人口和纽约人口，用台北人口除以纽约人口，并报告比值。&quot;)
+    print(result[&quot;final&quot;])
+    assert result[&quot;final&quot;]
+    assert run_json_tool_call({&quot;name&quot;: &quot;calculator&quot;, &quot;arguments&quot;: {&quot;expression&quot;: &quot;2 + 3 * 4&quot;}}) == &quot;14.0&quot;
+</code></pre></details><details id="f1b5e2ef4e338"><summary>examples/upstream/04-codeact-vs-json-tool/starter_anthropic.py</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/starter_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 4 Path B：用 LiteLLM 的固定 Anthropic model ID 跑 CodeAct。
+
+它和 Path A 共用同一组工具、Docker 边界与最多四步的限制。
+&quot;&quot;&quot;
+
+# 比较 JSON 参数调用与代码行动；算术用 AST 白名单，CodeAct 的执行依赖受限 Docker。
+# 这是原题的另一供应商路径；共享的检索、工具或状态逻辑仍需遵守相同验收条件。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from smolagents import LiteLLMModel
+from starter import run
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;anthropic/claude-haiku-4-5-20251001&quot;)
+
+
+def make_anthropic_model() -&gt; LiteLLMModel:
+    &quot;&quot;&quot;建立 Smolagents 可识别的 Anthropic LiteLLM model。&quot;&quot;&quot;
+    return LiteLLMModel(model_id=MODEL)
+
+
+if __name__ == &quot;__main__&quot;:
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    result = run(&quot;查询台北人口除以纽约人口的比值。&quot;, model=make_anthropic_model())
+    print(result[&quot;final&quot;])
+    assert result[&quot;final&quot;]
+    assert MODEL.startswith(&quot;anthropic/&quot;)
+</code></pre></details><details id="f6c83fdffa523"><summary>examples/upstream/04-codeact-vs-json-tool/test.py</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/test.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path A 离线行为测试：不调用 CodeAgent.run，也不执行模型程序码。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：比较 JSON 参数调用与代码行动；算术用 AST 白名单，CodeAct 的执行依赖受限 Docker。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import MAX_NUMBER, codeact_executor_config, evaluate_arithmetic, run_json_tool_call
+
+
+def test_json_tool_and_ast_evaluator() -&gt; None:
+    assert run_json_tool_call({&quot;name&quot;: &quot;calculator&quot;, &quot;arguments&quot;: {&quot;expression&quot;: &quot;2 + 3 * (4 - 1)&quot;}}) == &quot;11.0&quot;
+    assert evaluate_arithmetic(&quot;-4 / 2&quot;) == -2.0
+
+
+def test_ast_guards_reject_code_and_unsafe_values() -&gt; None:
+    for expression in (&quot;__import__(&#x27;os&#x27;)&quot;, &quot;2 / 0&quot;, f&quot;{MAX_NUMBER + 1}&quot;):
+        try:
+            evaluate_arithmetic(expression)
+        except (SyntaxError, ValueError):
+            pass
+        else:
+            raise AssertionError(f&quot;受限解释器应拒绝：{expression!r}&quot;)
+
+
+def test_codeact_uses_loopback_control_and_limits() -&gt; None:
+    config = codeact_executor_config()
+    assert &quot;additional_imports&quot; not in config
+    assert config[&quot;allow_pickle&quot;] is False
+    assert config[&quot;host&quot;] == &quot;127.0.0.1&quot;
+    assert config[&quot;container_run_kwargs&quot;][&quot;network_mode&quot;] == &quot;bridge&quot;
+    assert config[&quot;container_run_kwargs&quot;][&quot;cap_drop&quot;] == [&quot;ALL&quot;]
+    assert config[&quot;container_run_kwargs&quot;][&quot;security_opt&quot;] == [&quot;no-new-privileges&quot;]
+
+
+if __name__ == &quot;__main__&quot;:
+    test_json_tool_and_ast_evaluator()
+    test_ast_guards_reject_code_and_unsafe_values()
+    test_codeact_uses_loopback_control_and_limits()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f64618fee855f"><summary>examples/upstream/04-codeact-vs-json-tool/test_anthropic.py</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/test_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path B 离线行为测试：不调用模型，也不执行模型产生的程序码。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：比较 JSON 参数调用与代码行动；算术用 AST 白名单，CodeAct 的执行依赖受限 Docker。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from starter import run_json_tool_call
+from starter_anthropic import MODEL, make_anthropic_model
+
+
+def test_litellm_provider_configuration() -&gt; None:
+    model = make_anthropic_model()
+    assert MODEL == &quot;anthropic/claude-haiku-4-5-20251001&quot;
+    assert model.model_id == MODEL
+
+
+def test_anthropic_path_uses_the_same_safe_json_boundary() -&gt; None:
+    assert run_json_tool_call({&quot;name&quot;: &quot;calculator&quot;, &quot;arguments&quot;: {&quot;expression&quot;: &quot;8 / 2&quot;}}) == &quot;4.0&quot;
+    try:
+        run_json_tool_call({&quot;name&quot;: &quot;shell&quot;, &quot;arguments&quot;: {&quot;command&quot;: &quot;whoami&quot;}})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&quot;必须拒绝未授权的工具名称。&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    test_litellm_provider_configuration()
+    test_anthropic_path_uses_the_same_safe_json_boundary()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="f97deb5c6abc3"><summary>examples/upstream/04-codeact-vs-json-tool/test_docker_smoke.py</summary><p><a href="../examples/upstream/04-codeact-vs-json-tool/test_docker_smoke.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;手动检查 Smolagents 的 Docker 控制通道。
+
+先确认 docker version 成功，再运行本文件。它会构建并启动官方
+Jupyter 执行器，检查宿主能否执行一条简单语句，以及控制端口是否只绑定
+本机回环地址。普通离线测试不会运行此文件。
+&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：比较 JSON 参数调用与代码行动；算术用 AST 白名单，CodeAct 的执行依赖受限 Docker。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from smolagents import DockerExecutor
+from smolagents.monitoring import AgentLogger, LogLevel
+
+from starter import codeact_executor_config
+
+
+def test_docker_control_channel() -&gt; None:
+    config = codeact_executor_config()
+    executor = None
+    try:
+        executor = DockerExecutor(
+            additional_imports=[],
+            logger=AgentLogger(level=LogLevel.ERROR),
+            build_new_image=True,
+            **config,
+        )
+        output = executor.run_code_raise_errors(&quot;print(2 + 2)&quot;)
+        assert &quot;4&quot; in output.logs
+        executor.container.reload()
+        bindings = executor.container.attrs[&quot;NetworkSettings&quot;][&quot;Ports&quot;][&quot;8888/tcp&quot;]
+        assert bindings
+        assert all(binding[&quot;HostIp&quot;] == &quot;127.0.0.1&quot; for binding in bindings)
+    # 无论成功还是失败，都执行这里的收尾步骤。
+    finally:
+        if executor is not None:
+            executor.cleanup()
+
+
+if __name__ == &quot;__main__&quot;:
+    test_docker_control_channel()
+    print(&quot;docker smoke pass&quot;)
+</code></pre></details><details id="f8e4aad70ec24"><summary>examples/upstream/05-typed-agent/README.zh-Hans.md</summary><p><a href="../examples/upstream/05-typed-agent/README.zh-Hans.md">打开完整文件</a></p><pre><code>&lt;div align=&quot;right&quot;&gt;
+  &lt;a href=&quot;./README.md&quot;&gt;繁体中文&lt;/a&gt; | &lt;strong&gt;简体中文&lt;/strong&gt; | &lt;a href=&quot;./README.en.md&quot;&gt;English&lt;/a&gt;
+&lt;/div&gt;
+
+# 练习 5：型别安全 agent（Pydantic AI structured output）
+
+对应 [Stage 4 — Workflow Graph 与 Agent 框架](../../../stages/04-agent-frameworks.zh-Hans.md) 练习 5。
+&gt; 🎓 **学习模式**：先运行提供的 `starter.py`（`python starter.py`），然后只改一个小地方，再重新运行现有测试 `python test.py`。如果测试失败，就撤销或修正这一个改动，再试一次。不需要重命名文件，也不需要重写整份解答。完整方法见 [`docs/HOW_TO_USE.md`](../../../docs/HOW_TO_USE.md)。
+
+&gt; 📚 **想要 chapter-length 深入版？** 本 folder 的 starter 是 illustrative 版、聚焦核心 pattern + 两条 SDK path，不是进阶深度教材。深度教材推荐：
+&gt; - [`datawhalechina/hello-agents`](https://github.com/datawhalechina/hello-agents) ⭐ 中文圈最完整、章节式 + 16 种 production 能力。**本练习对应 hello-agents 的 structured output / type-safe 章节**
+&gt; - [Pydantic AI 官方 docs](https://ai.pydantic.dev/) + [Instructor library](https://github.com/567-labs/instructor)（另一条 typed-output 路线）
+&gt; - 完整 references 见 [Stage 4 精选 Projects](../../../stages/04-agent-frameworks.zh-Hans.md#-精选-projects)
+
+
+## 任务
+
+Agent 回问题、**强制** return `AnswerWithConfidence`：
+
+```python
+class AnswerWithConfidence(BaseModel):
+    answer: str
+    confidence: float = Field(ge=0.0, le=1.0) # runtime 验证 0-1
+    sources: list[str]
+```
+
+Pydantic AI 把 **schema validation（格式规则检查）** 放进程序：LLM 不照 schema 时，framework 可以拒绝或重试。它能检查形状，**不能证明答案内容是真的**。
+
+## 怎么跑 — 两条路径
+
+&gt; ⚠️ **每个练习都要有自己的 Python 3.11 `.venv`。** 不要把这题的 Pydantic 需求与 CrewAI 练习混装。
+
+### Path A（默认、本机免费）
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+.\.venv\Scripts\python.exe starter.py
+```
+
+预算：模型 API 是 **$0**；本机硬体、电力与重试时间仍有成本。
+
+### Path B（Anthropic、比较云端结果）
+
+```powershell
+$env:ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+```
+
+预设固定型号：`claude-haiku-4-5-20251001`。若一次请求用 2,000 input + 1,000 output tokens：`2,000 / 1,000,000 × $1 + 1,000 / 1,000,000 × $5 = $0.007`。验证失败可能重试；先设供应商支出上限 **$0.05**。
+
+&lt;details markdown=&quot;1&quot;&gt;
+&lt;summary&gt;macOS／Linux 指令与查核资讯&lt;/summary&gt;
+
+```bash
+python3.11 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+./.venv/bin/python test.py
+```
+
+官方来源：[Pydantic AI output](https://ai.pydantic.dev/output/)｜[Pydantic AI testing](https://ai.pydantic.dev/testing/)｜[Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+
+&lt;small&gt;套件、model ID、价格与官方连结查核：2026-08-28 UTC。&lt;/small&gt;
+&lt;/details&gt;
+
+## 不花钱验证程序逻辑
+
+```powershell
+.\.venv\Scripts\python.exe test.py # 官方 TestModel + schema 边界
+.\.venv\Scripts\python.exe test_anthropic.py # Anthropic 设定 + 相同输出契约
+```
+
+`test.py` 直接验 `AnswerWithConfidence` 对非法资料（confidence &gt; 1.0、type 不对、sources 不是 list）的 ValidationError——不需要打 LLM、纯 type 层测试。
+
+## 为什么 type-safe agent 重要
+
+```
+Stage 3 练习 6：schema = JSON Schema in prompt
+    LLM 看到、但回什么是 LLM 决定（可能违反）
+
+Stage 4 练习 5：schema = Pydantic model in code
+    LLM 违反 → framework 自动 raise → retry / 修
+    成功回传的 output 已通过 runtime 格式检查
+    内容是否正确仍要另外验证
+```
+
+对 production：
+
+| 需求 | 纯 prompt schema | Pydantic AI |
+|---|---|---|
+| LLM 偶尔少栏位 | 你的下游 code 要 try/except | 自动 retry 直到符合 |
+| 型别错（confidence=&quot;high&quot;） | 下游 crash | Pydantic ValidationError、retry |
+| 边界错（confidence=1.5） | 下游用错误值 | 拒绝、retry |
+| 多余栏位 | 依你的 parser 而定 | 依 Pydantic model 设定处理 |
+
+**结论**：下游程序需要固定栏位时，typed output 很有用。Stage 3 练习 6 教 schema 设计；这题把 schema 变成 runtime contract，再提醒你补上事实查核。
+
+## Pydantic AI 核心观念
+
+### Agent + output_type
+
+```python
+agent = Agent(
+    model=...,
+    output_type=AnswerWithConfidence, # ← 强制 LLM 回这个 shape
+    system_prompt=&quot;...&quot;
+)
+result = agent.run_sync(question)
+answer: AnswerWithConfidence = result.output # 已验证的物件
+```
+
+**重点**：framework 把 Pydantic schema 转成 structured output 指示，执行 validation，失败时依设定重试。重试成功只表示格式合格。
+
+### Field constraints
+
+```python
+confidence: float = Field(ge=0.0, le=1.0, description=&quot;...&quot;)
+```
+
+`ge` / `le` 是 Pydantic 的 numeric bound。LLM 回 `1.5` 会被 ValidationError 挡下、retry。
+
+### 自动 retry
+
+```python
+Agent(..., retries=3) # default 1，可调
+```
+
+Pydantic AI 看到 ValidationError、会把错误讯息塞回 prompt、要求 LLM 重产。
+
+## 两个 path 观察重点
+
+| 观察项 | Anthropic Claude haiku | Ollama qwen2.5:3b |
+|---|---|---|
+| 一次产对 schema | 用相同题组量测 | 用相同题组量测 |
+| retry 次数 | 记录实际结果 | 记录实际结果 |
+| confidence 边界 | 由 Pydantic 验证 | 由 Pydantic 验证 |
+| sources 是 list | 由 Pydantic 验证 | 由 Pydantic 验证 |
+| 成本 | 依 tokens 与重试次数 | 模型 API $0 |
+
+**教学重点**：比较模型时要一起记录成功率、重试次数、延迟与费用；不要只看单次 token 价格，也不要先假设大模型一定比较省。
+
+## 常见坑
+
+- **`output_type` 太复杂**：nested model 越深越难产生与维护。先用最少必要栏位，再用评测决定是否拆分
+- **缺 `description`**：`Field(...)` 没写 `description=`、LLM 看不到栏位用途、易误填
+- **`retries=0`**：失败就 raise。重试次数要依费用、延迟与失败模式设定，并保留上限
+- **小 model + 深 nested**：qwen2.5:3b 可能 retry 多次仍不对。换大 model 或扁平 schema
+
+## 想看更聪明的答案？
+
+```powershell
+$env:MODEL=&quot;claude-sonnet-5&quot;; .\.venv\Scripts\python.exe starter_anthropic.py
+$env:MODEL=&quot;qwen2.5:7b&quot;; .\.venv\Scripts\python.exe starter.py
+```
+
+## 延伸
+
+- **加 tools**：Pydantic AI agent 可以同时有 tools + structured output、`@agent.tool` 装饰函数
+- **stream typed output**：`agent.run_stream(...)` 边跑边验
+- **跨 model 比较**：同一个 schema 跑 Claude / GPT / Gemini / 本机 model，比较通过率、重试与成本
+- **接 production**：Pydantic AI 跟 FastAPI 整合很好、output 直接当 API response model
+</code></pre></details><details id="f593ca565e4d1"><summary>examples/upstream/05-typed-agent/requirements.txt</summary><p><a href="../examples/upstream/05-typed-agent/requirements.txt">打开完整文件</a></p><pre><code>pydantic-ai&gt;=2.35,&lt;3.0
+pydantic&gt;=2.13,&lt;3.0
+</code></pre></details><details id="f2b1067eda251"><summary>examples/upstream/05-typed-agent/starter.py</summary><p><a href="../examples/upstream/05-typed-agent/starter.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 5：用 Pydantic AI ``output_type`` 检查输出形状。
+
+型别检查像表格的格子：它能确保栏位存在、种类正确、数字在范围内，
+但不能证明内容是真的。真实性仍要靠可信来源与额外的语义检查。
+&quot;&quot;&quot;
+
+# 检查字段类型、范围与非空约束；结构合法不代表答案或置信度在事实层面正确。
+
+from __future__ import annotations
+
+import os
+import sys
+from typing import Any
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+# Field 把长度、范围等约束附在字段上；格式通过之后，还要核对业务规则和事实依据。
+from pydantic import BaseModel, Field, field_validator
+from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.openai import OpenAIProvider
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;qwen2.5:3b&quot;)
+OLLAMA_BASE = os.environ.get(&quot;OLLAMA_API_BASE&quot;, &quot;http://localhost:11434/v1&quot;)
+
+
+# Pydantic 限制字段形状与范围，confidence 不表示经过统计校准的正确率。
+class AnswerWithConfidence(BaseModel):
+    &quot;&quot;&quot;已验证的资料形状；它不是答案为真的证据。&quot;&quot;&quot;
+    # answer：保存最终对外文本；非空只说明模型有输出，事实与引用是否正确仍要独立核对。
+    # min_length：要求至少有指定数量的字符或元素，避免空答案、空来源列表看起来结构合法却无法使用。
+    answer: str = Field(min_length=1, description=&quot;非空且不夸大确定性的中文答案。&quot;)
+    # confidence：这里只约束模型自报值的范围，不能把它当成经过校准的真实正确率。
+    # ge：设置包含边界的数值下限；类型正确但越界的值也必须被拒绝。
+    # le：设置包含边界的数值上限，防止过大置信度或预算通过类型检查。
+    confidence: float = Field(ge=0.0, le=1.0, description=&quot;置信度必须在 0.0 到 1.0 之间。&quot;)
+    # sources：要求提供可回查的来源标签，让审核者能核对依据；标签存在不等于来源真的支持断言。
+    # min_length：要求至少有指定数量的字符或元素，避免空答案、空来源列表看起来结构合法却无法使用。
+    sources: list[str] = Field(min_length=1, description=&quot;至少提供一个非空的来源标签。&quot;)
+
+    @field_validator(&quot;answer&quot;)
+    @classmethod
+    def answer_is_not_blank(cls, value: str) -&gt; str:
+        if not value.strip():
+            raise ValueError(&quot;answer 不能为空白&quot;)
+        return value.strip()
+
+    @field_validator(&quot;sources&quot;)
+    @classmethod
+    def sources_are_nonempty_labels(cls, value: list[str]) -&gt; list[str]:
+        if not all(isinstance(item, str) and item.strip() for item in value):
+            raise ValueError(&quot;sources 中的来源标签必须是非空字符串&quot;)
+        return [item.strip() for item in value]
+
+
+def make_ollama_model() -&gt; OpenAIChatModel:
+    &quot;&quot;&quot;用目前 Pydantic AI 的 OpenAIChatModel 连到本机 Ollama。&quot;&quot;&quot;
+    # base_url：把请求发到这个地址，而不是 SDK 的默认云服务；使用 OpenAI 客户端并不代表数据一定发给 OpenAI。
+    # api_key：这是客户端要求的鉴权参数；本机 Ollama 的占位值不是云端密钥，也不提供执行授权。
+    return OpenAIChatModel(MODEL, provider=OpenAIProvider(base_url=OLLAMA_BASE, api_key=&quot;ollama&quot;))
+
+
+def build_agent(model: Any | None = None) -&gt; Agent:
+    &quot;&quot;&quot;建立会重试两次、并要求 AnswerWithConfidence 的 agent。&quot;&quot;&quot;
+    return Agent(
+        model or make_ollama_model(),
+        # output_type：把最终答案约束为这个类型，尽早暴露缺字段或类型错误；仍需另做事实核对。
+        output_type=AnswerWithConfidence,
+        retries=2,
+        instructions=(
+            &quot;返回 AnswerWithConfidence：给出非空中文答案、0 到 1 之间的置信度，&quot;
+            &quot;以及至少一个来源标签。结构合法不能证明内容真实。&quot;
+        ),
+    )
+
+
+def run(question: str, model: Any | None = None) -&gt; AnswerWithConfidence:
+    &quot;&quot;&quot;执行 agent，并在返回前再检查本练习的结果契约。&quot;&quot;&quot;
+    output = build_agent(model).run_sync(question).output
+    if not output.answer or not output.sources or not 0.0 &lt;= output.confidence &lt;= 1.0:
+        raise RuntimeError(&quot;验证后的输出仍不符合本练习约定。&quot;)
+    return output
+
+
+if __name__ == &quot;__main__&quot;:
+    answer = run(&quot;台北人口是多少？&quot;)
+    # 把 SDK 或模型对象转成普通数据，方便保存与返回；不要把对象的调试字符串当作协议 JSON。
+    print(answer.model_dump())
+    assert 0.0 &lt;= answer.confidence &lt;= 1.0
+    assert answer.answer and answer.sources
+</code></pre></details><details id="f70e1cf167542"><summary>examples/upstream/05-typed-agent/starter_anthropic.py</summary><p><a href="../examples/upstream/05-typed-agent/starter_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Stage 4 练习 5 Path B：用固定 Anthropic model ID 跑同一个输出契约。&quot;&quot;&quot;
+
+# 检查字段类型、范围与非空约束；结构合法不代表答案或置信度在事实层面正确。
+# 这是原题的另一供应商路径；共享的检索、工具或状态逻辑仍需遵守相同验收条件。
+
+from __future__ import annotations
+
+import os
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from pydantic_ai.models.anthropic import AnthropicModel
+from starter import run
+
+MODEL = os.environ.get(&quot;MODEL&quot;, &quot;claude-haiku-4-5-20251001&quot;)
+
+
+def make_anthropic_model() -&gt; AnthropicModel:
+    &quot;&quot;&quot;建立 Pydantic AI 目前支援的 Anthropic model 物件。&quot;&quot;&quot;
+    return AnthropicModel(MODEL)
+
+
+if __name__ == &quot;__main__&quot;:
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    answer = run(&quot;台北人口是多少？&quot;, model=make_anthropic_model())
+    # 把 SDK 或模型对象转成普通数据，方便保存与返回；不要把对象的调试字符串当作协议 JSON。
+    print(answer.model_dump())
+    assert answer.answer and answer.sources
+    assert 0.0 &lt;= answer.confidence &lt;= 1.0
+</code></pre></details><details id="f7fc04931a6cb"><summary>examples/upstream/05-typed-agent/test.py</summary><p><a href="../examples/upstream/05-typed-agent/test.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path A 离线行为测试：使用 Pydantic AI 官方 TestModel，不连网。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：检查字段类型、范围与非空约束；结构合法不代表答案或置信度在事实层面正确。
+
+from __future__ import annotations
+
+import sys
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from pydantic import ValidationError
+from pydantic_ai.models.test import TestModel
+from starter import AnswerWithConfidence, run
+
+
+def test_official_test_model_produces_valid_typed_output() -&gt; None:
+    model = TestModel(custom_output_args={&quot;answer&quot;: &quot;离线模拟答案&quot;, &quot;confidence&quot;: 0.6, &quot;sources&quot;: [&quot;固定离线样本&quot;]})
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    answer = run(&#x27;测试问题&#x27;, model=model)
+    assert answer.answer == &quot;离线模拟答案&quot;
+    assert answer.sources == [&quot;固定离线样本&quot;]
+
+
+def test_invalid_contract_values_are_rejected() -&gt; None:
+    invalid = [
+        {&quot;answer&quot;: &quot;ok&quot;, &quot;confidence&quot;: 1.1, &quot;sources&quot;: [&quot;source&quot;]},
+        {&quot;answer&quot;: &quot;ok&quot;, &quot;confidence&quot;: 0.5, &quot;sources&quot;: &quot;source&quot;},
+        {&quot;answer&quot;: &quot; &quot;, &quot;confidence&quot;: 0.5, &quot;sources&quot;: [&quot;source&quot;]},
+        {&quot;answer&quot;: &quot;ok&quot;, &quot;confidence&quot;: 0.5, &quot;sources&quot;: []},
+    ]
+    for payload in invalid:
+        try:
+            # 按 AnswerWithConfidence 的模型定义验证输入。
+            # 在接收结果的边界执行运行时验证，尽早拒绝缺字段、错类型和越界值。
+            AnswerWithConfidence.model_validate(payload)
+        except ValidationError:
+            pass
+        else:
+            raise AssertionError(f&quot;这里应拒绝无效值：{payload!r}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    test_official_test_model_produces_valid_typed_output()
+    test_invalid_contract_values_are_rejected()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="fb0da480cb09a"><summary>examples/upstream/05-typed-agent/test_anthropic.py</summary><p><a href="../examples/upstream/05-typed-agent/test_anthropic.py">打开完整文件</a></p><pre><code>&quot;&quot;&quot;Path B 离线行为测试：检查 Anthropic 设定，再用官方 TestModel 执行。&quot;&quot;&quot;
+
+# 本组测试围绕以下行为检查正反例：检查字段类型、范围与非空约束；结构合法不代表答案或置信度在事实层面正确。
+
+from __future__ import annotations
+
+import sys
+import os
+
+# 不同终端对标准输出对象的实现不同，先确认支持重设编码，再开启中文输出，避免测试替身上报属性错误。
+if hasattr(sys.stdout, &quot;reconfigure&quot;):
+    # 统一终端的中文编码；无法编码的字符只替换显示，不能让日志打印失败掩盖实际业务结果。
+    sys.stdout.reconfigure(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+from pydantic_ai.models.test import TestModel
+from starter import run
+from starter_anthropic import MODEL, make_anthropic_model
+
+
+def test_anthropic_provider_construction() -&gt; None:
+    os.environ.setdefault(&quot;ANTHROPIC_API_KEY&quot;, &quot;offline-test-key&quot;)
+    model = make_anthropic_model()
+    assert MODEL == &quot;claude-haiku-4-5-20251001&quot;
+    assert model.model_name == MODEL
+
+
+def test_path_b_behavior_with_official_offline_model() -&gt; None:
+    offline = TestModel(custom_output_args={&quot;answer&quot;: &quot;Anthropic 路径的离线回答&quot;, &quot;confidence&quot;: 0.4, &quot;sources&quot;: [&quot;fixture&quot;]})
+    # model：显式指定本次使用的模型或测试替身，避免悄悄使用默认值；换模型后要重新核对本例的输出约定。
+    answer = run(&#x27;测试问题&#x27;, model=offline)
+    assert answer.answer.startswith(&quot;Anthropic 路径的离线回答&quot;)
+    assert answer.confidence == 0.4
+
+
+if __name__ == &quot;__main__&quot;:
+    test_anthropic_provider_construction()
+    test_path_b_behavior_with_official_offline_model()
+    print(&quot;全部通过&quot;)
+</code></pre></details><details id="fe1fd6a49d3a1"><summary>examples/upstream/LICENSE</summary><p><a href="../examples/upstream/LICENSE">打开完整文件</a></p><pre><code>MIT License
+
+Copyright (c) 2026 Wenyu Chiou
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</code></pre></details></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

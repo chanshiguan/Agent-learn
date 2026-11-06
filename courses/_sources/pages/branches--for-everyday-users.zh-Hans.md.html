@@ -1,0 +1,226 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>for-everyday-users.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="日常用户延伸路线for-everyday-users"></span><h1 data-heading-alias="日常用户延伸路线for-everyday-users" id="h4773f6bd4a76">日常用户延伸路线（For Everyday Users）</h1>
+<blockquote>
+<p><a href="README.zh-Hans.md.html">← 回到主路线</a> · 你不必先学会写程序，也不必走完整条主线。</p>
+</blockquote>
+<p><a id="使用场景生活场景--ai-怎么帮"></a></p>
+<span id="-这条路帮你做什么"></span><h2 data-heading-alias="-这条路帮你做什么" id="h416a3ef7083f">📌 这条路帮你做什么</h2>
+<p>这条路教你把 AI 当成“先帮忙写草稿的助手”。你先给它材料和要求，它先做一版；最后仍由你对照原文、修正并决定要不要使用。</p>
+<p>你可以直接从第一个练习开始。不要先放真实姓名、密码、病历、合约或公司机密。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<p>完成这一页后，你可以：</p>
+<ol>
+<li>把要做的事、可用材料和输出格式说清楚。</li>
+<li>分清聊天界面、<strong>App／Connector</strong>、<strong>CLI Agent</strong> 与本地模型运行环境。</li>
+<li>在连接账号、开放文件或执行命令前先看权限。</li>
+<li>对照 <strong>Source</strong> 检查 AI 草稿，不把流畅文字当成正确答案。</li>
+</ol>
+<span id="-九个核心词"></span><h2 data-heading-alias="-九个核心词" id="h0c277bcdcb66">🧩 九个核心词</h2>
+<ul>
+<li><strong>Prompt（提示）</strong>：你交给 AI 的要求。像写一张工作小纸条，要说要做什么、可以用什么材料、结果长什么样。</li>
+<li><strong>Source（来源）</strong>：你要 AI 依照的原文、图片或材料。最后要回来对照它，不能只相信 AI 的记忆。</li>
+<li><strong>Private Data（私人数据）</strong>：不该随便交给别人的数据，例如密码、身份证号、未公开公司文件或他人的个人信息。</li>
+<li><strong>Hallucination（幻觉）</strong>：AI 不知道答案时，仍可能写出一段很像真的内容。句子好看不代表事实存在。</li>
+<li><strong>Human Review（人工审查）</strong>：由人把草稿和 Source 一项一项比对，修正后才决定是否使用。</li>
+<li><strong>App／Connector（服务连接器）</strong>：聊天服务通往 Gmail、Drive 或其他服务的一扇门。它能做什么，取决于产品和你给的权限。</li>
+<li><strong>CLI Agent（命令行 Agent）</strong>：在终端里工作的助手。它可能读写文件或执行命令，所以动手前要先看计划与 diff。</li>
+<li><strong>Local LLM／Runtime（本地模型／运行环境）</strong>：让模型在自己的电脑上运行的软件。Runtime 负责运行模型，不等于聊天 App，也不等于 CLI Agent。</li>
+<li><strong>Approval Gate（人工批准关卡）</strong>：真正寄信、改文件或执行高影响动作前，先停下来让人确认。</li>
+</ul>
+<p><strong>连接账号前，先问四件事：</strong></p>
+<ol>
+<li><strong>读什么？</strong> 只开放这次任务需要的数据。</li>
+<li><strong>送去哪？</strong> 先看哪些服务会收到数据。</li>
+<li><strong>能改什么？</strong> 寄信、改文件或付款前，保留 <strong>Approval Gate</strong>。</li>
+<li><strong>怎么收回？</strong> 找到停止任务、撤销连接与删除已存数据的方法。</li>
+</ol>
+<span id="-第一个练习把虚构消息变成可核对的提醒"></span><h2 data-heading-alias="-第一个练习把虚构消息变成可核对的提醒" id="h9099acf1f9fd">🛠 第一个练习：把虚构消息变成可核对的提醒</h2>
+<p>这题只用<strong>虚构</strong>材料。把下面整段直接贴到你正在使用的聊天工具：</p>
+<pre><code class="language-text">来源消息：
+「小安说星期五前会把海报草稿交给小美。活动日期是 9 月 12 日。消息没有写交付时间。」
+
+请帮我写一段简短提醒。只能使用来源消息里的事实，不要猜。
+请输出：
+1. Draft
+2. Facts copied
+3. Needs confirmation
+
+不要替我发送消息。
+</code></pre>
+<p>完成后，自己做三个检查：</p>
+<ol>
+<li><code>Facts copied</code> 能不能逐句在 Source 找到？</li>
+<li>没有写出的交付时间，有没有放进 <code>Needs confirmation</code>？</li>
+<li>工具有没有只生成 Draft，而没有自行发送？</li>
+</ol>
+<p><a id="起步你应该从哪一层进入"></a>
+<a id="给日常用户的层级建议"></a></p>
+<span id="-按工作选四扇门"></span><h2 data-heading-alias="-按工作选四扇门" id="he09175f02053">🚪 按工作选四扇门</h2>
+<p><strong>这四扇门不是等级。需要哪一扇才开哪一扇。</strong> 多数单次任务只要第一扇；不是工具越多，结果就越好。</p>
+<div class="reader-route-table" role="region" tabindex="0" aria-label="聊天与连接器入口比较">
+<table align="center">
+  <thead><tr><th>入口</th><th>五岁也懂的说法</th><th>适合什么</th><th>动手前先做什么</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Chat surface</strong></td><td>打开一个对话框，请它先写草稿</td><td>写信、解释文章、整理公开信息</td><td>移除 Private Data；准备可核对的 Source</td></tr>
+    <tr><td><strong>App／Connector</strong></td><td>帮聊天工具开一扇通往其他服务的门</td><td>搜索已授权的邮件、文件或日历</td><td>看清读取与写入权限；写入动作保留人工确认</td></tr>
+  </tbody>
+</table>
+<p><a id="tier-2--cli-agent愿意学命令行的进阶用户"></a></p>
+<div class="reader-route-table" role="region" tabindex="0" aria-label="CLI 与本地模型入口比较">
+<table align="center">
+  <thead><tr><th>入口</th><th>五岁也懂的说法</th><th>适合什么</th><th>动手前先做什么</th></tr></thead>
+  <tbody>
+    <tr><td><strong>CLI Agent</strong></td><td>在终端里工作的助手</td><td>重复整理文件或执行多步骤任务</td><td>限定文件夹，先看 preview／dry-run、command 与 diff，再批准</td></tr>
+    <tr><td><strong>Local LLM／Runtime</strong></td><td>模型在自己的电脑里运行</td><td>离线实验，或不想把指定数据交给云端模型</td><td>确认选的是 local model；cloud model、web search 或云端功能仍会联网</td></tr>
+  </tbody>
+</table>
+<p>如果你只想聊天，不需要安装 CLI Agent 或本地 Runtime。想学命令行时再去 <a href="tracks--cli--A1-cli-intro.zh-Hans.md.html">Track A 第一站</a>；想了解模型时再去 <a href="stages--01-llm-basics.zh-Hans.md.html">Stage 1</a>。</p>
+<span id="-个人-agent先说明目标与边界"></span><h2 data-heading-alias="-个人-agent先说明目标与边界" id="h0b5991669de8">🧑 个人 Agent：先说明目标与边界</h2>
+<p><small>个人 Agent 产品查核：2026-10-02 UTC；新增与复核：2026-10-16 UTC。仅 Claude Duet 更新：2026-10-23 UTC。</small></p>
+<p><strong>个人 Agent（Personal Agent）</strong> 是能跨工具完成多步骤工作的助手。你先说明目标，它先查资料、写草稿，再拿回来请你确认。这类产品把模型、工具与权限放在一起。产品名称不是底层模型名称，也不是新的升级等级。</p>
+<p>这里也纳入消息式个人代理：看它是否保留个人情境、连接日常工具并持续跟进。下表加入初创公司出身的 Instinct、Tab、Tomo 与 Poke。Poke 已加入 Cognition，不再列为独立团队。聊天陪伴、单一提醒工具与企业工作流平台不一定符合这个范围。可用性与隐私细节见下方“账号、数据、权限与费用”。</p>
+<p>第一次仍用上面的虚构消息，先不要连接账号。需要跨工具时，再限定它能读取什么、能修改什么，以及何时必须停下来请你批准。发出、发布、删除文件或付款前保留 <strong>Approval Gate</strong>。“持续工作”不代表可以跳过人工检查。</p>
+<p><strong>Claude Duet</strong> 是会持续追踪任务的个人 Agent，不是新模型。目前是美国 Pro／Max 的研究预览，仍需候补邀请；Team／Enterprise 尚未开放。官方说明：寄信、付款、签署或删除前会请你批准。撤销 App 连接后，<strong>记忆不会自动删除</strong>。先读<a href="../../reference/source-readings.html#s61869f96ced6">资格与数据限制</a>，不要直接接私人账号。</p>
+<p><a id="必修阅读"></a></p>
+<span id="-必读"></span><h2 data-heading-alias="-必读" id="h12845bd23629">📖 必读</h2>
+<p>先读这六个短入口；它们分别回答“怎么问、能接什么、数据会去哪里”：</p>
+<ol>
+<li><a href="../../reference/source-readings.html#s67d71812fd07">OpenAI — Prompt engineering best practices for ChatGPT</a>：学会把要求与 context 说清楚。</li>
+<li><a href="../../reference/source-readings.html#s5a36005db887">Anthropic — Get started with Claude</a>：用一般对话方式开始，再逐步补充限制。</li>
+<li><a href="../../reference/source-readings.html#sb4438ca1663a">OpenAI — Apps in ChatGPT</a>：Apps 的能力会因方案、地区、workspace 与管理员设置而不同。</li>
+<li><a href="../../reference/source-readings.html#sf9b59fae6ab6">Anthropic — When to use desktop and web connectors</a>：分清 remote connector 与本机 desktop extension。</li>
+<li><a href="../../reference/source-readings.html#s1acba5cfdb50">Google — Gemini Apps Privacy Hub</a>：连接数据前先看 activity、人工审查与第三方政策。</li>
+<li><a href="../../reference/source-readings.html#s043ee5baa4f4">Ollama — FAQ</a>：分清本机运行、cloud model、web search 与 <code>local-only</code> 设置。</li>
+</ol>
+<p>想系统学习 Prompt、zero-shot、one-shot、few-shot 与查证方法，再进入 <a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 2 — Prompt Engineering</a>。</p>
+<p><a id="-精选-projects"></a></p>
+<span id="-精选-projects-与学习资源"></span><h2 data-heading-alias="-精选-projects-与学习资源" id="h25e931c5f883">⭐ 精选 Projects 与学习资源</h2>
+<p>星级依“初学者价值、文档质量与安全边界”给分。不是 GitHub stars。其他资源的状态与限制核查于 <code>2026-08-29 UTC</code>。个人 Agent 入口新增与复核于 <code>2026-10-16 UTC</code>。仅 Claude Duet 新增于 <code>2026-10-23 UTC</code>。三星代表可选的具体产品示例，适合互相对照。它们是未实测的参考／对照示例，不是必修工具。评分依官方文档的教学价值，不代表产品的实测质量。</p>
+<div class="reader-resource-catalog" role="region" tabindex="0" aria-label="资源表（分类、用途与限制）">
+<table align="center">
+  <thead><tr><th scope="col">分类</th><th scope="col">项目／文档</th><th scope="col">评分</th><th scope="col">用途</th><th scope="col">限制</th></tr></thead>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">聊天界面</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s5502a6be3bf0">Claude</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">云端 Chat surface<div data-field="use">阅读、写作与反复讨论</td><td><div data-field="status">正式可用；商业云服务<div data-field="limits">功能依方案与地区；重要内容仍要对照 Source</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s516c22c5dba9">ChatGPT</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">云端 Chat surface<div data-field="use">一般问答、语音与多种工作入口</td><td><div data-field="status">正式可用；商业云服务<div data-field="limits">仍会出错；高影响结果要 Human Review</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#scb2468cef9d9">Gemini</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="identity">Google 的云端 Chat surface<div data-field="use">问答与符合资格的 Google 服务连接</td><td><div data-field="status">正式可用；商业云服务<div data-field="limits">先看 activity 与人工审查设置，不放机密数据</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s74db45a22f84">Perplexity</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="identity">带来源入口的云端搜索助手<div data-field="use">找候选来源并建立查证起点</td><td><div data-field="status">正式可用；商业云服务<div data-field="limits">引用不等于内容正确；要逐一打开来源</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="8" align="center" valign="middle" width="80">个人 Agent</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s237fb4ef6950">OpenAI dots</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">个人 Agent 产品／官方文档<div data-field="use">适合谁：想学持续任务与批准边界的日常用户。教什么：先用虚构数据学习目标、工具与批准边界。</td><td><div data-field="status">逐步开放；商业云服务<div data-field="limits">依方案、年龄、地区与管理员设置；账号可能尚未开放</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s61869f96ced6">Claude Duet</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">个人 Agent 产品／官方文档<div data-field="use">适合谁：比较持续任务的日常用户。教什么：先限制数据，再批准对外动作。</td><td><div data-field="status">研究预览；美国 Pro／Max，需候补邀请；商业云服务<div data-field="limits">Team／Enterprise 未开放；撤销连接不会自动清除记忆</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sa02b9db14c7c">Meta Muse</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">个人 Agent 产品／官方介绍<div data-field="use">适合谁：想练跨 App 草拟的日常用户与小商家。教什么：学跨 App 草拟与行动前人工批准。</td><td><div data-field="status">限区可用；商业云服务<div data-field="limits">美国与加拿大；Meta 表示发布、发送与花费须批准</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s33e8e29ce012">Grok Bot</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">个人 Agent 产品／官方文档<div data-field="use">适合谁：想比较持续任务与共享数据的日常用户。教什么：学持续任务与共享电脑的数据边界。</td><td><div data-field="status">符合资格方案可用；商业云服务<div data-field="limits">需符合资格的付费方案；同账号 Bots 共享文件与登录</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#scd98a15a8243">Instinct</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">消息／通话式个人代理<div data-field="use">适合谁：比较生活任务委派的用户。教什么：模型训练与授权范围。</td><td><div data-field="status">商业服务；资格须查账号<div data-field="limits">18 岁以上；训练退出有例外</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s410c2453ec37">Tab</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">消息式个人代理<div data-field="use">适合谁：比较跨工具委派的用户。教什么：候补、付款批准与账号密码隔离。</td><td><div data-field="status">Private beta；商业服务<div data-field="limits">候补不保证开放；付款限部分测试用户</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s0d457e36dd13">Tomo</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">Mapo Labs 个人 AI<div data-field="use">适合谁：跟进目标与日常安排的用户。教什么：长期情境与群聊数据边界。</td><td><div data-field="status">付费方案；商业服务<div data-field="limits">授权人员可能审阅对话；群聊涉及他人数据</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sb85a6f49705c">Poke</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐</span></td><td><div data-field="identity">初创公司出身的消息式个人代理<div data-field="use">适合谁：比较邮件与日历自动化的用户。教什么：主动提醒、方案及产品归属变化。</td><td><div data-field="status">免费／付费方案；已加入 Cognition<div data-field="limits">核对用量与额外费用；检查 Maximum Privacy</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">官方入门与安全指南</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s67d71812fd07">OpenAI Prompt Guide</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">ChatGPT 官方指南<div data-field="use">学清楚、具体与逐步改写 Prompt</td><td><div data-field="status">现行；官方指南<div data-field="limits">好 Prompt 不能保证正确，仍要查证</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s5a36005db887">Claude Get Started</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">Claude 官方入门<div data-field="use">第一次聊天与基本操作</td><td><div data-field="status">现行；官方指南<div data-field="limits">方案有使用限制；不要假设所有功能都可用</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sb4438ca1663a">Apps in ChatGPT</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">App／Connector 官方说明<div data-field="use">了解搜索、同步与外部 action</td><td><div data-field="status">商业；商业云服务<div data-field="limits">能力与权限不同；高影响 action 保留人工确认</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s1acba5cfdb50">Gemini Privacy Hub</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">Gemini 官方隐私指南<div data-field="use">连接 Google 或第三方数据前检查设置</td><td><div data-field="status">现行；官方隐私指南<div data-field="limits">可能处理敏感内容；不要连接不愿交给 reviewer 的机密数据</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle" width="80">CLI Agent</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s13d96f6971ff">Claude Code</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">Anthropic CLI Agent<div data-field="use">在指定工作区读取、修改文件并执行任务</td><td><div data-field="status">活跃；商业服务；repo 未标示标准开源许可证<div data-field="limits">先设置 permission，批准前先看 command／diff</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s8c3dc2a0187c">Codex</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">OpenAI coding agent<div data-field="use">app／CLI／IDE／cloud 工作</td><td><div data-field="status">活跃；repo 代码为 Apache-2.0，app／cloud 依服务条款<div data-field="limits">用 approval 限制写文件、命令与外部 action</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#sffccace0ba14">OpenCode</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">可连接多种 provider 的 coding agent／harness<div data-field="use">在终端或 desktop 使用模型做多步骤任务</td><td><div data-field="status">活跃；MIT<div data-field="limits">provider 仍需账号／API key；用 permission 与 AGENTS.md 限定范围</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s24684c1ecca2">Gemini CLI</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="identity">Google CLI Agent<div data-field="use">在终端使用 Gemini 与工具</td><td><div data-field="status">活跃；Apache-2.0<div data-field="limits">修改前看 diff／command；sandbox 只能降低风险</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="2" align="center" valign="middle" width="80">Local LLM Runtime</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s77b4be38215d">Ollama</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐⭐</span></td><td><div data-field="identity">本地模型执行环境<div data-field="use">下载并在自己的电脑执行模型</td><td><div data-field="status">活跃；MIT<div data-field="limits">确认使用 local model；cloud model 与 web search 不是本机推论</td></tr>
+    <tr><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s6751d818724f">LM Studio</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="identity">图形化本地模型运行环境<div data-field="use">用桌面界面加载已下载模型</td><td><div data-field="status">商业；商业桌面应用程序<div data-field="limits">本地功能可离线；cloud models、搜索等云功能仍会联网</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="1" align="center" valign="middle" width="80">Prompt 素材</th><td><div data-field="entry"><strong><a href="../../reference/source-readings.html#s1643157b768c">prompts.chat</a></strong></td><td align="center" valign="middle"><span data-field="rating">⭐⭐⭐⭐</span></td><td><div data-field="identity">社群 Prompt 示例库<div data-field="use">找句型，再改成自己的任务</td><td><div data-field="status">活跃；MIT／CC0<div data-field="limits">示例质量不一；不要直接贴 Private Data</td></tr>
+  </tbody>
+</table>
+<details markdown="1">
+<summary>🔐 账号、数据、权限与费用</summary>
+<ul>
+<li>App／Connector 是否出现，会受<strong>方案、地区、workspace</strong>、设备与管理员设置影响。没有看到功能，不代表你操作错了。</li>
+<li>连接前先问：它会读什么？会把什么送给哪个服务？能不能写回？怎么撤销？</li>
+<li>搜索和草拟通常是低影响动作；发信、改日历、删除文件或购买是写入动作，必须保留 Approval Gate 与人工确认。</li>
+<li>云端产品的免费额度、订阅与 API 费用会变；操作前直接看产品目前显示的方案，不在教材保存固定价格。</li>
+<li>不确定能不能上传时，先不要上传。公开可读也不等于你有权把别人的内容交给第三方服务处理。</li>
+</ul>
+<p>个人 Agent 产品细节（2026-10-16 UTC；文档查核，未实测）：</p>
+<ul>
+<li>
+<p><a href="../../reference/source-readings.html#s61869f96ced6">Claude Duet</a>（仅此项：2026-10-23 UTC）：在自己的云端电脑上工作，使用 Claude Opus 5.5，不能自行选模型。后台工作也计入 Pro／Max 方案用量，不是无限免费 API。现有 Claude 的记忆、Skills 与连接器会延续使用。先检查共享数据与记忆设置；寄信、付款、签署或删除仍需人工批准。参考 <a href="../../reference/source-readings.html#sf5220dab8f55">10/21 官方公告</a>。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#s237fb4ef6950">OpenAI dots</a>：持续工作的云助手，有自己的云电脑与浏览器，底层模型为 GPT-6 Astra。你关掉电脑后仍能继续；它会记住偏好与待办、在后台并行工作，分享私人对话信息给他人前须先取得你的允许。<a href="../../reference/source-readings.html#s8aae644cdd9d">2026-09-29 更新</a>说明了逐步开放。Pro 100、Pro 200、Pro 500 限超过 18 岁。也限在欧洲经济区、英国与瑞士以外。Business Premium、Enterprise 在全球逐步开放。Enterprise 须由管理员启用。符合方案不代表账号已经获得功能。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#sa02b9db14c7c">Meta Muse</a>：用自己的云电脑跨 App 工作。<a href="../../reference/source-readings.html#s3044f63155f8">2026-09-29 Muse for Small Business 更新</a>确认美国与加拿大可用。也加入商务 skills 与 connectors。Meta 表示发布、发送与花费须先取得你的批准。另有 Sentinel 代理审核对外联网动作；Muse 提供活动审计轨迹。密码与付款资料分开存放于安全存储，Muse 本身看不到。Muse 是产品；Muse Spark 是模型。Muse Code 是在终端工作的 coding agent。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#s33e8e29ce012">Grok Bot</a>：使用持续保留状态的云电脑。它能用浏览器、文件与终端做事。需付费 Cursor 方案或连接符合资格的 SuperGrok 方案，用量每周重置。同一账号的 Bots 共享电脑、文件、浏览器会话与 App 登录。不能把它们当成彼此隔离。<a href="../../reference/source-readings.html#s52b14ec01b86">2026-09-28 Team Bots 更新</a>加入 public beta。此 public beta 支持 Teams 与 Enterprise 方案。可共享 skills、工具并在 Slack 协作。Grok Bot 是产品，不是 Grok 模型名称。也不是用于编程的 <a href="../../reference/source-readings.html#s529782cff2c4">Grok Build</a>。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#scd98a15a8243">Instinct</a>（Spear Street Technology）：通过文字或通话交代生活任务，官方展示购物与订票等用途。<a href="../../reference/source-readings.html#s37d50dfac4c3">条款</a>要求年满 18 岁；公开入口未列完整价格与地区资格，应以账号当下信息为准。<a href="../../reference/source-readings.html#sbc1186b7bb4a">隐私政策</a>允许部分数据用于模型训练，提供退出设置但有例外；不要假设每个对外动作都会自动停下来确认。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#s410c2453ec37">Tab</a>（Terrasoft）：在消息里委派工作，保留此前情境，使用自己的电脑、浏览器与已连接账号，也能代打电话。<a href="../../reference/source-readings.html#s2b1021560284">目前为 private beta</a>，候补不保证开放时间、价格或功能；付款功能只限部分测试用户。<a href="../../reference/source-readings.html#s700b757b557f">官方安全说明</a>要求付款绑定具体交易与批准，密码及卡号走独立流程，不贴在消息里。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#s0d457e36dd13">Tomo</a>（Mapo Labs）：小团队的个人 AI，记住对话情境、主动提醒，并连接邮件与日历，适合比较目标跟进及日常安排。提供付费方案，价格与消息额度可能因用户而异。<a href="../../reference/source-readings.html#s3f568df5dd2c">隐私政策</a>说明授权人员可能审阅对话；加入群聊也会处理其他参与者的数据，先确认分享范围。</p>
+</li>
+<li>
+<p><a href="../../reference/source-readings.html#sb85a6f49705c">Poke</a>（The Interaction Company，已<a href="../../reference/source-readings.html#s5a01260de7d8">加入 Cognition</a>）：在消息界面使用个人情境、连接服务与主动提醒，可处理邮件、日历及自动化。<a href="../../reference/source-readings.html#s9eb019a1d612">方案</a>有免费与付费层级，用量限制与额外费用要另查。<a href="../../reference/source-readings.html#s98fcbc0645f4">隐私政策</a>提供 Maximum Privacy 的模型训练排除设置；先看设置再连接私人账号。</p>
+</li>
+</ul>
+</details>
+<details markdown="1">
+<summary>🧪 CLI Agent 与本地模型进阶步骤</summary>
+<p>CLI Agent 的安全起手式：</p>
+<ol>
+<li>在测试文件夹放几个可还原的虚构文件。</li>
+<li>先要求 read-only plan 或 preview／dry-run。</li>
+<li>把可读写范围限制在那个文件夹。</li>
+<li>看清 command 与 diff，再批准小步骤。</li>
+<li>执行后人工检查；不要一开始就让它发信、删除文件、付款、push 或 deploy。</li>
+</ol>
+<p>官方边界：</p>
+<ul>
+<li><a href="../../reference/source-readings.html#sa821cdd77914">Gemini CLI tools</a> 会在修改工具前显示 action；<a href="../../reference/source-readings.html#sc00da69e0718">sandbox 文件</a> 也提醒 sandbox 不是零风险保证。</li>
+<li><a href="../../reference/source-readings.html#s74281762c0fb">OpenCode permissions</a> 可对 edit、bash 与外部文件夹设置 ask／allow／deny；<a href="../../reference/source-readings.html#s13da216438ac">provider 文件</a> 显示模型连接仍需要对应账号、OAuth、API key 或环境设置。</li>
+<li>Ollama 可以启用 <a href="../../reference/source-readings.html#sa13ccce8cd32">cloud models</a>。只要纯本机模式时，依 FAQ 设置 <code>disable_ollama_cloud</code> 或 <code>OLLAMA_NO_CLOUD=1</code>。</li>
+<li>LM Studio 的<a href="../../reference/source-readings.html#se723aaa03983">离线说明</a>指出，已下载模型、chat、文件与 local server 可以离线使用；<a href="../../reference/source-readings.html#sde36c5277366">隐私说明</a>区分本地处理与 cloud models／web search。</li>
+</ul>
+</details>
+<p><a id="可以建的流程按使用频率"></a></p>
+<details markdown="1">
+<summary>🧰 更多流程、替代方案与疑难排解</summary>
+<p>可以慢慢加入的低风险流程：</p>
+<ul>
+<li><strong>语言练习</strong>：请 AI 扮演对话伙伴；每次只纠正两个错误，最后由你核对教材。</li>
+<li><strong>周记草稿</strong>：只用你愿意放进工具的笔记；先列事实，再写摘要。</li>
+<li><strong>公开文章摘要</strong>：附上原文，要求每个重点指出 Source 段落；自己打开原文检查。</li>
+<li><strong>虚构文件整理</strong>：先在测试文件夹 preview 新文件名，人工批准后才改名。</li>
+</ul>
+<p>常见问题：</p>
+<ul>
+<li>回答猜了不存在的数据：缩短任务，明写“不知道就放进 Needs confirmation”。</li>
+<li>Connector 找不到数据：先检查原服务权限、方案、workspace 管理员与支持的 surface。</li>
+<li>本地模型很慢：先换较小模型；不要把“跑得动”误当成“回答一定正确”。</li>
+<li>不知道选哪个入口：先用 Chat surface 完成第一题；真的需要读外部服务、改档或离线时再开其他门。</li>
+</ul>
+</details>
+<p><a id="社群备注"></a></p>
+<span id="-完成检查与下一站"></span><h2 data-heading-alias="-完成检查与下一站" id="hf28bc5d82ae6">✅ 完成检查与下一站</h2>
+<ul>
+<li>[ ] 我能说出 Chat surface、App／Connector、CLI Agent 与 Local LLM／Runtime 的差别。</li>
+<li>[ ] 我知道 AI 会生成 Hallucination，会回到 Source 做 Human Review。</li>
+<li>[ ] 我不会把 Private Data 直接贴进数据政策不清楚的服务。</li>
+<li>[ ] 寄出、改档、执行命令或其他高影响动作前，我会保留 Approval Gate。</li>
+<li>[ ] 我能分清个人 Agent 产品与模型，也会检查可用性及共享数据范围。</li>
+</ul>
+<p>下一站依你的需要选：</p>
+<ul>
+<li>想把 Prompt 写得更清楚：进入 <a href="stages--02-prompt-engineering.zh-Hans.md.html">Stage 2</a>。</li>
+<li>想安全使用 CLI Agent：进入 <a href="tracks--cli--A1-cli-intro.zh-Hans.md.html">Track A1</a>。</li>
+<li>想分清 App、Connector、MCP 与自动化：进入 <a href="branches--for-knowledge-worker.zh-Hans.md.html">知识工作者路线</a>。</li>
+<li>想协助改善这条路：阅读 <a href="CONTRIBUTING.zh-Hans.md.html">CONTRIBUTING.zh-Hans.md</a>。</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

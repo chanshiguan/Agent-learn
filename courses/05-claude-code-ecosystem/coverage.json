@@ -1,0 +1,110 @@
+[
+  {
+    "requirement": "5.1–5.7 部件关系",
+    "lesson": "lessons/03-workshop.html#h84fca28c82d7",
+    "example": "examples/CLAUDE.md",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "规则与 Skills 官方教程",
+    "lesson": "lessons/03-workshop.html#h682c51f5767d",
+    "example": "examples/skills/readme-check/SKILL.md",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "Hook 配置和事件",
+    "lesson": "lessons/03-workshop.html#hc2ac535fde5d",
+    "example": "examples/settings.demo.json",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "MCP 连接、发现、调用、撤销",
+    "lesson": "lessons/03-workshop.html#hb908a909734a",
+    "example": "examples/mcp_roundtrip.py",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "Subagent/cookbook/并行/Worktree",
+    "lesson": "lessons/03-workshop.html#hb8d6dd6f9c91",
+    "example": "examples/agents/evidence-reviewer.md",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "Plugin/SDK/长期任务",
+    "lesson": "lessons/03-workshop.html#h13737eb51bc7",
+    "example": "examples/sdk_job.py",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "五项原练习验收",
+    "lesson": "lessons/03-workshop.html#h72b55547a3d3",
+    "example": "examples/check_readme.py",
+    "assessment": "lessons/03-workshop.html#h72b55547a3d3"
+  },
+  {
+    "requirement": "直接必读：Claude Code quickstart（本课必读相关能力）",
+    "lesson": "lessons/00-first-session.html#hedfba6c73f49",
+    "example": "examples/quickstart-check.py",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Extend Claude Code（本课必读相关能力）",
+    "lesson": "lessons/03-workshop.html#h84fca28c82d7",
+    "example": "examples/CLAUDE.md",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：How Claude remembers your project（本课必读相关能力）",
+    "lesson": "lessons/01-guide.html#hb3d729f04974",
+    "example": "examples/CLAUDE.md",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Skills（本课必读相关能力）",
+    "lesson": "lessons/03-workshop.html#h682c51f5767d",
+    "example": "examples/skills/readme-check/SKILL.md",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：MCP specification（本课必读相关能力）",
+    "lesson": "lessons/03-workshop.html#hb908a909734a",
+    "example": "examples/mcp_roundtrip.py",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Hooks reference（本课必读相关能力）",
+    "lesson": "lessons/03-workshop.html#hc2ac535fde5d",
+    "example": "examples/observe_hook.py",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Plugins（本课必读相关能力）",
+    "lesson": "lessons/04-extensions.html#hfc1878a01dfa",
+    "example": "examples/course-plugin/.claude-plugin/plugin.json",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Subagents（条件性扩展；选做时按完整实作验收）",
+    "lesson": "lessons/03-workshop.html#hb8d6dd6f9c91",
+    "example": "examples/agents/evidence-reviewer.md",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：parallel agents（条件性扩展；选做时按完整实作验收）",
+    "lesson": "lessons/03-workshop.html#hb8d6dd6f9c91",
+    "example": "examples/agents/evidence-reviewer.md",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Dynamic workflows（条件性扩展；选做时按完整实作验收）",
+    "lesson": "lessons/04-extensions.html#hbd991555f46f",
+    "example": "examples/audit-readmes.js",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  },
+  {
+    "requirement": "直接必读：Agent SDK overview（条件性扩展；选做时按完整实作验收）",
+    "lesson": "lessons/04-extensions.html#hf2831a19b60e",
+    "example": "examples/sdk_job.py",
+    "assessment": "lessons/04-extensions.html#hd26d673c912c"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "requirement": "CLI-5：项目规则",
+    "lesson": "lessons/04-original-cli.html#h91b2e0763bdd",
+    "example": "examples/project-rules.md",
+    "assessment": "lessons/04-original-cli.html#h91b2e0763bdd"
+  },
+  {
+    "requirement": "CLI-6：审查真正的 Git diff",
+    "lesson": "lessons/04-original-cli.html#hf60e59f12348",
+    "example": "examples/SKILL.md",
+    "assessment": "lessons/04-original-cli.html#hf60e59f12348"
+  },
+  {
+    "requirement": "CLI-7：两份文件的四步交接",
+    "lesson": "lessons/04-original-cli.html#hac8147c2c22a",
+    "example": "examples/diff_lab.py",
+    "assessment": "lessons/04-original-cli.html#hac8147c2c22a"
+  },
+  {
+    "requirement": "CLI-8：同一任务，分别记录环境",
+    "lesson": "lessons/04-original-cli.html#h19bbbcf4e25c",
+    "example": "examples/portable-diff-task.md",
+    "assessment": "lessons/04-original-cli.html#h19bbbcf4e25c"
+  }
+]

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>补充课后练习与综合验收 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 15</p><h1>补充课后练习与综合验收</h1><p class="lede">闭卷解释、运行新案例，用证据检验全部补充内容。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-extra">扩展选读</span><strong>B 线基础必修</strong><p>扩展验收：只在学习对应扩展主题后完成；不替代单元 8 的主线验收。</p></aside>
+<h2>1. 流式调用：不能只测成功</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>运行09_streaming_tools.py的离线和真实模式。闭卷解释index和id的区别；再运行断流与截断测试，指出为什么工具调用次数必须为零。</p>
+<pre><code># 观察流式片段组装与完整性检查。
+python 09_streaming_tools.py
+# 观察流式片段组装与完整性检查；--live 会进入真实服务路径，需先满足本章环境要求。
+python 09_streaming_tools.py --live
+# 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest test_advanced.StreamingTests -v</code></pre>
+<details><summary>验收与完整参考</summary><p>参数碎片正确合并，同轮不同index不串线；没有结束原因时停止，不执行。完整实现见<a href="../reference/code-library.html#09_streaming_tools-py">09_streaming_tools.py</a>与<a href="../reference/code-library.html#test_advanced-py">test_advanced.py</a>。</p></details>
+<h2>2. 选择模式：别把指定工具当路由能力</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>分别运行auto、none、required、specific，记录首轮是否有tool_calls。解释specific成功为什么不能证明模型会自行选工具，以及后续为什么恢复auto。</p>
+<details><summary>参考答案</summary><p>specific由程序明确指定工具；auto才保留模型的路由决定。持续强制每轮调用可能无法自然结束。none还需程序保持执行权限约束。完整代码为10_tool_choice.py。</p></details>
+<h2>3. 并发：用重叠证据验收</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>运行11_parallel_tools.py，比较实际输出时长。然后运行Barrier测试，解释两名工作线程必须同时到达Barrier才继续，为什么这比断言“耗时小于某个数字”更稳定。</p>
+<pre><code># 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest test_advanced.ExecutionTests -v</code></pre>
+<details><summary>参考答案</summary><p>两个任务并发执行时，都能到达 Barrier；如果顺序执行，第一个任务会一直等到超时。测试还会检查返回结果是否与原调用顺序对应，避免按完成顺序把 ID 配错。完整代码和测试都已提供。</p></details>
+<h2>4. 研究理解：事实、指标、推断分开</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>不翻正文写出Standard、CoT、Act、ReAct各改变了什么。解释为什么原论文中HotpotQA某项分数低于CoT，仍不否定工具反馈的全部价值。</p>
+<p>再运行17_react_retrieval.py --live，检查查询青禾号后是否使用观察中的林遥去做第二跳。最终答对但没有两次查询，不通过本题的过程验收。</p>
+<details><summary>参考答案</summary><p>一种方法是否有用，要结合具体任务和评价指标来看。不同方法在获取事实、灵活处理任务和错误恢复方面各有取舍。两跳案例不仅要答出“海城”，还要确认后一步确实使用了前一步取得的数据。</p></details>
+<h2>5. 反馈：看得见被保留和被拒绝的修订</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>运行Self-Refine与Reflexion离线版，分别找出revision与memory。再跑两个真实版；如果首轮已经正确，记录“无需修订”，不能虚构失败轨迹。</p>
+<pre><code># 比较反馈前后的草稿。
+python 12_self_refine.py
+# 检验经验如何影响下一次尝试。
+python 13_reflexion.py
+# 比较反馈前后的草稿；--live 会进入真实服务路径，需先满足本章环境要求。
+python 12_self_refine.py --live
+# 检验经验如何影响下一次尝试；--live 会进入真实服务路径，需先满足本章环境要求。
+python 13_reflexion.py --live
+# 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest test_advanced.FeedbackTests -v</code></pre>
+<details><summary>验收</summary><p>Self-Refine不接受规则得分更低的修订；Reflexion失败后生成可核对经验并在下一次尝试提供；连续失败在上限停止。完整实现12/13与反馈测试均在代码集。</p></details>
+<h2>6. 结构与语义：两套库同题对照</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>在独立环境分别运行14、15。比较最终字段；再阅读Pydantic失败测试，解释“城市不是台北”和“多了一个字段”分别由哪层拦截。</p>
+<details><summary>参考答案</summary><p>额外字段由结构模型的extra=forbid拦截；城市或温度偏离输入由业务验证拦截。Instructor的重试与Outlines的生成约束不能代替这些规则。安装步骤和完整代码见单元13。</p></details>
+<h2>7. CodeAct：组合能力与边界同时验收</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>运行16的离线与真实模式，找到同一代码动作中的天气查询与换算。再运行CodeActionTests，解释为什么本课拒绝import，而不是悄悄为模型开放更多能力。</p>
+<details><summary>参考答案</summary><p>代码表示能组合中间变量与工具，但只能使用解释器明确允许的能力。最终需要成功观察与78.8°F结果，禁止语法必须被拒绝。当前实现不承诺完整Python兼容。</p></details>
+<h2>综合验收与复习</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<ul class="checklist"><li>能解释基础单元 1–8，以及扩展单元 9–14 的案例。</li><li>每个主题至少检查一个成功路径和一个失败路径。</li><li>知道离线脚本、真实模型成绩与历史论文结果是三种证据。</li><li>能解释流、并发、重试、反思分别改变哪一层。</li><li>闭卷完成两跳查询、天气换算与执行边界的说明。</li></ul>
+<p>当日做流式和并发，第二天闭卷区分Self-Refine与Reflexion，一周后混合验收JSON抽取、工具查询和CodeAct。同一问题用哪条路径更合适，要能说明依据。</p>
+<p>全部案例可在本项目阅读和运行；外部来源仅保留供核查。把题号、运行命令和完整输出发给我，可以继续逐行拆解。</p>
+<div class="next-prev"><a href="0014-codeact.html">← CodeAct与代码执行边界</a><a href="../../04-agent-frameworks/index.html">完成本课验收后，进入第四课 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

@@ -1,0 +1,52 @@
+{
+  "00cf60e54867": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "scripts/zh-hans-localize.py",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "02eb8f42d224": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "scripts/test_zh_hans_localize.py",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "f84cdeae6c13": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "scripts/link-unverifiable-baseline.json",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "e14f4bda728b": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "scripts/mutate_check_links.py",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "92675049f5e9": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "../",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "cb2e477b9d1f": {
+    "origin": "_sources/upstream/CHANGELOG.md",
+    "target": "resources/diagrams/locale-variant-prompts.md",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "b3a86474bf61": {
+    "origin": "_sources/upstream/CONTRIBUTING.zh-Hans.md",
+    "target": ".github/TESTING-STATUS.md",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "17226b9f9f8f": {
+    "origin": "_sources/upstream/CONTRIBUTORS.md",
+    "target": ".github/PULL_REQUEST_TEMPLATE.md",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  },
+  "33895d516321": {
+    "origin": "_sources/upstream/README.zh-Hans.md",
+    "target": "mailto:wenyuchiou12@gmail.com",
+    "reason": "外部应用入口，不是本地学习步骤"
+  },
+  "bcba2c08edc2": {
+    "origin": "_sources/upstream/stages/DESIGN.md",
+    "target": "../walkthroughs/build-first-agent-in-7-steps.md",
+    "reason": "原仓库附属入口未在教学快照中；不是本课必修前提"
+  }
+}

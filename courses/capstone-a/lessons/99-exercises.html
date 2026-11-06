@@ -1,0 +1,96 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>结业 A 最终实践</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">结业 A · CLI Power User 结业专题</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="结业-a-最终实践"></span><h1 data-heading-alias="结业-a-最终实践" id="h803fda12458e">结业 A 最终实践</h1>
+<p>目的：脱离照抄案例，为自己的重复任务建立可重跑流程。提交真实成品、README、一次成功与一次失败证据、自评和150字内反思。</p>
+<p>先用会议示范跑通，再换成自己的非敏感任务；至少保留一项 MCP 或自写 Skill/command，CLI 必须实际参与。测资料缺失、来源不存在、相对日期三种失败中的至少一种。</p>
+<details><summary>完整 Skill 参考</summary>
+<pre><code>---
+name: meeting-actions
+description: 从编号的会议资料生成可核对行动表草稿，缺失责任人或日期时标待确认。
+disable-model-invocation: true
+---
+
+只读取用户指定的会议资料，不读取其他文件或访问外部服务。
+输出 JSON 对象，字段为 actions 数组和 needs_confirmation 字符串数组。
+actions 每项包含 task、owner、due、source 四个字符串字段。
+保留条件与否定；缺失信息用“待确认”，不猜具体日期。
+source 使用原句编号。不发送消息，不创建实际日程，不发布。
+没有资料时停止并列出缺失输入。
+
+</code></pre>
+</details>
+<details><summary>完整验证器</summary>
+<pre><code class="language-python">&quot;&quot;&quot;验证固定会议示范；结构检查与事实验收分开。&quot;&quot;&quot;
+
+# 只验证行动表的字段和来源；是否准确保留责任人、时间与待决定事项，还需逐句核对。
+import json
+import sys
+from pathlib import Path
+
+# 把相对路径变成绝对路径并解析符号链接；涉及目录权限时，还要检查解析后的位置是否在允许目录内。
+HERE=Path(__file__).resolve().parent
+
+
+def validate(data):
+    if not isinstance(data,dict) or set(data)!={'actions','needs_confirmation'}:
+        raise ValueError('需要 actions 与 needs_confirmation')
+    if not isinstance(data['actions'],list) or not data['actions']:
+        raise ValueError('缺行动列表')
+    for row in data['actions']:
+        if not isinstance(row,dict) or set(row)!={'task','owner','due','source'}:
+            raise ValueError('行动字段错误')
+        if not all(isinstance(value,str) and value.strip() for value in row.values()):
+            raise ValueError('字段不能为空')
+        if not set(row['source'].split(',')).issubset({'M1','M2','M3'}):
+            raise ValueError('未知来源')
+        if row['owner']!='小林':
+            raise ValueError('固定示范中只有小林被指定负责，不能补造其他负责人')
+        if row['due']!='周五，具体日期待确认':
+            raise ValueError('固定示范未给具体日期；使用完整的待确认期限')
+    if not isinstance(data['needs_confirmation'],list) or not all(isinstance(x,str) for x in data['needs_confirmation']):
+        raise ValueError('待确认项必须是文本列表')
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    reference=json.loads((HERE/'reference-draft.json').read_text())
+    exact=data==reference
+    return {'status':'PASS_REFERENCE' if exact else 'NEEDS_REVIEW',
+            'scope':'仅固定会议数据；换资料必须重建事实断言，不照搬负责人规则',
+            'next':'逐句核对任务是否保留不发布、是否遗漏预算待确认；再检查实际 CLI 证据。复制参考答案不能证明独立完成。'}
+
+
+if __name__=='__main__':
+    path=Path(sys.argv[1]) if len(sys.argv)&gt;1 else HERE/'reference-draft.json'
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    print(json.dumps(validate(json.loads(path.read_text())),ensure_ascii=False,indent=2))
+
+</code></pre>
+</details>
+<details><summary>完整示范产物</summary>
+<pre><code class="language-json">{&quot;actions&quot;:[{&quot;task&quot;:&quot;准备报名表草稿，不发布；整理报名字段&quot;,&quot;owner&quot;:&quot;小林&quot;,&quot;due&quot;:&quot;周五，具体日期待确认&quot;,&quot;source&quot;:&quot;M1,M2&quot;}],&quot;needs_confirmation&quot;:[&quot;会议日期与周五对应的年月日&quot;,&quot;预算&quot;]}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{&quot;actions&quot;:[{&quot;task&quot;:&quot;准备报名表草稿，不发布；整理报名字段&quot;,&quot;owner&quot;:&quot;小林&quot;,&quot;due&quot;:&quot;周五，具体日期待确认&quot;,&quot;source&quot;:&quot;M1,M2&quot;}],&quot;needs_confirmation&quot;:[&quot;会议日期与周五对应的年月日&quot;,&quot;预算&quot;]}</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr></tbody></table></details></details>
+<p>验收：另一人只读 README 能重跑；所有运行状态如实；没有未经批准的外部动作；缺资料不编造。隔两天从干净目录再跑一次；一周后记录这条工作流实际复用次数与一次改进。</p>
+<span id="本课分层完成标准"></span><h2 data-heading-alias="本课分层完成标准" id="hb50f4e279762">本课分层完成标准</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<ol>
+<li>先回想：不看答案，用自己的话解释本课几个容易混淆的概念，再展开答案核对。</li>
+<li>跟着做：按<a href="03-workshop.html">分步实作与完整参考</a>运行最小案例，保存输入和输出。</li>
+<li>自己做：换一份资料，或修改一个要求，完成自己的结果。只运行参考文件还不够。</li>
+<li>试着排错：故意触发一次失败，说明怎么找到原因、怎么修复，再运行正常例子确认恢复。</li>
+</ol>
+<p>做完后，对照实作章末尾的评分标准逐项检查。分别记录代码是否运行成功、自动检查是否通过、内容是否经过人工核对，以及实际集成是否完成。待复核和未执行的项目暂不计为通过。卡住时，把课程编号、输入和实际输出发给我，一起定位问题。完成练习所需的步骤都在项目里。</p>
+<span id="独立回忆先作答再展开"></span><h2 data-heading-alias="独立回忆先作答再展开" id="he06aec239d3e">独立回忆：先作答再展开</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>每题先用自己的话回答，再看参考答案。表述可以不同，但要说清谁负责、什么情况下成立。</p>
+<span id="回忆题-1"></span><h3 data-heading-alias="回忆题-1" id="h26d39fd160b3">回忆题 1</h3>
+<p>默认跑参考答案验证器 PASS，算完成 CLI 结业吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>不算。还需实际 CLI 参与、自己的产物、失败证据和干净目录复现。</p>
+</details>
+<span id="回忆题-2"></span><h3 data-heading-alias="回忆题-2" id="h77732339f22a">回忆题 2</h3>
+<p>可用的 README 应说明什么？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>环境、输入、执行、预期输出、失败处理和撤销；不能依赖作者口头补步骤。</p>
+</details>
+<nav class="next-prev" aria-label="章节导航"><a href="03-workshop.html">← 结业 A 的完整交付样板</a><a href="../../index.html">完成本课验收后，查看下一课路线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

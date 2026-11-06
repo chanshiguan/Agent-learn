@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>开发者分支：一次可回滚的小改</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">开发分支 · 开发者延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="开发者分支一次可回滚的小改"></span><h1 data-heading-alias="开发者分支一次可回滚的小改" id="h223d815b1eb0">开发者分支：一次可回滚的小改</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hbdb14103d58c">从真实 diff 出发</a></li><li><a href="#hbece7f5603ba">原练习：只改一份 README</a></li><li><a href="#h415390c3faaa">每日开发</a></li><li><a href="#hf6aa24a1d7c2">PR Review</a></li><li><a href="#h9e95b34e7651">CI 与批量重构</a></li><li><a href="#hf96482a3afdf">完整案例</a></li></ul></aside>
+<p>这是按开发任务选学的分支。先看目标与边界，再读工具各自负责什么，随后在临时项目中完成 README 修改与撤回，最后独立做课末练习。涉及 CLI 操作时可回看 A1、A2；不要求把其他身份分支学完。</p>
+<span id="从真实-diff-出发"></span><h2 data-heading-alias="从真实-diff-出发" id="hbdb14103d58c">从真实 diff 出发</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>本分支推荐 A1→A2→第五课核心→A3；从 B 线过来可先看第七课。每次修改都要围绕一个明确问题，只改解决问题所需的部分，运行相关检查，并知道怎样撤回。</p>
+<p>Context 是任务所需资料，Harness 管运行，Skill 复用流程，MCP 接工具，Subagent 分离上下文，Worktree 隔离工作目录，Eval 验证表现，Review 检查变更影响。OpenRouter 是模型入口，Ollama 是本地服务，Pi/OpenCode 等是运行工具，不是同一类替代品。</p>
+<span id="原练习只改一份-readme"></span><h2 data-heading-alias="原练习只改一份-readme" id="hbece7f5603ba">原练习：只改一份 README</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>先读取 README、项目规则和相关测试说明，提出只涉及一份文档的计划。用户确认后修改，查看 diff，运行仓库文档检查或最小相关检查，最后说明如何只撤回这次改动。不要因为“顺手”重排整份文档。</p>
+<p>在本地例子中 input.json 表示尚未修改、尚未测试的状态。正确结果应提出计划并列出缺少的 diff 与测试证据，不能写“全部检查通过”。完整可操作 demo 在 A1；本课练习重点是审查计划和证据。</p>
+<span id="每日开发"></span><h2 data-heading-alias="每日开发" id="h415390c3faaa">每日开发</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>给问题的触发条件、实际结果、期望结果和最小复现。先定位，再改动，再验证。Bug 修复要用能复现问题的检查验证；文档小改不需要为了形式新增大量测试。引用具体文件与行，说明新行为和影响范围。</p>
+<span id="pr-review"></span><h2 data-heading-alias="pr-review" id="hf6aa24a1d7c2">PR Review</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>优先检查正确性、数据损坏风险、权限、兼容性，以及是否缺少必要验证。审查意见要写清触发场景、影响和位置；个人风格偏好与必须修复的错误分开说明。只看新增行可能漏掉调用者约定，要阅读必要上下文；但不扩展成无关全仓重构。</p>
+<span id="ci-与批量重构"></span><h2 data-heading-alias="ci-与批量重构" id="h9e95b34e7651">CI 与批量重构</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>CI 把规则变成可重复反馈；最小权限、可信依赖和隔离执行仍重要。批量重构先小样本，确认 API 契约与测试，再分批推进，每批都有 diff 与回退点。类型检查通过不能证明业务等价。</p>
+<p>委派时分配独立文件或模块，明确公共接口与合并者。多个 Agent 不会自动解决并发冲突。Worktree 不等于进程沙箱；它避免文件混杂，不自动隔离凭证。</p>
+<span id="完整案例"></span><h2 data-heading-alias="完整案例" id="hf96482a3afdf">完整案例</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-developer/examples/exercise.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-developer/examples/exercise.py
+# 运行 courses/branch-developer/examples/exercise.py，按本行参数完成当前案例并核对输出；--live 会进入真实服务路径，需先满足本章环境要求。
+.venv/bin/python courses/branch-developer/examples/exercise.py --live
+</code></pre>
+<p>默认是固定参考答案检查；--live 是本地模型只读计划，程序没有文件编辑、提交或推送工具。模型不能用自己输出的“已通过”当测试证据。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">开发者分支必读整合 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

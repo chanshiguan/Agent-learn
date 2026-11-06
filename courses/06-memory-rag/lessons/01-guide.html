@@ -1,0 +1,79 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>第六课：找对证据，再记住允许保存的事</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">6 · RAG 与 Memory</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="第六课找对证据再记住允许保存的事"></span><h1 data-heading-alias="第六课找对证据再记住允许保存的事" id="hdd4833e2564c">第六课：找对证据，再记住允许保存的事</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h5a0860022162">一课两种能力</a></li><li><a href="#hb7f85cbc0ed7">1. 什么情况下用什么</a></li><li><a href="#h864594ff4b98">2. Embedding 与相似度</a></li><li><a href="#h6223e62310be">3. 两条流水线</a></li><li><a href="#h91ea2c5ceed1">4. 切片不是越小越好</a></li><li><a href="#hef67b9ed640c">5. Chroma 与完整 RAG</a></li><li><a href="#h94260e1e86a7">6. 原例依赖与当前环境</a></li><li><a href="#ha9ebef5f7fe9">7. 检索差在哪里，才加哪一种技术</a></li><li><a href="#h5d89f0c288de">8. 查询、图与反思型检索</a></li><li><a href="#h36c7a7a1fe6d">9. Memory 的生命周期</a></li></ul></aside>
+<p>第四课解决流程怎么走，第五课解决工具与工作环境怎么连接。这一课补上资料从哪里来、哪些信息可以留到下一次。先读概念和原练习所需知识，完成向量、资料库、切分、RAG、记忆五个小实验；再做综合助手，最后学习进阶方法并运行 A/B/C 对照。受管云检索是选修，不影响本地学习顺序。</p>
+<span id="一课两种能力"></span><h2 data-heading-alias="一课两种能力" id="h5a0860022162">一课两种能力</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>RAG 是先检索外部资料，再让模型依据资料回答；Memory 是把未来仍需要的状态保存下来，再在适当时候取回。聊天历史是发生过的记录，context 是当前请求看见的内容，二者都不自动等于可靠记忆。RAG 和普通应用记忆一般不改变模型权重。</p>
+<p>本课先完成原练习 1–4 的检索管线，再完成练习 5 与持久记忆补充。最后做一个能给出处、能承认无证据、能记住并删除回答偏好的助手。</p>
+<span id="1-什么情况下用什么"></span><h2 data-heading-alias="1-什么情况下用什么" id="hb7f85cbc0ed7">1. 什么情况下用什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>起点</th>
+<th>需要验证</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只有几页资料，本次用完</td>
+<td>直接放入 context</td>
+<td>长度、遗漏、引用</td>
+</tr>
+<tr>
+<td>多份资料，问题不同会用到不同段落</td>
+<td>RAG</td>
+<td>找到正确片段且答案受支持</td>
+</tr>
+<tr>
+<td>下次还要记得偏好或任务状态</td>
+<td>Memory</td>
+<td>授权、隔离、更新、删除</td>
+</tr>
+<tr>
+<td>希望稳定改变模型行为</td>
+<td>微调等训练方法</td>
+<td>数据质量、泛化与评测</td>
+</tr>
+</tbody>
+</table>
+<p>向量库不是 RAG 的必要条件。结构化账目优先 SQL，产品编号可能适合字词检索，文档语义相似才适合 embedding。先看资料是什么类型、需要怎样查询，再选择工具库。</p>
+<span id="2-embedding-与相似度"></span><h2 data-heading-alias="2-embedding-与相似度" id="h864594ff4b98">2. Embedding 与相似度</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Embedding 模型把文本转成固定维度的浮点向量。向量本身不是可读摘要，也不是加密。把文档和问题用相容的模型映射到同一空间，才能比较距离；更换模型或维度通常需要重建索引。</p>
+<p>余弦相似度是两向量点积除以长度乘积，比较方向；不能把相似度 0.8 解释成“答案正确概率 80%”。余弦不适用于零向量；某些数据库返回 distance，越小越相近，不要把排序方向弄反。</p>
+<p>原练习 1 的完整程序在 examples/upstream/01-embeddings，使用真实 embedding 模型；首次运行可能下载模型。固定数字向量只适合验证计算，不能证明语义模型有效。用“同义句、同主题但否定、完全无关句”三类对照，比只测两个相近句更有信息。</p>
+<span id="3-两条流水线"></span><h2 data-heading-alias="3-两条流水线" id="h6223e62310be">3. 两条流水线</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>索引：读取 → 清洗 → 切片 → 嵌入 → 保存文本、向量和来源。</p>
+<p>查询：问题 → 权限过滤 → 检索候选 → 可选重排 → 提供证据 → 生成 → 检查引用。</p>
+<p>每个 chunk 至少应保存 doc_id、chunk_id、来源位置、版本、权限范围。文档更新后要使旧索引失效或明确版本；否则模型可能引用过期条款。先过滤可见资料，再排序，不要先取出他人资料再让模型“别说出来”。</p>
+<span id="4-切片不是越小越好"></span><h2 data-heading-alias="4-切片不是越小越好" id="h91ea2c5ceed1">4. 切片不是越小越好</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>固定长度最简单，但可能把定义和例外切开。Overlap 让边界内容有重复，减少断句损失，也会增加索引和上下文成本。段落切分保留自然语义；Markdown 标题切分利用结构，但不等同于基于语义模型判断断点的 semantic chunking。</p>
+<p>过小：命中一个词却丢了限定条件。过大：检索命中后带入太多不相关内容，占据 context。可用 parent-child：小块检索命中后带回相应大段。没有通用最佳 chunk_size，中文字符、英文词和 token 不是同一个计量单位。</p>
+<p>原练习 3 同时展示固定长度、段落、标题三种方法。固定同一组问题，比较片段数、平均大小、来源完整性、Recall@k 与最终答案；只看“生成了多少块”不足以决定方案。</p>
+<span id="5-chroma-与完整-rag"></span><h2 data-heading-alias="5-chroma-与完整-rag" id="hef67b9ed640c">5. Chroma 与完整 RAG</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Collection 管理一组相容的向量与记录。add 用于新 ID，upsert 用于新增或更新；重复 ID、维度不一致要处理。Client 的临时数据不等于长期存储；PersistentClient 才把数据写到指定目录。默认 embedding 功能可能自动下载模型，应在准备阶段说明。</p>
+<p>原练习 2 在 examples/upstream/02-vector-db；练习 4 在 04-full-rag-pipeline。查询返回的 ID、文本和 metadata 要一起交给答案生成。提示中要求“只根据这些资料，有缺口就说明”，再在程序中检查引用 ID 是否属于本次候选。</p>
+<p>有引用还不够，还要看它是否支持当前说法：资料写“工作日处理”不能支持“周末也能处理”。检查时把回答中的每个判断与原文逐条对照，尤其注意数字、日期、否定词和适用对象。工具结果中的“忽略之前规则”仍是资料，不应成为指令。</p>
+<span id="6-原例依赖与当前环境"></span><h2 data-heading-alias="6-原例依赖与当前环境" id="h94260e1e86a7">6. 原例依赖与当前环境</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>原第六课依赖含 openai&lt;2，与根环境 3.37 不兼容。用独立环境，不在根 .venv 执行这些 requirements。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+/opt/homebrew/bin/python3.11 -m venv courses/06-memory-rag/.venv
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/06-memory-rag/.venv/bin/python -m pip install -r courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/requirements.txt
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/06-memory-rag/.venv/bin/python courses/06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py
+</code></pre>
+<p>各原例使用的环境变量及 embedding 模型以同目录完整 README 为准；不要推断 MODEL 能覆盖任何第三方库里的所有模型配置。Path B 是可选云端路径，需相应凭证和计费；没有凭证时先做本地与离线测试。资料下载、依赖安装和真实模型运行是三类不同的验证。</p>
+<span id="7-检索差在哪里才加哪一种技术"></span><h2 data-heading-alias="7-检索差在哪里才加哪一种技术" id="ha9ebef5f7fe9">7. 检索差在哪里，才加哪一种技术</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>找不到同义词：考虑 dense retrieval 或查询改写；漏产品代码：补 BM25；候选里有正确段落但排得低：增加 reranker；跨文档关系无法直接命中：考虑图或多步检索；检索正确却胡说：先修生成和验收，不要继续换向量库。</p>
+<p>BM25 结合词频、词的稀有度与长度归一；dense 用语义空间。Hybrid Search 合并二者候选。不同系统的原始分数未必同尺度，RRF 可按排名融合：每条结果贡献 1/(常数+排名)，同 ID 累加。examples/ranking_lab.py 给出完整固定排名实验。它不调用 embedding 模型，明确只验证融合与指标。</p>
+<p>Reranker 对候选的“问题—文段”配对再评分；如果正确段落根本不在候选里，它无从救回。先看 candidate recall，再看重排收益。Hybrid RAG 则指固定步骤和 Agent 决策混合的控制结构，不能与 Hybrid Search 混为一谈。</p>
+<span id="8-查询图与反思型检索"></span><h2 data-heading-alias="8-查询图与反思型检索" id="h5d89f0c288de">8. 查询、图与反思型检索</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>Multi-query 生成多种表达；Decomposition 把复合问题拆开；HyDE 先生成假想答案帮助检索，假想答案本身不能当证据；RAG Fusion 合并多查询的排名。限制查询数与循环数，防止不断改写却没找到新资料。</p>
+<p>GraphRAG 从资料抽取实体关系和社区主题，适合跨文档关系或整体主题问题；构图成本更高，错关系也会传播。LightRAG 是另一实现，不是 GraphRAG 的别名。问题只需一段原文时，先保持简单检索。</p>
+<p>Self-RAG 原方法包含训练出的反思 token，不等于普通 Prompt 加“反思一下”。CRAG 评估检索是否可靠，按正确、错误、不明确分支精炼或补找资料。Adaptive-RAG 根据复杂度决定不查、查一次还是多步查。教学中的 if/else 可以演示如何选择处理分支，但没有复现原论文的训练过程，也不能用来验证论文结果。</p>
+<p>RAPTOR 对文本聚类、摘要并递归形成树，支持不同层级检索；其降维、软聚类与查询方式有具体设计，手工按章节做摘要树只是示意。DSPy 把任务写成模块、输入输出约定和指标，用样本优化提示或示例；训练/开发/测试要分开，不能用保留题反复调参。</p>
+<span id="9-memory-的生命周期"></span><h2 data-heading-alias="9-memory-的生命周期" id="h36c7a7a1fe6d">9. Memory 的生命周期</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先提出保存候选 → 检查是否必要且允许 → 规范化 → 保存 owner、source、时间、版本、期限 → 在相同用户与任务范围内检索 → 更新冲突 → 删除或过期。</p>
+<p>短期/长期说的是作用范围；把所有聊天写进硬盘不意味着设计好了长期记忆。Semantic 是事实或偏好，Episodic 是经历，Procedural 是步骤规则；semantic memory 与 semantic search 不是同义词。</p>
+<p>原练习 5 使用 Chroma PersistentClient，已有磁盘保存和跨进程读取测试。补充 examples/memory_store.py 使用 SQLite，进一步演示授权、隔离、版本冲突、期限与删除。身份 owner 在教学调用中直接传入；生产要由登录态提供，不能允许模型通过填写别人的 owner 来取得访问权限。</p>
+<p>删除主表后仍可能存在缓存、向量索引、备份或日志，本例只保证当前 SQLite 业务行不再返回，不保证磁盘取证级擦除。过期后不再检索与实际清理存储也是两件事。不要把“我忘了”当删除证据。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="../index.html">← 本课目录</a><a href="02-readings.html">第六课必修及两条进阶支线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

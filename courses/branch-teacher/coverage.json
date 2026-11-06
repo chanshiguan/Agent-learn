@@ -1,0 +1,32 @@
+[
+  {
+    "requirement": "原影子长短题与学习目标",
+    "lesson": "lessons/03-workshop.html#he0975c3584f6",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "完整教案、四级量规和虚构回答",
+    "lesson": "lessons/03-workshop.html#ha598894ae530",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "UNESCO/欧盟/TeachAI 三份必读",
+    "lesson": "lessons/03-workshop.html#h6462a4f96bf4",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "形成性评价与事实审核",
+    "lesson": "lessons/03-workshop.html#h75d51e68b841",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  },
+  {
+    "requirement": "学生提交与六项验收",
+    "lesson": "lessons/03-workshop.html#hc6e63aff78cc",
+    "example": "examples/reference-work.json",
+    "assessment": "lessons/03-workshop.html#hc6e63aff78cc"
+  }
+]

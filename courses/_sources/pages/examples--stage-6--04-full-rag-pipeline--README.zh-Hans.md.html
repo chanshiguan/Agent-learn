@@ -1,0 +1,126 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="练习-4把完整-rag-接起来"></span><h1 data-heading-alias="练习-4把完整-rag-接起来" id="hc5890049d0da">练习 4：把完整 RAG 接起来</h1>
+<p>← 回到 <a href="stages--06-memory-rag.zh-Hans.md.html#练习-4完整-rag-流水线">Stage 6 — Memory &amp; RAG</a></p>
+<p><strong>RAG（Retrieval-Augmented Generation，检索增强生成）</strong> 会先找数据，再让模型看着数据回答。它像开卷考试：先翻到对的页，再作答。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<ul>
+<li>把 <strong>chunk → embed → retrieve → generate</strong> 四步接起来。</li>
+<li>看懂 <strong>grounding（依据数据回答）</strong> 与 <code>top_k</code>。</li>
+<li>用假的 LLM 回复离线测完整流程。</li>
+<li>分清楚“找错数据”和“看对数据却答错”两种故障。</li>
+</ul>
+<span id="-核心词"></span><h2 data-heading-alias="-核心词" id="h949cbeeec1c0">🔑 核心词</h2>
+<table>
+<thead>
+<tr>
+<th>核心词</th>
+<th>白话意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Retrieval</strong></td>
+<td>先找回可能有答案的段落</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td>模型读段落后组成答案</td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td>答案要能在提供的数据中找到依据</td>
+</tr>
+<tr>
+<td><strong>Top-k</strong></td>
+<td>最多拿几段数据给模型看</td>
+</tr>
+</tbody>
+</table>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>★★★★★ <a href="../../reference/source-readings.html#sdff5a1527489">OpenAI Retrieval 官方指南</a>：受管 vector store 与搜索的第一手做法。</li>
+<li>★★★★★ <a href="../../reference/source-readings.html#sd73971f3264f">LlamaIndex RAG 官方教程</a>：拆解 ingestion、index、query。</li>
+<li>★★★★★ <a href="../../reference/source-readings.html#sd24be485ae87">LangChain RAG 官方教程</a>：比较 two-step 与 agentic RAG。</li>
+<li>★★★★☆ <a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a>：较完整的 RAG 流水线教材。</li>
+</ul>
+<p><sub>资料查核：2026-08-30 UTC。</sub></p>
+<span id="-path-aollama本机免费"></span><h2 data-heading-alias="-path-aollama本机免费" id="h33d62cc2e160">▶️ Path A（Ollama、本机免费）</h2>
+<pre><code class="language-powershell">pip install -r requirements.txt
+ollama pull qwen2.5:3b
+ollama serve
+python starter.py
+</code></pre>
+<p>模型在本机执行，API 费用是 <strong>$0</strong>。</p>
+<details markdown="1">
+<summary>Path B（Anthropic）</summary>
+<pre><code class="language-powershell">pip install -r requirements.txt
+$env:ANTHROPIC_API_KEY = Read-Host &quot;Anthropic API key&quot;
+python starter_anthropic.py
+</code></pre>
+<p>默认模型是 <code>claude-haiku-4-5</code>。现行标准价格为每百万输入 token <strong>$1</strong>、输出 token <strong>$5</strong>；实际费用依 token 用量计算：</p>
+<pre><code class="language-text">费用 = 输入 token ÷ 1,000,000 × 1
+     + 输出 token ÷ 1,000,000 × 5
+</code></pre>
+<p>执行前请再看 <a href="../../reference/source-readings.html#s50846cd1ff36">Anthropic 官方价格页</a>，并设定小额使用上限。</p>
+</details>
+<p><strong>Stage 06 总预算</strong>：五个 Path A 全部跑完，API 费用仍是 <strong>$0</strong>（不含下载、磁盘与电费）。选跑云端 Path 时，费用依 embedding／输入／输出 token 实际用量计算；先设小额账户上限，成功跑一次就停。</p>
+<span id="-不连-api-的完整检查"></span><h2 data-heading-alias="-不连-api-的完整检查" id="heee061c93e49">✅ 不连 API 的完整检查</h2>
+<pre><code class="language-powershell">python test.py
+python test_anthropic.py
+</code></pre>
+<p>测试会替换 LLM 与 embedding，不下载模型、不扣款，但仍会确认 context 真的进入 prompt。</p>
+<span id="rag-四步"></span><h2 data-heading-alias="rag-四步" id="hf0dac55eed9f">RAG 四步</h2>
+<pre><code class="language-text">文档 → 1. chunk → 2. embed/index → 3. retrieve top-k → 4. generate
+</code></pre>
+<pre><code class="language-python">collection = build_kb(doc)
+contexts = retrieve(collection, query, top_k=2)
+answer = generate(query, contexts)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>主要设定</th>
+<th>出错时会看到什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chunk</strong></td>
+<td>size、overlap、文档结构</td>
+<td>正确句子被切断</td>
+</tr>
+<tr>
+<td><strong>Embed / index</strong></td>
+<td>embedding model、数据更新</td>
+<td>新数据找不到</td>
+</tr>
+<tr>
+<td><strong>Retrieve</strong></td>
+<td><code>top_k</code>、filter、reranker</td>
+<td>拿回错段落或漏段落</td>
+</tr>
+<tr>
+<td><strong>Generate</strong></td>
+<td>prompt、模型、输出限制</td>
+<td>context 对，答案仍乱猜</td>
+</tr>
+</tbody>
+</table>
+<span id="最小-grounding-规则"></span><h2 data-heading-alias="最小-grounding-规则" id="h4da8467729ed">最小 grounding 规则</h2>
+<pre><code class="language-text">只根据提供的 context 回答。
+如果 context 没有答案，就清楚说不知道。
+</code></pre>
+<p>这能降低乱答，但不能保证零 hallucination。正式系统还需要无答案测试、引用、输出验证与人工抽查。</p>
+<details markdown="1">
+<summary>常见问题与下一步</summary>
+<ul>
+<li><code>top_k</code> 太小会漏数据；太大会把噪声和 token 成本一起放大。</li>
+<li>每次问题都重建 index 很浪费；数据没变时应重用持久化 collection。</li>
+<li>只测“答得出来”不够，也要测“数据没有答案时会拒答”。</li>
+<li>进阶可加入 query rewriting、reranker、citation 与 evaluation；先一次只改一个零件。</li>
+</ul>
+</details>
+<p>下一步：把外部文档换成用户过去说过的事，完成 <a href="examples--stage-6--05-long-term-memory--README.zh-Hans.md.html">练习 5：Long-term Memory</a>。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

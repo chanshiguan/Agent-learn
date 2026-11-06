@@ -1,0 +1,72 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HOW_TO_USE</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="how-to-use-this-curriculum--每次只改一件事"></span><h1 data-heading-alias="how-to-use-this-curriculum--每次只改一件事" id="h4f03b4e7756a">How to use this curriculum — 每次只改一件事</h1>
+<p>這份學習地圖不是考試。你不用先抄一份空白檔案，也不用把完整程式重新默寫一次。
+最簡單的學法是：<strong>先跑起來，再改一件小事，最後用測試看差別。</strong></p>
+<span id="先認識-starterpy"></span><h2 data-heading-alias="先認識-starterpy" id="hcc12bc12bd18">先認識 <code>starter.py</code></h2>
+<p>每個練習 folder 裡的 <strong><code>starter.py</code></strong> 是一份可以直接執行的起點。它不是空白作業紙，
+也不是只能偷看的答案。它的工作是先給你一個「真的會動」的小系統，讓你有東西可以改。</p>
+<p>先在專案根目錄進入練習資料夾：</p>
+<pre><code class="language-powershell">cd examples/stage-3/03-react-from-scratch
+</code></pre>
+<p>依<a href="examples--stage-3--03-react-from-scratch--README.zh-Hans.md.html">該題 README</a> 安裝需求，下載並啟動 Ollama 模型。準備好後，先跑離線測試，再跑程式：</p>
+<pre><code class="language-powershell">python test.py
+python starter.py
+</code></pre>
+<p>如果這題另有 <code>test_anthropic.py</code> 或 README 指定的離線測試，也照 README 的第一個動作執行。
+先確認原版能跑，再開始改；這樣出錯時，你知道問題來自剛剛那個小改動。</p>
+<span id="六步學習循環"></span><h2 data-heading-alias="六步學習循環" id="h18cb13253177">六步學習循環</h2>
+<ol>
+<li><strong>看成果</strong>：先讀 README 的「你會做出什麼」和成功條件。</li>
+<li><strong>直接執行</strong>：複製第一組命令，讓原版測試通過。</li>
+<li><strong>選一個小改動</strong>：只改一個輸入、規則、工具或停止條件。</li>
+<li><strong>先猜結果</strong>：用一句話寫下「我覺得會發生什麼」。</li>
+<li><strong>再跑測試</strong>：看實際結果是否和猜的一樣；不一樣就讀錯誤訊息。</li>
+<li><strong>說出原因</strong>：用自己的話解釋這一行為什麼會改變系統。</li>
+</ol>
+<p>這個循環可以一直重複。一次只改一件事，像一次只換一塊積木；倒了時才知道是哪一塊造成的。</p>
+<span id="可以改什麼"></span><h2 data-heading-alias="可以改什麼" id="h4ca09eec703a">可以改什麼？</h2>
+<p>先選最小、可回復的變化：</p>
+<ul>
+<li>把一個測試輸入換成空字串、很長的文字或未知值。</li>
+<li>新增一個工具參數，然後補一個會失敗的測試。</li>
+<li>把 <code>max_iter</code> 調小，看看 Agent Loop 怎麼停止。</li>
+<li>暫時拿掉一個欄位，觀察 schema 驗證會回報什麼。</li>
+<li>改一條 prompt 規則，再用同一組案例比較前後結果。</li>
+</ul>
+<p>不要一次換模型、改 prompt、加工具又改測試。四件事一起動，失敗時很難知道原因。</p>
+<span id="每題做完問自己三句話"></span><h2 data-heading-alias="每題做完問自己三句話" id="hfb48274c3b8f">每題做完問自己三句話</h2>
+<ol>
+<li><strong>為什麼要這樣寫？</strong> 例如 Agent Loop 為什麼要把 tool result 放回 messages？</li>
+<li><strong>拿掉它會怎樣？</strong> 例如沒有 <code>max_iter</code>、schema 或 approval gate 會發生什麼？</li>
+<li><strong>真實環境還缺什麼？</strong> 通常要再補 auth、eval、observability、retry 或人工核准。</li>
+</ol>
+<p>測試通過只表示目前檢查的行為正確。你能回答這三題，才表示你知道系統為什麼會動。</p>
+<span id="章節怎麼接"></span><h2 data-heading-alias="章節怎麼接" id="h96b7b4ba13d4">章節怎麼接</h2>
+<ul>
+<li><strong>Stage 3</strong> 先學 Agent Loop：模型叫工具、工具回結果、模型再決定下一步。</li>
+<li><strong>Stage 4（Workflow Graph／Agent Framework）</strong>：把多個步驟、分支與人工核准接起來。</li>
+<li><strong>Stage 6</strong> 學 RAG 與 Memory：讓系統找到證據，並保存真的需要保留的狀態。</li>
+<li><strong>Stage 7</strong> 學 production control：用 Harness、Eval、觀測與復原讓長任務更可靠。</li>
+</ul>
+<p>不用等到每題都完美才往下走。如果下一章的第一個核心詞看不懂，就回上一章挑一題再做一次。</p>
+<details markdown="1">
+<summary>⏱️ 查看練習時間安排</summary>
+<p>不要用固定小時判斷自己學得好不好。先留一個不被打斷的小時，完成一輪「執行 → 小改動 →
+測試 → 解釋」。如果一題太大，就只做第一個成功條件；下次再接著做。</p>
+<p>時間很少時，每個 Stage 先選一題完整走完，其餘題目先看成果與成功條件。完整做完一題，
+通常比匆忙讀過五題更有用。</p>
+</details>
+<span id="如果卡住"></span><h2 data-heading-alias="如果卡住" id="hccbdb0b115c7">如果卡住</h2>
+<p>依序做：</p>
+<ol>
+<li>看終端機最上面第一個真正的錯誤，不要只看最後一行。</li>
+<li>用 <code>git diff</code> 看自己剛改了什麼；先手動還原最後一個小改動，再跑一次測試。</li>
+<li>讀 README 的成功條件、常見問題與該題測試名稱。</li>
+<li>Tool calling 問題可看 <code>examples/stage-5/tool-calling-tutor/</code>。</li>
+<li>還是不懂就開 issue，附上使用的命令、錯誤訊息、環境版本與最小 diff；不要貼 API key。</li>
+</ol>
+<p>卡住不表示你不會。它只表示「預期」和「實際結果」不同；把差別縮小到一個改動，就能繼續查。</p>
+<span id="給維護者"></span><h2 data-heading-alias="給維護者" id="hab0317dda6b1">給維護者</h2>
+<p>每個練習的可見入口要提供可直接複製的第一個動作、成功條件與「只改一件事」。不要再要求
+讀者建立空白文字檔、改名藏起完整範例或整份重寫。若未來新增 TODO template，它必須是
+額外選項；現有可執行 starter 與離線測試仍要保留。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

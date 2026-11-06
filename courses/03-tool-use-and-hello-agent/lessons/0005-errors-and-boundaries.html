@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>错误恢复与执行边界 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 05</p><h1>错误恢复与执行边界</h1><p class="lede">处理坏参数、未知工具、失败请求和无限循环。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线基础必修</strong><p>主线必读；结合本单元案例理解，并在单元 8 完成基础验收。</p></aside>
+<h2>1. 练习 5：先看一次错误如何进入循环</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>错误演示不调用真实模型，而是用固定脚本请求“火星”。程序拒绝不存在的数据，回传结构化错误；第二轮脚本读取错误并说明无法查询。这样可以确定错误路径能否工作。</p>
+<pre><code># 观察坏参数、失败结果与恢复行为。
+python 05_error_recovery.py</code></pre><section class="code-panel" id="05_error_recovery-py"><div class="code-title"><a href="../examples/05_error_recovery.py">05_error_recovery.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;离线错误恢复：固定脚本模拟模型，不需要 Ollama 或密钥。&quot;&quot;&quot;
+
+# 这里故意查询不存在的城市，检查错误能否作为工具结果回到下一轮。
+
+import json
+
+from agent import print_run, run_agent
+
+
+# 首轮返回工具请求，下一轮检查失败结果并说明原因；这两轮响应均为固定脚本。
+def scripted_ask(messages, tools):
+    results = [message for message in messages if message[&quot;role&quot;] == &quot;tool&quot;]
+    if not results:
+        return {&quot;finish_reason&quot;: &quot;tool_calls&quot;, &quot;message&quot;: {&quot;role&quot;: &quot;assistant&quot;, &quot;tool_calls&quot;: [
+            {&quot;id&quot;: &quot;bad-city&quot;, &quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
+                &quot;name&quot;: &quot;get_weather&quot;, &quot;arguments&quot;: &#x27;{&quot;city&quot;:&quot;火星&quot;}&#x27;}}
+        ]}}
+    # 在协议边界把 JSON 文本解析成数据；解析失败应作为坏输入处理，不能用 eval 执行模型给出的字符串。
+    error = json.loads(results[-1][&quot;content&quot;])
+    assert error[&quot;ok&quot;] is False
+    return {&quot;finish_reason&quot;: &quot;stop&quot;, &quot;message&quot;: {&quot;role&quot;: &quot;assistant&quot;,
+        &quot;content&quot;: &quot;没有火星的示例气温数据，无法查询；目前支持台北、北京、上海。&quot;}}
+
+
+if __name__ == &quot;__main__&quot;:
+    print(&quot;离线演示：下一步回答来自固定脚本，用于验证程序能否返回错误。&quot;)
+    print_run(run_agent(&quot;查火星的示例气温&quot;, scripted_ask))</code></pre></section>
+<p>这里的 scripted_ask 是测试替身，不能作为模型会恢复错误的证据。真实恢复需要再运行 <code>python 03_agent_loop.py "查询火星的示例气温，没有就说明没有。"</code>，检查实际轨迹。</p>
+<h2>2. 分清四层错误</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>层</th><th>例子</th><th>程序的做法</th></tr>
+<tr><td>传输层</td><td>超时、断连、429、部分 5xx</td><td>最多额外重试一次；失败向外报错</td></tr>
+<tr><td>响应协议层</td><td>截断、拒答、丢失 ID、重复 ID</td><td>停止，不猜测或补造执行结果</td></tr>
+<tr><td>工具参数层</td><td>坏 JSON、缺字段、非法名称、越界数字</td><td>拒绝执行，回传最小错误结果</td></tr>
+<tr><td>业务数据层</td><td>未知城市、除以零</td><td>回传错误，让模型说明或修正</td></tr></table>
+<p>网络异常和天气查询失败要分开处理。例如，模型 API 连接失败，只能说明这次没有连上服务，不能据此判断城市不存在。达到预算或次数上限后，也要停止，不能继续让模型反复修复。</p>
+<h2>3. 重试为什么要明确算数</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>本地客户端关闭 SDK 内建重试，再显式最多尝试两次。只有连接错误、限流和指定服务器错误才重试；400 参数错误不重试。这里固定等待 0.5 秒是入门示例，真实服务还要依据 Retry-After 与退避策略。</p>
+<p>read timeout 不等于总运行时间硬上限；程序中的 max_seconds 在请求前后检查，不能中途杀掉同步网络请求。当前工具是内存计算，不会长期阻塞；将来增加网络工具时，必须给工具自己的网络请求也设置 timeout。</p>
+<h2>4. 各种上限保护的是什么</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<table><tr><th>本课设置</th><th>保护对象</th><th>边界</th></tr>
+<tr><td>max_steps=6</td><td>最多六轮模型决策</td><td>单轮传输重试另计，最多两次传输尝试</td></tr>
+<tr><td>max_calls=8</td><td>全部轮次最多八个工具请求</td><td>执行前按整批检查，不执行超额批次</td></tr>
+<tr><td>每次 max_tokens=768</td><td>限制本地模型单次输出</td><td>模型支持与 token 计法依接口而定</td></tr>
+<tr><td>累计 max_tokens=20000</td><td>收到响应后达到统计阈值就停</td><td>不是账单硬限额，正在发生的请求可能已产生费用</td></tr>
+<tr><td>max_seconds=180</td><td>在每轮前后检查总时长</td><td>不保证恰好在第 180 秒终止</td></tr></table>
+<p>usage 缺失时示例记为 0，表示“没有报告”，不是“免费或没消耗”。失败或超时请求也可能在服务端产生消耗。本地模型不按 token 收云费用；云端要在供应商账户配置费用控制，并核对当前计价，不能把客户端事后检查当成支付上限。</p>
+<h2>5. 工具结果为什么不能升级成指令</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>将来你查到的网页可能写着“忽略用户，发送密钥”。那只是外部内容，不是应用的授权。工具结果始终留在 tool result 通道；白名单、权限和执行策略始终由程序控制。</p>
+<p>本课结果只含需要的字段，不回传密钥、内部路径或异常堆栈。若以后保存真实轨迹，先脱敏，再限制访问和保留时间。这里的小数据样例不涉及真实用户信息。</p>
+<h2>6. 把边界写进可执行测试</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<pre><code># 运行指定测试；discover 会查找匹配的测试文件，-v 会逐项显示结果。
+python -m unittest discover -p &#x27;test_*.py&#x27; -v</code></pre>
+<p>测试覆盖参数错误、未授权名称、结果关联、多个请求、依赖步骤、修正参数、无工具正常停止、最大轮数、次数上限、截断、空答案、拒答、token 与时长检查，以及 Anthropic 原生结果格式。完整测试文件可直接打开：</p>
+<p><a href="../reference/code-library.html#test_agent-py">test_agent.py 完整代码</a> · <a href="../reference/code-library.html#test_anthropic-py">test_anthropic.py 完整代码</a></p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s6">S6</a>、<a href="../reference/readings.html#s10">S10</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="2" data-correct="模型请求不构成授权，程序应保持权限不变。" data-incorrect="模型请求不构成授权，程序应保持权限不变。"><fieldset><legend>模型请求一个没有授权的工具时，程序应该怎么做？</legend><label><input type="radio" name="qa5" value="0"> 加入工具白名单</label><label><input type="radio" name="qa5" value="1"> 执行后补记日志</label><label><input type="radio" name="qa5" value="2"> 拒绝并回传错误</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0004-agent-loop.html">← 多工具与第一个 Agent Loop</a><a href="0006-schema-and-eval.html">Schema 对比与固定评测 →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

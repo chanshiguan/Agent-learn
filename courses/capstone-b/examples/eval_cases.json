@@ -1,0 +1,16 @@
+{
+  "version":"course-demo-v1",
+  "warning":"公开教学题；读过答案后不能继续声称它是你的盲测保留集。",
+  "development":[
+    {"id":"d1","question":"周一几点开放？","required":["09:00","18:00"],"sources":["hours"]},
+    {"id":"d2","question":"预约至少提前几天？","required":["1"],"sources":["booking"]},
+    {"id":"d3","question":"课程开始前多久可以全额退款？","required":["24"],"sources":["cancel"]},
+    {"id":"d4","question":"哪里可以通话？","required":["门厅"],"sources":["quiet"]},
+    {"id":"d5","question":"报名者能下载哪些教材？","required":["所报"],"sources":["files"]}
+  ],
+  "holdout":[
+    {"id":"h1","question":"周日能去学习室吗？","required":["闭馆"],"sources":["hours"]},
+    {"id":"h2","question":"预约最多提前几天？","required":["7"],"sources":["booking"]},
+    {"id":"h3","question":"月球基地的地址是什么？","required":["资料不足，无法回答。"],"sources":[]}
+  ]
+}

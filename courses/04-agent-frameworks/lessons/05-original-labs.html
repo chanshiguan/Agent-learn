@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>原练习逐题运行与验收</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">4 · Workflow Graph 与 Agent 框架</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>B 线主线内容；读懂讲解并达到本课验收标准后继续。</p></aside><span id="top"></span><span id="原练习逐题运行与验收"></span><h1 data-heading-alias="原练习逐题运行与验收" id="h252970059b62">原练习逐题运行与验收</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#hbe4c7fa58bd0">01-same-agent-two-frameworks：同任务、双框架</a></li><li><a href="#hc9428ff6d2f3">02-multi-agent-roles：研究→写作→审核</a></li><li><a href="#h4328e93019ef">03-graph-workflow：图、检查点与人审</a></li><li><a href="#hfade37202a0c">04-codeact-vs-json-tool：CodeAct 与 JSON 工具</a></li><li><a href="#h4dcd7c9a3d32">05-typed-agent：类型化结果</a></li></ul></aside>
+<p>以下命令从 ai-learn 根目录运行。每题有独立 Python 3.11 环境；创建和安装只在首次需要，日常直接用对应环境解释器。requirements.txt 列依赖，不是课程正文。不要将这些依赖安装进主环境或第二、三课环境。</p>
+<p>原始代码完整保留在源码页，标为 upstream；补充参考解在本课实作章。原材料中的云价格与产品状态是来源快照，实际开销以账户和用量为准。</p>
+<p>这五题可以按同样的顺序排错：遇到 ModuleNotFoundError，先确认安装依赖和运行程序用的是同一个 Python；提示模型不存在时，用 ollama list 核对名称；返回格式不符合要求时，保存原始输出继续检查。依赖版本和本地模型的支持情况都会影响结果，mock 测试与真实调用要分开记录。</p>
+<span id="01-same-agent-two-frameworks同任务双框架"></span><h2 data-heading-alias="01-same-agent-two-frameworks同任务双框架" id="hbe4c7fa58bd0">01-same-agent-two-frameworks：同任务、双框架</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先固定查询与工具资料；LangGraph 和 CrewAI 分别运行，比较真实工具往返和摘要，不只比较措辞。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-04-01
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-04-01/bin/python -m pip install -r courses/04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/requirements.txt
+# 运行 courses/04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-04-01/bin/python courses/04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-04-01/bin/python courses/04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/starter.py
+</code></pre>
+<p>双框架第二条路径：</p>
+<pre><code class="language-bash"># 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=ollama/gemma4:e4b courses/.venv-lab-04-01/bin/python courses/04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/starter_crewai.py
+</code></pre>
+<p>验收：原测试检查工具循环；另检查查询不存在时是否诚实说明。</p>
+<span id="02-multi-agent-roles研究写作审核"></span><h2 data-heading-alias="02-multi-agent-roles研究写作审核" id="hc9428ff6d2f3">02-multi-agent-roles：研究→写作→审核</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>检查研究结果是否实际传入写作任务，再检查审核是否拿到同一证据。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-04-02
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-04-02/bin/python -m pip install -r courses/04-agent-frameworks/examples/upstream/02-multi-agent-roles/requirements.txt
+# 运行 courses/04-agent-frameworks/examples/upstream/02-multi-agent-roles/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-04-02/bin/python courses/04-agent-frameworks/examples/upstream/02-multi-agent-roles/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=ollama/gemma4:e4b courses/.venv-lab-04-02/bin/python courses/04-agent-frameworks/examples/upstream/02-multi-agent-roles/starter.py
+</code></pre>
+<p>验收：每角色有可查看产物；没有来源的断言不能因为角色同意而通过。</p>
+<span id="03-graph-workflow图检查点与人审"></span><h2 data-heading-alias="03-graph-workflow图检查点与人审" id="h4328e93019ef">03-graph-workflow：图、检查点与人审</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>看条件边与 interrupt，原例使用内存检查点；跨进程综合题使用本课 summary_workflow。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-04-03
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-04-03/bin/python -m pip install -r courses/04-agent-frameworks/examples/upstream/03-graph-workflow/requirements.txt
+# 运行 courses/04-agent-frameworks/examples/upstream/03-graph-workflow/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-04-03/bin/python courses/04-agent-frameworks/examples/upstream/03-graph-workflow/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-04-03/bin/python courses/04-agent-frameworks/examples/upstream/03-graph-workflow/starter.py
+</code></pre>
+<p>验收：接受与拒绝分别验证，不能把内存示范当重启恢复。</p>
+<span id="04-codeact-vs-json-toolcodeact-与-json-工具"></span><h2 data-heading-alias="04-codeact-vs-json-toolcodeact-与-json-工具" id="hfade37202a0c">04-codeact-vs-json-tool：CodeAct 与 JSON 工具</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先读执行器设置；没有 Docker 时不要运行未隔离的任意代码作为替代。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-04-04
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-04-04/bin/python -m pip install -r courses/04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/requirements.txt
+# 运行 courses/04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-04-04/bin/python courses/04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-04-04/bin/python courses/04-agent-frameworks/examples/upstream/04-codeact-vs-json-tool/starter.py
+</code></pre>
+<p>验收：相同计算任务与非法表达式都测；隔离实际未运行则记录未执行。</p>
+<span id="05-typed-agent类型化结果"></span><h2 data-heading-alias="05-typed-agent类型化结果" id="h4dcd7c9a3d32">05-typed-agent：类型化结果</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>看 answer、confidence、sources 的约束与真实验证错误。</p>
+<pre><code class="language-bash"># 用指定 Python 创建独立虚拟环境，避免本例依赖与其他课程互相影响。
+python3.11 -m venv courses/.venv-lab-04-05
+# 将列出的依赖安装到所用 Python 环境；-r 表示从指定清单读取包名与版本。
+courses/.venv-lab-04-05/bin/python -m pip install -r courses/04-agent-frameworks/examples/upstream/05-typed-agent/requirements.txt
+# 运行 courses/04-agent-frameworks/examples/upstream/05-typed-agent/test.py，按本行参数完成当前案例并核对输出。
+courses/.venv-lab-04-05/bin/python courses/04-agent-frameworks/examples/upstream/05-typed-agent/test.py
+# 为本次命令设置明确的环境变量；后面的程序使用这些值运行。
+MODEL=gemma4:e4b courses/.venv-lab-04-05/bin/python courses/04-agent-frameworks/examples/upstream/05-typed-agent/starter.py
+</code></pre>
+<p>验收：confidence 越界、来源空、字段类型错应被拒；合法结构仍需核对事实。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="04-patterns.html">← 五种流程与工具接口：从文章概念到可执行模型</a><a href="06-framework-apis.html">必读 API 实作：动态分工与交接 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

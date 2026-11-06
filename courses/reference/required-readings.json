@@ -1,0 +1,2199 @@
+[
+  {
+    "course": "04-agent-frameworks",
+    "source": "https://www.anthropic.com/engineering/building-effective-agents",
+    "title": "Anthropic — Building Effective Agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "工作流/自主决策",
+      "五模式",
+      "成本与停止条件"
+    ],
+    "lesson": "04-agent-frameworks/lessons/04-patterns.html#h2912d2034de9",
+    "example": "04-agent-frameworks/examples/patterns.py",
+    "assessment": "04-agent-frameworks/lessons/06-framework-apis.html#h09e0c8b8eeac",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md"
+  },
+  {
+    "course": "04-agent-frameworks",
+    "source": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
+    "title": "LangGraph — Workflows and Agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "节点/状态/边",
+      "动态分发",
+      "并行结果合并"
+    ],
+    "lesson": "04-agent-frameworks/lessons/06-framework-apis.html#h05aaf2ca8d60",
+    "example": "04-agent-frameworks/examples/dynamic_workers.py",
+    "assessment": "04-agent-frameworks/lessons/06-framework-apis.html#h09e0c8b8eeac",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md"
+  },
+  {
+    "course": "04-agent-frameworks",
+    "source": "https://openai.github.io/openai-agents-python/multi_agent/",
+    "title": "OpenAI Agents SDK — Multi-agent orchestration",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "manager-as-tools",
+      "handoff",
+      "事件与最终 Agent"
+    ],
+    "lesson": "04-agent-frameworks/lessons/06-framework-apis.html#h97d3880a2832",
+    "example": "04-agent-frameworks/examples/sdk_orchestration.py",
+    "assessment": "04-agent-frameworks/lessons/06-framework-apis.html#h09e0c8b8eeac",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md"
+  },
+  {
+    "course": "04-agent-frameworks",
+    "source": "https://docs.langchain.com/oss/python/langgraph/overview",
+    "title": "LangGraph",
+    "scope": "框架 Quickstart 二选一",
+    "knowledge_points": [
+      "StateGraph",
+      "compile/invoke",
+      "最小图与恢复"
+    ],
+    "lesson": "04-agent-frameworks/lessons/03-workshop.html#h2cea55149f0c",
+    "example": "04-agent-frameworks/examples/summary_workflow.py",
+    "assessment": "04-agent-frameworks/lessons/06-framework-apis.html#h09e0c8b8eeac",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md"
+  },
+  {
+    "course": "04-agent-frameworks",
+    "source": "https://docs.crewai.com/",
+    "title": "CrewAI",
+    "scope": "框架 Quickstart 二选一",
+    "knowledge_points": [
+      "Agent/Task/Crew",
+      "同输入双框架",
+      "依赖与输出"
+    ],
+    "lesson": "04-agent-frameworks/lessons/05-original-labs.html#hbe4c7fa58bd0",
+    "example": "04-agent-frameworks/examples/upstream/01-same-agent-two-frameworks/starter.py",
+    "assessment": "04-agent-frameworks/lessons/06-framework-apis.html#h09e0c8b8eeac",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/04-agent-frameworks.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/quickstart",
+    "title": "Claude Code quickstart",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "安装/PATH",
+      "登录",
+      "首次只读请求",
+      "外部验证"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/00-first-session.html#hedfba6c73f49",
+    "example": "05-claude-code-ecosystem/examples/quickstart-check.py",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/features-overview",
+    "title": "Extend Claude Code",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "规则、Skill、MCP、Hook、Plugin、Subagent 的职责"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#h84fca28c82d7",
+    "example": "05-claude-code-ecosystem/examples/CLAUDE.md",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/memory",
+    "title": "How Claude remembers your project",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "规则作用域",
+      "导入",
+      "自动记忆与权限"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/01-guide.html#hb3d729f04974",
+    "example": "05-claude-code-ecosystem/examples/CLAUDE.md",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/skills",
+    "title": "Skills",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "路由、正文、参数与调用",
+      "正反例"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#h682c51f5767d",
+    "example": "05-claude-code-ecosystem/examples/skills/readme-check/SKILL.md",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://modelcontextprotocol.io/specification",
+    "title": "MCP specification",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Host/Client/Server",
+      "工具发现",
+      "版本锁定",
+      "撤销"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#hb908a909734a",
+    "example": "05-claude-code-ecosystem/examples/mcp_roundtrip.py",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/hooks",
+    "title": "Hooks reference",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "事件输入、注册和日志",
+      "退出状态与权限"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#hc2ac535fde5d",
+    "example": "05-claude-code-ecosystem/examples/observe_hook.py",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/plugins",
+    "title": "Plugins",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "目录与manifest",
+      "命名空间",
+      "加载、验证、撤销"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/04-extensions.html#hfc1878a01dfa",
+    "example": "05-claude-code-ecosystem/examples/course-plugin/.claude-plugin/plugin.json",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/sub-agents",
+    "title": "Subagents",
+    "scope": "条件性扩展；选做时按完整实作验收",
+    "knowledge_points": [
+      "自足委派",
+      "工具范围",
+      "独立上下文"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#hb8d6dd6f9c91",
+    "example": "05-claude-code-ecosystem/examples/agents/evidence-reviewer.md",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/agents",
+    "title": "parallel agents",
+    "scope": "条件性扩展；选做时按完整实作验收",
+    "knowledge_points": [
+      "并行职责",
+      "共享文件冲突",
+      "Worktree与消息协调"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/03-workshop.html#hb8d6dd6f9c91",
+    "example": "05-claude-code-ecosystem/examples/agents/evidence-reviewer.md",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/workflows",
+    "title": "Dynamic workflows",
+    "scope": "条件性扩展；选做时按完整实作验收",
+    "knowledge_points": [
+      "脚本、pipeline、schema",
+      "正常/取消",
+      "宿主运行"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/04-extensions.html#hbd991555f46f",
+    "example": "05-claude-code-ecosystem/examples/audit-readmes.js",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "05-claude-code-ecosystem",
+    "source": "https://code.claude.com/docs/en/agent-sdk/overview",
+    "title": "Agent SDK overview",
+    "scope": "条件性扩展；选做时按完整实作验收",
+    "knowledge_points": [
+      "消息终止",
+      "超时预算",
+      "工作目录",
+      "会话续接与托管"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/04-extensions.html#hf2831a19b60e",
+    "example": "05-claude-code-ecosystem/examples/sdk_job.py",
+    "assessment": "05-claude-code-ecosystem/lessons/04-extensions.html#hd26d673c912c",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/05-claude-code-ecosystem.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+    "title": "LangChain Retrieval",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "加载、切分、向量、库、检索器",
+      "证据生成"
+    ],
+    "lesson": "06-memory-rag/lessons/03-workshop.html#h49e4e1515c68",
+    "example": "06-memory-rag/examples/grounded_rag.py",
+    "assessment": "06-memory-rag/lessons/06-abc-experiment.html#hfad0de2bd041",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/06-memory-rag.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://developers.llamaindex.ai/python/framework/getting_started/concepts/",
+    "title": "LlamaIndex concepts",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Document/Node",
+      "索引/查询",
+      "检索与合成"
+    ],
+    "lesson": "06-memory-rag/lessons/02-readings.html#h2a01e0b8eda3",
+    "example": "06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "06-memory-rag/lessons/06-abc-experiment.html#hfad0de2bd041",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/06-memory-rag.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.trychroma.com/docs/overview/getting-started",
+    "title": "Chroma getting started",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "collection",
+      "ID与metadata",
+      "add/query",
+      "持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/05-original-labs.html#h09131f22422c",
+    "example": "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+    "assessment": "06-memory-rag/lessons/06-abc-experiment.html#hfad0de2bd041",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/06-memory-rag.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.langchain.com/oss/python/langgraph/agentic-rag",
+    "title": "LangGraph Agentic RAG",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "工具化检索",
+      "相关性判断",
+      "改写上限",
+      "无证据拒答"
+    ],
+    "lesson": "06-memory-rag/lessons/04-advanced.html#hc44790c17b6b",
+    "example": "06-memory-rag/examples/grounded_rag.py",
+    "assessment": "06-memory-rag/lessons/06-abc-experiment.html#hfad0de2bd041",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/06-memory-rag.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "title": "Anthropic — Demystifying evals for AI agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Outcome/Trajectory",
+      "题集、trial、grader",
+      "人工校准"
+    ],
+    "lesson": "07-multi-agent-production/lessons/03-workshop.html#hbbd9e98a9100",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://openai.github.io/openai-agents-python/tracing/",
+    "title": "OpenAI Agents SDK — Tracing",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "trace/span",
+      "工具/交接/guardrail事件",
+      "敏感日志"
+    ],
+    "lesson": "07-multi-agent-production/lessons/02-readings.html#hc00e107d60b8",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+    "title": "OpenAI Agents SDK — Human-in-the-loop",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "RunState",
+      "暂停",
+      "批准/拒绝",
+      "恢复与效果"
+    ],
+    "lesson": "07-multi-agent-production/lessons/02-readings.html#hd39b90db1c57",
+    "example": "07-multi-agent-production/examples/production_case.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.langchain.com/oss/python/langgraph/persistence",
+    "title": "LangGraph — Persistence",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "checkpoint与store",
+      "thread与跨会话资料"
+    ],
+    "lesson": "07-multi-agent-production/lessons/02-readings.html#hc193c4d2a7aa",
+    "example": "07-multi-agent-production/examples/production_case.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+    "title": "LangGraph — Interrupts",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "中断重跑",
+      "状态绑定",
+      "幂等与批准"
+    ],
+    "lesson": "07-multi-agent-production/lessons/03-workshop.html#h3f3278f98d35",
+    "example": "07-multi-agent-production/examples/production_case.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.anthropic.com/engineering/building-effective-agents",
+    "title": "Anthropic — Building Effective Agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "简单组合",
+      "任务分工收益",
+      "循环停止"
+    ],
+    "lesson": "07-multi-agent-production/lessons/02-readings.html#hb0e3e81d60ba",
+    "example": "07-multi-agent-production/examples/production_case.py",
+    "assessment": "07-multi-agent-production/lessons/03-workshop.html#he77a208adc59",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07-multi-agent-production.zh-Hans.md"
+  },
+  {
+    "course": "07.5-advanced-agentic-concepts",
+    "source": "https://www.anthropic.com/engineering/building-effective-agents",
+    "title": "Anthropic — Building Effective Agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "从简单流程开始",
+      "增加复杂度的证据"
+    ],
+    "lesson": "07.5-advanced-agentic-concepts/lessons/02-readings.html#h50fda3723f4b",
+    "example": "07.5-advanced-agentic-concepts/examples/ablation.py",
+    "assessment": "07.5-advanced-agentic-concepts/lessons/03-workshop.html#h8489468240b6",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07.5-advanced-agentic-concepts.zh-Hans.md"
+  },
+  {
+    "course": "07.5-advanced-agentic-concepts",
+    "source": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "title": "Anthropic — Demystifying Evals for AI Agents",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "结果/轨迹",
+      "故障实验",
+      "质量成本稳定性"
+    ],
+    "lesson": "07.5-advanced-agentic-concepts/lessons/02-readings.html#h1fee0542dd5a",
+    "example": "07.5-advanced-agentic-concepts/examples/ablation.py",
+    "assessment": "07.5-advanced-agentic-concepts/lessons/03-workshop.html#h8489468240b6",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07.5-advanced-agentic-concepts.zh-Hans.md"
+  },
+  {
+    "course": "07.5-advanced-agentic-concepts",
+    "source": "https://openai.com/index/harness-engineering/",
+    "title": "OpenAI — Harness Engineering",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "环境、版本化知识",
+      "反馈与机械验证"
+    ],
+    "lesson": "07.5-advanced-agentic-concepts/lessons/03-workshop.html#hf1fba43652d6",
+    "example": "07.5-advanced-agentic-concepts/examples/ablation.py",
+    "assessment": "07.5-advanced-agentic-concepts/lessons/03-workshop.html#h8489468240b6",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/07.5-advanced-agentic-concepts.zh-Hans.md"
+  },
+  {
+    "course": "08-agent-interfaces",
+    "source": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool",
+    "title": "Anthropic Computer Use tool",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "截图坐标",
+      "动作提议与执行",
+      "ID配对与拒绝"
+    ],
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html#h32da5fa58d9d",
+    "example": "08-agent-interfaces/examples/browser_loop.py",
+    "assessment": "08-agent-interfaces/lessons/03-workshop.html#he0cbc98443ff",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md"
+  },
+  {
+    "course": "08-agent-interfaces",
+    "source": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/browser-use-tool",
+    "title": "Anthropic Browser Use tool",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "DOM/可访问性树",
+      "像素回退",
+      "页面版本"
+    ],
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html#h11e937823cb2",
+    "example": "08-agent-interfaces/examples/browser_loop.py",
+    "assessment": "08-agent-interfaces/lessons/03-workshop.html#he0cbc98443ff",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md"
+  },
+  {
+    "course": "08-agent-interfaces",
+    "source": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+    "title": "OpenAI Computer Use guide",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "computer call/output",
+      "逐动作策略",
+      "实际截图与确认"
+    ],
+    "lesson": "08-agent-interfaces/lessons/01-guide.html#he6074ea6e826",
+    "example": "08-agent-interfaces/examples/browser_loop.py",
+    "assessment": "08-agent-interfaces/lessons/03-workshop.html#he0cbc98443ff",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md"
+  },
+  {
+    "course": "08-agent-interfaces",
+    "source": "https://openai.github.io/openai-agents-python/sandbox/guide/",
+    "title": "OpenAI Agents SDK Sandbox guide",
+    "scope": "可变工作区选修",
+    "knowledge_points": [
+      "workspace/session/snapshot",
+      "权限",
+      "生命周期"
+    ],
+    "lesson": "08-agent-interfaces/lessons/03-workshop.html#h524a4a4282aa",
+    "example": "08-agent-interfaces/examples/Dockerfile",
+    "assessment": "08-agent-interfaces/lessons/03-workshop.html#he0cbc98443ff",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "stages/08-agent-interfaces.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://code.claude.com/docs/en/quickstart",
+    "title": "Claude Code Quickstart",
+    "scope": "CLI 选用参考；不要求全部安装",
+    "knowledge_points": [
+      "选定CLI的安装、认证与首次任务"
+    ],
+    "lesson": "05-claude-code-ecosystem/lessons/00-first-session.html#hedfba6c73f49",
+    "example": "05-claude-code-ecosystem/examples/quickstart-check.py",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://code.claude.com/docs/en/permissions",
+    "title": "permissions",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "权限与项目范围"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://learn.chatgpt.com/docs/codex/cli",
+    "title": "Codex CLI",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "已有Codex中的目录、任务、差异与回退"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://google-gemini.github.io/gemini-cli/docs/get-started/authentication.html",
+    "title": "Gemini CLI authentication",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "认证与Provider区别"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html",
+    "title": "sandbox 设置",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "执行隔离与权限区别"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://opencode.ai/docs/",
+    "title": "OpenCode 文档",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "候选CLI的规则、工具和模型组合"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://block.github.io/goose/",
+    "title": "goose 文档",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "候选CLI的选择与相同任务对照"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://aider.chat/docs/",
+    "title": "Aider 文档",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "候选CLI的编辑与验证责任"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://hermes-agent.nousresearch.com/docs/",
+    "title": "Hermes Agent 文档",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "持久Agent与普通会话的选择"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://github.com/xai-org/grok-build",
+    "title": "Grok Build repo",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "候选CLI与模型服务的区别"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://pi.dev/docs/latest",
+    "title": "Pi 文档",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "权限外置时宿主责任"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://openrouter.ai/docs/faq",
+    "title": "OpenRouter FAQ",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "路由服务与模型提供商"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A1-cli-intro",
+    "source": "https://ollama.com/",
+    "title": "Ollama",
+    "scope": "按所选 CLI 路径阅读；通用准备/权限/错误定位已内化，其他产品是选用比较，不要求逐一安装",
+    "knowledge_points": [
+      "本地运行时与客户端职责"
+    ],
+    "lesson": "A1-cli-intro/lessons/03-workshop.html#hf5ab579ae8b5",
+    "example": "A1-cli-intro/examples/task.md",
+    "assessment": "A1-cli-intro/lessons/03-workshop.html#h1d7ae9c4ab4d",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A1-cli-intro.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://learn.chatgpt.com/docs/agent-configuration/agents-md",
+    "title": "AGENTS.md",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Codex项目规则路径与层次"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "example": "A2-cli-workflow/examples/project-rules.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://code.claude.com/docs/en/memory",
+    "title": "CLAUDE.md",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Claude项目规则与自动记忆"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "example": "A2-cli-workflow/examples/project-rules.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://geminicli.com/docs/cli/gemini-md/",
+    "title": "GEMINI.md",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Gemini规则文件与位置"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "example": "A2-cli-workflow/examples/project-rules.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://opencode.ai/docs/rules",
+    "title": "AGENTS.md",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "OpenCode规则优先关系"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "example": "A2-cli-workflow/examples/project-rules.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#h91b2e0763bdd",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://learn.chatgpt.com/docs/build-skills",
+    "title": "Codex/ChatGPT",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Codex Skill与任务卡"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "example": "A2-cli-workflow/examples/SKILL.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://code.claude.com/docs/en/skills",
+    "title": "Claude Code",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Claude Skill加载与权限"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "example": "A2-cli-workflow/examples/SKILL.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://geminicli.com/docs/cli/using-agent-skills/",
+    "title": "Gemini CLI",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "Gemini Skill位置与启用"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "example": "A2-cli-workflow/examples/SKILL.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A2-cli-workflow",
+    "source": "https://opencode.ai/docs/skills/",
+    "title": "OpenCode",
+    "scope": "按所用 CLI 选读",
+    "knowledge_points": [
+      "OpenCode Skill位置与许可"
+    ],
+    "lesson": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "example": "A2-cli-workflow/examples/SKILL.md",
+    "assessment": "A2-cli-workflow/lessons/04-original-cli.html#hf60e59f12348",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A2-cli-workflow.zh-Hans.md"
+  },
+  {
+    "course": "A3-cli-production",
+    "source": "https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers",
+    "title": "MCP Connect to local servers",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "MCP连接、路径、发现、撤销"
+    ],
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html#h5d390571143a",
+    "example": "A3-cli-production/examples/review-workflow.yml",
+    "assessment": "A3-cli-production/lessons/04-original-delivery.html#h5d390571143a",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md"
+  },
+  {
+    "course": "A3-cli-production",
+    "source": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+    "title": "GitHub Actions Security Hardening",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "最小权限、不可信PR、Secret边界"
+    ],
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "example": "A3-cli-production/examples/review-workflow.yml",
+    "assessment": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md"
+  },
+  {
+    "course": "A3-cli-production",
+    "source": "https://code.claude.com/docs/en/github-actions",
+    "title": "官方 GitHub Actions 文档",
+    "scope": "CI 二选一；本地完整实现为 Codex",
+    "knowledge_points": [
+      "CI二选一：本地实现选择Codex",
+      "Claude为候选"
+    ],
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "example": "A3-cli-production/examples/review-workflow.yml",
+    "assessment": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md"
+  },
+  {
+    "course": "A3-cli-production",
+    "source": "https://learn.chatgpt.com/docs/github-action",
+    "title": "官方 GitHub Action 文档",
+    "scope": "CI 二选一；本地完整实现为 Codex",
+    "knowledge_points": [
+      "Codex Action",
+      "真实diff",
+      "结果artifact",
+      "失败"
+    ],
+    "lesson": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "example": "A3-cli-production/examples/review-workflow.yml",
+    "assessment": "A3-cli-production/lessons/04-original-delivery.html#hb5c05492eda1",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "tracks/cli/A3-cli-production.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://support.google.com/gemininotebook/answer/16179559",
+    "title": "Gemini Notebook citation 说明",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "引用回原文",
+      "核对上下文和证据"
+    ],
+    "lesson": "branch-researcher/lessons/04-reproducibility.html#hab4f06ea431b",
+    "example": "branch-researcher/examples/reference-work.json",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://support.google.com/gemininotebook/answer/17004255",
+    "title": "Gemini Notebook 隐私与使用条款",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "资料上传权限与隐私范围"
+    ],
+    "lesson": "branch-researcher/lessons/04-reproducibility.html#hab4f06ea431b",
+    "example": "branch-researcher/examples/reference-work.json",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://www.zotero.org/support/quick_start_guide",
+    "title": "Zotero 快速入门",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "条目、作者、年份、附件和引用"
+    ],
+    "lesson": "branch-researcher/lessons/04-reproducibility.html#hab4f06ea431b",
+    "example": "branch-researcher/examples/reference-work.json",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://github.com/Future-House/paper-qa",
+    "title": "PaperQA2 README",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "文献RAG证据检索与引用核查"
+    ],
+    "lesson": "branch-researcher/lessons/03-workshop.html#h4e1502014496",
+    "example": "branch-researcher/examples/reference-work.json",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://doc.dvc.org/command-reference",
+    "title": "DVC 常用流程",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "数据元信息、Git、pipeline与复现"
+    ],
+    "lesson": "branch-researcher/lessons/04-reproducibility.html#h1563b1dbc9cf",
+    "example": "branch-researcher/examples/repro-demo/dvc.yaml",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-researcher",
+    "source": "https://help.zenodo.org/docs/get-started/quickstart/",
+    "title": "Zenodo 快速入门",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "可公开资料、版本和可引用记录"
+    ],
+    "lesson": "branch-researcher/lessons/04-reproducibility.html#h5c8124c436e6",
+    "example": "branch-researcher/examples/reference-work.json",
+    "assessment": "branch-researcher/lessons/03-workshop.html#h0d516681cbc8",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-researcher.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://code.claude.com/docs/en/permissions",
+    "title": "Claude Code permissions",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "allow/ask/deny与任务授权"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://learn.chatgpt.com/docs/agent-approvals-security",
+    "title": "OpenAI Codex agent approvals & security",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Sandbox/Approval/网络各自职责"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+    "title": "GitHub Copilot cloud agent",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "云端与本机运行位置",
+      "PR交付"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://github.com/earendil-works/pi#permissions--containerization",
+    "title": "Pi — Permissions & Containerization",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "没有内置隔离时的执行责任"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://openrouter.ai/docs/guides/routing/provider-selection",
+    "title": "OpenRouter provider selection",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Router/Provider/Model与数据去向"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-developer",
+    "source": "https://docs.ollama.com/",
+    "title": "Ollama docs",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "本地模型服务提供与不提供的能力"
+    ],
+    "lesson": "branch-developer/lessons/03-workshop.html#ha4a53c29f88f",
+    "example": "branch-developer/examples/reference-work.json",
+    "assessment": "branch-developer/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-developer.zh-Hans.md"
+  },
+  {
+    "course": "branch-teacher",
+    "source": "https://www.unesco.org/en/articles/guidance-generative-ai-education-and-research?hub=387",
+    "title": "UNESCO — Guidance for Generative AI in Education and Research",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "人本、年龄、隐私、公平",
+      "保留学生自主思考"
+    ],
+    "lesson": "branch-teacher/lessons/02-readings.html#hdd897f1cc079",
+    "example": "branch-teacher/examples/reference-work.json",
+    "assessment": "branch-teacher/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-teacher.zh-Hans.md"
+  },
+  {
+    "course": "branch-teacher",
+    "source": "https://education.ec.europa.eu/focus-topics/digital-education/actions/plan/ethical-guidelines-for-educators-on-using-artificial-intelligence",
+    "title": "European Commission — Ethical Guidelines for Educators",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "监督、透明、公平、数据、问责",
+      "情境核对"
+    ],
+    "lesson": "branch-teacher/lessons/02-readings.html#h2dfb54fe1a29",
+    "example": "branch-teacher/examples/reference-work.json",
+    "assessment": "branch-teacher/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-teacher.zh-Hans.md"
+  },
+  {
+    "course": "branch-teacher",
+    "source": "https://www.teachai.org/toolkit",
+    "title": "TeachAI — AI Guidance for Schools Toolkit",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "目标、规则、素养、平衡、诚信、自主和评估"
+    ],
+    "lesson": "branch-teacher/lessons/02-readings.html#hb665fd9f2466",
+    "example": "branch-teacher/examples/reference-work.json",
+    "assessment": "branch-teacher/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-teacher.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://help.openai.com/en/articles/11487775-connectors-in",
+    "title": "OpenAI — Apps in ChatGPT",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "搜索/同步/动作",
+      "账号管理员与权限"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://support.claude.com/en/articles/14328846-browse-skills-connectors-and-plugins-in-one-directory",
+    "title": "Anthropic — Skills、Connectors 与 Plugins 目录",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Skill/connector/plugin区分",
+      "安装非核准"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://support.google.com/gemini/answer/14959807?co=GENIE.Platform%3DDesktop&hl=en",
+    "title": "Google — Gemini Connected Apps",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "管理员/Source限制",
+      "核对时效"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://support.microsoft.com/en-us/microsoft-365-copilot/understand-copilot-connectors",
+    "title": "Microsoft — Understand Copilot connectors",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "沿用源系统权限",
+      "索引延迟排查"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://modelcontextprotocol.io/registry/about",
+    "title": "Model Context Protocol — Registry",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "目录元数据与namespace",
+      "非安全背书"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h2bdb07fc05db",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-knowledge-worker",
+    "source": "https://help.zapier.com/hc/en-us/articles/22234847450893-Zap-workflows-quick-start-guide",
+    "title": "Zapier — workflow quick start",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "trigger/action",
+      "字段映射",
+      "测试、批准、重复事件"
+    ],
+    "lesson": "branch-knowledge-worker/lessons/03-workshop.html#h3fae46e278cc",
+    "example": "branch-knowledge-worker/examples/reference-work.json",
+    "assessment": "branch-knowledge-worker/lessons/03-workshop.html#hc6e63aff78cc",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-knowledge-worker.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://help.openai.com/en/articles/10032626-how-do-i-prompt-chatgpt-effectively",
+    "title": "OpenAI — Prompt engineering best practices for ChatGPT",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "目标、context、限制、输出、确认"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#hfaf483ee2cf2",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://support.claude.com/en/articles/8114491-get-started-with-claude",
+    "title": "Anthropic — Get started with Claude",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "对话逐步补条件",
+      "不编造缺失事实"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#hfaf483ee2cf2",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://help.openai.com/en/articles/11487775-connectors-in",
+    "title": "OpenAI — Apps in ChatGPT",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "Apps能力受账号、地区、管理员限制"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#h7dd7e4ba147b",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://support.claude.com/en/articles/11725091-when-to-use-desktop-and-web-connectors",
+    "title": "Anthropic — When to use desktop and web connectors",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "远端connector与本机extension"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#h7dd7e4ba147b",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://support.google.com/gemini/answer/13594961?hl=en",
+    "title": "Google — Gemini Apps Privacy Hub",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "活动、人工审查与第三方资料政策"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#h7dd7e4ba147b",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "branch-everyday-users",
+    "source": "https://docs.ollama.com/faq",
+    "title": "Ollama — FAQ",
+    "scope": "本课必读相关能力",
+    "knowledge_points": [
+      "本机/cloud/web search",
+      "local-only边界"
+    ],
+    "lesson": "branch-everyday-users/lessons/03-workshop.html#h7dd7e4ba147b",
+    "example": "branch-everyday-users/examples/reference-work.json",
+    "assessment": "branch-everyday-users/lessons/03-workshop.html#h6d39b69524c0",
+    "boundary": "覆盖原课要求的相关能力，不表示产品全站/完整规范均已实现。",
+    "source_document": "branches/for-everyday-users.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+    "title": "LangChain：Retrieval 概念",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "存储、检索、决策分工"
+    ],
+    "lesson": "06-memory-rag/lessons/03-workshop.html#h49e4e1515c68",
+    "example": "06-memory-rag/examples/grounded_rag.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://www.anthropic.com/engineering/contextual-retrieval",
+    "title": "Anthropic：Contextual Retrieval（情境化检索）",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "片段背景、原文保留、索引更新"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h3477c9f71eab",
+    "example": "06-memory-rag/examples/grounded_rag.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://qdrant.tech/documentation/search/hybrid-queries/",
+    "title": "Qdrant：Hybrid Queries",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "多路候选、prefetch、RRF"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h23fa32f69293",
+    "example": "06-memory-rag/examples/fusion_comparison.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://docs.weaviate.io/weaviate/concepts/search/hybrid-search",
+    "title": "Weaviate：Hybrid Search",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "BM25与向量",
+      "alpha",
+      "相对分数与名次"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h23fa32f69293",
+    "example": "06-memory-rag/examples/fusion_comparison.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://docs.langchain.com/oss/python/langgraph/agentic-rag",
+    "title": "LangGraph：Agentic RAG（由 Agent 决定何时搜索）",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "检索决策、证据检查、有上限的改写与拒答"
+    ],
+    "lesson": "06-memory-rag/lessons/04-advanced.html#hc44790c17b6b",
+    "example": "06-memory-rag/examples/grounded_rag.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/advanced-rag.zh-Hans.md",
+    "source": "https://github.com/vibrantlabsai/ragas",
+    "title": "Ragas",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "数据字段、检索/答案指标、Judge校准"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h1ad98989be48",
+    "example": "06-memory-rag/examples/rerank_experiment.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://docs.langchain.com/oss/python/concepts/memory",
+    "title": "LangChain：Memory overview",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "thread、session",
+      "语义、情节、程序性记忆"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h4705565b95ea",
+    "example": "06-memory-rag/examples/memory_store.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://docs.langchain.com/oss/python/langgraph/add-memory",
+    "title": "LangGraph：Add and manage memory",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "checkpoint/store",
+      "namespace",
+      "语义搜索边界"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h4705565b95ea",
+    "example": "06-memory-rag/examples/memory_store.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://arxiv.org/abs/2309.02427",
+    "title": "CoALA paper",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "记忆、行动空间、内部/外部行动与决策"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h20068724e7ba",
+    "example": "06-memory-rag/examples/memory_store.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://arxiv.org/abs/2304.03442",
+    "title": "Generative Agents paper",
+    "scope": "第六课进阶支线相关能力；产品选择项按二选一执行",
+    "knowledge_points": [
+      "近期、重要、相关",
+      "反思、计划与事实边界"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h20068724e7ba",
+    "example": "06-memory-rag/examples/memory_store.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://github.com/mem0ai/mem0",
+    "title": "Mem0",
+    "scope": "记忆产品的选用阅读；原支线练习不强制安装任何一个产品",
+    "knowledge_points": [
+      "Mem0 记忆组件与 Letta 有状态 Agent 的区别",
+      "按生命周期验收选型，不把 Chroma 原例误称 Mem0"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h5f610c8ca1c5",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://github.com/letta-ai/letta-code",
+    "title": "Letta Code",
+    "scope": "记忆产品的选用阅读；原支线练习不强制安装任何一个产品",
+    "knowledge_points": [
+      "Mem0 记忆组件与 Letta 有状态 Agent 的区别",
+      "按生命周期验收选型，不把 Chroma 原例误称 Mem0"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h5f610c8ca1c5",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source_document": "resources/agent-memory.zh-Hans.md",
+    "source": "https://github.com/letta-ai/letta",
+    "title": "Letta 项目入口",
+    "scope": "记忆产品的选用阅读；原支线练习不强制安装任何一个产品",
+    "knowledge_points": [
+      "Mem0 记忆组件与 Letta 有状态 Agent 的区别",
+      "按生命周期验收选型，不把 Chroma 原例误称 Mem0"
+    ],
+    "lesson": "06-memory-rag/lessons/07-direct-readings.html#h5f610c8ca1c5",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/07-direct-readings.html#hf21bf3feb35b",
+    "boundary": "原理与本课实验已内化；通用示例不冒称运行过该产品服务或论文系统。"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://www.sbert.net/",
+    "title": "Sentence Transformers 官方文档",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "本机 embedding 的第一手说明与示例。",
+      "练习一：Sentence Transformers 与云端 Embedding"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h432280dd6c17",
+    "example": "06-memory-rag/examples/upstream/01-embeddings/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/01-embeddings/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://developers.openai.com/api/docs/models/text-embedding-3-small",
+    "title": "OpenAI text-embedding-3-small 官方模型页",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "云端模型、用途与现行价格。",
+      "练习一：Sentence Transformers 与云端 Embedding"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h432280dd6c17",
+    "example": "06-memory-rag/examples/upstream/01-embeddings/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/01-embeddings/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "适合读完本练习后，再看较完整的 embedding 与 RAG 章节。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/01-embeddings/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/01-embeddings/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.trychroma.com/reference/python/client",
+    "title": "Chroma Clients 官方文档",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "分清楚内存与磁盘存储。",
+      "练习二与五：Chroma 客户端、Embedding Function 与持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#he6ef93384195",
+    "example": "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/02-vector-db/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.trychroma.com/docs/embeddings/embedding-functions",
+    "title": "Chroma Embedding Functions 官方文档",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "看 collection 如何建立向量。",
+      "练习二与五：Chroma 客户端、Embedding Function 与持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#he6ef93384195",
+    "example": "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/02-vector-db/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/zilliztech/VectorDBBench",
+    "title": "VectorDBBench",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "需要比较大型部署时，再用自己的负载做 benchmark。",
+      "练习二与五：Chroma 客户端、Embedding Function 与持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#he6ef93384195",
+    "example": "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/02-vector-db/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "较完整的 vector store 教材。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/02-vector-db/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/02-vector-db/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.langchain.com/oss/python/integrations/splitters",
+    "title": "LangChain text splitters 官方概念页",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "从简单切法开始。",
+      "练习三：解析、结构切分与语义切分"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h0ac27a56cec1",
+    "example": "06-memory-rag/examples/upstream/03-chunking-comparison/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/03-chunking-comparison/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/semantic_splitter/",
+    "title": "LlamaIndex Semantic Splitter 官方 API",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "需要语义断点时再进阶。",
+      "练习三：解析、结构切分与语义切分"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h0ac27a56cec1",
+    "example": "06-memory-rag/examples/upstream/03-chunking-comparison/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/03-chunking-comparison/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.unstructured.io/",
+    "title": "Unstructured 官方文档",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "PDF、DOCX、HTML 等复杂格式的解析入口。",
+      "练习三：解析、结构切分与语义切分"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h0ac27a56cec1",
+    "example": "06-memory-rag/examples/upstream/03-chunking-comparison/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/03-chunking-comparison/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "较完整的 RAG chunking 教材。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/03-chunking-comparison/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/03-chunking-comparison/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://developers.openai.com/api/docs/guides/retrieval",
+    "title": "OpenAI Retrieval 官方指南",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "受管 vector store 与搜索的第一手做法。",
+      "练习四：LlamaIndex、LangChain 与受管 Retrieval"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h91f4dbfb83d8",
+    "example": "06-memory-rag/examples/managed_retrieval.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/04-full-rag-pipeline/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.llamaindex.ai/en/stable/understanding/rag/",
+    "title": "LlamaIndex RAG 官方教程",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "拆解 ingestion、index、query。",
+      "练习四：LlamaIndex、LangChain 与受管 Retrieval"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h91f4dbfb83d8",
+    "example": "06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/04-full-rag-pipeline/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.langchain.com/oss/python/langchain/rag",
+    "title": "LangChain RAG 官方教程",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "比较 two-step 与 agentic RAG。",
+      "练习四：LlamaIndex、LangChain 与受管 Retrieval"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h91f4dbfb83d8",
+    "example": "06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/04-full-rag-pipeline/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "较完整的 RAG 流水线教材。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/04-full-rag-pipeline/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/04-full-rag-pipeline/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.trychroma.com/reference/python/client",
+    "title": "Chroma PersistentClient 官方文档",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "本练习真正保存到磁盘的基础。",
+      "练习二与五：Chroma 客户端、Embedding Function 与持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#he6ef93384195",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/05-long-term-memory/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://docs.langchain.com/oss/python/concepts/memory",
+    "title": "LangGraph Memory 官方概念页",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "分清楚 thread 与跨 thread 记忆。",
+      "练习二与五：Chroma 客户端、Embedding Function 与持久化"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#he6ef93384195",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/05-long-term-memory/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/mem0ai/mem0",
+    "title": "Mem0",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "fact extraction、更新与删除的成熟项目。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/05-long-term-memory/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/letta-ai/letta-code",
+    "title": "Letta Code",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "现行 stateful agent 与 working／archival memory 的完整实现。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/05-long-term-memory/README.zh-Hans.md"
+  },
+  {
+    "course": "06-memory-rag",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "较完整的 Agent memory 教材。",
+      "扩展教材与本地自测"
+    ],
+    "lesson": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "example": "06-memory-rag/examples/upstream/05-long-term-memory/starter.py",
+    "assessment": "06-memory-rag/lessons/08-example-readings.html#h9d58a61b9b06",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-6/05-long-term-memory/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "章节式中文 Agent 教材，适合补完整背景。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/01-multi-agent-debate/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/01-multi-agent-debate/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.anthropic.com/engineering/building-effective-agents",
+    "title": "Anthropic：Building effective agents",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "先判断单 Agent 是否已足够，再增加协作。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/01-multi-agent-debate/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/01-multi-agent-debate/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/microsoft/autogen",
+    "title": "Microsoft AutoGen",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "想看完整 multi-agent framework 时再进入。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/01-multi-agent-debate/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/01-multi-agent-debate/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/promptfoo/promptfoo",
+    "title": "promptfoo",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "可把 cases、providers 和 assertions 放进版本控制。",
+      "Eval：同一份题集怎样搬进不同工具"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h728ea8ae9878",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://console.anthropic.com/workbench/evals",
+    "title": "Anthropic Console Evals",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "用官方界面创建与比较测试集。",
+      "Eval：同一份题集怎样搬进不同工具"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h728ea8ae9878",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "章节式中文 Agent 教材，适合补完整背景。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://smith.langchain.com/",
+    "title": "LangSmith",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "适合已使用 LangChain／LangGraph 的团队。",
+      "Eval：同一份题集怎样搬进不同工具"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h728ea8ae9878",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://wandb.ai/site/weave",
+    "title": "Weights & Biases Weave",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "把 traces、数据与评测放在同一套工作流。",
+      "Eval：同一份题集怎样搬进不同工具"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h728ea8ae9878",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.braintrust.dev/",
+    "title": "Braintrust",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "适合做多版本实验与结果追踪。",
+      "Eval：同一份题集怎样搬进不同工具"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h728ea8ae9878",
+    "example": "07-multi-agent-production/examples/upstream/02-eval/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/02-eval/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/langfuse/langfuse",
+    "title": "Langfuse",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "开源 traces、evals 与 prompt 管理。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/Arize-ai/phoenix",
+    "title": "Arize Phoenix",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "OpenTelemetry 导向的观测工具；Elastic License 2.0（ELv2）限制对外提供托管服务。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "章节式中文 Agent 教材，适合补完整背景。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://smith.langchain.com/",
+    "title": "LangSmith",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "适合 LangChain／LangGraph 生态。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.helicone.ai/",
+    "title": "Helicone",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "可用 proxy 方式收集 LLM 请求数据。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.datadoghq.com/product/llm-observability/",
+    "title": "Datadog LLM Observability",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "适合已使用 Datadog APM 的团队。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://console.anthropic.com/",
+    "title": "Anthropic Console",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "查看 Claude API usage 与账务数据。",
+      "Observability：从请求到一次可解释的失败"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#hd167ba61ef4f",
+    "example": "07-multi-agent-production/examples/upstream/03-observability/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/03-observability/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+    "title": "Anthropic Prompt caching 官方文件",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "最低长度、TTL、breakpoint 与 usage 栏位的权威来源。",
+      "Streaming、Prompt caching 与 Batch：三件不同的事"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h0c0f04064b67",
+    "example": "07-multi-agent-production/examples/upstream/04-sdk-advanced/starter_anthropic.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/04-sdk-advanced/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+    "title": "Anthropic Pricing",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "用当期单价重算，不保存旧的固定账单。",
+      "Streaming、Prompt caching 与 Batch：三件不同的事"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h0c0f04064b67",
+    "example": "07-multi-agent-production/examples/upstream/04-sdk-advanced/starter_anthropic.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/04-sdk-advanced/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+    "title": "Anthropic Batch processing",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "非即时大量工作可再研究 batch。",
+      "Streaming、Prompt caching 与 Batch：三件不同的事"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h0c0f04064b67",
+    "example": "07-multi-agent-production/examples/upstream/04-sdk-advanced/starter_anthropic.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/04-sdk-advanced/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "需要章节式背景时使用。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/04-sdk-advanced/starter_anthropic.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/04-sdk-advanced/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://fastapi.tiangolo.com/tutorial/",
+    "title": "FastAPI 官方教学",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "schema、errors、dependencies 与部署的第一手文件。",
+      "Deploy：FastAPI 与 Docker 还各负责什么"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h14c831f55364",
+    "example": "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/05-deploy/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.docker.com/build/building/best-practices/",
+    "title": "Dockerfile best practices",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "创建较小、可更新且非 root 的 image。",
+      "Deploy：FastAPI 与 Docker 还各负责什么"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h14c831f55364",
+    "example": "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/05-deploy/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.docker.com/engine/network/port-publishing/",
+    "title": "Docker port publishing",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "理解为什么 `127.0.0.1:8000:8000` 比默认公开所有界面更保守。",
+      "Deploy：FastAPI 与 Docker 还各负责什么"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h14c831f55364",
+    "example": "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/05-deploy/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/ai-boost/awesome-harness-engineering",
+    "title": "awesome-harness-engineering",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "需要更多 harness pattern 时使用。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/05-deploy/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://github.com/datawhalechina/hello-agents",
+    "title": "datawhalechina/hello-agents",
+    "scope": "原练习 README 的选用/扩展参考",
+    "knowledge_points": [
+      "章节式 Agent production 背景。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/05-deploy/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/05-deploy/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+    "title": "OpenAI Agents SDK — Human-in-the-loop",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "tool approval、`RunState` 保存与 resume。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/06-safe-execution/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/06-safe-execution/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+    "title": "LangGraph — Interrupts",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "pause、approve／reject、checkpoint、resume 与 interrupt 前的幂等副作用。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/06-safe-execution/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/06-safe-execution/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://docs.langchain.com/oss/python/langgraph/persistence",
+    "title": "LangGraph — Persistence",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "checkpointer、store、thread state 与 fault tolerance 的边界。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/06-safe-execution/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/06-safe-execution/README.zh-Hans.md"
+  },
+  {
+    "course": "07-multi-agent-production",
+    "source": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "title": "Anthropic — Demystifying evals for AI agents",
+    "scope": "原练习 README 的必读相关能力；平台工具按需选择",
+    "knowledge_points": [
+      "不要只看 Agent 说了什么，也要检查外部 Outcome 与完整 Trajectory。",
+      "辩论、批准恢复与扩展教材"
+    ],
+    "lesson": "07-multi-agent-production/lessons/07-example-readings.html#h902220b3a675",
+    "example": "07-multi-agent-production/examples/upstream/06-safe-execution/starter.py",
+    "assessment": "07-multi-agent-production/lessons/07-example-readings.html#h3f7020dd4366",
+    "boundary": "讲解覆盖原题所需知识。示例为标明的原题或本地实现，不冒称运行过这一目录中的每家服务。",
+    "source_document": "examples/stage-7/06-safe-execution/README.zh-Hans.md"
+  }
+]

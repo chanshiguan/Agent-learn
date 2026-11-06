@@ -1,0 +1,14 @@
+.study-badge { display:inline-block; padding:.15em .6em; margin:0 .5em .35em 0; border:1px solid currentColor; border-radius:5px; font-size:.82rem; line-height:1.6; vertical-align:middle; font-weight:600; }
+.study-core { color:#24503b; background:#eef7f0; }
+.study-a { color:#254c79; background:#edf4fc; }
+.study-extra, .study-branch { color:#785719; background:#fff8e8; }
+.study-mixed { color:#67417b; background:#f7f0fb; }
+.study-lookup { color:#555; background:#f4f4f4; }
+.study-priority { border:1px solid var(--line, #ccc); border-radius:8px; padding:16px 20px; margin:20px 0; }
+.study-priority p { margin:.5em 0 0; }
+.study-section { margin:0 0 1em; }
+.study-section-note { font-size:.92rem; margin:.2em 0; }
+.line-notes { font-size:.92rem; }
+.line-notes td { overflow-wrap:anywhere; }
+/* 长注释在阅读区域内换行；复制代码仍取原文本，不插入额外换行。 */
+pre, pre code { white-space: pre-wrap; overflow-wrap: anywhere; }

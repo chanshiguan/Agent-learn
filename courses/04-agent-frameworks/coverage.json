@@ -1,0 +1,140 @@
+[
+  {
+    "requirement": "本地环境与综合摘要流程",
+    "lesson": "lessons/03-workshop.html#ha258cb17c159",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "State/Node/Edge 与 LangGraph 教程",
+    "lesson": "lessons/03-workshop.html#h2cea55149f0c",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "HITL 与持久化恢复",
+    "lesson": "lessons/03-workshop.html#hfeafd4cecd2d",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "摘要＋来源检查综合任务",
+    "lesson": "lessons/03-workshop.html#hf757715d6713",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "原五题的衔接（完整实现见下方逐题条目）",
+    "lesson": "lessons/03-workshop.html#hddb7931f1cd8",
+    "example": "text/05-original-labs.md",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "编排选型与控制权",
+    "lesson": "lessons/03-workshop.html#h50bbe1a7aea0",
+    "example": "examples/sdk_orchestration.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "综合题验收",
+    "lesson": "lessons/03-workshop.html#hfdcc2e617c64",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：为什么不是每项任务都需要 Agent",
+    "lesson": "lessons/04-patterns.html#hd1a42ca24aa9",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：五种模式怎样选择",
+    "lesson": "lessons/04-patterns.html#h2912d2034de9",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：完整控制流演示",
+    "lesson": "lessons/04-patterns.html#h39f1b80d9582",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：从模式到框架 API",
+    "lesson": "lessons/04-patterns.html#h2f9c32bbee6e",
+    "example": "examples/dynamic_workers.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：两个应用域与工具设计",
+    "lesson": "lessons/04-patterns.html#h900dfea5d820",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "必读编排文章：参考观点的边界与本地自测",
+    "lesson": "lessons/04-patterns.html#ha70207dde3ca",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/03-workshop.html#hfdcc2e617c64"
+  },
+  {
+    "requirement": "原练习 同任务、双框架",
+    "lesson": "lessons/05-original-labs.html#hbe4c7fa58bd0",
+    "example": "examples/upstream/01-same-agent-two-frameworks/starter.py",
+    "assessment": "lessons/05-original-labs.html#hbe4c7fa58bd0"
+  },
+  {
+    "requirement": "原练习 研究→写作→审核",
+    "lesson": "lessons/05-original-labs.html#hc9428ff6d2f3",
+    "example": "examples/upstream/02-multi-agent-roles/starter.py",
+    "assessment": "lessons/05-original-labs.html#hc9428ff6d2f3"
+  },
+  {
+    "requirement": "原练习 图、检查点与人审",
+    "lesson": "lessons/05-original-labs.html#h4328e93019ef",
+    "example": "examples/upstream/03-graph-workflow/starter.py",
+    "assessment": "lessons/05-original-labs.html#h4328e93019ef"
+  },
+  {
+    "requirement": "原练习 CodeAct 与 JSON 工具",
+    "lesson": "lessons/05-original-labs.html#hfade37202a0c",
+    "example": "examples/upstream/04-codeact-vs-json-tool/starter.py",
+    "assessment": "lessons/05-original-labs.html#hfade37202a0c"
+  },
+  {
+    "requirement": "原练习 类型化结果",
+    "lesson": "lessons/05-original-labs.html#h4dcd7c9a3d32",
+    "example": "examples/upstream/05-typed-agent/starter.py",
+    "assessment": "lessons/05-original-labs.html#h4dcd7c9a3d32"
+  },
+  {
+    "requirement": "直接必读：Anthropic — Building Effective Agents（本课必读相关能力）",
+    "lesson": "lessons/04-patterns.html#h2912d2034de9",
+    "example": "examples/patterns.py",
+    "assessment": "lessons/06-framework-apis.html#h09e0c8b8eeac"
+  },
+  {
+    "requirement": "直接必读：LangGraph — Workflows and Agents（本课必读相关能力）",
+    "lesson": "lessons/06-framework-apis.html#h05aaf2ca8d60",
+    "example": "examples/dynamic_workers.py",
+    "assessment": "lessons/06-framework-apis.html#h09e0c8b8eeac"
+  },
+  {
+    "requirement": "直接必读：OpenAI Agents SDK — Multi-agent orchestration（本课必读相关能力）",
+    "lesson": "lessons/06-framework-apis.html#h97d3880a2832",
+    "example": "examples/sdk_orchestration.py",
+    "assessment": "lessons/06-framework-apis.html#h09e0c8b8eeac"
+  },
+  {
+    "requirement": "直接必读：LangGraph（框架 Quickstart 二选一）",
+    "lesson": "lessons/03-workshop.html#h2cea55149f0c",
+    "example": "examples/summary_workflow.py",
+    "assessment": "lessons/06-framework-apis.html#h09e0c8b8eeac"
+  },
+  {
+    "requirement": "直接必读：CrewAI（框架 Quickstart 二选一）",
+    "lesson": "lessons/05-original-labs.html#hbe4c7fa58bd0",
+    "example": "examples/upstream/01-same-agent-two-frameworks/starter.py",
+    "assessment": "lessons/06-framework-apis.html#h09e0c8b8eeac"
+  }
+]

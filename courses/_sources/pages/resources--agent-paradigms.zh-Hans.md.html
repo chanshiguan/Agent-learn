@@ -1,0 +1,239 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>agent-paradigms.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="agent-工具怎么分身份操作界面部署位置"></span><h1 data-heading-alias="agent-工具怎么分身份操作界面部署位置" id="ha1178052f933">Agent 工具怎么分：身份、操作界面、部署位置</h1>
+<blockquote>
+<p><a href="README.zh-Hans.md.html">← 回主路线 README</a></p>
+</blockquote>
+<p>同一个工具可以出现在终端、IDE 和桌面应用中，也可以连接本地或云端模型。所以不要硬把工具塞进五个互斥“类型”。先问三个问题，会比较不容易混乱。</p>
+<p><img src="../upstream/resources/diagrams/agent-tool-axes.zh-Hans.png" alt="Agent 工具的 Identity、Surface 和 Deployment 三条轴" /></p>
+<span id="-先分清三条轴"></span><h2 data-heading-alias="-先分清三条轴" id="ha3bf69c53791">📌 先分清三条轴</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">轴</th>
+<th style="text-align:left">五岁也能懂的说法</th>
+<th style="text-align:left">正确问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Identity（身份）</strong></td>
+<td style="text-align:left">这个东西的工作是什么？</td>
+<td style="text-align:left">它是 Coding Agent、Router、Local Runtime、Framework，还是 Chat Gateway？</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Surface（操作界面）</strong></td>
+<td style="text-align:left">你从哪扇门跟它说话？</td>
+<td style="text-align:left">终端、IDE、桌面、Web、Chat app 还是 API？</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Deployment（部署位置）</strong></td>
+<td style="text-align:left">它的身体放在哪里？</td>
+<td style="text-align:left">你的电脑、云端主机、边缘设备，还是托管服务？</td>
+</tr>
+</tbody>
+</table>
+<p>一个产品可以同时有很多 <strong>Surface</strong>，也可以更换 <strong>Deployment</strong>。这不会改变它的主要 <strong>Identity</strong>。</p>
+<span id="-你会学会什么"></span><h2 data-heading-alias="-你会学会什么" id="h068a84833f3b">🎯 你会学会什么</h2>
+<ul>
+<li>分清 OpenCode、Pi、OpenRouter 和 Ollama，不再把它们当作同一类。</li>
+<li>先选择工作身份，再选择界面和部署位置。</li>
+<li>知道“本地”“开源”“有 permission prompt”都不等于安全保证。</li>
+<li>把 <strong>Subagent</strong> 当作执行方式，不当作第六种产品。</li>
+</ul>
+<span id="-身份它到底负责什么"></span><h2 data-heading-alias="-身份它到底负责什么" id="hfe180acd5616">🧩 身份：它到底负责什么</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">核心词</th>
+<th style="text-align:left">白话定义</th>
+<th style="text-align:left">例子</th>
+<th style="text-align:left">它不自动负责什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Coding Agent／Harness（程序代理／工作台）</strong></td>
+<td style="text-align:left">能在允许范围内读文件、改文件、跑命令，再回来报告</td>
+<td style="text-align:left">Claude Code、Codex、OpenCode、Pi、Aider、goose</td>
+<td style="text-align:left">不一定包含模型、Router 或 Sandbox</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Router（路由器）</strong></td>
+<td style="text-align:left">把模型请求转发给不同 Provider</td>
+<td style="text-align:left">OpenRouter</td>
+<td style="text-align:left">不会自己修改 repo，也不管理文件权限</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Local Runtime（本地模型引擎）</strong></td>
+<td style="text-align:left">在自己的电脑加载并运行模型</td>
+<td style="text-align:left">Ollama、vLLM</td>
+<td style="text-align:left">不会自己理解任务或操作工作目录</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Agent Framework（代理框架）</strong></td>
+<td style="text-align:left">给开发者编写状态、步骤、Handoff 和 Workflow 的工具箱</td>
+<td style="text-align:left">LangGraph、CrewAI、Microsoft Agent Framework</td>
+<td style="text-align:left">不是安装后就能替你完成工作的成品 Agent</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Chat Gateway（聊天入口）</strong></td>
+<td style="text-align:left">把 Agent 连接到 Telegram、Slack 等消息入口</td>
+<td style="text-align:left">Hermes Agent 的 gateway／messaging 模式</td>
+<td style="text-align:left">不代表底层模型、权限和部署已经安全</td>
+</tr>
+</tbody>
+</table>
+<p>最短识别法：<strong>谁运行模型？谁转发请求？谁能碰文件？谁安排多个步骤？你从哪里说话？</strong></p>
+<span id="-常见工具放在哪里"></span><h2 data-heading-alias="-常见工具放在哪里" id="h6eceece0dc38">🧭 常见工具放在哪里</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">工具</th>
+<th style="text-align:left">主要 Identity</th>
+<th style="text-align:left">常见 Surface</th>
+<th style="text-align:left">可用 Deployment</th>
+<th style="text-align:left">初学者最容易搞错的地方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s521c67e0751a">OpenCode</a></td>
+<td style="text-align:left">Coding Agent／Harness</td>
+<td style="text-align:left">终端、桌面、IDE</td>
+<td style="text-align:left">OpenCode 程序在本地运行</td>
+<td style="text-align:left">连接云端 Provider 只会发出模型请求，不会把 OpenCode 程序搬到云端；仍要选择模型和 permission</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sbaf6812c9f44">Pi</a></td>
+<td style="text-align:left">Coding Agent／Harness</td>
+<td style="text-align:left">终端、SDK、RPC</td>
+<td style="text-align:left">本地</td>
+<td style="text-align:left">这里的 Pi 不是 Raspberry Pi；它没有内置 Sandbox</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter</a></td>
+<td style="text-align:left">Router</td>
+<td style="text-align:left">API</td>
+<td style="text-align:left">托管云端服务</td>
+<td style="text-align:left">它不会自己读文件或执行命令</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s1d9fc6d98824">Ollama</a></td>
+<td style="text-align:left">Local Runtime</td>
+<td style="text-align:left">CLI、API</td>
+<td style="text-align:left">本地或自己的服务器</td>
+<td style="text-align:left">它不是 Coding Agent；要由 Client／Agent 调用</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s5365bfeb95ff">Aider</a></td>
+<td style="text-align:left">Coding Agent／pair programmer</td>
+<td style="text-align:left">终端</td>
+<td style="text-align:left">本地</td>
+<td style="text-align:left">先看清 Git auto-commit／<code>--no-verify</code> 行为</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s8b6461a92465">goose</a></td>
+<td style="text-align:left">Coding／general Agent</td>
+<td style="text-align:left">CLI、桌面、API</td>
+<td style="text-align:left">本地</td>
+<td style="text-align:left">Extension 权限要单独审查</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#sec2b8bd43eef">Hermes Agent</a></td>
+<td style="text-align:left">Agent runtime＋Chat Gateway</td>
+<td style="text-align:left">CLI、消息平台</td>
+<td style="text-align:left">本地或自己的主机</td>
+<td style="text-align:left">Chat 入口不等于 24/7、安全或零维护</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s0b5c4741d1c1">OpenClaw</a></td>
+<td style="text-align:left">可自建的 Agent／assistant 平台</td>
+<td style="text-align:left">Web、Chat、CLI，取决于部署</td>
+<td style="text-align:left">本地、云端或 edge</td>
+<td style="text-align:left">在 edge 运行不代表没有网络、工具或数据外泄风险</td>
+</tr>
+</tbody>
+</table>
+<span id="-必读阅读"></span><h2 data-heading-alias="-必读阅读" id="h48b0391bf708">📚 必读阅读</h2>
+<ol>
+<li><a href="resources--cli-agents-guide.zh-Hans.md.html">CLI Agents 指南</a>：比较登录、Provider、Sandbox、项目规则和权限。</li>
+<li><a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4：Workflow Graph 与 Agent 框架</a>：学习 Framework 和 Workflow Graph。</li>
+<li><a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5：Claude Code 生态</a>：学习 Skills、MCP、Hooks 和 Subagents。</li>
+<li><a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7：Agent Production Engineering</a>：学习 Harness、Loop、Graph、跨系统 Eval 和上线边界。</li>
+</ol>
+<span id="-三步选择法"></span><h2 data-heading-alias="-三步选择法" id="hb69301e476cf">🪜 三步选择法</h2>
+<ol>
+<li><strong>先选 Identity</strong>：要修改 repo 就选 Coding Agent；只想转接模型就选 Router；要在本地运行模型就选 Local Runtime；要自己编写 Workflow 才选 Framework。</li>
+<li><strong>再选 Surface</strong>：眼睛一直看程序就偏 IDE；需要命令、Git 和长任务就偏终端；需要手机消息入口才考虑 Chat Gateway。</li>
+<li><strong>最后选 Deployment</strong>：先从可恢复的 demo repo 和最小权限开始，再决定本地、云端或 edge。部署位置不会自动消除风险。</li>
+</ol>
+<details markdown="1">
+<summary>展开四个生活场景和安全边界</summary>
+<span id="编写一个小功能"></span><h3 data-heading-alias="编写一个小功能" id="hf2154d697b3d">编写一个小功能</h3>
+<p>选择一个 Coding Agent／Harness，在 demo branch 中要求它先说明计划、再修改一个文件、运行测试并显示 diff。模型可以来自 Provider API，也可以由 Ollama 在本地运行。</p>
+<span id="用一个-api-key-尝试不同-provider"></span><h3 data-heading-alias="用一个-api-key-尝试不同-provider" id="hc63fee7bf436">用一个 API key 尝试不同 Provider</h3>
+<p>Coding Agent 仍负责文件和命令；OpenRouter 只负责转发模型请求。两者的账单、数据政策和权限要分开看。</p>
+<span id="手机接收例行整理"></span><h3 data-heading-alias="手机接收例行整理" id="h5eceb6e9bc93">手机接收例行整理</h3>
+<p>Hermes Agent 这类工具可以连接 Messaging Gateway。你仍要处理主机更新、密钥、允许的工具、失败重试和消息平台权限。</p>
+<span id="在-edge-设备处理敏感数据"></span><h3 data-heading-alias="在-edge-设备处理敏感数据" id="h64749aa68c7c">在 edge 设备处理敏感数据</h3>
+<p>本地模型可以减少把 Prompt 发送给外部 Provider 的需要，但 Agent 如果能联网、调用工具或读取其他文件夹，仍可能把数据带出去。要使用防火墙、容器／VM、最小权限、假数据测试和人工审核。</p>
+</details>
+<span id="subagent--在-agent-runtime-里再-spawn-agent"></span><h2 data-heading-alias="subagent--在-agent-runtime-里再-spawn-agent" id="hb7c72b1ccf70">Subagent — “在 agent runtime 里再 spawn agent”</h2>
+<p><strong>Subagent（子代理）</strong> 是主 Agent 把一小块任务交给另一个隔离工作者。它回答的是“工作怎么分”，不是“产品运行在哪里”。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">路径</th>
+<th style="text-align:left">谁负责建立子代理</th>
+<th style="text-align:left">适合什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Framework-based</strong></td>
+<td style="text-align:left">你的 Python／TypeScript orchestration 程序</td>
+<td style="text-align:left">要自己控制状态、Provider、Handoff 和 Workflow</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Coding-Agent native</strong></td>
+<td style="text-align:left">Claude Code、Codex 等 Agent runtime</td>
+<td style="text-align:left">在同一个 repo 中拆分研究、实现或审查任务</td>
+</tr>
+</tbody>
+</table>
+<p>不论哪条路径，都要给子代理明确范围、输出格式、预算、停止条件和验证方式。主代理仍要读取结果；“使用了多个 Agent”不是正确性的证明。</p>
+<p>继续阅读 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5 的 Subagents</a> 和<a href="resources--subagent-cookbook.zh-Hans.md.html">可直接复制的 Subagent Cookbook</a>。</p>
+<span id="-精选-projects-与学习资源"></span><h2 data-heading-alias="-精选-projects-与学习资源" id="h9b515e845d58">🎯 精选 Projects 与学习资源</h2>
+<p>星星是本学习地图的阅读优先级，不是 GitHub stars，也不是工具总排名。</p>
+<table align="center">
+<thead><tr><th>分类</th><th>Project／资源</th><th>用它学什么</th><th>限制</th><th>评分</th></tr></thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="5" align="center" valign="middle">Coding Agent／Harness</th><td><a href="../../reference/source-readings.html#sffccace0ba14">opencode</a></td><td>Provider 切换、rules、Skills 和 permission</td><td>模型和 Sandbox 仍要另外选择</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sc133b93b912d">pi</a></td><td>小核心、extensions、SDK 和 RPC</td><td>没有内置 Sandbox</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s27b0817e8f72">aider</a></td><td>Git diff、commit 和 undo 工作流</td><td>先确认 auto-commit 和 hook 设置</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s8782e21ebeda">goose</a></td><td>CLI、桌面、Provider 和 extensions</td><td>先开放最小 extension 权限</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s508ea0cfd549">continue</a></td><td>IDE／CLI Surface 和 Agent mode</td><td>不同 Surface 的权限要分开看</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">Router／Runtime</th><td><a href="../../reference/source-readings.html#s606aefabac4f">OpenRouter 官方文档</a></td><td>Router、Provider routing 和 usage</td><td>不是 Coding Agent</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s77b4be38215d">ollama</a></td><td>本地模型下载和兼容 API</td><td>不是 Coding Agent</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">Messaging／自建</th><td><a href="../../reference/source-readings.html#sec2b8bd43eef">hermes-agent</a></td><td>Agent runtime、Messaging Gateway 和调度</td><td>自建仍要维护并收窄工具权限</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s0b5c4741d1c1">openclaw</a></td><td>本地／edge／自建 assistant 的部署取舍</td><td>本地不等于零数据风险</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="3" align="center" valign="middle">Framework／Workflow</th><td><a href="../../reference/source-readings.html#s642743ad9061">langgraph</a></td><td>状态、节点、边、Checkpoint 和 Human-in-the-loop</td><td>需要自己编写和测试 Workflow</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s715b6bc81ab4">crewAI</a></td><td>角色、Task 和 Crew orchestration</td><td>角色描述不能替代验证</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sb6a803a2c827">agent-framework</a></td><td>Microsoft 当前 Agent／Workflow 开发路径</td><td>旧 AutoGen／Swarm 教材只作历史背景</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+</tbody>
+</table>
+<span id="-完成检查"></span><h2 data-heading-alias="-完成检查" id="h1eabc38b81c6">✅ 完成检查</h2>
+<ul>
+<li>[ ] 我能用一句话说明 Coding Agent、Router、Local Runtime 和 Framework 的差别。</li>
+<li>[ ] 我不会把 OpenRouter 当成 Agent，也不会把 Ollama 当成修改文件的工具。</li>
+<li>[ ] 我知道 OpenCode／Pi 的 Provider、模型、Surface 和 Sandbox 要分开确认。</li>
+<li>[ ] 我选择工具时先看 Identity，再看 Surface 和 Deployment。</li>
+<li>[ ] 我知道本地、edge、开源和 permission prompt 都不是安全保证。</li>
+</ul>
+<p><small>工具身份、官方入口、项目状态和许可证核查：2026-08-30 UTC。</small></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReAct论文详解与检索实验 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+<p class="eyebrow">Stage 03 · 单元 11</p><h1>ReAct论文详解与检索实验</h1><p class="lede">理解研究方法、对照实验和失败类型，跑通两跳查询。</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-extra">扩展选读</span><strong>B 线基础必修</strong><p>扩展选读、选做；基础验收通过后可先进入第四课，需要本能力时再回来学习。 ReAct 的入门概念在单元 7 必读；这里展开论文对照和检索实验。</p></aside>
+<h2>1. 论文研究问题</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>ReAct由Yao等人提出，研究语言决策与环境行动的交替。知识任务用HotpotQA、FEVER；交互任务用ALFWorld、WebShop。历史实验主要使用PaLM-540B，不能把结果直接移植到当前本地模型。</p>
+<h2>2. 方法与对照如何读</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<table><tr><th>方法</th><th>论文中的对照意图</th></tr><tr><td>Standard</td><td>直接生成答案</td></tr><tr><td>CoT / CoT-SC</td><td>文本推理；后者多次采样后聚合</td></tr><tr><td>Act</td><td>行动与观察，不加入相同形式的推理轨迹</td></tr><tr><td>ReAct</td><td>推理与行动交错</td></tr></table>
+<p>论文检索环境包含search、lookup、finish。其提示通过少量任务轨迹提供示范。现代代码可以用原生工具协议实现反馈循环；本课不要求模型公开私有思维链，也不把当前API实现称为历史提示方法的逐字复现。</p>
+<h2>3. 原始实验并不是全面领先</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<table><tr><th>方法</th><th>HotpotQA EM</th><th>FEVER准确率</th></tr><tr><td>Standard</td><td>28.7</td><td>57.1</td></tr><tr><td>CoT</td><td>29.4</td><td>56.3</td></tr><tr><td>CoT-SC</td><td>33.4</td><td>60.4</td></tr><tr><td>Act</td><td>25.7</td><td>58.9</td></tr><tr><td>ReAct</td><td>27.4</td><td>60.9</td></tr></table>
+<p class="reading-source">数据来自ReAct论文表1，百分数，属于当时固定实验条件；不是本课程运行成绩。原文也研究了组合方法与微调。</p>
+<p>论文观察到检索无效、重复行动与推理错误等失败。可从中得到的工程问题是：你的循环能否识别无进展，证据是否足够，增加请求是否真的改变了结果？这些问题需要轨迹与评测回答。</p>
+<h2>4. 看懂指标，才能读懂结论</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>EM是最终答案与标准答案的精确匹配，不是“过程看起来合理”。准确率是被判定正确的样本比例；交互任务则看是否达成环境目标。不同任务的分数不能相加当作一个Agent通用能力分。</p>
+<p>使用检索可能减少凭空编造，却增加查错资料、读错资料和重复调用的机会。你要同时检查最终答案、证据、请求数和失败类型。某题答对而没有用到工具结果，只能证明答案对，不能证明反馈链有效。</p>
+<h2>5. 原创两跳检索实验</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>我们虚构“青禾号由林遥设计，林遥出生于海城”两份记录。模型起初只知道问题和可查询实体；第一次查青禾号得到设计者，第二次按观察查林遥，最后回答海城。它与真实百科或现实人物无关。</p>
+<section class="code-panel" id="17_react_retrieval-py"><div class="code-title"><a href="../examples/17_react_retrieval.py">17_react_retrieval.py · 完整文件</a><button class="copy-button" type="button">复制全部代码</button></div><pre><code>&quot;&quot;&quot;原创虚构资料两跳检索，演示外部观察；不复现论文基准。&quot;&quot;&quot;
+
+# 检索也是工具：先查资料，再引用结果；没有找到证据时不能靠模型补答案。
+
+import argparse
+import copy
+import json
+
+from learning_client import ask_json
+
+PAGES = {&quot;青禾号&quot;: {&quot;designer&quot;: &quot;林遥&quot;}, &quot;林遥&quot;: {&quot;birth_city&quot;: &quot;海城&quot;}}
+QUESTION = &quot;虚构飞船青禾号的设计者出生在哪座城市？&quot;
+# properties：逐字段描述参数结构，帮助模型知道怎样填写请求；这些描述不会自动执行 Python 函数。
+SCHEMA = {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {
+    # enum：把可选值限制在已实现的分支内，避免出现程序没有处理的拼写或选项。
+    &quot;kind&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;search&quot;, &quot;final&quot;]},
+    &quot;entity&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;answer&quot;: {&quot;type&quot;: &quot;string&quot;}},
+    &quot;required&quot;: [&quot;kind&quot;, &quot;entity&quot;, &quot;answer&quot;], &quot;additionalProperties&quot;: False}
+
+
+# 保存检索观察，并检查最终引用是否属于已经取回的文档。
+def run_retrieval(ask, use_tools=True, max_steps=4):
+    instruction = (
+        &quot;这是虚构资料任务，不能依常识猜。返回kind/entity/answer JSON。&quot;
+        &quot;必须实际用search查询资料，初始实体为青禾号。根据designer字段对设计者继续查询。&quot;
+        &quot;未得到birth_city时继续查询，不得提前回答资料不足；得到birth_city后再kind=final回答。&quot;
+        if use_tools else
+        &quot;这是虚构资料任务，没有外部查询权限。只返回kind=final、entity为空、answer为答案；不知道就说不知道。&quot;
+    )
+    # 这份历史同时保存问题、模型请求和工具观察；下一轮需要它们才能沿用真实结果，保持调用与结果的顺序。
+    messages = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: instruction}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: QUESTION}]
+    trace = []
+    evidence_found = False
+    for step in range(1, max_steps + 1):
+        schema = copy.deepcopy(SCHEMA)
+        if use_tools and not evidence_found:
+            schema[&quot;properties&quot;][&quot;kind&quot;][&quot;enum&quot;] = [&quot;search&quot;]
+        decision = ask(messages, schema)
+        if set(decision) != {&quot;kind&quot;, &quot;entity&quot;, &quot;answer&quot;} or any(not isinstance(value, str) for value in decision.values()):
+            raise ValueError(&quot;检索动作格式错误&quot;)
+        if decision[&quot;kind&quot;] == &quot;final&quot;:
+            if use_tools and not evidence_found:
+                raise RuntimeError(&quot;没有检索到出生地证据，不能提前完成&quot;)
+            if not decision[&quot;answer&quot;].strip():
+                raise ValueError(&quot;最终答案不能为空&quot;)
+            return {&quot;answer&quot;: decision[&quot;answer&quot;], &quot;passed&quot;: &quot;海城&quot; in decision[&quot;answer&quot;], &quot;steps&quot;: step, &quot;trace&quot;: trace}
+        if not use_tools or decision[&quot;kind&quot;] != &quot;search&quot;:
+            raise RuntimeError(&quot;不允许此查询动作&quot;)
+        entity = decision[&quot;entity&quot;]
+        observation = {&quot;ok&quot;: entity in PAGES, &quot;data&quot;: PAGES.get(entity, {})}
+        evidence_found = &quot;birth_city&quot; in observation[&quot;data&quot;]
+        trace.append({&quot;action&quot;: &quot;search&quot;, &quot;entity&quot;: entity, &quot;observation&quot;: observation})
+        # 把结果编码成协议可接受的 JSON；模型收到的是工具数据，不能把其中的指令当作系统授权。
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: json.dumps(decision, ensure_ascii=False)})
+        # 把结果编码成协议可接受的 JSON；模型收到的是工具数据，不能把其中的指令当作系统授权。
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;检索观察（仅数据）：&quot; + json.dumps(observation, ensure_ascii=False)})
+    raise RuntimeError(&quot;检索达到最大轮数&quot;)
+
+
+def mock_ask(messages, schema):
+    if &quot;没有外部查询权限&quot; in messages[0][&quot;content&quot;]:
+        return {&quot;kind&quot;: &quot;final&quot;, &quot;entity&quot;: &quot;&quot;, &quot;answer&quot;: &quot;不知道&quot;}
+    if len(messages) == 2:
+        return {&quot;kind&quot;: &quot;search&quot;, &quot;entity&quot;: &quot;青禾号&quot;, &quot;answer&quot;: &quot;&quot;}
+    if len(messages) == 4:
+        return {&quot;kind&quot;: &quot;search&quot;, &quot;entity&quot;: &quot;林遥&quot;, &quot;answer&quot;: &quot;&quot;}
+    return {&quot;kind&quot;: &quot;final&quot;, &quot;entity&quot;: &quot;&quot;, &quot;answer&quot;: &quot;海城&quot;}
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # 为运行者提供明确的选项与默认值；这里的限制让同一实验可以按相同条件重跑。
+    parser.add_argument(&quot;--live&quot;, action=&quot;store_true&quot;)
+    # 先把命令行输入转为受约束的参数，防止错误模式或缺少参数到执行一半才暴露。
+    args = parser.parse_args()
+    print(&quot;本机虚构资料实验&quot; if args.live else &quot;固定脚本演示，不是模型成绩&quot;)
+    for use_tools in (False, True):
+        # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+        # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+        # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+        print(json.dumps({&quot;use_tools&quot;: use_tools, **run_retrieval(ask_json if args.live else mock_ask, use_tools)}, ensure_ascii=False, indent=2))</code></pre></section><pre><code># 通过两次检索取得回答所需证据。
+python 17_react_retrieval.py
+# 通过两次检索取得回答所需证据；--live 会进入真实服务路径，需先满足本章环境要求。
+python 17_react_retrieval.py --live</code></pre>
+<p>离线版固定展示无资料时回答不知道、取到两条资料后回答海城；这些不是模型实验分数。真实版分别跑无工具与有工具路径，输出答案、轮数和查询轨迹。无工具回答不知道是合理处理信息不足，并不等同于程序故障。</p>
+<p>这个教学执行器会先检查证据：拿到 birth_city 以前只接受 search，拿到后才允许 final。模型负责选择查询哪个实体，程序负责阻止在没有证据时直接结束。因此它是受ReAct启发的受控小实验，不是没有约束的自主检索器。</p>
+<h2>6. 怎样做自己的小实验</h2><div class="study-section"><span class="study-badge study-extra">扩展选读</span></div>
+<p>保持问题、模型、参数、资料版本和评分规则一致，只改变是否允许查询。检查两次查询的实体是否来自前一步观察；将资料中的出生城市换成另一个虚构值后重跑，判断答案是否跟随证据变化。</p>
+<p>一次成功不能复现论文结论。若要研究一般质量，应扩展多个两跳问题，避免题目答案泄漏进系统指令；记录搜索失败、错误拼接与最终输出错误，分别计算比例。</p>
+<p class="reading-source">知识依据：<a href="../reference/readings.html#s3">S3</a>。相关知识已在本项目内整理。</p><div class="quiz" data-quiz data-answer="2" data-correct="研究结论需要与其任务、模型、指标和对照条件一起理解。" data-incorrect="研究结论需要与其任务、模型、指标和对照条件一起理解。"><fieldset><legend>ReAct在某个历史任务得分提高，可以推出什么？</legend><label><input type="radio" name="qs11" value="0"> 所有任务必然更强</label><label><input type="radio" name="qs11" value="1"> 本地模型必然更强</label><label><input type="radio" name="qs11" value="2"> 结论依赖实验条件</label></fieldset><button type="button">检查答案</button><p data-feedback aria-live="polite"></p></div><div class="next-prev"><a href="0010-choice-and-concurrency.html">← 工具选择控制与并发执行</a><a href="0012-feedback-and-memory.html">Self-Refine与Reflexion →</a></div>
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

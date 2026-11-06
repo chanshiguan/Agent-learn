@@ -1,0 +1,352 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>04-agent-frameworks.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="stage-4--workflow-graph-与-agent-框架"></span><h1 data-heading-alias="stage-4--workflow-graph-与-agent-框架" id="h5994cf74ad2e">Stage 4 — Workflow Graph 与 Agent 框架</h1>
+<p>你在 Stage 3 已经自己写过 <strong>Agent Loop</strong>。这一关先把多步工作画成 <strong>Workflow Graph</strong>，再选 <strong>Framework（框架）</strong> 来帮你接线。先看懂工作地图，再选工具箱，才不会因为某个框架很流行就硬把事情变复杂。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<p>完成这一关后，你可以：</p>
+<ul>
+<li>用自己的话分清 Agent Loop、Workflow Graph、Agent framework 与多角色系统。</li>
+<li>先选最简单能完成任务的工具，不为了流行硬加角色。</li>
+<li>跑完五个练习，亲手比较 LangGraph、CrewAI、Smolagents 与 Pydantic AI。</li>
+<li>说出交接、存档与人工批准各自解决什么问题。</li>
+</ul>
+<span id="-先认识八个核心词"></span><h2 data-heading-alias="-先认识八个核心词" id="h70155c361cc5">🧩 先认识八个核心词</h2>
+<ul>
+<li><strong>Workflow（工作流程）／Workflow Graph（工作流程图）</strong>：像照食谱做菜，再把每一步和下一站画出来。程序先写好 node、edge 与分支，模型只完成其中需要判断的工作。</li>
+<li><strong>Framework（框架）</strong>：一盒已经整理好的积木。它帮你接好循环、工具、记录与错误处理；但盒子越大，藏起来的细节也越多。</li>
+<li><strong>Agent（智能体）</strong>：像拿到目标的助手。模型可以根据当前结果决定下一步，但真正的权限、验证与停止条件仍由程序控制。</li>
+<li><strong>Orchestration（编排）</strong>：像交通指挥。它安排谁先做、谁后做、数据交给谁，以及失败时怎么回来。</li>
+<li><strong>State（状态）</strong>：像工作中的笔记本。它记住当前输入、工具结果、进度与下一步需要的数据。</li>
+<li><strong>Checkpoint（检查点）</strong>：像游戏存档。流程中断后，可以从已保存的位置继续，不必全部重来。</li>
+<li><strong>Handoff（交接）</strong>：像把工作单交给另一位同学。新的 Agent 接手后，需要拿到足够背景，也不能得到不需要的权限。</li>
+<li><strong>Human-in-the-loop（HITL，人在循环中）</strong>：像先举手请老师看。程序在花钱、寄信、删除数据或发布前暂停，等人批准才继续。</li>
+</ul>
+<p><a id="-先分清loopframework-与-graph"></a></p>
+<span id="-先分清loopgraph-与-framework"></span><h2 data-heading-alias="-先分清loopgraph-与-framework" id="hee1b734da619">🧭 先分清：Loop、Graph 与 Framework</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">五岁也懂的说法</th>
+<th style="text-align:left">正确边界与学习位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Agent Loop</strong></td>
+<td style="text-align:left">助手做一步、看结果，再决定下一步</td>
+<td style="text-align:left">Stage 3 的一次执行内循环：model → tool call → execute → tool result → model</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Workflow Graph</strong></td>
+<td style="text-align:left">把每一站和道路画出来</td>
+<td style="text-align:left">用 node、edge、branch 与 state 表示工作顺序；格子里可以是 Agent、工具、检查或人工批准</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Agent Framework</strong></td>
+<td style="text-align:left">一盒帮你接线的工具积木</td>
+<td style="text-align:left">提供 runner、tool、state、handoff、checkpoint 等零件；一个 Agent 也能使用</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Loop Engineering</strong></td>
+<td style="text-align:left">设计它怎么反复做、怎么验证、何时停</td>
+<td style="text-align:left">Stage 7 才加入预算、验证、恢复与人工升级</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Production orchestration（上线编排）</strong></td>
+<td style="text-align:left">把整张工作地图做成真的能安全运行</td>
+<td style="text-align:left">Stage 7 才为多个 loop、工具和人工批准加上观测、恢复与停止规则；新兴文章也可能称为 Graph Engineering</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Framework 是工具箱；Workflow Graph 是你画出的工作地图；Production orchestration 是让地图能安全运行的工程工作。</strong> <strong>Graph Engineering</strong> 是新兴但还未统一的称呼，不是 Framework 的另一个名字。<strong>Multi-Agent</strong> 可以放进图里，但不是每张图都需要多个 Agent，也不是每个 node 都必须是 Agent。</p>
+<span id="-先看一张选择地图"></span><h2 data-heading-alias="-先看一张选择地图" id="h29831297e34a">🗺️ 先看一张选择地图</h2>
+<p><img src="../upstream/resources/diagrams/agent-framework-choice-map.zh-Hans.png" alt="Agent 系统选择图：先分辨由程序或 Agent 决定下一步，再看需要一个或多个 Agent，最后先选最简单能完成任务的形状" /></p>
+<p>先问两题：<strong>谁决定下一步？需要几个 Agent？</strong> 如果固定路线已经能完成，就停在左上角；多一个 Agent 会多一份 context、测试与失败方式。</p>
+<span id="-进入条件"></span><h2 data-heading-alias="-进入条件" id="h4203fdf0a3c2">🚪 进入条件</h2>
+<p>先完成 Stage 3 的六道练习，至少能说出 <code>schema → call → execute → result → answer</code>。会读 <code>async</code>／<code>await</code> 很有帮助，但不是开始第一题的门槛。</p>
+<details markdown="1">
+<summary>⏱ 展开时间、环境与预算</summary>
+<ul>
+<li>建议时间：<code>2–3 周</code>，约 <code>10–15 小时</code>。不用一次看完 19 个项目。</li>
+<li>Python：现有示例先用 <code>3.11</code>。CrewAI <code>1.15.18</code> 当前要求 Python <code>&gt;=3.10,&lt;3.14</code>；Python 3.14 用户请另外建立 3.11 环境。紧接着的 stacked 04B 会把五个示例迁移到当前 major，并在干净环境中验收；本内容层不把旧 requirements 说成已经升级。</li>
+<li>Path A：Ollama 练习不收 API 费；你的硬件、电力与下载时间仍有成本。</li>
+<li>Path B：本章用 Anthropic Haiku 比较。单次成本公式是 <code>输入 tokens ÷ 1,000,000 × $1 + 输出 tokens ÷ 1,000,000 × $5</code>；五题总成本是五次实际用量相加，不先猜固定小数。</li>
+</ul>
+</details>
+<span id="-必修阅读"></span><h2 data-heading-alias="-必修阅读" id="h333a7c3c42fb">📚 必修阅读</h2>
+<p>先读“怎么选简单形状”，再从第 4 步的两个 framework Quickstart 中挑一个。下面共有 4 个阅读步骤、5 个官方链接；先按顺序读，不必一次读完每一页。</p>
+<ol>
+<li><a href="../../reference/source-readings.html#sffc229d83891">Anthropic — Building Effective Agents</a>：先分清 workflow 与 agent，也看懂为什么要从简单方案开始。</li>
+<li><a href="../../reference/source-readings.html#sbe28ccd063ec">LangGraph — Workflows and Agents</a>：看固定路线与动态路线怎么写成图。</li>
+<li><a href="../../reference/source-readings.html#s6c059f59453b">OpenAI Agents SDK — Multi-agent orchestration</a>：比较 manager-as-tools 与 handoff。</li>
+<li>Quickstart 二选一：<a href="../../reference/source-readings.html#s399cf6369bd3">LangGraph</a> 或 <a href="../../reference/source-readings.html#s959fcba3f7dc">CrewAI</a>；只要先深入一个。</li>
+</ol>
+<p>第三方排行榜可以提供候选名单，但不能证明版本、授权、可用性或哪个“最强”。这些事以官方文件与你自己的 eval 为准。</p>
+<p><a id="-什么是-multi-agent-framework"></a></p>
+<span id="-什么是-agent-framework"></span><h2 data-heading-alias="-什么是-agent-framework" id="hbba131ac9558">🤔 什么是 Agent framework？</h2>
+<p>Agent framework 是帮一个或多个 Agent 接好模型、工具、state、重试、存档与人工批准的工具箱。<strong>一个 Agent 也能使用 framework；Multi-Agent 只是后面的一种系统形状，不是 framework 的定义。</strong> Framework 不是魔法，也不是每个项目的默认答案。</p>
+<p><a id="两个维度先分清楚workflow-vs-agent--single-vs-multi"></a></p>
+<h3 id="hcd5b8ae5c2aa">两个维度先分清楚（workflow vs agent / single vs multi）</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left"><strong>Workflow</strong>：程序先写好路线</th>
+<th style="text-align:left"><strong>Agent</strong>：模型动态选下一步</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>一个 Agent</strong></td>
+<td style="text-align:left">线性流程或固定分支</td>
+<td style="text-align:left">Stage 3 写过的工具循环</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>多个 Agent</strong></td>
+<td style="text-align:left">固定角色与顺序</td>
+<td style="text-align:left">动态 handoff、supervisor 或辩论</td>
+</tr>
+</tbody>
+</table>
+<p>这四格会重叠。例如 LangGraph 的 conditional edge 可以同时有固定规则与模型决策。表格是帮你问问题，不是把所有系统硬塞进盒子。</p>
+<p><a id="什么时候真的需要-multi-agent不要硬上"></a></p>
+<h3 id="h28ac3d58cb63">什么时候<strong>真的</strong>需要 Multi-Agent（不要硬上）</h3>
+<p>先用一个 Agent。只有出现下面的证据，再考虑增加角色：</p>
+<ul>
+<li>任务真的能拆成彼此较独立的工作，而且每份工作有清楚输出。</li>
+<li>不同角色需要不同工具、权限或 context，分开能降低混乱。</li>
+<li>多个方向可以同时探索，最后也有明确的合并与验证方法。</li>
+<li>你的 eval 显示多 Agent 比单 Agent 更可靠，增加的 token、延迟与调试成本值得。</li>
+</ul>
+<p>没有这些证据时，一个 Agent 加好工具、好 context 与有限循环通常更容易测试。多 Agent 不保证比较准，也不保证比较快。</p>
+<details markdown="1">
+<summary>展开 Anthropic／Cognition 证据与成本限制</summary>
+<ul>
+<li><a href="../../reference/source-readings.html#sffc229d83891">Anthropic — Building Effective Agents</a> 建议先从最简单可行方案开始；framework 可能遮住 prompt 与 response，用户仍要懂底层。</li>
+<li><a href="../../reference/source-readings.html#sa3afc1e8c7c2">Anthropic — Multi-agent Research System</a> 说明 multi-agent 适合 breadth-first、可平行的研究。文中的 <code>90.2%</code> 是特定 research eval 的相对提升，不是“90% 用例”通则；该系统约使用一般 chat 的 <code>15×</code> tokens，也不能套到所有任务。</li>
+<li><a href="../../reference/source-readings.html#s08ba861ce042">Cognition — Don't Build Multi-Agents</a> 强调 context fragmentation：细节散在不同 Agent 后，整体判断可能变差。文章没有提出“90% 用例不该使用”的统计。</li>
+<li>平行分支的完成时间取决于最慢分支、rate limit、重试与最后整合，不是固定 <code>1/N</code>。</li>
+</ul>
+</details>
+<span id="五种协作-pattern"></span><h3 data-heading-alias="五种协作-pattern" id="h348431c7fc5f">五种协作 pattern</h3>
+<p><strong>Supervisor（主管 Agent）</strong> 像班长，负责拆工作与合并答案。<strong>Worker（工作 Agent）</strong> 像组员，只拿完成自己任务所需的数据与工具。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Pattern</th>
+<th style="text-align:left">一句话形状</th>
+<th style="text-align:left">适合什么</th>
+<th style="text-align:left">先注意什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Routing／Handoff</strong></td>
+<td style="text-align:left">A 判断后交给 B</td>
+<td style="text-align:left">客服分类、专家转接</td>
+<td style="text-align:left">交接数据与权限</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Sequential</strong></td>
+<td style="text-align:left">A 做完才轮到 B</td>
+<td style="text-align:left">有固定先后的流程</td>
+<td style="text-align:left">前一步错误会往后传</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Parallel</strong></td>
+<td style="text-align:left">多份工作同时做</td>
+<td style="text-align:left">可独立搜索或检查</td>
+<td style="text-align:left">最慢分支与合并规则</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Supervisor–Worker</strong></td>
+<td style="text-align:left">一位主管分派多位工作者</td>
+<td style="text-align:left">大任务拆解与汇总</td>
+<td style="text-align:left">主管可能成为瓶颈</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Debate／Peer Review</strong></td>
+<td style="text-align:left">多个角色互相批评</td>
+<td style="text-align:left">高风险判断与复查</td>
+<td style="text-align:left">角色多不等于事实正确</td>
+</tr>
+</tbody>
+</table>
+<details markdown="1">
+<summary>展开完整 pattern、论文与 Claude Code subagent 对照</summary>
+<ul>
+<li>Routing／Handoff：<a href="../../reference/source-readings.html#s4dee6fd4082d">OpenAI Agents SDK handoffs</a> 是现行官方入口。<a href="../../reference/source-readings.html#seca37678e973">OpenAI Swarm</a> 只保留作为教育用 source reading；官方已建议 production 迁移到 Agents SDK。</li>
+<li>Sequential／Supervisor–Worker：<a href="../../reference/source-readings.html#s399cf6369bd3">LangGraph</a> 可以把 node、edge、state 与 checkpoint 明确画出。</li>
+<li>Parallel：适合彼此独立的研究方向；若工作共享大量 context 或紧密依赖，分开反而会丢失信息。</li>
+<li>Debate／Society：可延伸阅读 <a href="../../reference/source-readings.html#sec7ede4a4fcf">AutoGen paper</a>、<a href="../../reference/source-readings.html#s7be8bd14c63d">CAMEL</a>、<a href="../../reference/source-readings.html#s37fe1a89badb">ChatDev</a> 与 <a href="../../reference/source-readings.html#sefc9ff30e069">Generative Agents</a>。论文证明一种设计能被研究，不代表它是你的 production 默认方案。</li>
+<li>Claude Code subagent 是 runtime 内置的另一条路：用配置文件隔离 context 与工具，不必自己写 Python orchestration。完整比较留在 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能">Stage 5.5</a>。</li>
+</ul>
+</details>
+<span id="依需求选工具"></span><h3 data-heading-alias="依需求选工具" id="hfcccd052b9b4">依需求选工具</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你现在的情况</th>
+<th style="text-align:left">先看什么</th>
+<th style="text-align:left">为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">一个简单工具循环已经够用</td>
+<td style="text-align:left">Raw SDK／Stage 3 写法</td>
+<td style="text-align:left">最透明、最容易调试</td>
+</tr>
+<tr>
+<td style="text-align:left">要图式 state、checkpoint、HITL</td>
+<td style="text-align:left"><strong>LangGraph</strong></td>
+<td style="text-align:left">低阶 orchestration runtime，控制清楚</td>
+</tr>
+<tr>
+<td style="text-align:left">要快速做角色式雏形</td>
+<td style="text-align:left"><strong>CrewAI</strong></td>
+<td style="text-align:left">Agent、Task、Crew 容易上手；Flows 也支持 persistence 与 human feedback</td>
+</tr>
+<tr>
+<td style="text-align:left">已使用 OpenAI 生态、需要 handoff 与 tracing</td>
+<td style="text-align:left"><strong>OpenAI Agents SDK</strong></td>
+<td style="text-align:left">官方 SDK；Sandbox Agents 当前仍是 beta</td>
+</tr>
+<tr>
+<td style="text-align:left">Python／.NET 的 Microsoft 团队</td>
+<td style="text-align:left"><strong>Microsoft Agent Framework</strong></td>
+<td style="text-align:left">已 stable，并有 AutoGen／Semantic Kernel 迁移指南</td>
+</tr>
+</tbody>
+</table>
+<p>Ollama 练习先从 LangGraph 或 CrewAI 路线开始。不要因为工具清单超过某个固定数字就换框架；先用 eval 看 context、选错率与延迟是否真的恶化。</p>
+<details markdown="1">
+<summary>展开进阶 tool patterns</summary>
+<ul>
+<li><strong>Dynamic tool selection</strong>：先搜索或路由出少量相关工具，再交给模型。可看 <a href="../../reference/source-readings.html#s5344b3dc6426">LlamaIndex tools</a>。</li>
+<li><strong>Tool composition</strong>：把 A 的输出直接接到 B 的输入，减少不必要的中间文字。</li>
+<li><strong>Tool-augmented retrieval</strong>：把 retriever 当工具，再让 Agent 根据结果决定下一步；完整 RAG 留到 Stage 6。</li>
+</ul>
+<p>这三种做法不一定要用 framework。Framework 的价值是少写重复程序、留下 state 与 trace；raw SDK 也能实现。</p>
+</details>
+<span id="-动手练习"></span><h2 data-heading-alias="-动手练习" id="heaf7ce6df8e7">🛠 动手练习</h2>
+<p>每题先回到项目根目录，再安装该题的 requirements 并运行离线测试。通过后，按该题 README 选择 Ollama Path A 或 Anthropic Path B。</p>
+<span id="练习-1同一个-agent两个-framework"></span><h3 data-heading-alias="练习-1同一个-agent两个-framework" id="h0d5a7e9f2b83">练习 1：同一个 agent、两个 framework</h3>
+<p><strong>成果</strong>：同一个搜索加摘要任务各走 LangGraph 与 CrewAI，说出两者藏起来的工作有什么不同。</p>
+<pre><code class="language-powershell">Set-Location (git rev-parse --show-toplevel)
+Set-Location examples/stage-4/01-same-agent-two-frameworks
+py -3.11 -m pip install -r requirements.txt
+py -3.11 test.py
+</code></pre>
+<p>预算：Path A 单次 API 费 <code>$0</code>；Path B 依 <code>$1／$5</code> 每百万输入／输出 tokens 计算。若五题各跑一次，本章总额就是五次实际 token 成本相加。</p>
+<span id="练习-2多-agent-角色分配"></span><h3 data-heading-alias="练习-2多-agent-角色分配" id="haaa6185a83b6">练习 2：多 agent 角色分配</h3>
+<p><strong>成果</strong>：让 researcher、writer 与 reviewer 各做一件清楚的事，并看见每次交接的输出。</p>
+<pre><code class="language-powershell">Set-Location (git rev-parse --show-toplevel)
+Set-Location examples/stage-4/02-multi-agent-roles
+py -3.11 -m pip install -r requirements.txt
+py -3.11 test.py
+</code></pre>
+<p>预算：Path A 单次 API 费 <code>$0</code>；Path B 使用同一公式。角色越多，通常会多出 prompt 与调用，但没有固定倍数，请记录实际 tokens。</p>
+<span id="练习-3图式-workflow"></span><h3 data-heading-alias="练习-3图式-workflow" id="hcd6d42da39eb">练习 3：图式 workflow</h3>
+<p><strong>成果</strong>：在 LangGraph 建立分支、checkpoint 与 HITL 暂停点，再从保存位置继续。</p>
+<pre><code class="language-powershell">Set-Location (git rev-parse --show-toplevel)
+Set-Location examples/stage-4/03-graph-workflow
+py -3.11 -m pip install -r requirements.txt
+py -3.11 test.py
+</code></pre>
+<p>预算：Path A 单次 API 费 <code>$0</code>；Path B 依实际 tokens 计算。Checkpoint 保存的是进度，不会自动降低模型费用。</p>
+<span id="练习-4codeact-vs-json-tool"></span><h3 data-heading-alias="练习-4codeact-vs-json-tool" id="he40d59a40b14">练习 4：CodeAct vs JSON tool</h3>
+<p><strong>CodeAct</strong> 是让模型写代码当 action。它像请助手自己写一把临时工具，灵活性高，但模型生成的程序一律视为不可信，必须放在 sandbox 或受限环境，不能直接在主机任意执行。</p>
+<p><strong>成果</strong>：用同一题比较受限 CodeAct 与 JSON tool call，说出哪一条更容易验证。</p>
+<pre><code class="language-powershell">Set-Location (git rev-parse --show-toplevel)
+Set-Location examples/stage-4/04-codeact-vs-json-tool
+py -3.11 -m pip install -r requirements.txt
+py -3.11 test.py
+</code></pre>
+<p>预算：Path A 单次 API 费 <code>$0</code>；Path B 依实际 tokens 计算。Sandbox、容器或受管执行环境可能另收费。</p>
+<span id="练习-5类型安全-agent"></span><h3 data-heading-alias="练习-5类型安全-agent" id="hd473f2b8a9d0">练习 5：类型安全 agent</h3>
+<p><strong>Type-safe（类型安全）</strong> 像先画好表格格子，再检查每格放对数据。Pydantic 可以验证 Structured Output 的形状与范围；它不能保证答案内容一定是真的。</p>
+<p><strong>成果</strong>：让 Pydantic AI 返回 <code>answer</code>、<code>confidence</code> 与 <code>sources</code>，并亲眼看到不合规数据被拒绝。</p>
+<pre><code class="language-powershell">Set-Location (git rev-parse --show-toplevel)
+Set-Location examples/stage-4/05-typed-agent
+py -3.11 -m pip install -r requirements.txt
+py -3.11 test.py
+</code></pre>
+<p>预算：Path A 单次 API 费 <code>$0</code>；Path B 依实际 tokens 计算。Schema 验证失败后的重试也会产生 token 成本。</p>
+<details markdown="1">
+<summary>展开五题的 Path A／Path B 与排错入口</summary>
+<p>每个文件夹都有三语 README、<code>starter.py</code>、<code>starter_anthropic.py</code>、<code>test.py</code> 与 <code>test_anthropic.py</code>。先安装 requirements，再运行 mock test；成功后才按 README 启动真实模型：</p>
+<ol>
+<li><a href="examples--stage-4--01-same-agent-two-frameworks--README.zh-Hans.md.html">练习 1 README</a></li>
+<li><a href="examples--stage-4--02-multi-agent-roles--README.zh-Hans.md.html">练习 2 README</a></li>
+<li><a href="examples--stage-4--03-graph-workflow--README.zh-Hans.md.html">练习 3 README</a></li>
+<li><a href="examples--stage-4--04-codeact-vs-json-tool--README.zh-Hans.md.html">练习 4 README</a></li>
+<li><a href="examples--stage-4--05-typed-agent--README.zh-Hans.md.html">练习 5 README</a></li>
+</ol>
+<p>如果 <code>py -3.11</code> 找不到 Python，先跑 <code>py -0p</code> 看已安装版本。不要在 Python 3.14 强装 CrewAI 1.15.18；建立 Python 3.11 virtual environment。</p>
+</details>
+<span id="-推荐小项目有人先检查的研究摘要流程"></span><h2 data-heading-alias="-推荐小项目有人先检查的研究摘要流程" id="hfbd391ca5d8b">🎒 推荐小项目：有人先检查的研究摘要流程</h2>
+<p>把五题合成一个小作品：一位 researcher 找数据，一位 writer 写摘要；程序保存 state，最后停在 HITL，等你检查来源后才输出。先用两个角色就好，不要一开始做十人团队。</p>
+<p>成功标准：你能重新启动程序并从 checkpoint 继续；没有人的批准，流程不会进入最后发布步骤。</p>
+<span id="-精选-projects"></span><h2 data-heading-alias="-精选-projects" id="h44aee77132c0">🎯 精选 Projects</h2>
+<p>第一个入口先看 <a href="../../reference/source-readings.html#s642743ad9061">LangGraph</a> ⭐⭐⭐⭐⭐：你能直接看到 state、edge、checkpoint 与中断点。其余 18 条已按用途分组放在下面；推荐度是本章学习顺序，不是人气排行榜。</p>
+<p><small>既有框架信息核查：2026-08-27 UTC；Bifrost：2026-09-03 UTC</small></p>
+<table align="center">
+  <thead>
+    <tr>
+      <th scope="col">分类</th>
+      <th scope="col">Project</th>
+      <th scope="col">适合谁</th>
+      <th scope="col">状态／授权与限制</th>
+      <th scope="col">推荐度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">Production orchestration</th><td><a href="../../reference/source-readings.html#s642743ad9061">LangGraph</a></td><td>要 state、checkpoint、HITL 与可重播流程。</td><td>维护中；MIT。低阶 runtime，需要自己做较多设计。</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s92c9b5cfe3d8">Microsoft Semantic Kernel</a></td><td>既有 .NET／Java／Python Microsoft 技术栈。</td><td>维护中；MIT。Microsoft 另提供迁移到 Agent Framework 的指南。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sa36c4dfc0a7a">Agno</a></td><td>要把 Agent、Team、Workflow 接到 AgentOS 管理。</td><td>维护中；Apache-2.0。平台范围大，先确认是否真的需要整套。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sb6a803a2c827">Microsoft Agent Framework</a></td><td>新建 Python／.NET Microsoft Agent 项目。</td><td>Python 1.x stable；MIT。有 AutoGen／Semantic Kernel 官方迁移路径。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="6" align="center" valign="middle">快速雏形／多 Agent</th><td><a href="../../reference/source-readings.html#s715b6bc81ab4">CrewAI</a></td><td>快速做 researcher → writer → reviewer 角色流程。</td><td>维护中；MIT。Flows 已支持 persistence、resume 与 human feedback。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sd807807ac587">Microsoft AutoGen</a></td><td>维护现有 group-chat、辩论或 peer-review 项目。</td><td>Maintenance mode，由社区维护；CC-BY-4.0。现有 Python 项目使用 <code>autogen-agentchat</code> 0.7.x；新的 Microsoft 项目改用 Agent Framework，并避开旧 0.2 教程。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s82fcf33f253d">OpenAI Agents SDK</a></td><td>已使用 OpenAI 生态，需要 handoff、guardrail 与 tracing。</td><td>维护中；MIT。Sandbox Agents 是 beta，不等于所有 production 问题已解决。</td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s191947403d65">Deep Agents</a></td><td>要 planning、filesystem、subagent、memory 与 permissions 的完整 harness。</td><td>维护中；MIT。建在 LangGraph 上；简单 Agent 用它可能太重。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#seca37678e973">OpenAI Swarm</a></td><td>想读小型 source，理解 Agent 与 handoff。</td><td>冻结／历史教育用途；MIT。官方已由 Agents SDK 取代，不用于新 production 项目。</td><td>⭐⭐⭐⭐（教育）</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#saee9f0d16c69">Strands Agents</a></td><td>AWS／Bedrock 团队，或需要 Python／TypeScript SDK。</td><td>维护中；Apache-2.0。canonical repo 已由旧 <code>sdk-python</code> 移到 <code>harness-sdk</code>。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">特殊路线</th><td><a href="../../reference/source-readings.html#scce197194374">Hugging Face Smolagents</a></td><td>想比较 CodeAct 与 tool calling，或使用 Hugging Face 生态。</td><td>维护中；Apache-2.0。模型生成 code 必须隔离执行。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#se916d975160d">Pydantic AI</a></td><td>重视 typed dependency、structured output 与 validation。</td><td>维护中；MIT。Schema 验证外形，不保证语意正确。</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#s7fe841355559">Letta</a></td><td>长 session、跨日记忆与 persona-stable 助手。</td><td>维护中；Apache-2.0。Memory-first，完整记忆观念留到 Stage 6。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sce3dc91895d6">Vercel Eve</a></td><td>TypeScript／Vercel 团队，需要 durable workflow、sandbox 与 approvals。</td><td>Public Preview；Apache-2.0。2026-06 才公开，API 仍可能快速变动。</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="3" align="center" valign="middle">特化</th><td><a href="../../reference/source-readings.html#se7f1aab302e1">LlamaIndex Agents</a></td><td>文件密集、retrieval 与知识工作流程。</td><td>维护中；MIT。强项是数据与 retrieval，不是所有 orchestration 场景。</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sa602ed08f0ee">AgentScope</a></td><td>研究多 Agent、需要可视化与 studio 工具。</td><td>维护中；Apache-2.0。先确认社区、部署与语言需求。</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sc5a32632e586">LangChain</a></td><td>要模型、retrieval、tool 与 middleware 的高阶积木。</td><td>维护中；MIT。复杂 orchestration 可下沉到 LangGraph。</td><td align="center" valign="middle">⭐⭐⭐</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" rowspan="2" align="center" valign="middle">基础设施</th><td><a href="../../reference/source-readings.html#s53f916a5ea4c">Bifrost</a></td><td>想自建 gateway，以统一接口连接多家 provider，并练习 routing、fallback 与 load balancing。</td><td>维护中；Apache-2.0。它是 infrastructure，不是 Agent framework；adaptive load balancing、clustering 与部分 guardrails 属于 enterprise 功能。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+    <tr><td><a href="../../reference/source-readings.html#sdab892839df4">LiteLLM</a></td><td>想用 Python SDK 或 OpenAI-compatible proxy 统一切换多家 provider。</td><td>维护中；根目录 LICENSE 说明 enterprise 以外采用 MIT，<code>enterprise/</code> 另有授权。它不是 Agent framework。</td><td align="center" valign="middle">⭐⭐⭐⭐</td></tr>
+  </tbody>
+</table>
+<span id="-进-stage-5-前的自我检查"></span><h2 data-heading-alias="-进-stage-5-前的自我检查" id="h7710bfbf762f">✅ 进 Stage 5 前的自我检查</h2>
+<ul>
+<li>[ ] 我能分清 Agent Loop、Agent framework、Workflow Graph 与 Multi-Agent，不把它们当同一件事。</li>
+<li>[ ] 我会先用最简单方案，只有看到可量化证据才增加 Agent。</li>
+<li>[ ] 我能说明 State、Checkpoint、Handoff 与 HITL 各自保存或控制什么。</li>
+<li>[ ] 我跑过五题的离线测试，并完成至少一条 Ollama Path A。</li>
+<li>[ ] 我知道 CodeAct 要隔离执行，type-safe output 也仍需检查内容。</li>
+</ul>
+<p>都做到后，进入 <a href="stages--05-claude-code-ecosystem.zh-Hans.md.html">Stage 5 — Claude Code Ecosystem</a>。如果还分不清四格，回到上面的选择地图；不必重读 19 笔表格。</p>
+<details markdown="1">
+<summary>💡 展开疑难排解与后续路由</summary>
+<ul>
+<li>想了解 Claude Code subagent：到 Stage 5.5。</li>
+<li>想了解 checkpoint 与长期记忆：到 Stage 6。</li>
+<li>想把 multi-agent 上线、做 eval 与 observability：到 Stage 7。</li>
+<li>想看更前沿的 harness、dynamic workflow 与失败研究：到 Stage 7.5。</li>
+<li>想让 Agent 操作浏览器、电脑或 sandbox：到 Stage 8。</li>
+</ul>
+</details>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

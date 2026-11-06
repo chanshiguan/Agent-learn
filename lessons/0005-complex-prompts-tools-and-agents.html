@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>05 · 复杂 Prompt、工具与 Agent</title><link rel="stylesheet" href="../assets/course.css"></head>
+<body><main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><a href="0004-reasoning-grounding-and-reliability.html">04 推理与可靠性</a><span class="current">05 工具与 Agent</span><a href="0006-parameters-iteration-and-evals.html">06 迭代与 Eval</a></nav>
+  <p class="eyebrow">Lesson 05 · Workflows</p>
+  <h1>当 Prompt 越写越长，往往应该改流程了</h1>
+  <p class="lede">复杂任务不只需要更多指令，还需要计划、分解、工具调用、验证和失败恢复。这一课把 Anthropic 复杂 Prompt 模板和附录、Google Agentic Workflow、OpenAI Agent 任务建议连起来。</p>
+
+  <h2>1. 复杂 Prompt 的组件库</h2>
+  <p>Anthropic 第 9 章将复杂 Prompt 拆成一组可选组件。不是每个 Prompt 都要包含全部组件，但它是一份完整检查清单：</p>
+  <table>
+    <thead><tr><th>组件</th><th>回答什么问题</th><th>客服 Agent 示例</th></tr></thead>
+    <tbody>
+      <tr><td>Task context</td><td>你是谁，总目标是什么？</td><td>你是售后分流助手</td></tr>
+      <tr><td>Tone context</td><td>用什么语气和对象沟通？</td><td>简短、冷静、不责备用户</td></tr>
+      <tr><td>Task description</td><td>具体职责和规则是什么？</td><td>分类，必要时询问补充信息</td></tr>
+      <tr><td>Examples</td><td>理想行为和边界是什么样？</td><td>边界留言与期望输出</td></tr>
+      <tr><td>Input data</td><td>这次处理的资料是什么？</td><td>对话历史与当前留言</td></tr>
+      <tr><td>Immediate task</td><td>现在这一步要做什么？</td><td>判断应转给哪个队列</td></tr>
+      <tr><td>Planning/analysis</td><td>需要哪些可检查处理步骤？</td><td>先检查支付，再检查技术故障</td></tr>
+      <tr><td>Output formatting</td><td>结果结构是什么？</td><td>标签 + 简短可验证理由</td></tr>
+      <tr><td>Prefill</td><td>需要给输出一个起点吗？</td><td><code>&lt;result&gt;</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><strong>构建顺序：</strong>先使用较完整的结构将任务做对，然后用 Eval 删减没有价值的组件。不要一开始就追求“最短神奇 Prompt”。</div>
+
+  <h2>2. 顺序不是绝对，但要有理由</h2>
+  <p>通用起点可以是：身份/任务背景 → 规则 → 范例 → 资料 → 当前任务 → 输出格式。对长文档，现代 Gemini 建议将大量上下文放在前面，具体问题放在文档后面，并用“根据上述资料”连接上下文和任务。</p>
+  <p>不同任务可以调整顺序，但每次调整都应用同一组 Eval 检查。</p>
+
+  <h2>3. 三种拆分复杂度的方法</h2>
+  <table>
+    <thead><tr><th>方法</th><th>结构</th><th>适合场景</th></tr></thead>
+    <tbody>
+      <tr><td>路由/拆指令</td><td>先识别任务类型，选择对应 Prompt</td><td>客服、多种文档处理</td></tr>
+      <tr><td>链式处理</td><td>A 的输出成为 B 的输入</td><td>提取证据 → 写答案 → 审核</td></tr>
+      <tr><td>并行后聚合</td><td>分片处理，再合并结果</td><td>多文档摘要、多维度评审</td></tr>
+    </tbody>
+  </table>
+  <p>链式处理还可以用于修订：第一次生成草稿，第二次检查事实或风格，第三次输出定稿。但“再检查一次”也可能改坏原本正确的答案，所以要允许审核器回答“无需修改”。</p>
+
+  <h2>4. 工具调用的不变本质</h2>
+  <div class="flow"><span>模型选工具与参数</span><b>→</b><span>生成暂停</span><b>→</b><span>程序执行工具</span><b>→</b><span>工具结果返回模型</span><b>→</b><span>模型继续</span></div>
+  <p>工具可以是计算器、天气 API、SQL 查询、搜索、文件读写或业务操作。模型不是自己在操作数据库；它只是产生一个结构化的工具请求，真正的代码决定是否执行。</p>
+  <div class="callout warning"><strong>历史内容警告：</strong>Anthropic 附录使用 XML 文本自己实现 function calling，并明确说当时还将改进。这种方式可以用来理解原理，但现在应优先使用供应商的原生 Tool/Function Schema，不要自己用正则表达式解析模型生成的伪函数调用。</div>
+
+  <h2>5. 工具定义要说清什么</h2>
+  <ul>
+    <li>工具名称与精确用途。</li>
+    <li>什么情况该用，什么情况不该用。</li>
+    <li>每个参数的类型、含义、是否必填和合法值。</li>
+    <li>工具结果的结构和可能错误。</li>
+    <li>写操作、高风险操作和权限边界。</li>
+  </ul>
+  <p>对 SQL 或数据库工具，还要区分读取与写入，不要让“查用户”和“创建用户”共用模糊的参数说明。</p>
+
+  <h2>6. 从 Prompt 链到 Agent Loop</h2>
+  <pre><code>while 任务未完成:
+    让模型根据当前状态选择下一步
+    if 模型请求工具:
+        检查权限和参数
+        执行工具
+        追加工具结果
+    else:
+        验证最终答案
+        结束</code></pre>
+  <p>Agent 不只是“带工具的聊天”。一个可靠 Agent 需要明确三组行为维度：</p>
+  <table>
+    <thead><tr><th>维度</th><th>关键决策</th></tr></thead>
+    <tbody>
+      <tr><td>推理与策略</td><td>怎样分解任务，诊断多深，查阅资料多全面</td></tr>
+      <tr><td>执行与可靠性</td><td>观察变化后是否转向，失败后重试多久，如何评估风险</td></tr>
+      <tr><td>交互与输出</td><td>什么时候可做假设，什么时候问用户，进度说多少，结果需多精确</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7. 计划、持续性和完成条件</h2>
+  <p>OpenAI 对长时间 Agent 任务的建议是：在重要工具调用前提供简短说明，将任务拆成可跟踪项，并在每次观察后检查是否真正完成。重点不是“写一个超长计划”，而是防止只完成一半就停止。</p>
+  <p>完成条件应可验证：“修好代码”太弱；“失败测试先变红，修复后变绿，全部回归通过”才可检查。</p>
+
+  <h2>8. 应对障碍：重试不等于原样重复</h2>
+  <ul>
+    <li>短暂网络失败：在有限次数内重试。</li>
+    <li>参数无效：修改参数或重新读取 schema，不要原样重试。</li>
+    <li>权限不足：停止并向用户说明，不尝试绕过。</li>
+    <li>假设被否定：生成新假设，而不是对旧结论继续加强语气。</li>
+  </ul>
+
+  <h2>9. 编程和前端 Agent 的特定要求</h2>
+  <p>对编程任务，明确角色和工作流，给工具调用示例，要求运行测试并检查补丁是否真正应用。对前端任务，还应说明视觉标准、字体、色彩、间距、交互状态、可访问性、文件结构和 API 边界。</p>
+  <p>OpenAI 当前文档举例推荐 Tailwind CSS、shadcn/ui、Radix Themes、Lucide/Material Symbols/Heroicons 和 Motion。这是特定时期的工具建议，不是 Prompt Engineering 的永久定律；实际项目应匹配现有技术栈。</p>
+
+  <h2>10. 检索练习</h2>
+  <div class="quiz" data-quiz data-answer="c" data-correct="复杂顺序任务适合将上一步输出作为下一步输入。" data-incorrect="单个超长 Prompt 不一定比清晰流程更可靠。">
+    <fieldset><legend>1. “提取证据 → 写答案 → 事实审核”最适合哪种结构？</legend>
+      <label><input type="radio" name="a1" value="a"> 单次超长请求</label><label><input type="radio" name="a1" value="b"> 随机三次请求</label><label><input type="radio" name="a1" value="c"> 顺序 Prompt 链路</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="quiz" data-quiz data-answer="b" data-correct="模型选择调用，应用层负责校验和执行。" data-incorrect="不要将真正执行权和模型的文本生成混在一起。">
+    <fieldset><legend>2. 在工具调用中，真正执行 SQL/API 的是？</legend>
+      <label><input type="radio" name="a2" value="a"> 模型的推理文字</label><label><input type="radio" name="a2" value="b"> 应用的控制逻辑</label><label><input type="radio" name="a2" value="c"> Prompt 中的工具名</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="next-prev"><a href="0004-reasoning-grounding-and-reliability.html">← 上一课：推理与可靠性</a><a href="0006-parameters-iteration-and-evals.html">下一课：迭代与 Eval →</a></div>
+  <footer><p>你可以把一个想做的 Agent 任务发给我，我会帮你区分哪些应放在 Prompt，哪些应放在工具或程序流程中。</p></footer>
+</main><script src="../assets/quiz.js"></script></body></html>

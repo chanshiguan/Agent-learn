@@ -1,0 +1,85 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>debug-flowchart.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="debug-flowchart为什么-llm-不调用我的-tool"></span><h1 data-heading-alias="debug-flowchart为什么-llm-不调用我的-tool" id="h979c093df856">Debug Flowchart：“为什么 LLM 不调用我的 tool”</h1>
+<blockquote>
+<p>先看症状，再做最小检查。对应 <code>SKILL.md</code> Step 2。</p>
+</blockquote>
+<span id="section-a--symptom-allm-完全不触发-tool_calls"></span><h2 data-heading-alias="section-a--symptom-allm-完全不触发-tool_calls" id="h03e8cabb03e8">Section A — Symptom (a)：LLM 完全不触发 tool_calls</h2>
+<p>LLM 看到了 <code>tools=[...]</code>，却只返回文字。先逐项确认：</p>
+<pre><code class="language-text">[ ] finish_reason 是 &quot;tool_calls&quot; 还是 &quot;stop&quot;？
+[ ] message.tool_calls 是空的吗？
+[ ] user 的问题真的需要外部工具吗？
+[ ] 发出的 tool schema 符合当前 SDK 格式吗？
+</code></pre>
+<span id="先检查这-5-项"></span><h3 data-heading-alias="先检查这-5-项" id="h4047bd23ff91">先检查这 5 项</h3>
+<span id="1-description-太模糊"></span><h4 data-heading-alias="1-description-太模糊" id="h3753d0f10bce">1. <code>description</code> 太模糊</h4>
+<pre><code class="language-python"># ❌ 看不出何时使用
+{&quot;name&quot;: &quot;get_data&quot;, &quot;description&quot;: &quot;Get data.&quot;}
+
+# ✅ 说清楚使用时机
+{&quot;name&quot;: &quot;get_weather&quot;, &quot;description&quot;: &quot;Use this when the user asks about current weather, forecasts, or temperatures for a city.&quot;}
+</code></pre>
+<span id="2-多个-tool-的工作重叠"></span><h4 data-heading-alias="2-多个-tool-的工作重叠" id="h2962dc38eaa2">2. 多个 tool 的工作重叠</h4>
+<pre><code class="language-python"># ❌ search 和 lookup 看起来一样
+{&quot;name&quot;: &quot;search&quot;, &quot;description&quot;: &quot;Find information.&quot;}
+{&quot;name&quot;: &quot;lookup&quot;, &quot;description&quot;: &quot;Look up data.&quot;}
+
+# ✅ 各自说清楚能做和不能做的事
+{&quot;name&quot;: &quot;web_search&quot;, &quot;description&quot;: &quot;Use for current external information. Do not use for facts already provided by the user.&quot;}
+{&quot;name&quot;: &quot;fact_lookup&quot;, &quot;description&quot;: &quot;Use for stored facts. Do not use for live news or prices.&quot;}
+</code></pre>
+<span id="3-问题根本不需要-tool"></span><h4 data-heading-alias="3-问题根本不需要-tool" id="h013e34dc38b1">3. 问题根本不需要 tool</h4>
+<p>“什么是 Python？”通常不需要天气或计算工具。没有 tool call 不一定是 bug。</p>
+<span id="4-schema-结构不符合-sdk"></span><h4 data-heading-alias="4-schema-结构不符合-sdk" id="h26e00b8cb291">4. Schema 结构不符合 SDK</h4>
+<p>OpenAI-compatible 格式需要 <code>{&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {...}}</code>；Anthropic 格式使用 <code>input_schema</code>。不同 client 的验证与报错方式可能不同，所以要检查实际发出的 request、收到的 response 和应用程序 log。</p>
+<span id="5-当前组合没有可用的-tool-calling-支持"></span><h4 data-heading-alias="5-当前组合没有可用的-tool-calling-支持" id="h6a117e518a70">5. 当前组合没有可用的 tool-calling 支持</h4>
+<p>查看当前 SDK 与 model 的官方文档，再用一个<strong>固定小测试（fixture）</strong> 确认。它像每次都考同一道题。比较时保持 model、设置和问题不变；不要只看 model 名称或大小猜结果。</p>
+<span id="section-b--symptom-btool-被调用但-args-错"></span><h2 data-heading-alias="section-b--symptom-btool-被调用但-args-错" id="ha753d244b11b">Section B — Symptom (b)：tool 被调用，但 args 错</h2>
+<pre><code class="language-python"># 预期
+convert_temperature(value=32, unit=&quot;celsius&quot;)
+
+# 可能收到
+convert_temperature(value=&quot;32 Celsius&quot;, unit=&quot;&quot;)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>看到的问题</th>
+<th>Schema 修法</th>
+<th>程序仍要做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数字变成文字</td>
+<td><code>type: &quot;number&quot;</code></td>
+<td>再检查类型和范围</td>
+</tr>
+<tr>
+<td>少了字段</td>
+<td><code>required</code></td>
+<td>缺值时返回清楚错误</td>
+</tr>
+<tr>
+<td>同一单位有多种写法</td>
+<td><code>enum</code></td>
+<td>只接受 allowlist 内的值</td>
+</tr>
+</tbody>
+</table>
+<p>完整例子见 <a href="examples--stage-5--tool-calling-tutor--references--schema-evolution.zh-Hans.md.html"><code>schema-evolution.zh-Hans.md</code></a>。</p>
+<span id="section-c--symptom-creact-loop-跑不停"></span><h2 data-heading-alias="section-c--symptom-creact-loop-跑不停" id="h2e5365a51d05">Section C — Symptom (c)：ReAct loop 跑不停</h2>
+<p>先检查三件事：</p>
+<ol>
+<li>把完整 assistant response 接回 <code>messages</code>。</li>
+<li>tool result 带回正确的 <code>tool_call_id</code> 或 <code>tool_use_id</code>。</li>
+<li>tool result 要自成一体，例如 <code>{&quot;city&quot;:&quot;Taipei&quot;,&quot;forecast&quot;:&quot;rain&quot;}</code>，不能只返回 <code>&quot;ok&quot;</code>。</li>
+</ol>
+<p>Loop 一定要有 <code>MAX_STEPS</code>。到上限时停止并报告，不可无限重试。</p>
+<span id="section-d--symptom-d多步任务漏了一步"></span><h2 data-heading-alias="section-d--symptom-d多步任务漏了一步" id="hc76de1d7ad0f">Section D — Symptom (d)：多步任务漏了一步</h2>
+<p>例如算完比例后，忘了再转成百分比。可以这样检查：</p>
+<ol>
+<li>用固定案例记录实际的 tool sequence。</li>
+<li>在 description 写清楚顺序，例如 <code>Call this last after dividing.</code>。</li>
+<li>要求一份短而可检查的工具计划，只列步骤和工具名称；不要要求、保存或公开模型的隐藏推理。</li>
+</ol>
+<p>可运行的多步范例：<a href="../../reference/source-readings.html#s9cb73ccfa29e">Stage 3 multi-step reasoning</a>。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,91 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="进阶选修让三个-agent-一起辩论"></span><h1 data-heading-alias="进阶选修让三个-agent-一起辩论" id="h5e880c7b6899">进阶选修：让三个 Agent 一起辩论</h1>
+<p>你会做出三个角色：PRO 说“赞成”、CON 说“反对”，Judge 看完两边再选一边。</p>
+<p>对应 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 — Agent 上线工程：可测、可看、可停、可恢复</a> 选修 A。先完成单一 Agent 的 Eval、安全执行与 Deploy 核心路线，再比较 Multi-Agent 是否真的更好。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<ul>
+<li>说清楚 <strong>Multi-Agent</strong>：多个 Agent 分工完成同一件事。</li>
+<li>让 PRO 与 CON 各自作答，避免一开始就互相带答案。</li>
+<li>用严格格式读 Judge 结果；格式错了就停止，不偷偷猜。</li>
+</ul>
+<span id="先跑不花模型费的测试"></span><h2 data-heading-alias="先跑不花模型费的测试" id="ha7551010ca68">先跑不花模型费的测试</h2>
+<p>在这个文件夹打开 PowerShell，直接复制：</p>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe test.py
+.\.venv\Scripts\python.exe test_anthropic.py
+</code></pre>
+<p>看到两份 <code>🎉</code>，就代表三次调用、空回复检查和 Judge 格式都通过。测试使用假回复，不会连接到模型。</p>
+<details markdown="1">
+<summary>Path A：用 Ollama 实际辩论</summary>
+<ol>
+<li>
+<p>安装 <a href="../../reference/source-readings.html#s1d9fc6d98824">Ollama</a> 后，先准备模型：</p>
+<pre><code class="language-powershell">ollama pull qwen3.5:4b
+ollama serve
+</code></pre>
+</li>
+<li>
+<p>另开一个 PowerShell：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py
+</code></pre>
+</li>
+</ol>
+<p>Ollama 不收模型 API 费，但下载时间、电力与电脑硬件仍有成本。模型较慢时，请等它完成，不要用固定秒数判断失败。</p>
+</details>
+<details markdown="1">
+<summary>Path B：用 Anthropic 比较结果与预算</summary>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY = &quot;贴上你的金钥&quot;
+$env:MODEL = &quot;claude-haiku-4-5-20251001&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>这题会调用三次模型。Haiku 4.5 的单价是 input <code>$1 / 1M</code> tokens、output <code>$5 / 1M</code> tokens：</p>
+<pre><code class="language-text">估算费用 = (input_tokens × $1 / 1M) + (output_tokens × $5 / 1M)
+</code></pre>
+<p>这是估算公式，不是帐单保证。第一次练习前，可在 Anthropic Console 把供应商 spend limit 设成 <code>$1</code>；完成后移除 PowerShell 内的金钥。</p>
+</details>
+<span id="三个重要词"></span><h2 data-heading-alias="三个重要词" id="h2e741ba79fc6">三个重要词</h2>
+<ul>
+<li><strong>PRO / CON</strong>：同一题的赞成方与反对方。</li>
+<li><strong>Judge</strong>：读完两边答案，再选出较符合题目与证据的一边。</li>
+<li><strong>Output contract</strong>：模型必须照约定格式回答。这题只接受 <code>WINNER=PRO. 理由</code> 或 <code>WINNER=CON. 理由</code>。</li>
+</ul>
+<p>PRO 与 CON 都只看原题。Judge 才会看到原题和两份论点：</p>
+<pre><code class="language-text">题目 ─┬─&gt; PRO ─┐
+      └─&gt; CON ─┴─&gt; Judge ─&gt; WINNER + 理由
+</code></pre>
+<p>这只能提供第二个视角，不保证答案正确。医疗、法律或高风险决策仍要交给合格的人检查。</p>
+<span id="只改一件事"></span><h2 data-heading-alias="只改一件事" id="h3e24b238085c">只改一件事</h2>
+<p>把 <code>q</code> 换成你熟悉的问题，例如“小团队要不要先用 Agent framework？”再跑一次。看 Judge 的理由是否真的引用两边论点。</p>
+<span id="成功检查"></span><h2 data-heading-alias="成功检查" id="h10fc3e9baba8">成功检查</h2>
+<ul>
+<li>[ ] PRO 与 CON 都不是空白。</li>
+<li>[ ] Judge 只输出一个 Winner，并附上理由。</li>
+<li>[ ] 乱回 <code>Maybe WINNER=PRO</code> 时，测试会拒绝它。</li>
+<li>[ ] 你知道多 Agent 是分工方法，不是正确答案保证。</li>
+</ul>
+<details markdown="1">
+<summary>程序怎么走、常见问题与延伸</summary>
+<ol>
+<li><code>llm_call()</code> 先拒绝空字符串。</li>
+<li><code>debate()</code> 分别取得 PRO、CON、Judge 三份文字。</li>
+<li><code>parse_winner()</code> 用 <code>fullmatch()</code> 检查整份 Judge 回复，不做子字符串猜测。</li>
+</ol>
+<p>常见问题：</p>
+<ul>
+<li>两边说得太像：把角色、要保护的目标与限制写得更明确。</li>
+<li>Judge 格式错误：保留错误并重试一次，不要默默选一边。</li>
+<li>想减少顺序偏差：正式评测时交换 PRO／CON 显示顺序，再比较结果。</li>
+</ul>
+<p>延伸方向：把两边改成“工程师／用户”、加入人工批准，或把多个题目交给 <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a> 批次评测。</p>
+</details>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#see7e0e584b26"><code>datawhalechina/hello-agents</code></a>：章节式中文 Agent 教材，适合补完整背景。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sffc229d83891">Anthropic：Building effective agents</a>：先判断单 Agent 是否已足够，再增加协作。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sd807807ac587">Microsoft AutoGen</a>：想看完整 multi-agent framework 时再进入。</li>
+</ul>
+<p>完整清单见 <a href="stages--07-multi-agent-production.zh-Hans.md.html#-精选-projects范本--sdk--工具-collection">Stage 7 精选 Projects</a>。</p>
+<p><small>模型、价格、套件与连结查核：2026-08-28 UTC。</small></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

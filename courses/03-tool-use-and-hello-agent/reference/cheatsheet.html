@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>术语与协议速查 · 第三课</title><link rel="stylesheet" href="../../../assets/course.css">
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../../assets/learning.css"></head><body><main>
+<nav class="course-nav"><a href="../../index.html">总课程目录</a><a href="../index.html">第三课首页</a><a href="../reference/readings.html">本地必修阅读</a><a href="../reference/cheatsheet.html">术语与协议速查</a><a href="../reference/code-library.html">完整代码集</a></nav>
+
+<p class="eyebrow">Reference · 快速查阅</p><h1>术语、消息协议<br>与故障速查</h1>
+<h2>最短记忆链</h2><div class="formula">schema → call → validate / execute → result → answer 或下一轮</div>
+<table><tr><th>看到的东西</th><th>它是什么</th><th>它不保证什么</th></tr>
+<tr><td>Schema</td><td>接口说明</td><td>执行权限与业务正确</td></tr>
+<tr><td>Tool Call</td><td>请求名称、参数和 ID</td><td>函数已经执行</td></tr>
+<tr><td>Tool Result</td><td>对应请求的返回数据</td><td>外部内容绝对可信</td></tr>
+<tr><td>Structured Output</td><td>受约束的输出数据</td><td>事实与语义正确</td></tr>
+<tr><td>Trace</td><td>行动、观察、最终回答记录</td><td>完整私有思维链</td></tr>
+<tr><td>Mock / 离线替身</td><td>固定脚本代替模型</td><td>真实模型成功率</td></tr>
+<tr><td>Allowlist / 白名单</td><td>程序允许执行的函数集合</td><td>任意请求都值得执行</td></tr>
+<tr><td>Eval / 评测</td><td>固定输入与验收规则</td><td>一次成绩代表全部任务</td></tr></table>
+<h2>三种消息信封</h2>
+<table><tr><th>项目</th><th>本课 Chat Completions</th><th>Anthropic Messages</th><th>Ollama 原生</th></tr>
+<tr><td>工具定义</td><td>type/function/parameters</td><td>name/input_schema</td><td>type/function/parameters</td></tr>
+<tr><td>请求位置</td><td>message.tool_calls</td><td>content 内 tool_use</td><td>message.tool_calls</td></tr>
+<tr><td>参数</td><td>function.arguments 通常为字符串</td><td>input 对象</td><td>function.arguments 对象</td></tr>
+<tr><td>结果角色</td><td>tool</td><td>user 中的 tool_result</td><td>tool</td></tr>
+<tr><td>结果关联</td><td>tool_call_id</td><td>tool_use_id</td><td>按其原生协议含 tool_name 等字段</td></tr>
+<tr><td>最终文字</td><td>message.content</td><td>提取 type=text 的内容块</td><td>message.content</td></tr></table>
+<p>本表不是 OpenAI Responses API 的结构；Responses 有不同输出项和工具结果类型。本课只实际接入 Chat Completions 与 Anthropic Messages，Ollama 原生一列用于解释官方阅读材料。</p>
+<h2>执行前检查</h2><ol><li>请求结构合法，有唯一 ID。</li><li>函数在本次授权的工具列表中。</li><li>参数能解析为对象，字段无缺失或额外。</li><li>字符串、枚举、数值类型与范围合法。</li><li>当前身份拥有操作权限，且操作符合业务规则。</li><li>次数、时间与消耗检查允许继续。</li></ol>
+<h2>现象 → 先查哪里</h2>
+<table><tr><th>现象</th><th>第一检查项</th></tr>
+<tr><td>只打印 CompletionUsage</td><td>打印的是统计字段，回答要读 message.content</td></tr>
+<tr><td>content 为空</td><td>是否存在 tool_calls；是否被截断；不要直接认定失败</td></tr>
+<tr><td>不调用工具</td><td>原生工具支持、tools 是否传入、用途说明是否清楚</td></tr>
+<tr><td>提示 result 没有对应 ID</td><td>assistant 历史是否保存，ID 是否原样回传</td></tr>
+<tr><td>重复调用同一工具</td><td>结果是否真正加入下一轮历史，结果能否读懂</td></tr>
+<tr><td>Unsupported 参数错误</td><td>模型和兼容接口是否支持 reasoning_effort / response_format</td></tr>
+<tr><td>模型 404</td><td>ollama list 中是否真的有该模型名</td></tr>
+<tr><td>连接拒绝</td><td>Ollama 是否运行，端口是否为 11434</td></tr>
+<tr><td>天气“实时”但没有来源时间</td><td>本课只是固定数据，真实产品需另接可信服务</td></tr></table>
+<p><a href="code-library.html">所有案例和测试的完整代码</a> · <a href="coverage.html">知识覆盖表</a></p>
+
+<h2>补充术语与调用路径</h2>
+<table><tr><th>术语</th><th>快速解释</th><th>本地单元</th></tr>
+<tr><td>Delta / 流式片段</td><td>一次增量，不等于完整消息或完整参数</td><td><a href="../lessons/0009-streaming-tools.html">9</a></td></tr>
+<tr><td>index / call ID</td><td>前者分组片段，后者关联调用结果</td><td>9</td></tr>
+<tr><td>tool_choice</td><td>控制模型生成哪种请求，不授予执行权限</td><td><a href="../lessons/0010-choice-and-concurrency.html">10</a></td></tr>
+<tr><td>Concurrency / 并发</td><td>任务在时间上重叠；需要保持结果关联</td><td>10</td></tr>
+<tr><td>Future</td><td>已提交任务的结果句柄，不保证立刻完成</td><td>10</td></tr>
+<tr><td>EM / 精确匹配</td><td>答案是否匹配标准，不是过程观感评分</td><td><a href="../lessons/0011-react-paper.html">11</a></td></tr>
+<tr><td>Self-Refine</td><td>生成、反馈、修订当前输出</td><td><a href="../lessons/0012-feedback-and-memory.html">12</a></td></tr>
+<tr><td>Reflexion</td><td>依据任务反馈形成经验，供下一次尝试使用</td><td>12</td></tr>
+<tr><td>Instructor</td><td>类型化抽取、验证与有限重试的封装</td><td><a href="../lessons/0013-instructor-and-outlines.html">13</a></td></tr>
+<tr><td>Outlines</td><td>用输出类型组织不同后端的结构化生成</td><td>13</td></tr>
+<tr><td>Constrained Decoding / 约束解码</td><td>在生成时限制不符合结构的候选；支持范围依后端</td><td>13</td></tr>
+<tr><td>CodeAct</td><td>用代码表示行动，通过执行观察继续处理</td><td><a href="../lessons/0014-codeact.html">14</a></td></tr>
+<tr><td>AST / 抽象语法树</td><td>源码的语法结构；解析成功不表示安全</td><td>14</td></tr></table>
+<p>完整验收顺序：先跑离线边界测试，再跑本机模型；有副作用的能力需另行设计执行策略。本课的只读和受限代码能力不自动扩展为生产权限。</p>
+
+<footer><p>有疑问时，把“单元编号 + 小节标题 + 原始输出”发给我。可以逐行讲解代码，也可以只练你卡住的一步。</p><p>第三课独立目录 · 中文原创讲解与案例 · 来源核查：2026-11-03。第二课保留在原目录。</p></footer>
+</main><script src="../../../assets/quiz.js"></script><script src="../assets/course.js"></script></body></html>

@@ -1,0 +1,87 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>README.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><div align="right">
+  <a href="">繁體中文</a> | <strong>简体中文</strong> | <a href="">English</a>
+<span id="核心练习看见-agent-里面发生什么"></span><h1 data-heading-alias="核心练习看见-agent-里面发生什么" id="h11a5451740d5">核心练习：看见 Agent 里面发生什么</h1>
+<p><strong>Observability（可观测性）</strong> 像帮 Agent 装仪表板：它慢了、错了或花太多 token 时，你知道是哪一步。</p>
+<p>对应 <a href="stages--07-multi-agent-production.zh-Hans.md.html">Stage 7 — Agent 上线工程：可测、可看、可停、可恢复</a> 核心练习 2。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="hcd888090ed54">🎯 学习目标</h2>
+<ul>
+<li>认识 <strong>Request ID、Span、Latency、Usage、Error</strong> 五个核心信号。</li>
+<li>用同一个 request ID 串起一次工作里的多个步骤。</li>
+<li>记录供应商实际返回的 usage；没有数据时就显示缺少，不自行猜。</li>
+</ul>
+<span id="先跑不花模型费的测试"></span><h2 data-heading-alias="先跑不花模型费的测试" id="ha7551010ca68">先跑不花模型费的测试</h2>
+<p>在这个文件夹打开 PowerShell，直接复制：</p>
+<pre><code class="language-powershell">py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe test.py
+.\.venv\Scripts\python.exe test_anthropic.py
+</code></pre>
+<p>看到两份 <code>🎉</code>，代表成功、错误、latency、span 与 usage 都有离线测试。测试不会连到模型。</p>
+<details markdown="1">
+<summary>Path A：用 Ollama 产生一条真 Trace</summary>
+<pre><code class="language-powershell">ollama pull qwen3.5:4b
+ollama serve
+</code></pre>
+<p>另开 PowerShell：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe starter.py
+</code></pre>
+<p>Ollama 不收模型 API 费，但硬件、电力与时间仍有成本。某些版本可能没有返回 usage；程序会保留零值，不把估算冒充供应商数据。</p>
+</details>
+<details markdown="1">
+<summary>Path B：记录 Anthropic 返回的 Usage</summary>
+<pre><code class="language-powershell">$env:ANTHROPIC_API_KEY = &quot;贴上你的金钥&quot;
+$env:MODEL = &quot;claude-haiku-4-5-20251001&quot;
+.\.venv\Scripts\python.exe starter_anthropic.py
+</code></pre>
+<p>Haiku 4.5 的单价是 input <code>$1 / 1M</code> tokens、output <code>$5 / 1M</code> tokens：</p>
+<pre><code class="language-text">估算费用 = (input_tokens × $1 / 1M) + (output_tokens × $5 / 1M)
+</code></pre>
+<p>先设 <code>$1</code> provider spend limit。usage 是供应商对该次回复的计数栏位；不同 API 的栏位名称与涵盖范围可能不同。</p>
+</details>
+<span id="五个重要词"></span><h2 data-heading-alias="五个重要词" id="h1fd2dcb34d0e">五个重要词</h2>
+<ul>
+<li><strong>Request ID</strong>：一次请求的识别码，像包裹追踪号码。</li>
+<li><strong>Span</strong>：请求里的一小步，例如 search 或 llm_call。</li>
+<li><strong>Latency</strong>：这一步花了多久。</li>
+<li><strong>Usage</strong>：供应商返回的 input/output token 数。</li>
+<li><strong>Error</strong>：失败的步骤与安全的错误类别；记完仍要把 exception 往上抛。原始 exception 信息可能含有 secret，不能写进 log。</li>
+</ul>
+<pre><code class="language-text">request_id
+├─ span: search      → latency
+└─ span: llm_call    → latency + usage + error
+</code></pre>
+<p>这份 starter 用小型 <code>TraceContext</code> 教原理。正式环境通常使用 OpenTelemetry，再把数据送到观测平台。</p>
+<span id="只改一件事"></span><h2 data-heading-alias="只改一件事" id="h3e24b238085c">只改一件事</h2>
+<p>把假的 <code>search</code> 步骤改名成 <code>retrieve_context</code>，再跑测试。确认 summary 仍有两个 span，且两者使用同一个 request ID。</p>
+<span id="成功检查"></span><h2 data-heading-alias="成功检查" id="h10fc3e9baba8">成功检查</h2>
+<ul>
+<li>[ ] 一次请求只有一个 request ID。</li>
+<li>[ ] 每个步骤都有名称与 latency。</li>
+<li>[ ] 空模型回复会留下 error，再抛出例外。</li>
+<li>[ ] Log 不包含 API key、完整 Prompt 或原始 exception 信息。</li>
+</ul>
+<details markdown="1">
+<summary>Production 要补什么、常见问题</summary>
+<p>正式服务至少要能回答：哪一步慢、哪一种错误最多、一次用了多少 token，以及哪个版本开始变差。</p>
+<p>常见问题：</p>
+<ul>
+<li>只记整体时间：看不出 search 还是模型慢。</li>
+<li>吞掉 exception：外层误以为成功。应该“记录后再 raise”。</li>
+<li>把 Prompt 或原始 exception 信息全写入 log：可能泄漏个人信息、文件或 secret。先记录安全的错误类别，再做 redaction 与访问控制。</li>
+<li>每笔 trace 永久保存：成本与隐私风险会增加。先定 sampling、retention 和删除规则。</li>
+<li>自行换算 token 却标成 provider usage：估算与供应商栏位要分开命名。</li>
+</ul>
+</details>
+<span id="-必读与学习资源"></span><h2 data-heading-alias="-必读与学习资源" id="h1d70665c6115">📚 必读与学习资源</h2>
+<ul>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sa5d406dab379">Langfuse</a>：开源 traces、evals 与 prompt 管理。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s1db29eb9ab4f">Arize Phoenix</a>：OpenTelemetry 导向的观测工具；Elastic License 2.0（ELv2）限制对外提供托管服务。</li>
+<li>⭐⭐⭐⭐⭐ <a href="../../reference/source-readings.html#see7e0e584b26">datawhalechina/hello-agents</a>：章节式中文 Agent 教材，适合补完整背景。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sf08c59381287">LangSmith</a>：适合 LangChain／LangGraph 生态。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#sd72d204ccf66">Helicone</a>：可用 proxy 方式收集 LLM 请求数据。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#s7837fab13772">Datadog LLM Observability</a>：适合已使用 Datadog APM 的团队。</li>
+<li>⭐⭐⭐⭐ <a href="../../reference/source-readings.html#se25414371bec">Anthropic Console</a>：查看 Claude API usage 与账务数据。</li>
+</ul>
+<p>完整清单见 <a href="stages--07-multi-agent-production.zh-Hans.md.html#-精选-projects范本--sdk--工具-collection">Stage 7 精选 Projects</a>。</p>
+<p><small>模型、价格、套件与连结查核：2026-08-28 UTC。</small></p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

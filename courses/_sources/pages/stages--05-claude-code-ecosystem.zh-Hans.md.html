@@ -1,0 +1,544 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>05-claude-code-ecosystem.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="stage-5--claude-code-生态系统-"></span><h1 data-heading-alias="stage-5--claude-code-生态系统-" id="h5cf507c1d004">Stage 5 — Claude Code 生态系统 ⭐⭐</h1>
+<p><strong>Claude Code</strong> 是一位会使用文件和终端的助手。本章教你如何为它设置规则、工具和安全边界，而不是让你一次装完所有东西。</p>
+<span id="-学习目标"></span><h2 data-heading-alias="-学习目标" id="h63a912d99da5">📌 学习目标</h2>
+<p>完成本章后，你可以：</p>
+<ul>
+<li>说明 <strong>CLAUDE.md</strong>、<strong>Skill</strong>、<strong>MCP</strong>、<strong>Hook</strong>、<strong>Plugin</strong> 和 <strong>Subagent</strong> 分别做什么。</li>
+<li>先选择最小的组件，不为“看起来厉害”而把简单任务复杂化。</li>
+<li>做出一套可共享、可检查、默认安全的 Claude Code 项目配置。</li>
+<li>知道何时只用 Claude Code，何时才需要 <strong>Worktree</strong> 或 <strong>Claude Agent SDK</strong>。</li>
+</ul>
+<span id="-先认识核心术语"></span><h2 data-heading-alias="-先认识核心术语" id="h02d18b4947ed">🧩 先认识核心术语</h2>
+<span id="claude-code"></span><h3 data-heading-alias="claude-code" id="h396079f59aec"><strong>Claude Code</strong></h3>
+<p>它是能读写文件并执行命令的编码代理。它像坐在终端旁的助手；本章教你约束它，而不是一次开放所有权限。</p>
+<span id="claudemd"></span><h3 data-heading-alias="claudemd" id="hbb82394303c5"><strong>CLAUDE.md</strong></h3>
+<p>它是每次工作都要读取的项目守则，适合写测试命令、命名规范和禁止事项。</p>
+<span id="skillskillmd"></span><h3 data-heading-alias="skillskillmd" id="hc141e29a045f"><strong>Skill（<code>SKILL.md</code>）</strong></h3>
+<p>它是需要时才拿出来的操作卡，适合部署、审查和数据处理等可重复流程。</p>
+<span id="mcpmodel-context-protocol"></span><h3 data-heading-alias="mcpmodel-context-protocol" id="h6b40497f6f90"><strong>MCP（Model Context Protocol）</strong></h3>
+<p>它是让编码代理连接外部工具和数据的通用接口。连上 GitHub、数据库或浏览器后，代理才能实际使用这些服务。</p>
+<span id="hook"></span><h3 data-heading-alias="hook" id="hb3add5915036"><strong>Hook</strong></h3>
+<p>它是在事件发生时自动执行的检查。例如 Claude 要运行危险命令前，Hook 可以先拦截。</p>
+<span id="plugin-与-marketplace"></span><h3 data-heading-alias="plugin-与-marketplace" id="h7ad1ae90aa10"><strong>Plugin 与 Marketplace</strong></h3>
+<p><strong>Plugin</strong> 把 Skills、Hooks、Subagents 或 MCP 配置打包成一盒；<strong>Marketplace</strong> 是摆放许多盒子的目录。前者像应用，后者像应用商店。</p>
+<span id="subagent"></span><h3 data-heading-alias="subagent" id="ha623d0c7cb34"><strong>Subagent</strong></h3>
+<p>它是拥有独立 context window 的小助手。大量中间内容留在它那里，最后只把结论带回主对话。</p>
+<span id="worktree"></span><h3 data-heading-alias="worktree" id="hc7f99732be30"><strong>Worktree</strong></h3>
+<p>它是同一 Git 仓库的另一个工作目录。多个代理同时改文件时，它能避免彼此踩到同一份未提交内容。</p>
+<span id="claude-agent-sdk"></span><h3 data-heading-alias="claude-agent-sdk" id="h6295b346ef95"><strong>Claude Agent SDK</strong></h3>
+<p>它让你的 Python 或 TypeScript 程序控制代理。只有要把代理嵌入产品或服务时才需要它。</p>
+<p><img src="../upstream/resources/diagrams/claude-code-extension-map.zh-Hans.png" alt="Claude Code 扩展工具选择图" /></p>
+<span id="一张表先选对组件"></span><h2 data-heading-alias="一张表先选对组件" id="ha562a64412d6">一张表先选对组件</h2>
+<p><a id="-7-layer-architecture-map先看这张图再读-51-57"></a></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">你的问题</th>
+<th style="text-align:left">先用什么</th>
+<th style="text-align:left">先不要做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">每次都要记住同一条项目规则</td>
+<td style="text-align:left"><code>CLAUDE.md</code></td>
+<td style="text-align:left">把整本手册塞进去</td>
+</tr>
+<tr>
+<td style="text-align:left">只在特定场景需要一套流程</td>
+<td style="text-align:left">Skill</td>
+<td style="text-align:left">每次都粘贴同一大段 prompt</td>
+</tr>
+<tr>
+<td style="text-align:left">要连接 GitHub、数据库或浏览器</td>
+<td style="text-align:left">MCP</td>
+<td style="text-align:left">直接把未审查 server 接到高权限账户</td>
+</tr>
+<tr>
+<td style="text-align:left">事件发生时都要自动检查</td>
+<td style="text-align:left">Hook</td>
+<td style="text-align:left">把陌生 shell script 当作安全工具</td>
+</tr>
+<tr>
+<td style="text-align:left">大量搜索会挤满当前对话</td>
+<td style="text-align:left">Subagent</td>
+<td style="text-align:left">为一个小问题多开代理</td>
+</tr>
+<tr>
+<td style="text-align:left">多项工作会修改同一仓库</td>
+<td style="text-align:left">Worktree</td>
+<td style="text-align:left">让多个代理共享未提交文件</td>
+</tr>
+<tr>
+<td style="text-align:left">要与团队共享配置</td>
+<td style="text-align:left">Plugin</td>
+<td style="text-align:left">第一题就自建 marketplace</td>
+</tr>
+<tr>
+<td style="text-align:left">要把代理嵌进产品</td>
+<td style="text-align:left">Agent SDK</td>
+<td style="text-align:left">把 CLI 已能完成的工作重写成服务</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>想分清 OpenRouter、Pi、OpenCode 和 Ollama？OpenRouter 是 <strong>Router</strong>，Ollama 是 <strong>本地运行时</strong>，Claude Code、OpenCode 和 Pi 是 <strong>编码代理／harness</strong>。完整选择表见 <a href="tracks--cli--A1-cli-intro.zh-Hans.md.html">Track A1</a>。</p>
+</blockquote>
+<span id="-进入条件与阅读路径"></span><h2 data-heading-alias="-进入条件与阅读路径" id="hf73dbab5d691">🚪 进入条件与阅读路径</h2>
+<ul>
+<li><strong>Track A（CLI 用户）</strong>：完成 <a href="tracks--cli--A2-cli-workflow.zh-Hans.md.html">A2</a> 后读 5.1–5.4，掌握项目守则、Skill、MCP 和 Plugin，再前往 <a href="tracks--cli--A3-cli-production.zh-Hans.md.html">A3</a>。</li>
+<li><strong>Track B（代理开发者）</strong>：完成 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3</a> 和 <a href="stages--04-agent-frameworks.zh-Hans.md.html">Stage 4</a> 后，再读 5.5–5.8。</li>
+</ul>
+<details markdown="1">
+<summary>⏱ 开始前：时间、环境、认证与费用</summary>
+<ul>
+<li><strong>时间</strong>：主线约 6–10 小时；完成全部选读和项目约 15–25 小时。</li>
+<li><strong>环境</strong>：Git、终端，以及一个不含敏感数据的练习仓库。</li>
+<li><strong>认证</strong>：Claude Code 可使用 Anthropic 账户/API，也有 Amazon Bedrock、Google Vertex AI 和 Microsoft Foundry 的官方路径；它不是任意本地模型的通用前端。</li>
+<li><strong>费用</strong>：先做不调用模型的文件与配置检查；真正运行 Claude Code 前查看 <code>/cost</code> 或账户用量，不要猜测每项练习的固定费用。</li>
+<li><strong>安全</strong>：第一轮只用示例仓库、只读 MCP 和最小权限；不要放入生产 token、SSH key 或真实客户数据。</li>
+</ul>
+</details>
+<span id="-必修阅读"></span><h2 data-heading-alias="-必修阅读" id="h333a7c3c42fb">📚 必修阅读</h2>
+<p>开始前只看两个入口：<a href="../../reference/source-readings.html#sa21b84bdeaaf">Claude Code quickstart</a> 帮你安装并打开第一个会话；<a href="../../reference/source-readings.html#sf1c064262dc8">How Claude remembers your project</a> 帮你编写练习 1 使用的 <code>CLAUDE.md</code>。其他文档等遇到对应术语时再查，不必一次读完。</p>
+<ol>
+<li><a href="../../reference/source-readings.html#sa21b84bdeaaf">Claude Code quickstart</a> — 安装与第一个会话。</li>
+<li><a href="../../reference/source-readings.html#s3b35aaf641d0">Extend Claude Code</a> — 一张官方表区分 CLAUDE.md、Skill、MCP、Hook、Plugin 和 Subagent。</li>
+<li><a href="../../reference/source-readings.html#sf1c064262dc8">How Claude remembers your project</a> — <code>CLAUDE.md</code>、Rules 和 auto memory 的边界。</li>
+<li><a href="../../reference/source-readings.html#s542f21c1085b">Skills</a> — 旧 <code>.claude/commands/</code> 仍兼容；新教程先用 <code>SKILL.md</code>。</li>
+<li><a href="../../reference/source-readings.html#s4f6cea85fc05">MCP specification</a> — 查协议时看带日期的版本。</li>
+<li><a href="../../reference/source-readings.html#s20106b0f3bee">Hooks reference</a> — 事件、输入输出和拦截规则。</li>
+<li><a href="../../reference/source-readings.html#sfc9dd52a1466">Plugins</a> — 打包与共享扩展。</li>
+<li><a href="../../reference/source-readings.html#s7dc93e85c023">Subagents</a>、<a href="../../reference/source-readings.html#sff9d845099ea">parallel agents</a> 与 <a href="../../reference/source-readings.html#s8516d91b8404">Dynamic workflows</a> — 隔离、协作与大规模脚本编排。</li>
+<li><a href="../../reference/source-readings.html#sd69a094d34b1">Agent SDK overview</a> — 仅在要嵌入程序时再读。</li>
+</ol>
+<span id="-动手练习"></span><h2 data-heading-alias="-动手练习" id="heaf7ce6df8e7">🛠 动手练习</h2>
+<p>主项目是一个“安全的 Claude Code 练习仓库”。每题只添加一个组件；前一题成功后再做下一题。</p>
+<span id="练习-1写一张最小项目守则"></span><h3 data-heading-alias="练习-1写一张最小项目守则" id="h1fd4a39c9be4">练习 1：写一张最小项目守则</h3>
+<p>完成后，你会有一份短 <code>CLAUDE.md</code>，其中只有用途、禁止事项、验证命令和交付格式。</p>
+<pre><code class="language-text">请先阅读这个仓库，只回复：用途、最重要的 3 个目录，以及你会先运行哪个只读检查。不要修改文件。
+</code></pre>
+<details markdown="1">
+<summary>展开练习 1 的步骤与检查</summary>
+<ol>
+<li>在不含敏感数据的练习仓库根目录创建 <code>CLAUDE.md</code>。</li>
+<li>只写四部分：<code>Purpose</code>、<code>Do not</code>、<code>Verify</code>、<code>Deliver</code>。</li>
+<li>先人工阅读一遍，再请 Claude 按上面的 prompt 说明它理解到什么。</li>
+<li>成功条件：Claude 没有改文件，且它说出的验证命令与 <code>CLAUDE.md</code> 一致。</li>
+</ol>
+<p><code>CLAUDE.md</code> 最好少于 200 行。<code>@path</code> import 可以整理文件，但被 import 的内容仍会进入 context；需要按路径延后加载时，使用 <code>.claude/rules/</code> 的 <code>paths</code> frontmatter。</p>
+</details>
+<span id="练习-2把重复流程做成-skill"></span><h3 data-heading-alias="练习-2把重复流程做成-skill" id="h796944a4b987">练习 2：把重复流程做成 Skill</h3>
+<p>完成后，你可以输入一条简短需求，让 Claude 按固定清单检查 README。</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force .claude\skills\readme-check
+</code></pre>
+<details markdown="1">
+<summary>展开练习 2 的步骤、macOS/Linux 命令与示例</summary>
+<p>创建 <code>.claude/skills/readme-check/SKILL.md</code>：</p>
+<pre><code class="language-markdown">---
+name: readme-check
+description: Check a README for a clear purpose, install steps, one example, and a license link. Use when the user asks to review README onboarding.
+disable-model-invocation: true
+---
+
+1. Read the README without changing it.
+2. Check: purpose, install steps, one runnable example, license link.
+3. Return PASS or a short list of missing items with line references.
+</code></pre>
+<p>macOS/Linux：</p>
+<pre><code class="language-bash">mkdir -p .claude/skills/readme-check
+</code></pre>
+<p>先人工检查 YAML frontmatter，再在 Claude Code 输入 <code>/readme-check</code>。<code>disable-model-invocation: true</code> 表示只有你能主动调用它，适合有副作用或需要控制时机的流程。</p>
+<p>本仓库的完整 meta-example：<a href="examples--stage-5--tool-calling-tutor--README.zh-Hans.md.html"><code>examples/stage-5/tool-calling-tutor/</code></a>。</p>
+</details>
+<p><a id="练习-3添加一个只读-hook"></a></p>
+<span id="练习-3添加一个只观察不拦截的-hook"></span><h3 data-heading-alias="练习-3添加一个只观察不拦截的-hook" id="hd04ca1f8b827">练习 3：添加一个只观察、不拦截的 Hook</h3>
+<p>完成后，每次 Claude 想写文件或改文件时，Hook 都会记录 event 名称和 tool 名称；它不保存 prompt，也不替你批准或拦截操作。</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force .claude/hooks
+</code></pre>
+<details markdown="1">
+<summary>展开练习 3：直接复制 Hook、配置与验证步骤</summary>
+<p>将下面内容保存为 <code>.claude/hooks/log-tool.py</code>：</p>
+<pre><code class="language-python">import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+event = json.load(sys.stdin)
+record = {
+    &quot;checked_at&quot;: datetime.now(timezone.utc).isoformat(),
+    &quot;hook_event_name&quot;: event.get(&quot;hook_event_name&quot;),
+    &quot;tool_name&quot;: event.get(&quot;tool_name&quot;),
+}
+log_path = Path(__file__).with_name(&quot;events.jsonl&quot;)
+with log_path.open(&quot;a&quot;, encoding=&quot;utf-8&quot;) as handle:
+    handle.write(json.dumps(record, ensure_ascii=False) + &quot;\n&quot;)
+</code></pre>
+<p>如果示例仓库还没有 <code>.claude/settings.json</code>，直接创建：</p>
+<pre><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Edit|Write&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;python&quot;,
+            &quot;args&quot;: [
+              &quot;${CLAUDE_PROJECT_DIR}/.claude/hooks/log-tool.py&quot;
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>如果文件已存在，只把 <code>PreToolUse</code> 加入原有的 <code>hooks</code>，不要覆盖其他设置。将 <code>.claude/hooks/events.jsonl</code> 加入 <code>.gitignore</code>，避免提交本机操作日志。</p>
+<p>先用假数据测试 script：</p>
+<pre><code class="language-powershell">'{&quot;hook_event_name&quot;:&quot;PreToolUse&quot;,&quot;tool_name&quot;:&quot;Write&quot;}' | python .claude/hooks/log-tool.py
+Get-Content .claude/hooks/events.jsonl
+</code></pre>
+<p>接着在 Claude Code 输入 <code>/hooks</code>，确认 <code>PreToolUse</code> 显示一个 Hook；再请 Claude 在示例仓库创建 <code>hook-demo.txt</code>。最后一行应包含 <code>&quot;hook_event_name&quot;: &quot;PreToolUse&quot;</code> 和 <code>&quot;tool_name&quot;: &quot;Write&quot;</code>。</p>
+<ul>
+<li>Hook 可以是 shell command、HTTP endpoint、prompt、agent 或 MCP tool；并非每种 event 都支持每种 handler。</li>
+<li><code>PreToolUse</code> 的 exit code <code>2</code> 可以拦截 tool call，但它对所有 event 的效果并不相同；应查官方 event matrix。</li>
+<li>本示例只记录 event 和 tool 名称，不保存完整 prompt、tool input、token 或秘密值；exit code <code>0</code> 表示不拦截。</li>
+<li>成功条件：假数据测试和一次真实 <code>Write</code> 都新增一行，且日志中没有 prompt 或文件内容。</li>
+</ul>
+</details>
+<span id="练习-4连接受限的-mcp-server"></span><h3 data-heading-alias="练习-4连接受限的-mcp-server" id="hb67c14ab62ca">练习 4：连接受限的 MCP server</h3>
+<p>先核对这个 MCP server 可操作的文件夹与工具。这些限制只管它；Claude 的其他工具仍按各自权限运行。</p>
+<pre><code class="language-text">我要连接一个 filesystem MCP server。请先解释它能看到哪个目录、有哪些 tools、如何移除，然后等我批准；不要直接安装。
+</code></pre>
+<details markdown="1">
+<summary>展开练习 4 与 MCP 2026 补充</summary>
+<ol>
+<li>创建一个只放虚构数据的文件夹。</li>
+<li>按 <a href="../../reference/source-readings.html#se8ecdafbf282">Claude Code MCP 文档</a> 添加 filesystem server，scope 只指向该文件夹。</li>
+<li>先列出 tools，再读取一个假文件，最后移除 server。</li>
+<li>成功条件：读取指定文件夹成功；请求读取外部路径时失败。</li>
+</ol>
+<p>MCP 的三项核心抽象：<strong>Tools</strong> 是模型可调用的动作，<strong>Resources</strong> 是可读数据，<strong>Prompts</strong> 是 server 提供的 prompt 模板。多数入门 server 先使用 Tools。</p>
+<p><code>2026-07-28</code> 规范将核心改为 stateless request/response，移除 <code>initialize</code>/<code>initialized</code> 和 <code>Mcp-Session-Id</code>，并用 MRTR 处理需要补充信息的多轮请求。这是 SDK/server 作者才需深入的迁移内容；连接现成 server 的读者先确认 host 与 server 支持同一版本即可。</p>
+</details>
+<span id="练习-5用-subagent-做只读检查"></span><h3 data-heading-alias="练习-5用-subagent-做只读检查" id="hb2b499acd9c7">练习 5：用 Subagent 做只读检查</h3>
+<p>完成后，大量搜索会留在独立 context，主对话只收到摘要。</p>
+<pre><code class="language-text">Use the Explore subagent to find where tests are documented. Read only. Return the three most useful file paths and one sentence for each.
+</code></pre>
+<details markdown="1">
+<summary>展开练习 5 与自定义 Subagent 示例</summary>
+<p>Claude Code 内置的主要 Subagent 是 <code>Explore</code>、<code>Plan</code> 和 <code>general-purpose</code>。其他名称可能来自 plugin、组织设置或你自己的 <code>.claude/agents/&lt;name&gt;.md</code>，不要假设每台机器都有。</p>
+<pre><code class="language-markdown">---
+name: docs-finder
+description: Find documentation related to a named feature and return file paths. Use for read-only documentation discovery.
+tools: Read, Glob, Grep
+model: haiku
+---
+
+Search only. Return up to five file paths with one-sentence reasons. Do not edit files or run shell commands.
+</code></pre>
+<p>Subagent 由现行 <code>Agent</code> tool 派遣。它有独立的 context 与权限设置，接收一份自足任务，最后向主对话交回摘要。小问题、需要频繁来回或高度共享 context 的工作，留在主对话更简单。</p>
+</details>
+<span id="先看-5157-怎样连在一起"></span><h2 data-heading-alias="先看-5157-怎样连在一起" id="h9eba7b7ee34c">先看 5.1–5.7 怎样连在一起</h2>
+<p>这张图整理各组件的关系，不是安装顺序。先读上面的粗体定义，再用图找 context、动作、检查、隔离与打包的边界。</p>
+<p><img src="../upstream/resources/diagrams/claude-code-system-flow.zh-Hans.png" alt="Claude Code 5.1–5.7 关系图：CLAUDE.md 与 Skill 提供 context，Agent loop 通过 MCP 使用外部工具，Hook 按事件检查，Subagent 与 Worktree 分别隔离 context 和文件，Plugin 只负责打包" /></p>
+<span id="51--claude-code-基础"></span><h2 data-heading-alias="51--claude-code-基础" id="h91fabc38095e">5.1 — Claude Code 基础</h2>
+<p><a id="-claudemd-设计-prompts依-5-原则"></a></p>
+<p>本节成果：你能安全开始工作，并知道“配置”与“指示”不是一回事。</p>
+<details markdown="1">
+<summary>展开 5.1：安装、CLAUDE.md、Skills 兼容层与配置位置</summary>
+<p>Claude Code 可在 CLI、Desktop、VS Code 与 JetBrains 等 surface 使用。它能操作文件和工具，但仍受 permission、sandbox、Hook 与组织策略限制；“能执行 shell”不等于“应授予全部权限”。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Scope</th>
+<th style="text-align:left">常见位置</th>
+<th style="text-align:left">适合放什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Managed</td>
+<td style="text-align:left">操作系统的管理路径</td>
+<td style="text-align:left">组织策略</td>
+</tr>
+<tr>
+<td style="text-align:left">User</td>
+<td style="text-align:left"><code>~/.claude/CLAUDE.md</code></td>
+<td style="text-align:left">个人跨项目偏好</td>
+</tr>
+<tr>
+<td style="text-align:left">Project</td>
+<td style="text-align:left"><code>./CLAUDE.md</code> 或 <code>./.claude/CLAUDE.md</code></td>
+<td style="text-align:left">团队共享规则</td>
+</tr>
+<tr>
+<td style="text-align:left">Local</td>
+<td style="text-align:left"><code>./CLAUDE.local.md</code></td>
+<td style="text-align:left">不提交 Git 的本地配置</td>
+</tr>
+</tbody>
+</table>
+<p><code>.claude/rules/*.md</code> 可按 <code>paths</code> 延后加载；<code>.claude/skills/&lt;name&gt;/SKILL.md</code> 是按需知识或流程。旧 <code>.claude/commands/*.md</code> 仍可生成 slash command，但新内容优先教 Skills。</p>
+<p>常用入口以现行 <a href="../../reference/source-readings.html#s1ce67529b68b">Commands reference</a> 为准。第一次只记 <code>/help</code>、<code>/model</code>、<code>/permissions</code>、<code>/memory</code>、<code>/agents</code> 与 <code>/cost</code>；功能会更新，不要把固定“十大命令”当长期标准。</p>
+</details>
+<span id="52--mcpmodel-context-protocol基础"></span><h2 data-heading-alias="52--mcpmodel-context-protocol基础" id="h307f92d5a003">5.2 — MCP（Model Context Protocol）基础</h2>
+<p><a id="52--mcpmodel-context-protocol-基础"></a></p>
+<p>本节成果：你能用“通用插座”解释 MCP，也能说出 Tool Use 与 MCP 的区别。</p>
+<details markdown="1">
+<summary>展开 5.2：Tools、Resources、Prompts、版本与安全</summary>
+<ul>
+<li><strong>Tool Use</strong>：模型提出结构化调用，由程序或 host 执行。</li>
+<li><strong>MCP</strong>：把工具、数据与 prompt 的交换方式做成跨 host 协议。</li>
+<li><strong>Skill</strong>：教代理何时、如何使用能力；它不会凭空建立外部连接。</li>
+<li><strong>Plugin</strong>：把 Skill、Hook、Subagent、MCP 配置等打包共享。</li>
+</ul>
+<p>官方 <a href="../../reference/source-readings.html#scb8f252ccaaf"><code>modelcontextprotocol/servers</code></a> 是 reference implementations，不等于 production-ready server。连接第三方 server 前要检查来源、权限、数据流向和移除方式；tool result 也是不可信输入，不能直接当作高权限指令。</p>
+<p><code>2026-07-28</code> 是当前查核到的正式规范版本。它采用 stateless core、header routing、MRTR 与 extensions framework；旧功能至少有 12 个月 deprecation window。不要把 2025 的初始化流程直接粘到新 server。</p>
+</details>
+<span id="53--skills按需操作卡"></span><h2 data-heading-alias="53--skills按需操作卡" id="h6933e774700b">5.3 — Skills：按需操作卡</h2>
+<p><a id="53--skillsclaude-code-的行为层-claude-code-生态最关键的一层"></a>
+<a id="-skillmd-设计-prompts含-skill-creator-替代"></a></p>
+<p>本节成果：你能写出短小、可触发、可验证的 <code>SKILL.md</code>。</p>
+<details markdown="1">
+<summary>展开 5.3：frontmatter、加载、prompt 设计与 eval</summary>
+<p>Skill 的 description 像索引卡标题：应写清“何时使用”，不能只写漂亮的功能介绍。Skill body 默认按需加载；Supporting files 可放在 <code>references/</code>、<code>scripts/</code> 等目录。</p>
+<ul>
+<li><code>disable-model-invocation: true</code>：只能由用户主动调用，适合 deploy、commit 或有外部副作用的流程。</li>
+<li><code>user-invocable: false</code>：不作为用户 slash command，但 Claude 仍可在适当场景使用。</li>
+</ul>
+<p>可直接复制的审查 prompt：</p>
+<pre><code class="language-text">请检查这份 SKILL.md：
+1. description 是否写清“何时使用”与“何时不用”？
+2. 主文件是否只留必要流程，细节是否移到 references/？
+3. 每一步是否有可验证的成功条件？
+4. 有副作用的流程是否禁止 model 自动触发？
+5. 相对链接、脚本和示例是否真的存在？
+请逐项回复 PASS/FAIL、证据位置与最小修正；不要直接覆盖文件。
+</code></pre>
+<p>现行 Skills 遵循开放 Agent Skills 标准；Claude Code 另加 invocation control、Subagent execution 与 dynamic context。跨工具共用时，内容核心可以相同，但目录、frontmatter、权限和工具名必须分别验证。</p>
+</details>
+<span id="54--plugins-与-marketplaces"></span><h2 data-heading-alias="54--plugins-与-marketplaces" id="hf97450c551c1">5.4 — Plugins 与 Marketplaces</h2>
+<p>本节成果：你能说明“Plugin 是一盒组件，Marketplace 是摆放许多盒子的目录”。</p>
+<details markdown="1">
+<summary>展开 5.4：plugin 结构、安装、共享与供应链安全</summary>
+<pre><code class="language-text">my-plugin/
+├── .claude-plugin/plugin.json
+├── skills/&lt;name&gt;/SKILL.md
+├── agents/&lt;name&gt;.md
+├── hooks/hooks.json
+└── .mcp.json
+</code></pre>
+<p>实际 schema 以 <a href="../../reference/source-readings.html#se80a6d455d2f">Plugins reference</a> 为准；现行组件还可包含 LSP servers 与 monitors。不要把教学用的最小树状图当完整 schema。</p>
+<p>添加 Marketplace 只会让目录看见 Plugins，不代表全部已安装。安装前检查仓库、publisher、权限、Hook、MCP server、license 与更新方式；managed、project、local settings 的优先级和 consent 规则以官方配置文档为准。</p>
+</details>
+<span id="55--subagents隔离大段工作"></span><h2 data-heading-alias="55--subagents隔离大段工作" id="h00e09fd178b9">5.5 — Subagents：隔离大段工作</h2>
+<p><a id="55--subagentsclaude-code-原生-multi-agent-机制-2025-新功能"></a>
+<a id="可派遣的-subagent-有哪些"></a></p>
+<p>本节成果：你能判断何时需要独立 context，并写出一份自足的 delegation brief。</p>
+<details markdown="1">
+<summary>展开 5.5：内置类型、Skill 差异、权限、费用与常见错误</summary>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">Skill</th>
+<th style="text-align:left">Subagent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">核心用途</td>
+<td style="text-align:left">重用知识或流程</td>
+<td style="text-align:left">隔离一段工作</td>
+</tr>
+<tr>
+<td style="text-align:left">Context</td>
+<td style="text-align:left">通常在当前对话加载；也可设置 fork</td>
+<td style="text-align:left">默认新建独立 context</td>
+</tr>
+<tr>
+<td style="text-align:left">结果</td>
+<td style="text-align:left">改变 Claude 处理任务的方式</td>
+<td style="text-align:left">返回结果或摘要</td>
+</tr>
+<tr>
+<td style="text-align:left">适合</td>
+<td style="text-align:left">规则、参考资料、固定流程</td>
+<td style="text-align:left">大量搜索、并行分析、专业 worker</td>
+</tr>
+</tbody>
+</table>
+<p>自定义 Subagent 的 <code>description</code> 是路由提示，不是代码层的 <code>if</code>。prompt 应自足，明确任务、范围、工具、输出和停止条件。现行官方还支持 <code>skills</code>、<code>mcpServers</code>、permissions、hooks 与 <code>isolation: worktree</code> 等设置；只在确有需要时添加。</p>
+<p>多开代理会增加 token、延迟与集成工作。不要声称固定倍数；应按任务、模型和用量记录实测。</p>
+<p>15 个进阶可复制 recipe：<a href="resources--subagent-cookbook.zh-Hans.md.html"><code>resources/subagent-cookbook.zh-Hans.md</code></a>。组合与排错：<a href="resources--subagent-advanced.zh-Hans.md.html"><code>resources/subagent-advanced.zh-Hans.md</code></a>。</p>
+</details>
+<span id="56--并行工作与-worktree"></span><h2 data-heading-alias="56--并行工作与-worktree" id="h261c5da403a5">5.6 — 并行工作与 Worktree</h2>
+<p><a id="56--dynamic-workflows让-claude-自己写出-workflow-opus-48-新机制"></a></p>
+<p>本节成果：你能分清“谁协调工作”与“谁隔离文件”。</p>
+<details markdown="1">
+<summary>展开 5.6：Subagent、agent view、agent teams、Dynamic workflows、Worktree 与 /batch</summary>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">做法</th>
+<th style="text-align:left">谁协调</th>
+<th style="text-align:left">适合什么</th>
+<th style="text-align:left">当前状态／边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Subagent</td>
+<td style="text-align:left">主对话</td>
+<td style="text-align:left">隔离搜索或专业任务</td>
+<td style="text-align:left">同一 session 内返回结果</td>
+</tr>
+<tr>
+<td style="text-align:left">Agent view</td>
+<td style="text-align:left">用户</td>
+<td style="text-align:left">监看多个独立后台 session</td>
+<td style="text-align:left">Research preview</td>
+</tr>
+<tr>
+<td style="text-align:left">Agent teams</td>
+<td style="text-align:left">Lead 与 teammates</td>
+<td style="text-align:left">Workers 要共享任务并互相传讯</td>
+<td style="text-align:left">Experimental，默认关闭</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="../../reference/source-readings.html#s8516d91b8404"><strong>Dynamic workflows</strong></a></td>
+<td style="text-align:left">协调脚本／运行时</td>
+<td style="text-align:left">大型审计、迁移或交叉核验研究</td>
+<td style="text-align:left">可读、可重跑的 JavaScript 编排；会增加 token 用量</td>
+</tr>
+<tr>
+<td style="text-align:left">Worktree</td>
+<td style="text-align:left">Git／用户</td>
+<td style="text-align:left">隔离同一仓库的文件修改</td>
+<td style="text-align:left">不负责代理通信</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/batch</code></td>
+<td style="text-align:left">Claude 规划后分派</td>
+<td style="text-align:left">5–30 个可切开的机械改动</td>
+<td style="text-align:left">每个 worker 都要独立范围与 review</td>
+</tr>
+</tbody>
+</table>
+<p>Worktree 解决“不要改同一份文件”；Subagent/team 解决“谁做哪件事”。两者可一起使用，但不是同一功能。Agent teams 不会自动为每个 teammate 建 Worktree，所以仍要清楚划分文件 ownership。</p>
+<p><strong>Dynamic workflows</strong> 会把计划放进可读的 JavaScript 脚本，而不是绑定到某个特定 Claude 模型；用 <code>/workflows</code> 查看进度。现行官方文件列出付费方案、API、Bedrock、Google Cloud Agent Platform 与 Foundry，但没有声明一个通用最低版本；Pro 需从 <code>/config</code> 的对应项目开启。</p>
+</details>
+<span id="57--剖析-agent-loop"></span><h2 data-heading-alias="57--剖析-agent-loop" id="hb7709f7d2a3c">5.7 — 剖析 agent loop</h2>
+<p><a id="57--claude-code-source-解剖reference-harness-implementation-track-b-必看"></a></p>
+<p>本节成果：你能画出“读取 context → 模型决定 → 工具执行 → 结果返回 → 再决定”的 loop。</p>
+<details markdown="1">
+<summary>展开 5.7：官方 agent loop 阅读题</summary>
+<p>先读 <a href="../../reference/source-readings.html#sb174364e9eb6">How the agent loop works</a>，再回答：</p>
+<ol>
+<li>哪些数据在送给模型前进入 context？</li>
+<li>模型提出 tool call 后，谁检查 permission？</li>
+<li>tool result 如何返回下一轮？</li>
+<li>loop 在成功、错误、拒绝或达到限制时如何停止？</li>
+<li>Hook、MCP、Skill 和 Subagent 分别插在什么位置？</li>
+</ol>
+<p>把答案画成六格箭头图，再用 100–150 字比较 <a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 的最小 ReAct loop</a> 增加了哪些控制边界。</p>
+<p><code>anthropics/claude-agent-sdk-python</code> 值得阅读，但它是 SDK client/wrapper，不是 Claude Code 完整 runtime source。可以查看 message types、transport、query options 与 error handling；不要因为 <code>_internal/client.py</code> 没有完整 LLM loop 就误以为漏看。</p>
+</details>
+<span id="58--claude-agent-sdk选修"></span><h2 data-heading-alias="58--claude-agent-sdk选修" id="h184058d986bb">5.8 — Claude Agent SDK（选修）</h2>
+<p><a id="58--sdk把-claude-code-拆开来自己组-track-b-可选production-才需要"></a></p>
+<p>本节成果：你能判断 CLI 已够用，还是确实需要把代理嵌入程序。</p>
+<details markdown="1">
+<summary>展开 5.8：Python quickstart、provider 与安全 hosting</summary>
+<p>需要 SDK 的情况：</p>
+<ul>
+<li>用户不会打开终端，你要把代理放进自己的 App。</li>
+<li>需要程序化输入输出、调度、审计、限额或多租户。</li>
+<li>服务需要控制 allowed tools、session 与结果格式。</li>
+</ul>
+<pre><code class="language-python">import asyncio
+from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, query
+
+
+async def main() -&gt; None:
+    options = ClaudeAgentOptions(allowed_tools=[&quot;Read&quot;, &quot;Glob&quot;])
+    async for message in query(prompt=&quot;Summarize this project without editing files.&quot;, options=options):
+        if isinstance(message, AssistantMessage):
+            for block in message.content:
+                if isinstance(block, TextBlock):
+                    print(block.text)
+
+
+asyncio.run(main())
+</code></pre>
+<p>安装包是 <code>claude-agent-sdk</code>／<code>@anthropic-ai/claude-agent-sdk</code>；旧 <code>claude-code-sdk</code> 名称已经迁移。SDK 支持 Anthropic API，也有 Bedrock、Vertex AI 与 Foundry 的官方认证路径。</p>
+<p>SDK 会执行命令并保存 session state，不能把它当普通 stateless text API。上线前应实施容器／sandbox、network control、credential isolation、resource limits、audit log 与人工批准；先读 <a href="../../reference/source-readings.html#s3666f01f83d3">Hosting</a> 与 secure deployment 文档。</p>
+</details>
+<span id="-精选项目与学习资源"></span><h2 data-heading-alias="-精选项目与学习资源" id="hbe859646046b">🎯 精选项目与学习资源</h2>
+<p>第一次只选一个与眼前练习相符的入口。五星是本学习地图的编辑建议，不是人气排行榜。</p>
+<p><strong>本章先做这个：</strong> <a href="examples--stage-5--tool-calling-tutor--README.zh-Hans.md.html"><code>tool-calling-tutor</code></a> ⭐⭐⭐⭐⭐ — 它是仓库内可直接照着做的 Skill 示例。要查看 Claude Code 本身的版本与问题，再看 <a href="../../reference/source-readings.html#s13d96f6971ff"><code>anthropics/claude-code</code></a> ⭐⭐⭐⭐⭐。</p>
+<p><small>资料查核：2026-08-29 UTC</small></p>
+<table align="center">
+<thead><tr><th scope="col">主题</th><th scope="col">资源</th><th scope="col">评分</th><th scope="col">适合谁／读什么</th></tr></thead>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">Claude Code 基础</th><td><a href="../../reference/source-readings.html#s13d96f6971ff">claude-code</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>跟踪官方 releases、issues 与现行功能。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sc23f3e7cbb0e">Claude Code 官方文档</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>设置、权限与命令问题的第一来源。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s7765e623bebd">awesome-claude-code</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>完成官方 quickstart 后探索社区扩展。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s631e3007cea0">AI-Coding-Guide-Zh</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>适合想配合简体中文逐步导读的读者。</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="8" align="center" valign="middle">MCP</th><td><a href="../../reference/source-readings.html#scb8f252ccaaf">servers</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>官方 reference implementations；用于读协议，不是生产保证。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sb275ec28fddd">python-sdk</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>用 Python 写 client/server，先对照现行 spec revision。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sf7fb7d70e0ff">typescript-sdk</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>TypeScript 路线的官方 SDK。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s131c6958203d">awesome-mcp-servers</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>写 server 前先找现成选项；逐个审查 publisher 与权限。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s61a57c93de29">awesome-mcp-servers</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>用不同分类交叉找 server；收录不是安全背书。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sfaa318861b48">github-mcp-server</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>阅读大型官方 MCP server 的工具与权限设计。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s25708987ae32">magic-mcp</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>生成 UI 的非平凡 MCP 案例；使用前另查 license 与维护状态。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s4a925ee01de9">repomix</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>学习仓库打包、敏感数据过滤与 MCP mode 的边界。</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="8" align="center" valign="middle">Skills</th><td><a href="../../reference/source-readings.html#s82a901da1b9b">skills</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>官方模板、规范与文档处理 Skills；写自己的 Skill 前先读。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s13d96f6971ff">claude-code</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>跟踪 Claude Code 对 Skills 的现行支持。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s637c99109af3">skills</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>观察短小、任务导向的社区 Skill 写法。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s8c6014a36ca9">superpowers</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>学习 TDD、debugging 与 plan 类 Skills 的组合。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s31661aae5fd3">agents</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>看 Skills 与 Subagents 如何分工；不要照搬权限。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s9d1ddd1a7f4f">awesome-claude-skills</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>社区 Skill 入口，安装前逐项审查。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sccc01d626405">awesome-agent-skills</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>比较多家工具对 Agent Skills 的兼容范围。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s3cb7ff1cdcf9">claude-skills</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>寻找领域案例；当作案例库，不是官方标准。</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="7" align="center" valign="middle">Plugins／Marketplaces</th><td><a href="../../reference/source-readings.html#s02eab667df44">claude-plugins-official</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>官方 plugin 与 marketplace 结构的第一范本。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s2d6ba8fc0269">knowledge-work-plugins</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>看多领域 bundles 如何分工与打包。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s107d442e081b">superpowers-marketplace</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>学习只负责策展、plugin 放在外部仓库的最小 marketplace。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s5e19efafb659">skills-curated</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>观察 marketplace 如何加入人工安全审查与信任说明。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s4919bf7e67ed">awesome-claude-code-toolkit</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>探索 agents、skills、hooks 与 templates 的社区入口。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#sf02c7e072e30">life-sciences</a></td><td align="center" valign="middle">⭐⭐⭐</td><td>读单领域 marketplace 的结构；内容偏生命科学。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s31b15211a72c">claude-for-legal</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>看大型 vertical suite 的 Skills、Agents、MCP 与责任边界。</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">Subagents</th><td><a href="../../reference/source-readings.html#s1f49d0119ced">claude-cookbooks</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>阅读官方 tool-use 与 orchestration notebooks。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s31661aae5fd3">agents</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>看大量 agent 定义的命名与分工；先从少量文件开始。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s8c6014a36ca9">superpowers</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>比较何时用 Skill、何时隔离成 worker。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s02eab667df44">claude-plugins-official</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>看 Plugin 如何打包 Agents。</td></tr>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" rowspan="4" align="center" valign="middle">Agent loop／SDK</th><td><a href="../../reference/source-readings.html#se027419555c8">claude-agent-sdk-python</a></td><td align="center" valign="middle">⭐⭐⭐⭐⭐</td><td>Python SDK client、message types 与 options；不是完整 runtime source。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s6bc8928a1936">harness-engineering-from-cc-to-ai-coding</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>中文 harness 解读；事实仍需与官方文档核对。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s95e2f11879a2">awesome-harness-engineering</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>扩展到 eval、memory、observability 与 runtime 资源。</td></tr>
+<tr><td><a href="../../reference/source-readings.html#s31661aae5fd3">agents</a></td><td align="center" valign="middle">⭐⭐⭐⭐</td><td>从实际 Agent 定义观察 harness 的可读性与权限表面。</td></tr>
+</tbody>
+</table>
+<p><a id="-进入-stage-6-前的自我检查"></a></p>
+<span id="-进入下一站前的自我检查"></span><h2 data-heading-alias="-进入下一站前的自我检查" id="h49782aa4a1f2">✅ 进入下一站前的自我检查</h2>
+<p>你能否：</p>
+<ul>
+<li>[ ] 用一句话分清 <code>CLAUDE.md</code>、Skill、MCP、Hook、Plugin 和 Subagent？</li>
+<li>[ ] 完成至少前三题，且没有把陌生 script 或高权限 token 直接交给代理？</li>
+<li>[ ] 说明 Subagent 和 Worktree 解决的是两个不同问题？</li>
+<li>[ ] 说明 Claude Code、OpenRouter、OpenCode／Pi 与 Ollama 各是哪一类工具？</li>
+<li>[ ] 判断自己的需求是“使用 CLI”还是“确实需要 Agent SDK”？</li>
+</ul>
+<p>如果可以，按你的路线前进：<strong>Track A</strong> 前往 <a href="tracks--cli--A3-cli-production.zh-Hans.md.html">A3 — 安全的团队流程</a>；<strong>Track B</strong> 前往 <a href="stages--06-memory-rag.zh-Hans.md.html">Stage 6 — Memory &amp; RAG</a>。如果还不行，回到“一张表先选对组件”，只重做你分不清的那一行。</p>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

@@ -1,0 +1,147 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>schema-design-cheatsheet.zh-Hans</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a></nav><article class="lesson-body"><p class="source-note">原课程本地核对资料，保留原内容与顺序。外链已改为本地阅读入口。命令中的原仓库路径请按本课运行指南换成实际位置；版本差异见本课说明。MIT © 2026 Wenyu Chiou。</p><span id="top"></span><span id="function-schema-设计-cheatsheet"></span><h1 data-heading-alias="function-schema-设计-cheatsheet" id="h2ea65ed86d83">Function Schema 设计 Cheatsheet</h1>
+<blockquote>
+<p><a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 — 工具使用与第一个 Agent Loop</a> 的补充参考。写 tool / function schema 时的 5 条黄金规则 + 5 个 anti-pattern。</p>
+</blockquote>
+<blockquote>
+<p>规格查核：2026-08-27 UTC。Schema 是模型和程序共同使用的接口；写清楚会减少歧义，但不能代替应用程序验证或固定 eval。</p>
+</blockquote>
+<hr />
+<span id="5-条黄金规则"></span><h2 data-heading-alias="5-条黄金规则" id="hfb6277242712">5 条黄金规则</h2>
+<span id="规则-1description-是写给-llm-看的不是-docstring"></span><h3 data-heading-alias="规则-1description-是写给-llm-看的不是-docstring" id="h2fb300233f5f">规则 1：description 是写给 LLM 看的，不是 docstring</h3>
+<p>模型会一起看 tool name、<code>description</code>、schema 与对话内容，决定要不要提出 Tool Call。所以要：</p>
+<ul>
+<li>✅ 写<strong>情境</strong>（when）跟<strong>做什么</strong>（what）：<code>&quot;当用户问特定城市的天气时调用&quot;</code></li>
+<li>❌ 不要写实作细节：<code>&quot;使用 OpenWeather API v2.5 取得 JSON&quot;</code></li>
+</ul>
+<p>对照：</p>
+<pre><code class="language-python"># 坏
+&quot;description&quot;: &quot;Get weather data.&quot;
+
+# 好
+&quot;description&quot;: &quot;Get current weather for a specified city. Use this when the user asks about the current weather, temperature, humidity, or 'is it raining' for any specific location. Do NOT use for forecasts (use get_forecast instead) or historical data.&quot;
+</code></pre>
+<span id="规则-2参数用对-type模糊处用-enum-收敛"></span><h3 data-heading-alias="规则-2参数用对-type模糊处用-enum-收敛" id="h8ba18e0bedab">规则 2：参数用对 type，模糊处用 enum 收敛</h3>
+<p>LLM 对 <code>type: string</code> 自由度高、容易乱传。能用窄型别就用：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">模糊</th>
+<th style="text-align:left">收敛</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>unit: string</code>（摄氏？华氏？kelvin？）</td>
+<td style="text-align:left"><code>unit: enum[&quot;celsius&quot;, &quot;fahrenheit&quot;]</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>priority: string</code>（low/中/HIGH？）</td>
+<td style="text-align:left"><code>priority: enum[&quot;low&quot;, &quot;medium&quot;, &quot;high&quot;]</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count: string</code>（&quot;五个&quot;？）</td>
+<td style="text-align:left"><code>count: integer</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>enabled: string</code>（&quot;true&quot; / &quot;True&quot;）</td>
+<td style="text-align:left"><code>enabled: boolean</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>tags: string</code>（&quot;a,b,c&quot;？JSON？）</td>
+<td style="text-align:left"><code>tags: array of string</code></td>
+</tr>
+</tbody>
+</table>
+<span id="规则-3required-vs-optional-分清楚"></span><h3 data-heading-alias="规则-3required-vs-optional-分清楚" id="hd0e50bf59441">规则 3：required vs optional 分清楚</h3>
+<ul>
+<li>一般 JSON Schema 中，<code>required</code> 列出少了就不能执行的栏位。</li>
+<li>有默认值不代表供应商一定会替你填值；程序要明确套用 default。</li>
+<li><strong>OpenAI strict mode 是例外</strong>：properties 全部要列入 <code>required</code>，真正可选的栏位用包含 <code>null</code> 的 type 表示，并设置 <code>additionalProperties: false</code>。</li>
+<li>Anthropic、Ollama 与其他 compatible endpoint 的 strict 支持不同；不要把一家的规则当成通用规范。</li>
+</ul>
+<pre><code class="language-python"># 坏：把 timezone 列 required，LLM 会乱编「Asia/Taipei」即便用户没提到
+&quot;required&quot;: [&quot;city&quot;, &quot;timezone&quot;]
+
+# 一般非 strict schema 的简化例子
+&quot;required&quot;: [&quot;city&quot;],
+&quot;properties&quot;: {
+    &quot;timezone&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;UTC&quot;, &quot;description&quot;: &quot;...&quot;}
+}
+</code></pre>
+<span id="规则-4tool-name--parameter-name-要自说明"></span><h3 data-heading-alias="规则-4tool-name--parameter-name-要自说明" id="h811ed036d279">规则 4：tool name + parameter name 要自说明</h3>
+<p>LLM 看到 <code>do_thing(x, y, z)</code> 跟看到 <code>get_weather(city, unit)</code> 用法完全不同。</p>
+<ul>
+<li>✅ <code>get_user_profile(user_id)</code></li>
+<li>❌ <code>fetch(id)</code> 或 <code>process_data(input)</code></li>
+</ul>
+<p>动词开头，说清楚是 query / mutation / action。</p>
+<span id="规则-5error-回传要让-llm-可以恢复"></span><h3 data-heading-alias="规则-5error-回传要让-llm-可以恢复" id="h3e55214be122">规则 5：error 回传要让 LLM 可以恢复</h3>
+<p>程序先捕捉错误，再决定是否把最小、可处理的错误结果交回模型。错误可以结构化：</p>
+<pre><code class="language-json">{
+    &quot;error&quot;: &quot;City not found&quot;,
+    &quot;code&quot;: &quot;INVALID_CITY&quot;,
+    &quot;retry_hint&quot;: &quot;Check spelling, or try a major city nearby&quot;
+}
+</code></pre>
+<p>而不是只回 <code>&quot;Error 500&quot;</code>。Anthropic client tool 用 <code>is_error: true</code> 标示失败；其他 API 有自己的格式。无论哪一家，程序都要设置最大重试、timeout 和停止条件。</p>
+<hr />
+<span id="5-个常见-anti-pattern"></span><h2 data-heading-alias="5-个常见-anti-pattern" id="ha6931c1c7653">5 个常见 Anti-Pattern</h2>
+<span id="anti-1万能工具god-tool"></span><h3 data-heading-alias="anti-1万能工具god-tool" id="h6508949b66af">Anti-1：“万能工具”（God Tool）</h3>
+<pre><code class="language-python"># 坏：一个 tool 做所有事
+def do_database_op(operation: str, table: str, data: str) -&gt; str:
+    &quot;&quot;&quot;Do anything with the database.&quot;&quot;&quot;
+</code></pre>
+<p>这种工具把读取、创建和修改混在一起，也很难配置最小权限。改成 <code>query_users</code>、<code>create_order</code>、<code>update_inventory</code> 等用途清楚的工具，再用固定 eval 检查选择是否改善。</p>
+<span id="anti-2description-是-docstring"></span><h3 data-heading-alias="anti-2description-是-docstring" id="heb2437d9b2ec">Anti-2：description 是 docstring</h3>
+<pre><code class="language-python"># 坏
+&quot;description&quot;: &quot;GET /api/v2/weather endpoint. Returns JSON. See API docs.&quot;
+
+# 好
+&quot;description&quot;: &quot;Get current weather for a city. Returns temperature in C/F, humidity, and conditions.&quot;
+</code></pre>
+<p>LLM 不是程序，它要的是 <strong>“这个 tool 什么时候有用”</strong>。</p>
+<span id="anti-3所有东西都是-string"></span><h3 data-heading-alias="anti-3所有东西都是-string" id="h451c8c76f744">Anti-3：所有东西都是 string</h3>
+<pre><code class="language-python"># 坏
+{&quot;properties&quot;: {
+    &quot;count&quot;: {&quot;type&quot;: &quot;string&quot;},     # LLM 可能传 &quot;five&quot;
+    &quot;active&quot;: {&quot;type&quot;: &quot;string&quot;},    # LLM 可能传 &quot;yes&quot;
+    &quot;list&quot;: {&quot;type&quot;: &quot;string&quot;}       # LLM 可能传 &quot;[a, b, c]&quot; 或 &quot;a, b, c&quot;
+}}
+
+# 好
+{&quot;properties&quot;: {
+    &quot;count&quot;: {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 100},
+    &quot;active&quot;: {&quot;type&quot;: &quot;boolean&quot;},
+    &quot;list&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}
+}}
+</code></pre>
+<span id="anti-4只看一次成功就宣布-schema-很好"></span><h3 data-heading-alias="anti-4只看一次成功就宣布-schema-很好" id="ha5ca8c11ad5c">Anti-4：只看一次成功就宣布 schema 很好</h3>
+<p>清楚的例子可以帮助模型理解输入，但不能证明 schema 一定可靠。固定 5–10 个正常、模糊与恶意案例，让坏版与好版运行同一组题目。</p>
+<pre><code class="language-python">&quot;description&quot;: &quot;Search products by query text, such as 'red shoes'. Do not use for product ID lookup; use get_product_by_id.&quot;
+</code></pre>
+<p>记录工具选择、参数是否合法、程序是否拒绝未授权输入；不要只评最后一句话好不好看。</p>
+<span id="anti-5沉默的失败"></span><h3 data-heading-alias="anti-5沉默的失败" id="hbdc7003e56ae">Anti-5：沉默的失败</h3>
+<p>Tool 失败只回 <code>null</code> 或 <code>{}</code>，模型可能把空数据当成功。返回明确状态，例如：</p>
+<ul>
+<li>成功 → <code>{&quot;success&quot;: true, &quot;data&quot;: {...}}</code></li>
+<li>失败 → <code>{&quot;success&quot;: false, &quot;error&quot;: &quot;...&quot;, &quot;retry_hint&quot;: &quot;...&quot;}</code></li>
+</ul>
+<p>这个 JSON 外形只是应用程序约定，不是所有 API 的强制格式。程序仍要处理模型忽略错误、反复重试或提早停止的情况。</p>
+<hr />
+<span id="schema-演进的小建议"></span><h2 data-heading-alias="schema-演进的小建议" id="hd61a25b66ea3">Schema 演进的小建议</h2>
+<ul>
+<li>加参数先确认供应商规则：一般 schema 可加 optional + default；OpenAI strict mode 则要把栏位列为 required，并用 <code>null</code> 表示可省略</li>
+<li>改参数含义 → 开新 tool（<code>get_weather_v2</code>），旧的标 deprecated 一段时间再下</li>
+<li>description 改了要重新跑同一组 eval；不要假设文字小改一定没有行为差异</li>
+<li>上 production 前用 <a href="../../reference/source-readings.html#sbaf9cbcdf7e1">promptfoo</a> eval 一下“LLM 在 5-10 个典型 query 是否选对 tool”</li>
+</ul>
+<hr />
+<span id="延伸阅读"></span><h2 data-heading-alias="延伸阅读" id="h743a19f0bd9a">延伸阅读</h2>
+<ul>
+<li><a href="../../reference/source-readings.html#s4901dce6b1bc">Anthropic — Define Tools</a> — 官方 schema 与 description 指南</li>
+<li><a href="../../reference/source-readings.html#s42e907e29544">Anthropic — Handle Tool Calls</a> — Tool Result 与 <code>is_error</code></li>
+<li><a href="../../reference/source-readings.html#s90f2bf11e4fb">OpenAI — Function Calling</a> — strict mode 与 function schema 规格</li>
+<li><a href="stages--03-tool-use-and-hello-agent.zh-Hans.md.html">Stage 3 — 工具使用与第一个 Agent Loop</a> — 主要动手练习</li>
+<li><a href="stages--05-claude-code-ecosystem.zh-Hans.md.html#52--mcpmodel-context-protocol-基础">Stage 5.2 — MCP 基础</a> — MCP server 也使用 tool schema，但 host、权限与协议层不同</li>
+</ul>
+</article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

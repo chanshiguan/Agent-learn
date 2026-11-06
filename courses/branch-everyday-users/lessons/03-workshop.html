@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>不猜日期、不混淆草稿和实际动作</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">日常分支 · 日常用户延伸路线</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-branch">身份分支选读</span><strong>身份分支</strong><p>按你的工作场景选择；不影响 B 线主线进度。选学后按本分支要求完成练习。</p></aside><span id="top"></span><span id="不猜日期不混淆草稿和实际动作"></span><h1 data-heading-alias="不猜日期不混淆草稿和实际动作" id="h2834d7fa3910">不猜日期、不混淆草稿和实际动作</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h0e015b25bce8">单元一：原题消息与完整提醒</a></li><li><a href="#hfaf483ee2cf2">单元二：写请求的五个部分</a></li><li><a href="#h7dd7e4ba147b">单元三：四种入口怎样选择</a></li><li><a href="#h9a435fbb159e">单元四：个人 Agent 与持续任务</a></li><li><a href="#h6d39b69524c0">课末练习与评分</a></li></ul></aside>
+<span id="单元一原题消息与完整提醒"></span><h2 data-heading-alias="单元一原题消息与完整提醒" id="h0e015b25bce8">单元一：原题消息与完整提醒</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>原消息说“小安星期五前把海报草稿交给小美，活动日期9月12日，未写交付时间”。reference-work 的 original_message 保留原题，Draft、FactsCopied、NeedsConfirmation 分别是可读提醒、抄出的事实与待确认项。小雨海报案例用于换场景练习，不能代替小安这道原题。</p>
+<p>星期五不等于活动当天，9月12日没有给年份，消息也没有给具体几点。提醒可以原样保留这些信息，不能为了看起来完整猜出具体日期。谁交给谁也要照原句，不把收件人写成执行人。</p>
+<pre><code class="language-json">{
+  &quot;Draft&quot;: &quot;草稿：准备海报初稿，先核对活动名称、时间、地点；周五前提交，具体日期和渠道待确认。未发送。&quot;,
+  &quot;FactsCopied&quot;: [
+    {
+      &quot;fact&quot;: &quot;周五前交海报初稿&quot;,
+      &quot;source_id&quot;: &quot;e1&quot;
+    },
+    {
+      &quot;fact&quot;: &quot;需包含活动名称、时间、地点&quot;,
+      &quot;source_id&quot;: &quot;e2&quot;
+    }
+  ],
+  &quot;NeedsConfirmation&quot;: [
+    &quot;周五对应年月日&quot;,
+    &quot;活动名称&quot;,
+    &quot;活动时间&quot;,
+    &quot;地点&quot;,
+    &quot;提交渠道&quot;
+  ],
+  &quot;uncertain_variant&quot;: &quot;如果消息变成“周五之前可能需要交稿，等老师确认”，只记为可能任务；先确认是否要交和截止时间，不创建确定提醒。&quot;,
+  &quot;conflict_variant&quot;: &quot;若另一条说周四，列两条原句与来源，询问哪条生效，不自行选择。&quot;,
+  &quot;action_status&quot;: &quot;仅草稿，未发送、未创建提醒&quot;,
+  &quot;original_message&quot;: {
+    &quot;source&quot;: &quot;小安说星期五前会把海报草稿交给小美。活动日期是9月12日。消息没有写交付时间。&quot;,
+    &quot;Draft&quot;: &quot;提醒草稿：小安星期五前把海报草稿交给小美；活动日期为9月12日。请确认具体交付时间。未发送。&quot;,
+    &quot;FactsCopied&quot;: [
+      &quot;小安交海报草稿给小美&quot;,
+      &quot;星期五前交付&quot;,
+      &quot;活动日期9月12日&quot;
+    ],
+    &quot;NeedsConfirmation&quot;: [
+      &quot;星期五对应年月日&quot;,
+      &quot;活动年份&quot;,
+      &quot;具体交付时间&quot;,
+      &quot;发送渠道与收件人授权&quot;
+    ]
+  }
+}
+
+</code></pre>
+<details class="line-notes"><summary>逐行说明：保留原值的数据与多行字符串</summary><p>行号对应上面的完整代码及实际文件。这里是提示词或结构化数据，在正文内加注释会改变程序输入，因此单独解释。</p><table><thead><tr><th>行</th><th>原内容</th><th>目的</th></tr></thead><tbody><tr><td>1</td><td><code>{</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>2</td><td><code>  &quot;Draft&quot;: &quot;草稿：准备海报初稿，先核对活动名称、时间、地点；周五前提交，具体日期和渠道待确认。未发送。&quot;,</code></td><td>保存草稿。</td></tr><tr><td>3</td><td><code>  &quot;FactsCopied&quot;: [</code></td><td>列出从原资料复制的事实。</td></tr><tr><td>4</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>5</td><td><code>      &quot;fact&quot;: &quot;周五前交海报初稿&quot;,</code></td><td>保存当前对象的 fact 字段，按本例题目或配置读取。</td></tr><tr><td>6</td><td><code>      &quot;source_id&quot;: &quot;e1&quot;</code></td><td>记录该条内容对应的来源 ID。</td></tr><tr><td>7</td><td><code>    },</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>8</td><td><code>    {</code></td><td>开始一个对象，内部以字段名组织数据。</td></tr><tr><td>9</td><td><code>      &quot;fact&quot;: &quot;需包含活动名称、时间、地点&quot;,</code></td><td>保存当前对象的 fact 字段，按本例题目或配置读取。</td></tr><tr><td>10</td><td><code>      &quot;source_id&quot;: &quot;e2&quot;</code></td><td>记录该条内容对应的来源 ID。</td></tr><tr><td>11</td><td><code>    }</code></td><td>结束当前对象或数组。</td></tr><tr><td>12</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>13</td><td><code>  &quot;NeedsConfirmation&quot;: [</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>14</td><td><code>    &quot;周五对应年月日&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>15</td><td><code>    &quot;活动名称&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>16</td><td><code>    &quot;活动时间&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>17</td><td><code>    &quot;地点&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>18</td><td><code>    &quot;提交渠道&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>19</td><td><code>  ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>20</td><td><code>  &quot;uncertain_variant&quot;: &quot;如果消息变成“周五之前可能需要交稿，等老师确认”，只记为可能任务；先确认是否要交和截止时间，不创建确定提醒。&quot;,</code></td><td>保存当前对象的 uncertain_variant 字段，按本例题目或配置读取。</td></tr><tr><td>21</td><td><code>  &quot;conflict_variant&quot;: &quot;若另一条说周四，列两条原句与来源，询问哪条生效，不自行选择。&quot;,</code></td><td>保存当前对象的 conflict_variant 字段，按本例题目或配置读取。</td></tr><tr><td>22</td><td><code>  &quot;action_status&quot;: &quot;仅草稿，未发送、未创建提醒&quot;,</code></td><td>保存当前对象的 action_status 字段，按本例题目或配置读取。</td></tr><tr><td>23</td><td><code>  &quot;original_message&quot;: {</code></td><td>保存当前对象的 original_message 字段，按本例题目或配置读取。</td></tr><tr><td>24</td><td><code>    &quot;source&quot;: &quot;小安说星期五前会把海报草稿交给小美。活动日期是9月12日。消息没有写交付时间。&quot;,</code></td><td>保存当前对象的 source 字段，按本例题目或配置读取。</td></tr><tr><td>25</td><td><code>    &quot;Draft&quot;: &quot;提醒草稿：小安星期五前把海报草稿交给小美；活动日期为9月12日。请确认具体交付时间。未发送。&quot;,</code></td><td>保存草稿。</td></tr><tr><td>26</td><td><code>    &quot;FactsCopied&quot;: [</code></td><td>列出从原资料复制的事实。</td></tr><tr><td>27</td><td><code>      &quot;小安交海报草稿给小美&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>28</td><td><code>      &quot;星期五前交付&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>29</td><td><code>      &quot;活动日期9月12日&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>30</td><td><code>    ],</code></td><td>结束当前对象或数组；逗号表示同一层还有下一项。</td></tr><tr><td>31</td><td><code>    &quot;NeedsConfirmation&quot;: [</code></td><td>列出不能自行补造的信息。</td></tr><tr><td>32</td><td><code>      &quot;星期五对应年月日&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>33</td><td><code>      &quot;活动年份&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>34</td><td><code>      &quot;具体交付时间&quot;,</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>35</td><td><code>      &quot;发送渠道与收件人授权&quot;</code></td><td>提供当前数组中的一项；顺序和值按本行保存，供题目、参考答案或配置读取。</td></tr><tr><td>36</td><td><code>    ]</code></td><td>结束当前对象或数组。</td></tr><tr><td>37</td><td><code>  }</code></td><td>结束当前对象或数组。</td></tr><tr><td>38</td><td><code>}</code></td><td>结束当前对象或数组。</td></tr></tbody></table></details><span id="单元二写请求的五个部分"></span><h2 data-heading-alias="单元二写请求的五个部分" id="hfaf483ee2cf2">单元二：写请求的五个部分</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>说明要做什么、只用哪些材料、输出格式、不能猜什么、如何核对。比如“只据这段消息，分三块输出，未知时间标待确认，保持草稿，不发送”。复杂任务先拆一步，发现错误时指出哪句与来源不符，再让模型局部修改，比重复“仔细一点”更有效。</p>
+<p>不要把模型流畅表达当已查证。日期、金额、地址、联系人和是否已执行特别需要核对。遇到消息互相矛盾，列出两种说法和来源，停止生成确定提醒。模型声称“已经帮你提醒”却没有真实动作收据，不能当完成。</p>
+<span id="单元三四种入口怎样选择"></span><h2 data-heading-alias="单元三四种入口怎样选择" id="h7dd7e4ba147b">单元三：四种入口怎样选择</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>聊天适合草拟；连接器帮助搜索已授权账户资料；CLI 可读写限定目录并执行命令；本地 runtime 负责运行模型。它们不是高低等级。只想整理这段消息，不必装 CLI。重复整理本地文件才考虑 A 线，操作网页才考虑第八课。</p>
+<p>连接前明确读什么、数据送去哪、能改什么、怎样撤销。Claude 的桌面与网页连接能力、ChatGPT Apps、Gemini 连接服务可能有不同权限和可用条件，不能把一个服务的授权当成所有工具授权。停用账户连接与删除已有数据副本是两件事。</p>
+<p>Ollama 或 LM Studio 使用本地权重时可本地推理，但云模型、网页搜索、第三方工具和日志仍可能联网。判断是否不外发要看整条链，不能只看软件名字里有 local。账号条款与设置会变化，课程教你检查这些责任，不让你背某个永久开关位置。</p>
+<span id="单元四个人-agent-与持续任务"></span><h2 data-heading-alias="单元四个人-agent-与持续任务" id="h9a435fbb159e">单元四：个人 Agent 与持续任务</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<p>持续助手需明确目标、范围、何时停止、多久检查、怎样通知和撤销。让它记住偏好之前说明保存什么，之后应能查看、改正、删除。草稿到发送需要具体对象与内容确认；允许读消息不等于允许转发。没有确认渠道与收件人时，最有用的产物是待确认清单。</p>
+<span id="课末练习与评分"></span><h2 data-heading-alias="课末练习与评分" id="h6d39b69524c0">课末练习与评分</h2><div class="study-section"><span class="study-badge study-branch">身份分支选读</span></div>
+<pre><code class="language-bash"># 运行 courses/branch-everyday-users/examples/check_work.py，按本行参数完成当前案例并核对输出。
+.venv/bin/python courses/branch-everyday-users/examples/check_work.py /tmp/reminder-work.json
+</code></pre>
+<p>结构通过只代表三块和扩展字段齐全。人工核对：小安、小美与交付方向正确；周五未猜具体日期；9月12日未补年份；三块内容一致；表达“可能”的任务仍保留不确定性；没有声称已发送。任何一项事实错误都退回，不用语气分抵消。两天后不用模板重做，一周后加入一条冲突消息。</p>
+<nav class="next-prev" aria-label="章节导航"><a href="02-readings.html">← 日常用户分支必读整合</a><a href="99-exercises.html">日常用户分支课后练习 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

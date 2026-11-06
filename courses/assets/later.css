@@ -1,0 +1,11 @@
+@import url("learning.css");
+.route { padding: 22px; border-left: 4px solid var(--accent); background: var(--panel); }
+.lesson-body h1 { font-size: 2.5rem; }
+.code-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.copy { padding:6px 12px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:white; }
+.source-note { color:var(--muted); font-size:0.9rem; }
+.code-index { columns:2; }
+@media(max-width:720px) { .code-index { columns:1; } }
+@media print { details:not([open]) > * { display:block; } .copy { display:none; } }
+/* 长文件名、提交哈希和练习编号在窄屏可换行，不挤出正文。 */
+.lesson-body { overflow-wrap: anywhere; }

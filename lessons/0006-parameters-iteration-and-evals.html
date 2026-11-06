@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>06 · 参数、迭代与 Eval</title><link rel="stylesheet" href="../assets/course.css"></head>
+<body><main>
+  <nav class="course-nav"><a href="index.html">课程首页</a><a href="0005-complex-prompts-tools-and-agents.html">05 工具与 Agent</a><span class="current">06 迭代与 Eval</span><a href="0007-modern-model-guidance.html">07 现代模型</a></nav>
+  <p class="eyebrow">Lesson 06 · Engineering Loop</p>
+  <h1>Prompt 不是文案，是需要回归测试的程序逻辑</h1>
+  <p class="lede">这一课覆盖生成参数、Prompt 迭代策略、Fallback、版本化、缓存、模型升级和 Eval。目标是让你能证明一次修改是否真的变好。</p>
+
+  <h2>1. 五个常见生成参数</h2>
+  <table>
+    <thead><tr><th>参数</th><th>影响</th><th>常见误解</th></tr></thead>
+    <tbody>
+      <tr><td><code>max_output_tokens</code></td><td>允许生成的最大 token 数</td><td>它不是期望长度，而是硬上限</td></tr>
+      <tr><td><code>temperature</code></td><td>对候选 token 采样随机性的影响</td><td>0 不代表跨环境、跨版本绝对确定</td></tr>
+      <tr><td><code>top_k</code></td><td>只从概率最高的 K 个候选中选</td><td>不是所有模型都支持或建议自定义</td></tr>
+      <tr><td><code>top_p</code></td><td>从累积概率达到阈值的候选集采样</td><td>不要与 temperature 一起无目的调整</td></tr>
+      <tr><td><code>stop_sequences</code></td><td>出现指定字符串时停止生成</td><td>序列如果会出现在正文中，就会误截断</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warning"><strong>参数是模型特定的。</strong>Google 当前文档说明：Gemini 4 和 Gemini 3.6+ 忽略自定义 <code>temperature</code>、<code>top_p</code>、<code>top_k</code>，并将逐步对这些配置返回错误；某些早期 Gemini 3 模型也建议保持默认，避免破坏推理。不能把老模型的调参经验直接套到新模型。</div>
+
+  <h2>2. 先看结束原因，再怪 Prompt</h2>
+  <pre><code>choice = response.choices[0]
+text = choice.message.content or ""
+
+print("answer:", text)
+print("finish_reason:", choice.finish_reason)
+print("usage:", response.usage)</code></pre>
+  <p>如果 <code>finish_reason == "length"</code>，说明输出额度先用完了。这时重写分类规则可能完全没有用。你之前的空响应正是这一类问题。</p>
+
+  <h2>3. Prompt 迭代时可以改什么</h2>
+  <ol>
+    <li><strong>重新措辞：</strong>用更直接、可检查的语言表达同一目标。</li>
+    <li><strong>改成类似任务：</strong>例如将开放问答改成从有限选项中选择。</li>
+    <li><strong>调整内容顺序：</strong>比较范例、上下文、当前输入的不同顺序。</li>
+    <li><strong>补一个边界范例：</strong>针对已知错误，不要无目的加大量范例。</li>
+    <li><strong>增加相关上下文：</strong>当问题是知识不足，而不是指令不清。</li>
+    <li><strong>拆分流程：</strong>当单次 Prompt 同时承担太多任务。</li>
+  </ol>
+  <p>迭代不是随意重写。每一次修改都应有假设：“如果错误是由 X 造成，那么只修改 Y 后，案例 Z 应该改正。”</p>
+
+  <h2>4. 一次只改一个变量</h2>
+  <p>如果同时换模型、改 Prompt、加范例、调 temperature，分数上升后你不知道原因。一个干净实验需要固定：</p>
+  <ul class="checklist">
+    <li>模型名与模型版本</li><li>生成参数</li><li>测试题集</li><li>正确答案与评分规则</li><li>运行次数与随机性策略</li>
+  </ul>
+  <p>然后只修改一处，重跑全部 Eval。</p>
+
+  <h2>5. Eval 不只是总分</h2>
+  <table>
+    <thead><tr><th>维度</th><th>客服分类器的测量</th></tr></thead>
+    <tbody>
+      <tr><td>任务正确性</td><td>标签与标准答案一致</td></tr>
+      <tr><td>格式正确性</td><td>只有三个合法小写标签</td></tr>
+      <tr><td>稳定性</td><td>重复运行时不频繁改变</td></tr>
+      <tr><td>成本</td><td>prompt/completion/reasoning token</td></tr>
+      <tr><td>延迟</td><td>每次分类耗时</td></tr>
+      <tr><td>未知输入</td><td>边界或信息不足时是否安全退回 other</td></tr>
+    </tbody>
+  </table>
+  <p>总分 6/6 不代表已经足够好。如果六道题全部很简单，新旧 Prompt 都满分，就出现天花板效应：当前测试无法区分它们。</p>
+
+  <h2>6. 生产环境要固定模型快照</h2>
+  <p>同一模型家族的不同快照可能在指令遵循、格式和边界案例上有差异。生产系统应使用明确模型版本，升级时运行回归 Eval，而不是无声切换到“最新”。</p>
+
+  <h2>7. Prompt 应放在代码和版本控制中</h2>
+  <p>OpenAI 当前建议将生产 Prompt 保存在应用代码中，使用类型化参数/schema 提供动态值，并通过普通代码评审、测试、部署和特性开关发布。</p>
+  <pre><code>def build_classifier_prompt(message: str) -&gt; str:
+    return f"""# Task
+将留言分为 billing、bug 或 other。
+
+# Input
+&lt;message&gt;{message}&lt;/message&gt;
+
+# Output
+只返回一个合法标签。"""</code></pre>
+  <p>截至 2026-11-03，OpenAI 文档已标记 API 端可复用 Prompt Object 为废弃路线：2026-06-03 起弱化推广，<code>v1/prompts</code> 计划在 2026-11-30 关闭。已有 prompt ID/version 集成应迁移回代码管理。</p>
+
+  <h2>8. Prompt Caching 与长上下文</h2>
+  <p>反复使用的规则、工具定义和范例放在请求前缀，动态用户数据放在后面，可以提高 cache 命中机会。缓存主要优化成本和延迟，不会弥补不正确 Prompt。</p>
+  <p>模型只能在 context window 内处理输入、对话历史、工具结果和输出。即使上下文窗口很大，也应该做相关性筛选：“能塞进去”不等于“应该塞进去”。</p>
+
+  <h2>9. Fallback 的两种含义</h2>
+  <p>Google 页面将 Fallback Response 主要定义为安全过滤器触发后返回的拒答。原页建议在某些情况下增加 temperature，但这不是普适解法：</p>
+  <ul>
+    <li>如果是真正安全边界，不应用调参试图绕过。</li>
+    <li>如果是误触发，应重写任务上下文、说明合法用途，并按当前模型文档处理。</li>
+    <li>应用层的 Fallback 还应包括：超时、工具失败、解析失败和信息不足时的安全退路。</li>
+  </ul>
+
+  <h2>10. 一个完整的实验记录</h2>
+  <pre><code>假设：“付款页打不开”被误分为 billing，
+      是因为没有展示“业务词 + 技术故障”的边界。
+
+原版｜分数：8/10｜边界错误：2
+改动｜只增加一个 bug 边界范例
+新版｜分数：10/10｜边界错误：0
+成本｜prompt token 从 180 增至 205
+结论｜在当前 10 条 Eval 上有改善；需扩大边界集后再确认。</code></pre>
+
+  <h2>11. 检索练习</h2>
+  <div class="quiz" data-quiz data-answer="a" data-correct="只改一个变量才能将结果归因到该修改。" data-incorrect="同时改模型或测试题会破坏对照。">
+    <fieldset><legend>1. 验证新增范例是否有效，应该怎么做？</legend>
+      <label><input type="radio" name="e1" value="a"> 固定其他变量</label><label><input type="radio" name="e1" value="b"> 同时更换大模型</label><label><input type="radio" name="e1" value="c"> 换成更简单测试</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="quiz" data-quiz data-answer="c" data-correct="输出达到硬上限并因 length 结束，说明生成被截断。" data-incorrect="usage 只是统计，关键证据是 token 达上限与 finish_reason=length。">
+    <fieldset><legend>2. <code>completion_tokens == max_tokens</code> 且 <code>finish_reason == length</code> 表示？</legend>
+      <label><input type="radio" name="e2" value="a"> 分类标签定义错误</label><label><input type="radio" name="e2" value="b"> 输入上下文不相关</label><label><input type="radio" name="e2" value="c"> 生成输出被上限截断</label>
+    </fieldset><button type="button">检查</button><p data-feedback></p>
+  </div>
+  <div class="next-prev"><a href="0005-complex-prompts-tools-and-agents.html">← 上一课：工具与 Agent</a><a href="0007-modern-model-guidance.html">下一课：现代模型差异 →</a></div>
+  <footer><p>要设计新 Eval，可以把任务和 5–10 条真实输入发给我，我会帮你定义评分标准和边界集。</p></footer>
+</main><script src="../assets/quiz.js"></script></body></html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Prompt Engineering 中文术语表</title><link rel="stylesheet" href="../assets/course.css"></head>
+<body><main>
+  <nav class="course-nav"><a href="../lessons/index.html">课程首页</a><a href="prompt-engineering-map.html">速查地图</a><span class="current">术语表</span><a href="source-coverage.html">覆盖矩阵</a></nav>
+  <p class="eyebrow">Reference · Glossary</p>
+  <h1>Prompt Engineering 中文术语表</h1>
+  <p class="lede">这里不是只给中文翻译，而是说明每个词在实际开发中解决什么问题。按概念关系分组，比按字母顺序更容易形成整体认识。</p>
+
+  <h2>一、请求与消息结构</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Prompt</td><td>一次发给模型的完整提示</td><td>可以包含身份、规则、上下文、范例、当前输入和输出要求，不只是用户的一句话</td></tr>
+    <tr><td>Instruction</td><td>告诉模型要做什么、怎么做的指令</td><td>例如“分类”“只返回标签”“不确定时回答不知道”</td></tr>
+    <tr><td>Context</td><td>完成任务所需的背景资料</td><td>文档、对话历史、数据库记录、检索片段等；它不是默认可信，应标注来源</td></tr>
+    <tr><td>System message</td><td>系统级行为与边界</td><td>定义助手身份、长期规则、工具策略；具体优先级依 API 而异</td></tr>
+    <tr><td>Developer message</td><td>应用开发者提供的高优先级规则</td><td>OpenAI 当前消息层级中高于 user；适合应用逻辑和安全边界</td></tr>
+    <tr><td>User message</td><td>本次用户目标和数据</td><td>像调用函数时传入的参数，不能覆盖更高优先级规则</td></tr>
+    <tr><td>Assistant message</td><td>模型之前的输出或预填开头</td><td>可用于多轮历史；部分旧接口允许预填来引导格式</td></tr>
+    <tr><td>Role prompting</td><td>给模型设定专业身份或交流角色</td><td>主要影响关注点、语气和受众适配，不能凭空增加知识或权限</td></tr>
+    <tr><td>Prompt template</td><td>稳定文本加动态变量的提示模板</td><td>把业务规则与本次输入分离，便于复用、版本控制和测试</td></tr>
+    <tr><td>Delimiter</td><td>输入边界标记</td><td>用 XML 标签、Markdown 围栏等区分指令与不可信数据，减少歧义</td></tr>
+  </tbody></table>
+
+  <h2>二、范例与输出控制</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Zero-shot</td><td>不给范例，直接说明任务</td><td>先建立最小基线；简单或模型熟悉的任务往往已经够用</td></tr>
+    <tr><td>One-shot</td><td>给一个输入输出范例</td><td>快速示范格式或一个重要边界</td></tr>
+    <tr><td>Few-shot</td><td>给少量代表性范例</td><td>用行为示范补充规则；范例应多样、正确、格式一致并覆盖难点</td></tr>
+    <tr><td>Output format</td><td>输出必须长什么样</td><td>限定标签、字段、Markdown、XML 或 JSON；便于人读或程序解析</td></tr>
+    <tr><td>Structured Outputs</td><td>按 schema 强约束结构化输出</td><td>比只在文字里要求“返回 JSON”更可靠；仍要校验业务含义</td></tr>
+    <tr><td>Prefill</td><td>预先提供助手回答的开头</td><td>例如先写 <code>{</code> 引导 JSON；是否支持取决于模型和 API</td></tr>
+    <tr><td>Stop sequence</td><td>遇到指定文本就停止生成</td><td>控制生成边界；如果停止词可能出现在正文，会导致误截断</td></tr>
+    <tr><td>Completion</td><td>模型对输入的续写结果</td><td>早期 API 常用术语；现代响应还可能同时包含工具调用、推理项等</td></tr>
+    <tr><td>Fallback</td><td>正常路径失败时的安全退路</td><td>可指安全拒答，也可指超时、解析失败、工具失败或信息不足时的应用策略</td></tr>
+  </tbody></table>
+
+  <h2>三、模型生成与资源</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Token</td><td>模型处理文本的基本片段</td><td>输入、输出和某些推理 token 共同影响上下文上限、成本与延迟</td></tr>
+    <tr><td>Context window</td><td>一次请求能处理的 token 总容量</td><td>通常包括指令、历史、资料、工具结果和预留输出；大窗口不等于所有信息都相关</td></tr>
+    <tr><td>Max output tokens</td><td>最大输出额度</td><td>硬上限，不是目标长度；过小会造成截断或看似空响应</td></tr>
+    <tr><td>Finish reason</td><td>生成为何结束</td><td>用于区分正常结束、达到长度上限、触发停止词、工具调用或安全阻断</td></tr>
+    <tr><td>Temperature</td><td>采样随机性的一个控制量</td><td>支持情况和含义依模型而异；低值也不保证跨版本绝对一致</td></tr>
+    <tr><td>Top-k</td><td>只保留概率最高的 K 个候选</td><td>缩小采样集合；新模型可能不允许或不建议手动设置</td></tr>
+    <tr><td>Top-p</td><td>保留累积概率达到阈值的候选集合</td><td>又称 nucleus sampling；不要与其他参数无目的同时调整</td></tr>
+    <tr><td>Prompt caching</td><td>复用相同请求前缀的计算结果</td><td>把稳定规则和范例放前面、动态数据放后面，可降低部分成本和延迟</td></tr>
+    <tr><td>Model snapshot</td><td>固定时间点的具体模型版本</td><td>生产环境固定快照，并在升级前跑回归 Eval，避免行为无声改变</td></tr>
+  </tbody></table>
+
+  <h2>四、知识、检索与可靠性</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Hallucination</td><td>模型生成了没有可靠依据的内容</td><td>用允许“不知道”、提供可信上下文、先找证据、工具验证等方式降低风险</td></tr>
+    <tr><td>Grounding</td><td>让回答以指定证据或实时数据为依据</td><td>要求来源、引用片段、限制只用提供资料；当前事实可用搜索或数据库工具</td></tr>
+    <tr><td>Retrieval</td><td>从资料库找出相关内容</td><td>先缩小信息范围，再把最相关片段交给模型</td></tr>
+    <tr><td>RAG</td><td>检索增强生成</td><td>检索资料并随请求提供给模型，再让模型基于资料回答</td></tr>
+    <tr><td>Embedding</td><td>把内容编码成可比较的数值向量</td><td>用于语义相似度检索；不是回答本身，也不自动保证资料正确</td></tr>
+    <tr><td>Vector database</td><td>存储和搜索向量的数据库</td><td>按语义相似度查找文档片段，常用于 RAG 的检索层</td></tr>
+    <tr><td>Knowledge cutoff</td><td>模型训练知识的大致截止时间</td><td>不能靠 Prompt 延长；截止后或实时信息需要外部来源</td></tr>
+    <tr><td>Evidence-first</td><td>先提取证据，再生成答案</td><td>把“找依据”和“下结论”分开，便于审计并减少无依据回答</td></tr>
+  </tbody></table>
+
+  <h2>五、工具、工作流与 Agent</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Tool / Function calling</td><td>模型选择工具并生成结构化参数</td><td>宿主程序负责校验、授权、执行，再把结果交回模型；模型本身不直接执行函数</td></tr>
+    <tr><td>Tool schema</td><td>工具名称、用途和参数的结构定义</td><td>帮助模型正确选择工具；应用仍必须验证参数和权限</td></tr>
+    <tr><td>Prompt chaining</td><td>把前一步输出传给下一步</td><td>适合“提取 → 判断 → 写作 → 校验”等可分阶段任务</td></tr>
+    <tr><td>Aggregation</td><td>并行获得多个结果后再合并</td><td>可比较多个候选、来源或评审意见，但成本更高</td></tr>
+    <tr><td>Agent</td><td>围绕目标反复规划、调用工具、观察结果并继续行动的系统</td><td>需要停止条件、权限边界、恢复策略、验收标准和人工确认点</td></tr>
+    <tr><td>Agent loop</td><td>计划 → 行动 → 观察 → 更新计划的循环</td><td>直到完成、无法继续、达到预算，或需要用户决策</td></tr>
+    <tr><td>Persistence</td><td>遇到可恢复失败时继续推进</td><td>不是无限重试；要有重试上限、替代方案和升级条件</td></tr>
+  </tbody></table>
+
+  <h2>六、测试与维护</h2>
+  <table><thead><tr><th>术语</th><th>中文理解</th><th>实际用途</th></tr></thead><tbody>
+    <tr><td>Eval</td><td>评估模型系统表现的测试集与评分方法</td><td>固定输入、标准答案或评分量表，用于比较 Prompt、模型和参数</td></tr>
+    <tr><td>Regression test</td><td>防止已正确行为在改动后退化</td><td>每个真实失败样本都可加入回归集</td></tr>
+    <tr><td>Baseline</td><td>最小方案的基准成绩</td><td>没有基线就无法证明复杂 Prompt 是否带来收益</td></tr>
+    <tr><td>Edge case</td><td>边界或少见输入</td><td>最容易暴露规则冲突、格式失败和错误自信</td></tr>
+    <tr><td>Ceiling effect</td><td>测试太简单，所有方案都接近满分</td><td>需要增加困难、边界和真实分布案例，才能区分方案</td></tr>
+    <tr><td>A/B comparison</td><td>在相同条件下比较两个版本</td><td>一次只改一个变量，才能把结果变化归因于该改动</td></tr>
+    <tr><td>Prompt versioning</td><td>记录 Prompt 的版本和变更</td><td>与代码、模型版本和 Eval 结果关联，支持审查、回滚和部署</td></tr>
+  </tbody></table>
+
+  <div class="callout success"><strong>记忆方法：</strong>Prompt 决定“怎么做”，Context 提供“用什么资料做”，Tool 提供“模型本身做不了的动作”，Eval 证明“是否真的做对”。</div>
+  <div class="next-prev"><a href="../lessons/0007-modern-model-guidance.html">← 返回第 7 课</a><a href="source-coverage.html">查看知识覆盖矩阵 →</a></div>
+</main></body></html>

@@ -1,0 +1,7 @@
+[
+  {"id":"weather","question":"查询台北的示例气温。","actions":["get_weather"],"number":26,"unit_words":["摄氏","℃","°C","celsius"],"city":"台北"},
+  {"id":"math","question":"请调用计算工具，计算 12 乘以 8。","actions":["calculator"],"number":96,"operation":"multiply","left":12,"right":8},
+  {"id":"chain","question":"查询台北的示例气温，再用温度工具换算成华氏。","actions":["get_weather","convert_temperature"],"number":78.8,"unit_words":["华氏","℉","°F","fahrenheit"],"city":"台北"},
+  {"id":"greeting","question":"你好，用一句话回应即可。","actions":[]},
+  {"id":"missing","question":"这是错误处理实验：请实际调用 get_weather 查询火星，让工具返回是否有数据；不要只根据工具说明推断。收到错误就说明无法查询，不要猜温度。","actions":["get_weather"],"error":true,"city":"火星"}
+]

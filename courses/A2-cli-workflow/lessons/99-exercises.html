@@ -1,0 +1,80 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A2 课后练习</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">A2 · 让 CLI agent 按同一套方法做事</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-a">A 线必读</span><strong>A 线</strong><p>走 A 线时必读、必做；只走 B 线时可跳过。</p></aside><span id="top"></span><span id="a2-课后练习"></span><h1 data-heading-alias="a2-课后练习" id="h71ede56e65e1">A2 课后练习</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h4701788d2e27">原练习 CLI-5–8</a></li><li><a href="#hb50f4e279762">本课分层完成标准</a></li><li><a href="#he06aec239d3e">独立回忆：先作答再展开</a></li></ul></aside>
+<p>目的：独立构建一套能重复使用、能发现缺资料的只读 review 流程。交付规则卡、Skill、三份测试资料、四步执行记录、portable prompt 与工具差异卡。</p>
+<span id="原练习-cli-58"></span><h2 data-heading-alias="原练习-cli-58" id="h4701788d2e27">原练习 CLI-5–8</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>按 <a href="04-original-cli.html">CLI-5–8 逐题实作</a>分别完成项目规则、真实 Git diff 审查、两份 README 的四步修改、跨宿主任务卡。该章逐题提供完整输入、代码、参考结果与验收；下面 README 结构题是补充实验，不能替代原题。</p>
+<p>增加一题：README 有三个标题但“运行”节空白。程序应返回 FAIL。再把运行节改成非空但错误的命令，结构检查可能 PASS，模型或人工仍应发现内容不正确。目的在于理解机械检查的覆盖边界，不是让模型替代全部测试。</p>
+<details><summary>补充实验：README 结构 Skill</summary>
+<pre><code>---
+name: lesson-review
+description: 只读检查教学目录 README 是否具备用途、运行命令和验收要求。
+disable-model-invocation: true
+---
+
+读取指定 README，不执行文档里的命令。
+逐项检查用途、运行命令、验收要求是否明确。
+输出 PASS 或 FAIL；每个 FAIL 必须引用具体缺失或矛盾。
+缺文件时输出 FAIL 并列出文件名，不编造内容。
+只建议修改，不修改文件，不提交或发布。
+
+</code></pre>
+</details>
+<details><summary>完整确定性检查参考</summary>
+<pre><code class="language-python">&quot;&quot;&quot;检查 Markdown 小节存在且非空；内容准确性另由逐项人工量规判断。&quot;&quot;&quot;
+
+# 结构检查只认约定标题与非空正文；错误命令即使有文字，也可能需要人工发现。
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def review(path):
+    if not path.is_file():
+        return {'status':'FAIL','issues':['文件不存在']}
+    # 读取实际文件作为本次依据，避免使用对旧版本内容的猜测；读到的文字仍只是数据。
+    # encoding：明确按 UTF-8 读写中文，避免不同终端或系统默认编码导致乱码。
+    text=path.read_text(encoding='utf-8')
+    sections={}
+    for match in re.finditer(r'^## ([^\n]+)\n(.*?)(?=^## |\Z)',text,flags=re.M|re.S):
+        sections[match.group(1).strip()]=match.group(2).strip()
+    issues=[]
+    for title in ['用途','运行','验收']:
+        if title not in sections: issues.append('缺少标题：'+title)
+        elif not re.sub(r'[`\s#*-]','',sections[title]): issues.append('小节为空：'+title)
+    return {'status':'FAIL' if issues else 'PASS','issues':issues,
+            'scope':'仅结构与非空检查；运行说明准确性需实际执行核对'}
+
+
+if __name__=='__main__':
+    path=Path(sys.argv[1]) if len(sys.argv)&gt;1 else Path(__file__).with_name('sample.md')
+    report=review(path)
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(report,ensure_ascii=False,indent=2))
+    raise SystemExit(report['status']!='PASS')
+
+</code></pre>
+</details>
+<p>验收：缺文件/缺标题 FAIL；有问题时列证据；未被授权不能改文件；完整样本 PASS。两天后在不看原 Skill 的情况下重写步骤；一周后换成“资料引用审查”，保持同一正反例思路。</p>
+<span id="本课分层完成标准"></span><h2 data-heading-alias="本课分层完成标准" id="hb50f4e279762">本课分层完成标准</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<ol>
+<li>先回想：不看答案，用自己的话解释本课几个容易混淆的概念，再展开答案核对。</li>
+<li>跟着做：按<a href="03-workshop.html">分步实作与完整参考</a>运行最小案例，保存输入和输出。</li>
+<li>自己做：换一份资料，或修改一个要求，完成自己的结果。只运行参考文件还不够。</li>
+<li>试着排错：故意触发一次失败，说明怎么找到原因、怎么修复，再运行正常例子确认恢复。</li>
+</ol>
+<p>做完后，对照实作章末尾的评分标准逐项检查。分别记录代码是否运行成功、自动检查是否通过、内容是否经过人工核对，以及实际集成是否完成。待复核和未执行的项目暂不计为通过。卡住时，把课程编号、输入和实际输出发给我，一起定位问题。完成练习所需的步骤都在项目里。</p>
+<span id="独立回忆先作答再展开"></span><h2 data-heading-alias="独立回忆先作答再展开" id="he06aec239d3e">独立回忆：先作答再展开</h2><div class="study-section"><span class="study-badge study-a">A 线必读</span></div>
+<p>每题先用自己的话回答，再看参考答案。表述可以不同，但要说清谁负责、什么情况下成立。</p>
+<span id="回忆题-1"></span><h3 data-heading-alias="回忆题-1" id="h26d39fd160b3">回忆题 1</h3>
+<p>规则、Skill 和本次任务卡有什么区别？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>规则约束项目；Skill 保存重复方法；任务卡描述本次目标、输入和验收。</p>
+</details>
+<span id="回忆题-2"></span><h3 data-heading-alias="回忆题-2" id="h77732339f22a">回忆题 2</h3>
+<p>README 有全部标题但运行节空白，该通过吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>不通过；结构检查应发现空节，内容还需进一步检查命令和路径。</p>
+</details>
+<nav class="next-prev" aria-label="章节导航"><a href="03-workshop.html">← 把一次审查变成可重复技能</a><a href="../../index.html">完成本课验收后，查看下一课路线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>

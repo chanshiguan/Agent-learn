@@ -1,0 +1,81 @@
+{
+  "actions": [
+    {
+      "Decision": "先做原型、不发布正式版本",
+      "ActionItem": "整理报名字段",
+      "Owner": "小林",
+      "DueDate": "周五，具体年月日待确认",
+      "SourceSentence": "m1,m2,m3",
+      "NeedsConfirmation": [
+        "会议日期",
+        "周五对应日期"
+      ]
+    },
+    {
+      "Decision": "预算尚未确认",
+      "ActionItem": "确认预算结果",
+      "Owner": "待确认",
+      "DueDate": "待确认",
+      "SourceSentence": "m3",
+      "NeedsConfirmation": [
+        "财务确认人",
+        "预算金额",
+        "完成时间"
+      ]
+    }
+  ],
+  "conflict_case": {
+    "record_a": "虚构补充 A：周五交付",
+    "record_b": "虚构补充 B：周四交付",
+    "result": "记录冲突，保留两条来源，请负责人确认；不根据文件名新旧决定"
+  },
+  "review": [
+    "小林是负责人，小周是接收人，不能交换",
+    "未将预算写成已批准",
+    "没有发送或创建任务"
+  ],
+  "original_meeting": {
+    "source": "团队决定周五先发布说明页。小林会整理常见问题，但没有写期限。客服主管要在9月3日前确认回复范本。是否寄信给全部客户，会议后再决定。",
+    "table": [
+      {
+        "Decision": "周五先发布说明页",
+        "ActionItem": "准备发布说明页",
+        "Owner": "未知",
+        "DueDate": "周五，具体日期未知",
+        "SourceSentence": "团队决定周五先发布说明页。",
+        "NeedsConfirmation": "是：负责人、周五具体日期"
+      },
+      {
+        "Decision": "整理常见问题",
+        "ActionItem": "整理常见问题",
+        "Owner": "小林",
+        "DueDate": "未知",
+        "SourceSentence": "小林会整理常见问题，但没有写期限。",
+        "NeedsConfirmation": "是：期限"
+      },
+      {
+        "Decision": "确认回复范本",
+        "ActionItem": "确认回复范本",
+        "Owner": "客服主管",
+        "DueDate": "9月3日前，年份未知",
+        "SourceSentence": "客服主管要在9月3日前确认回复范本。",
+        "NeedsConfirmation": "是：年份与负责人身份"
+      },
+      {
+        "Decision": "是否全客户寄信尚未决定",
+        "ActionItem": "会议后确认是否寄信",
+        "Owner": "未知",
+        "DueDate": "未知",
+        "SourceSentence": "是否寄信给全部客户，会议后再决定。",
+        "NeedsConfirmation": "是：决定、负责人和期限"
+      }
+    ],
+    "human_review": [
+      "逐句核对来源",
+      "负责人未补猜",
+      "周五与年份未推断",
+      "无真实敏感资料",
+      "收件人未确定且未发送"
+    ]
+  }
+}

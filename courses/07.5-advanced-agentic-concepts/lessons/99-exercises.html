@@ -1,0 +1,100 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>第 7.5 课课后练习</title><link rel="stylesheet" href="../../../assets/course.css"><link rel="stylesheet" href="../../assets/later.css"></head><body><main><nav class="course-nav"><a href="../../index.html">全部课程与路线</a><a href="../index.html">本课目录</a><a href="../reference/readings.html">本地阅读</a><a href="../reference/code.html">完整代码</a><a href="99-exercises.html">课后练习</a></nav><article class="lesson-body"><p class="eyebrow">7.5 · 进阶 Agentic 选择</p><aside class="study-priority" aria-label="学习要求"><span class="study-badge study-core">主线必读</span><strong>B 线</strong><p>四个核心概念与决策记录是 B 线必修；其他复杂模式的实现按需选做。</p></aside><span id="top"></span><span id="第-75-课课后练习"></span><h1 data-heading-alias="第-75-课课后练习" id="h99e706050449">第 7.5 课课后练习</h1><aside class="toc"><strong>本章目录</strong><ul><li><a href="#h3ab1de9fafcf">目的与交付</a></li><li><a href="#hfb1d6eaa0121">贯穿练习</a></li><li><a href="#heb9cec92fa71">复习检查</a></li><li><a href="#h0d5a7e8b0c45">与综合任务对应的完整答案</a></li><li><a href="#hb50f4e279762">本课分层完成标准</a></li><li><a href="#he06aec239d3e">独立回忆：先作答再展开</a></li></ul></aside>
+<span id="目的与交付"></span><h2 data-heading-alias="目的与交付" id="h3ab1de9fafcf">目的与交付</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>目的：学会拒绝没有证据的复杂化。交付一份 decision.md，不强制写 Agent 或购买 API。完成后你应能根据可重现失败提出一个改动，并在无收益时撤回。</p>
+<span id="贯穿练习"></span><h2 data-heading-alias="贯穿练习" id="hfb1d6eaa0121">贯穿练习</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>从第七课选择一个真实失败。写清 outcome 和 trajectory；记录 baseline；从四个核心概念中选择一个改法；事前写接受门槛；列出撤销步骤。若没有真实失败，不编造收益：先提出待验证假设，标为“尚未采用”。</p>
+<p>再做两个反例：候选方案质量略高但越权一次，应拒绝；质量不降而 token 减半，但删除了必要人工审批，也不能直接采用。安全约束和质量指标不是随意互相抵消的分数。</p>
+<details><summary>参考决策记录</summary>
+<p>以下数值是写法示范，不是本次实测。失败：开发题 d3 的回答引用了不在候选中的文件。基线：同题三次出现两次，其他四题通过。单一改动：回答后核对引用 ID，不合法则返回缺证据并停止。门槛：该题三次均无非法引用，其他题无回退，增加延迟不超过本机约定值。撤销：恢复旧版本，但该问题未解决前不开放自动发布。结论：需要实际运行后填，不能预填“成功”。</p>
+</details>
+<details><summary>完整补充代码：固定数字演示接受门槛</summary>
+<pre><code class="language-python">&quot;&quot;&quot;用固定实验结果演示决策门槛；数字是教学数据，不是模型评测结果。&quot;&quot;&quot;
+
+# 质量、延迟和禁止动作分别比较；省 token 不能抵消越权。
+def decide(baseline, candidate):
+    required = {&quot;pass_rate&quot;, &quot;unsafe_actions&quot;, &quot;latency&quot;, &quot;tokens&quot;}
+    if set(baseline) != required or set(candidate) != required:
+        raise ValueError(&quot;缺少同口径的四项指标&quot;)
+    if candidate[&quot;unsafe_actions&quot;]:
+        return &quot;拒绝：出现禁止动作&quot;
+    if candidate[&quot;pass_rate&quot;] &lt; baseline[&quot;pass_rate&quot;]:
+        return &quot;拒绝：质量回退&quot;
+    if candidate[&quot;latency&quot;] &gt; baseline[&quot;latency&quot;] * 1.2:
+        return &quot;暂不采用：超过事前延迟门槛&quot;
+    if candidate[&quot;tokens&quot;] &gt; baseline[&quot;tokens&quot;] * 1.5:
+        return &quot;暂不采用：超过事前用量门槛&quot;
+    return &quot;可继续验证：还须多次试跑、人工校准和保留集检查&quot;
+
+
+if __name__ == &quot;__main__&quot;:
+    # 保留原方案表现，改进后在同一题集和配置上比较，避免只展示新方案成功的个例。
+    baseline = {&quot;pass_rate&quot;: 0.8, &quot;unsafe_actions&quot;: 0, &quot;latency&quot;: 10, &quot;tokens&quot;: 1000}
+    candidate = {&quot;pass_rate&quot;: 0.9, &quot;unsafe_actions&quot;: 0, &quot;latency&quot;: 11, &quot;tokens&quot;: 1300}
+    print(&quot;固定教学数据：&quot;, decide(baseline, candidate))
+
+</code></pre>
+</details>
+<span id="复习检查"></span><h2 data-heading-alias="复习检查" id="heb9cec92fa71">复习检查</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>不看正文解释 Judge 为什么也要评测；设计一个不会伤害真实资料的故障注入；列出一项可删的模型补丁和一项不能因模型升级就删的执行责任。两天后重新审视 decision.md 是否有无法证实的断言；一周后在新模型或新题上做一次单变量删除实验。</p>
+<span id="与综合任务对应的完整答案"></span><h2 data-heading-alias="与综合任务对应的完整答案" id="h0d5a7e8b0c45">与综合任务对应的完整答案</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>先按<a href="03-workshop.html">实作章</a>完成分步练习和正反例，再用章末标准逐项验收。下面提供综合任务的完整实现，独立完成后再展开对照。</p>
+<details><summary>完成后展开完整参考解</summary>
+<pre><code class="language-python">&quot;&quot;&quot;可复现的故障注入与删除实验：固定程序输出，不冒充模型评测。&quot;&quot;&quot;
+
+# 每次只改变是否保留来源检查，用同一套正反例观察退步；不测模型能力。
+import json
+
+CASES=[{'id':'normal','refs':['d1'],'expected':'ok'},
+       {'id':'bad_ref','refs':['invented'],'expected':'stop'},
+       {'id':'empty','refs':[],'expected':'stop'},
+       {'id':'timeout','refs':['d1'],'error':'timeout','expected':'stop'}]
+
+
+# 本题既检查返回值，也检查异常是否符合预期；正确停止也可能是通过。
+def trial(case, check_sources):
+    if case.get('error'):
+        return 'stop'
+    if check_sources and (not case['refs'] or any(r!='d1' for r in case['refs'])):
+        return 'stop'
+    return 'ok'
+
+
+# 逐题保存基线与删除后的差异，避免只看正常题掩盖故障。
+def experiment():
+    rows=[]
+    for variant,check in [('baseline',True),('remove_source_check',False)]:
+        for case in CASES:
+            actual=trial(case,check)
+            rows.append({'variant':variant,'case':case['id'],'actual':actual,'passed':actual==case['expected']})
+    return {'mode':'确定性故障实验','rows':rows,'decision':'保留来源检查：删除后 bad_ref 与 empty 回退。该控制不是可随模型升级删除的措辞补丁。'}
+
+
+if __name__=='__main__':
+    # 以 JSON 保留字段和类型，便于重跑比较或人工核对；不能只保存对象的调试显示。
+    # ensure_ascii：设为 False 时直接保留中文，方便阅读日志与工具结果；JSON 结构和字段含义不变。
+    # indent：给本地 JSON 产物增加缩进，方便人工逐字段检查；不会改变数据内容。
+    print(json.dumps(experiment(),ensure_ascii=False,indent=2))
+
+</code></pre>
+</details>
+<span id="本课分层完成标准"></span><h2 data-heading-alias="本课分层完成标准" id="hb50f4e279762">本课分层完成标准</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<ol>
+<li>先回想：不看答案，用自己的话解释本课几个容易混淆的概念，再展开答案核对。</li>
+<li>跟着做：按<a href="03-workshop.html">分步实作与完整参考</a>运行最小案例，保存输入和输出。</li>
+<li>自己做：换一份资料，或修改一个要求，完成自己的结果。只运行参考文件还不够。</li>
+<li>试着排错：故意触发一次失败，说明怎么找到原因、怎么修复，再运行正常例子确认恢复。</li>
+</ol>
+<p>做完后，对照实作章末尾的评分标准逐项检查。分别记录代码是否运行成功、自动检查是否通过、内容是否经过人工核对，以及实际集成是否完成。待复核和未执行的项目暂不计为通过。卡住时，把课程编号、输入和实际输出发给我，一起定位问题。完成练习所需的步骤都在项目里。</p>
+<span id="独立回忆先作答再展开"></span><h2 data-heading-alias="独立回忆先作答再展开" id="he06aec239d3e">独立回忆：先作答再展开</h2><div class="study-section"><span class="study-badge study-core">主线必读</span></div>
+<p>每题先用自己的话回答，再看参考答案。表述可以不同，但要说清谁负责、什么情况下成立。</p>
+<span id="回忆题-1"></span><h3 data-heading-alias="回忆题-1" id="h26d39fd160b3">回忆题 1</h3>
+<p>模型升级后可以直接删掉来源检查吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>不可以。先分清控制责任和能力补丁；来源检查承担验证责任，删除需替代机制与反例证据。</p>
+</details>
+<span id="回忆题-2"></span><h3 data-heading-alias="回忆题-2" id="h77732339f22a">回忆题 2</h3>
+<p>候选省一半 token，但出现一次禁止动作，能采用吗？</p>
+<details><summary>参考答案与判断依据</summary>
+<p>不能。关键约束是一票否决，费用收益不抵消越权。</p>
+</details>
+<nav class="next-prev" aria-label="章节导航"><a href="03-workshop.html">← 从失败记录做一次增加或删除实验</a><a href="../../index.html">完成本课验收后，查看下一课路线 →</a></nav></article><footer>遇到不懂的地方，把课程编号、小节和实际输出发给我。读完资料不代表已掌握；请用课末练习检验。<br>中文讲解与本地案例 · 来源快照 2026-11-03 · <a href="../../_sources/upstream/LICENSE">上游 MIT © Wenyu Chiou</a> · <a href="../../reference/version-notes.md">版本差异说明</a></footer></main><script src="../../assets/later.js"></script></body></html>
