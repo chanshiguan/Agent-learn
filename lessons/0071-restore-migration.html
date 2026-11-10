@@ -1,0 +1,119 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>真的恢复一次，再谈备份可靠 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0071-restore-migration">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>真的恢复一次，再谈备份可靠</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-28">← 返回课程地图</a><p class="rail-label">第 28 章 · 更新、备份、恢复与迁移</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0070-corpus-release.html"><span class="unit-number">1</span><span>审核新资料，再切换活动快照<small>40—55 分钟</small></span></a></li><li><a href="0071-restore-migration.html" aria-current="page"><span class="unit-number">2</span><span>真的恢复一次，再谈备份可靠<small>45—65 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">备份成功只证明写出了文件</a></li><li><a href="#section-2">记录两个恢复目标</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 28 章 / 单元 2 · 共 2 个</p><h1>真的恢复一次，再谈备份可靠</h1><div class="lesson-meta"><span>本单元 45—65 分钟</span><span>本章 85—120 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>45—65 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">备份成功只证明写出了文件</h2>
+<p>本课备份 SQLite 一致快照、corpus、人工范围和索引元数据，逐文件记录 SHA-256。它不含模型权重与 Qdrant 卷，恢复后依据 corpus 重建索引。原始 DOCX 需另行受控保管；仅此备份不足以恢复完整资料来源。</p>
+<pre><code class="language-bash"># 在已停止写入的窗口创建新备份目录；不要复用已经存在的名字。
+python -m companion backup data/backups/restore-drill-01
+# 恢复到全新目录，保留现有学习状态；指纹不符应拒绝，旧令牌撤销、待确认动作过期。
+python -m companion restore data/backups/restore-drill-01 data/restored-01
+# 仅在恢复副本上做向前兼容迁移；给 notes 新增可空字段，重复执行不应重复加列。
+READING_DATA_DIR=data/restored-01 python -m companion.migrate
+READING_DATA_DIR=data/restored-01 python -m companion.migrate
+# 用临时数据验证备份被篡改时拒绝恢复；不修改真实备份。
+PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_backup_restore_verifies_hash_and_revokes_tokens -v
+</code></pre>
+<p>在第二个终端设置 READING_DATA_DIR=data/restored-01，启动独立端口 8001 的 authenticated 服务，重新登录。核对本人笔记内容和条数、会话进度、未知范围排除、过期批准不可恢复。keyword 路线可先验证；向量路线按实际运行位置重建 index，再查同一来源。</p>
+<p>迁移前后核对 note_count，旧字段仍能读写。此例是新增可空字段的兼容迁移；删列、改含义或换存储不是同样简单，需单独数据转换和回滚方案。</p>
+<h2 id="section-2">记录两个恢复目标</h2>
+<p>RTO 是恢复到可用花了多久；RPO 是最多可能丢失多久的数据。记录真实开始、结束和备份时刻，而不是填一个想达到的数字。目标由公司确认，实际结果由演练证明。</p>
+<p>恢复旧备份还要重放之后的删除清单，避免复活已删除个人内容。备份访问、保留期限和原始资料恢复一起纳入操作手册。</p>
+<h2 id="section-3">对照完整实现</h2>
+<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
+<details><summary>展开本单元完整源码：companion/maintenance.py</summary>
+
+
+<pre><code class="language-python">&quot;&quot;&quot;备份与恢复实验：保存数据库快照、资料版本及哈希，不复制凭据。&quot;&quot;&quot;
+import hashlib
+import json
+import os
+import shutil
+import sqlite3
+from pathlib import Path
+from .files import data_dir, load
+
+
+def backup(destination):
+    target = Path(destination)
+    target.mkdir(parents=True, exist_ok=False)
+    original = data_dir()
+    # SQLite backup API 取得一致快照。完整系统备份仍需先停止写入和索引任务，保证多文件版本一致。
+    for name in (&quot;reading.sqlite3&quot;, &quot;checkpoints.sqlite3&quot;):
+        if (original / name).exists():
+            with sqlite3.connect(original / name) as source, sqlite3.connect(target / name) as copy:
+                source.backup(copy)
+    for name in (&quot;corpus.json&quot;, &quot;ranges.json&quot;, &quot;index.json&quot;):
+        if (original / name).exists():
+            shutil.copy2(original / name, target / name)
+    hashes = {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in target.iterdir() if file.is_file()}
+    (target / &quot;manifest.json&quot;).write_text(json.dumps({&quot;files&quot;: hashes, &quot;strategy&quot;: &quot;索引可由 corpus 重建；此包不含 Qdrant 卷与模型权重&quot;}, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
+    return {&quot;backup&quot;: str(target), &quot;files&quot;: list(hashes)}
+
+
+def restore(source, destination):
+    source, target = Path(source), Path(destination)
+    manifest = json.loads((source / &quot;manifest.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+    allowed = {&quot;reading.sqlite3&quot;, &quot;checkpoints.sqlite3&quot;, &quot;corpus.json&quot;, &quot;ranges.json&quot;, &quot;index.json&quot;}
+    if not set(manifest[&quot;files&quot;]).issubset(allowed):
+        raise ValueError(&quot;备份包含未约定的文件名。&quot;)
+    for name, expected in manifest[&quot;files&quot;].items():
+        if hashlib.sha256((source / name).read_bytes()).hexdigest() != expected:
+            raise ValueError(f&quot;备份指纹不符：{name}&quot;)
+    target.mkdir(parents=True, exist_ok=False)
+    for name in manifest[&quot;files&quot;]:
+        if name != &quot;index.json&quot;:
+            shutil.copy2(source / name, target / name)
+    if (target / &quot;reading.sqlite3&quot;).exists():
+        with sqlite3.connect(target / &quot;reading.sqlite3&quot;) as db:
+            if db.execute(&quot;PRAGMA integrity_check&quot;).fetchone()[0] != &quot;ok&quot;:
+                raise ValueError(&quot;数据库完整性检查失败。&quot;)
+            # 恢复后重新登录，避免把备份里的旧访问令牌重新激活。
+            db.execute(&quot;DELETE FROM tokens&quot;)
+            db.execute(&quot;UPDATE actions SET expires=0 WHERE status=&#39;pending&#39;&quot;)
+    return {&quot;restored&quot;: str(target), &quot;index_rebuild_required&quot;: True, &quot;login_required&quot;: True}
+
+
+def manifest():
+    import importlib.metadata
+    packages = {}
+    for name in (&quot;python-docx&quot;, &quot;openai&quot;, &quot;fastapi&quot;, &quot;qdrant-client&quot;, &quot;sentence-transformers&quot;, &quot;langgraph&quot;):
+        try:
+            packages[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            packages[name] = None
+    from .state import connect
+    with connect() as db:
+        schema_version = db.execute(&quot;PRAGMA user_version&quot;).fetchone()[0]
+    source_root = Path(__file__).parent
+    source_hashes = {str(f.relative_to(source_root)): hashlib.sha256(f.read_bytes()).hexdigest()
+                     for f in source_root.rglob(&quot;*&quot;) if f.is_file() and f.suffix in {&quot;.py&quot;, &quot;.html&quot;, &quot;.js&quot;, &quot;.css&quot;}}
+    return {&quot;application&quot;: &quot;classics-course-v2&quot;, &quot;source_hashes&quot;: source_hashes,
+            &quot;generation_model&quot;: os.environ.get(&quot;LLM_MODEL&quot;), &quot;generation_route&quot;: os.environ.get(&quot;LLM_MODE&quot;), &quot;prompt_version&quot;: &quot;grounded-v1&quot;,
+            &quot;corpus_revision&quot;: (load(&quot;corpus.json&quot;) or {}).get(&quot;revision&quot;),
+            &quot;index&quot;: load(&quot;index.json&quot;), &quot;packages&quot;: packages,
+            &quot;schema_version&quot;: schema_version}
+</code></pre>
+</details>
+
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为何恢复后要重新登录并让批准过期？</li>
+<li>本备份包足够恢复所有东西吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为何恢复后要重新登录并让批准过期？</strong></p>
+<p>避免旧令牌重新生效，也避免把备份里的陈旧确认当成现在仍有效的用户意图。</p>
+<p><strong>本备份包足够恢复所有东西吗？</strong></p>
+<p>不够。Qdrant 索引需重建，模型权重需缓存或重下，原始 DOCX、配置与凭据需按独立受控流程恢复。</p>
+<p>**通过证据：**新目录实际恢复、内容核对、索引重建、迁移前后计数及实测 RTO/RPO。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0071-restore-migration"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0070-corpus-release.html"><small>上一单元</small>审核新资料，再切换活动快照</a><a href="0072-acceptance-evidence.html"><small>下一单元</small>把练习成果整理成可审查的版本 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

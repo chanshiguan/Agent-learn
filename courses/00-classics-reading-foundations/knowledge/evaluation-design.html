@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>评测、观测与容量怎么分工 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>评测、观测与容量怎么分工</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先决定你想知道什么</a></li><li><a href="#section-2">固定题集与变化</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0030-retrieval-baseline.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / Agent 与上线工程</p><h1>评测、观测与容量怎么分工</h1><div class="lesson-meta"><span>预计 10—12 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>这是独立选读。读懂一个概念就可以返回主线，不要求另装服务或完成额外作业。</p>
+<h2 id="section-1">先决定你想知道什么</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>应看什么</th>
+<th>不足以回答它的指标</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>资料有没有找到</td>
+<td>文件/关键句命中与候选人工核对</td>
+<td>HTTP 200</td>
+</tr>
+<tr>
+<td>回答是否有据</td>
+<td>逐句支持度、引用和不足行为</td>
+<td>文字流畅</td>
+</tr>
+<tr>
+<td>工具边界是否可靠</td>
+<td>越权、过期、重放、取消测试</td>
+<td>一次正常调用</td>
+</tr>
+<tr>
+<td>为什么慢</td>
+<td>同一 trace 的分阶段耗时</td>
+<td>单独一个总耗时</td>
+</tr>
+<tr>
+<td>能接多少读者</td>
+<td>给定负载下错误、耗时分布、内存与费用</td>
+<td>一次单请求速度</td>
+</tr>
+<tr>
+<td>教学是否有效</td>
+<td>目标读者实际练习和反馈</td>
+<td>模型自评分</td>
+</tr>
+</tbody></table>
+<h2 id="section-2">固定题集与变化</h2>
+<p>开发题帮你发现失败，保留题检查是否只适应熟题。只改变一个条件，再记录资料、模型和 Prompt 版本。确定行为用自动断言，文学解释允许合理多解但要求证据。缺测标未知，不把空值当零分或满分。</p>
+<p>P95 表示约 95% 的观察耗时不超过这个值。四次请求也能算一个分位数，却不能代表稳定生产分布；样本规模、负载与成功/失败口径必须同时报告。</p>
+<p>进一步看 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12">Hello-Agents 第十二章</a> 的任务评估思路，和 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">Stage 7</a> 的评测与观测。课程中的名著量表由场景编排，需要内容负责人校准。</p>
+<div class="knowledge-return"><a href="../../../lessons/0030-retrieval-baseline.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

@@ -1,0 +1,76 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>同一份讲稿，三种切法 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0036-chunking-lab">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>同一份讲稿，三种切法</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-11">← 返回课程地图</a><p class="rail-label">第 11 章 · 切块与上下文实验</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0036-chunking-lab.html" aria-current="page"><span class="unit-number">1</span><span>同一份讲稿，三种切法<small>35—50 分钟</small></span></a></li><li><a href="0037-context-neighbors.html"><span class="unit-number">2</span><span>检索小块，再补它旁边的语境<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">块不是越短或越长越好</a></li><li><a href="#section-2">公开样本的实际对照</a></li><li><a href="#section-3">小练习</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 11 章 / 单元 1 · 共 2 个</p><h1>同一份讲稿，三种切法</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">块不是越短或越长越好</h2>
+<p>短块容易落进编码窗口，但“他”“这种看法”可能失去指代对象；长块保留语境，却会带入无关内容并增加成本。先用关键词检索比较切分，再讨论向量窗口，避免两个问题混在一起。</p>
+<pre><code class="language-bash"># 按 Word 段落保留整段；部分样本正文很长，预期不是自然变成精细知识单元。
+python -m companion ingest --strategy paragraph
+python -m companion evaluate --output chunks-paragraph.json
+# 按 Word 标题样式分组；没有真实标题样式的文档不会凭空获得章节结构。
+python -m companion ingest --strategy heading
+python -m companion evaluate --output chunks-heading.json
+# 固定小块形成可重复基线，比较关键句是否因边界被切开。
+python -m companion ingest --size 80 --overlap 16
+python -m companion evaluate --output chunks-fixed.json
+</code></pre>
+<p>在编辑器里比较三份报告的片段数、目标短句命中和正文。此处 evaluate 没加 generate，不受生成模型波动影响。段落或标题分组可能超出编码器窗口，不要直接拿它运行 index 后再怪向量库。</p>
+<h2 id="section-2">公开样本的实际对照</h2>
+<p>以下结果来自本版五份新编样本，使用相同开发题和词面检索；没有调用生成模型。</p>
+<table>
+<thead>
+<tr>
+<th>切分大小 / 重叠</th>
+<th align="right">块数</th>
+<th>第一题短句命中</th>
+<th>第二题短句命中</th>
+<th>第三题短句命中</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>600 / 60</td>
+<td align="right">15</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>80 / 16</td>
+<td align="right">106</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>96 / 16</td>
+<td align="right">85</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<p>第四道题没有页码证据，不计算目标短句命中。表中短句命中也不代表答案完整正确。打开检索片段，看一看解释的前因、限定条件是否同时保留下来；文件命中和证据完整是两回事。具体记录见课程的验证页面。</p>
+<h2 id="section-3">小练习</h2>
+<p>先从结果里找一条证据被切开或限定条件丢失的片段，把 size 改为 96，其他条件不变再测；若短句都命中，就比较上下文是否完整，不要为了实验编造失败。若出现好转，也检查另一道题是否变差。一次优化应说明收益发生在哪类问题上，而不是只汇报平均值。</p>
+<p>做完恢复 80/16，并重新 index。旧的 range 人工标注关联片段 ID，换切分后不会自动套用到新块；第 15 章会利用这一点防止误继承。</p>
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为什么“按标题切”可能完全无效？</li>
+<li>重叠能彻底解决断句吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为什么“按标题切”可能完全无效？</strong></p>
+<p>文件未使用可识别的标题样式，或正文只是一大段。算法不能凭空得知文学结构。</p>
+<p><strong>重叠能彻底解决断句吗？</strong></p>
+<p>不能。它增加连续性机会，也增加重复和成本；需要用失败题验证，必要时改变分段方法。</p>
+<p>**通过证据：**三份可对照报告和一个块大小改变的结论，明确收益与退步。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/resources/advanced-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0036-chunking-lab"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0035-index-versions.html"><small>上一单元</small>资料更新后，不让旧索引混进来</a><a href="0037-context-neighbors.html"><small>下一单元</small>检索小块，再补它旁边的语境 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

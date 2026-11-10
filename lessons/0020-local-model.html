@@ -1,0 +1,63 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>本地路线 先让模型服务准备好 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0020-local-model">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>本地路线 先让模型服务准备好</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-4">← 返回课程地图</a><p class="rail-label">第 4 章 · 接通一种真实模型</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0020-local-model.html" aria-current="page"><span class="unit-number">1</span><span>本地路线 先让模型服务准备好<small>25—40 分钟</small></span></a></li><li><a href="0021-cloud-model.html"><span class="unit-number">2</span><span>线上路线 把服务地址和凭据配置清楚<small>20—30 分钟</small></span></a></li><li><a href="0022-first-model-call.html"><span class="unit-number">3</span><span>用同一个程序获得回答<small>30—45 分钟</small></span></a></li><li><a href="0023-stage-checkpoint.html"><span class="unit-number">4</span><span>用一次排错和一次重跑完成第一阶段<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先认识这三个角色</a></li><li><a href="#section-2">安装并启动 Ollama</a></li><li><a href="#section-3">下载这次要用的模型</a></li><li><a href="#section-4">设置客户端要使用的地址</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 4 章 / 单元 1 · 共 4 个</p><h1>本地路线 先让模型服务准备好</h1><div class="lesson-meta"><span>本单元 25—40 分钟</span><span>本章 本地 75—115 分钟 / 线上 70—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>25—40 分钟</strong>，软件和模型下载另计。第 4 章本地路线共 <strong>75—115 分钟</strong>。如果选择线上路线，可以直接进入下一单元，再回到两条路线共用的调用程序。</p>
+<h2 id="section-1">先认识这三个角色</h2>
+<p>模型权重是需要加载的数据；Ollama 是负责加载并运行模型的服务；下一节的 Python 程序是向服务发送请求的客户端。装好 Ollama 不等于已经有模型，下载模型也不等于 Python 已经能连接服务。</p>
+<p>课程以新准备的开发环境为起点，不使用任何预设的个人模型。M1 16 GB 的练习先从指定资料中使用的小模型 <code>qwen2.5:3b</code> 开始，限制为单次请求和短输出。它是起步候选，不是对速度或复杂任务效果的保证。</p>
+<h2 id="section-2">安装并启动 Ollama</h2>
+<p>在实际学习的 Mac 上安装 Ollama 的 macOS 应用，启动后新开一个终端。如果使用 Homebrew，可以选择下面的方式；不要重复安装多个版本：</p>
+<pre><code class="language-bash"># 通过已有的 Homebrew 安装本地模型服务应用；此步骤还不会下载模型权重。
+brew install --cask ollama
+# 启动本地模型服务；后续客户端才能向它发送请求。
+open -a Ollama
+# 确认 Ollama 命令可找到；预期显示版本，模型是否下载另用 list 检查。
+ollama --version
+</code></pre>
+<p>没有 Homebrew 时，用 macOS 图形安装包完成安装即可；Homebrew 不作为课程的必学内容。Ollama 的软件入口收录在本节末的指定资料中。</p>
+<p>检查服务：</p>
+<pre><code class="language-bash"># 向本地服务查询已下载模型；下载后应看到 qwen2.5:3b，空列表表示尚无模型。
+ollama list
+</code></pre>
+<p>服务可用但列表为空时，只说明尚未下载模型。如果提示连接失败，先启动 Ollama 应用。也可在一个单独终端执行 <code>ollama serve</code>；该终端保持运行，其他操作用第二个终端。如果提示端口已占用，先检查应用是否已经启动，不要再启动第二个服务。</p>
+<h2 id="section-3">下载这次要用的模型</h2>
+<pre><code class="language-bash"># 下载课程选用的模型权重；成功后才有条件加载它进行生成，下载等待另计。
+ollama pull qwen2.5:3b
+# 向本地服务查询已下载模型；下载后应看到 qwen2.5:3b，空列表表示尚无模型。
+ollama list
+</code></pre>
+<p>下载结束后，预期列表包含 <code>qwen2.5:3b</code>。模型名中的标签要保留完整，不能把下载的 <code>3b</code> 随手改成另一个大小。模型下载量、运行内存和可用上下文不是同一个数；第一次只运行一个模型，观察系统内存，不同时启动其他重任务。</p>
+<h2 id="section-4">设置客户端要使用的地址</h2>
+<pre><code class="language-bash"># 让共用程序选择本地连接检查；预期不要求线上账号密钥。
+export LLM_MODE=local
+# 指定本次请求的模型标识；应与 ollama list 中已下载的名称一致。
+export LLM_MODEL=qwen2.5:3b
+# 让主机上的客户端连接本机模型服务；预期请求发往 11434 端口的兼容接口。
+export LLM_BASE_URL=http://127.0.0.1:11434/v1
+# 清除当前终端遗留的线上密钥；本地练习由程序使用占位值。
+unset LLM_API_KEY
+# 清除其他实验留下的专用推理参数，减少当前模型因不支持该参数而报错的可能。
+unset LLM_REASONING_EFFORT
+</code></pre>
+<p>这些变量只对当前终端及它启动的程序生效。重新打开终端时需要重新设置。<code>127.0.0.1</code> 表示运行客户端的这台机器，<code>11434</code> 是本章使用的模型服务端口，<code>/v1</code> 指向兼容接口前缀。</p>
+<p>本章让客户端和模型在同一台电脑上，先不开放局域网访问。未来另一台电脑连接这台 M1 时，<code>127.0.0.1</code> 就不能继续指向服务器；那属于后面的部署与访问控制内容。</p>
+<p>最后用一个只读请求查看接口能否连上：</p>
+<pre><code class="language-bash"># 只查询模型列表，最多等待 10 秒；预期返回 JSON，不生成回答或上传讲稿。
+curl --fail --max-time 10 http://127.0.0.1:11434/v1/models
+</code></pre>
+<p>预期返回 JSON 模型列表。这里没有发送阅读问题，也没有读取讲稿。列表能返回，只证明服务入口可达；实际生成是否成功，要由共用调用单元继续验证。</p>
+<p>**本单元完成条件：**模型已下载，接口可达，你能说清服务与 Python 客户端的区别。完成后跳过线上配置单元，进入“用同一个程序获得回答”。</p>
+<h2 id="section-5">本单元验收与参考答案</h2>
+<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>服务、模型、客户端各是什么？</strong> 模型权重是运行推理所需的数据；Ollama 加载模型并提供服务；Python 客户端向服务发送问题、接收结果。安装客户端 SDK 不会自动安装模型。</p>
+<p><strong>怎样确认本节通过？</strong> <code>ollama list</code> 中有完整的 <code>qwen2.5:3b</code> 标识；查询 <code>/v1/models</code> 成功返回 JSON。列表可达只证明接口连接成功，还没验证生成质量或知识库。</p>
+<p><strong>地址中的 <code>127.0.0.1</code> 指谁？</strong> 指运行客户端的那个环境。本节客户端在主机上，因此指当前主机；以后放进容器，不能继续把它当宿主地址。</p>
+<p>**下一步：**直接进入“用同一个程序获得回答”，无需完成线上账号配置；把真实生成结果留给共用单元验收。</p>
+</details>
+
+<h2 id="section-6">资料依据</h2>
+<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md">awesome-agentic-ai-zh Stage 1</a>提供 Ollama 本地调用路线；<a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>说明本地服务与统一客户端。模型候选来自指定材料，实际机器上的可用性以你的运行记录为准。</p>
+<label class="study-check"><input type="checkbox" data-study-check="0020-local-model"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0019-image-boundaries.html"><small>上一单元</small>确认程序和资料没有绑死在一起</a><a href="0022-first-model-call.html"><small>下一步 · 跳过线上配置</small>用同一个程序获得回答 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

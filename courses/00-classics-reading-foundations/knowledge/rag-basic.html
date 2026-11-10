@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>基础 RAG：先找资料，再组织回答 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>基础 RAG：先找资料，再组织回答</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">拆成准备资料与回答问题两段</a></li><li><a href="#section-2">放回这五份讲稿里理解</a></li><li><a href="#section-3">常见误解</a></li><li><a href="#section-4">可以继续读什么</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / RAG 方法详解</p><h1>基础 RAG：先找资料，再组织回答</h1><div class="lesson-meta"><span>预计 6—8 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>想象读者问“第一讲怎样解释序言与日记的差别”。程序先找到相关讲稿片段，再把片段、来源与问题交给模型。答案生成后，还要能回到这些片段核对。</p>
+<h2 id="section-1">拆成准备资料与回答问题两段</h2>
+<p>准备时：读取文件 → 保留来源 → 切分片段 → 建立可查询的索引。</p>
+<p>回答时：接收问题 → 检索相关片段 → 将片段放入请求 → 生成回答 → 核对引用。</p>
+<p>常见向量方案使用 Embedding 表示问题与片段，再按相似性取候选；“先检索、后生成”的固定流程并不要求所有实现都使用向量数据库。<a href="https://docs.langchain.com/oss/python/deepagents/retrieval">LangChain 检索文档</a>介绍了这些组件和固定流程。</p>
+<h2 id="section-2">放回这五份讲稿里理解</h2>
+<p>目前 JSON 中每讲只有一个长段落。它适合验证有没有读漏正文，却未必适合直接作为检索单位。后续可以切出小块，但每块仍需保留讲次、文件名和原文位置。</p>
+<p>“第一讲”是元数据限制；“序言与日记的差别”是内容线索。二者一起用，比把所有讲稿混在一起然后要求模型猜来源更容易检查。这是本项目后续实验的设计思路，效果仍须用题单验证。</p>
+<h2 id="section-3">常见误解</h2>
+<table>
+<thead>
+<tr>
+<th>说法</th>
+<th>应怎样核对</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>有向量库就算有 RAG</td>
+<td>检索结果是否真的进入生成请求？</td>
+</tr>
+<tr>
+<td>引用了文件名，答案就有依据</td>
+<td>引用内容是否支持这句话？</td>
+</tr>
+<tr>
+<td>RAG 会消除模型幻觉</td>
+<td>仍可能检索错误、漏资料或生成无据结论</td>
+</tr>
+</tbody></table>
+<h2 id="section-4">可以继续读什么</h2>
+<ul>
+<li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 第八章</a>（中文）：先看文档怎样进入检索流程。</li>
+<li><a href="https://docs.langchain.com/oss/python/deepagents/retrieval">LangChain：Retrieval</a>（英文，约 10 分钟）：只读组件与 2-step RAG，代码暂时跳过。</li>
+</ul>
+<p>下一步可看<a href="rag-hybrid.html">混合检索</a>，也可以直接返回主线。</p>
+<div class="knowledge-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

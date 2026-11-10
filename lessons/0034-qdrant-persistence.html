@@ -1,0 +1,47 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>启动向量库，重启后继续查 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0034-qdrant-persistence">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>启动向量库，重启后继续查</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-10">← 返回课程地图</a><p class="rail-label">第 10 章 · 把向量放进 Qdrant</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0034-qdrant-persistence.html" aria-current="page"><span class="unit-number">1</span><span>启动向量库，重启后继续查<small>35—50 分钟</small></span></a></li><li><a href="0035-index-versions.html"><span class="unit-number">2</span><span>资料更新后，不让旧索引混进来<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">复用前面学过的 Docker</a></li><li><a href="#section-2">证明数据确实持久化</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 10 章 / 单元 1 · 共 2 个</p><h1>启动向量库，重启后继续查</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">复用前面学过的 Docker</h2>
+<p>Qdrant 保存向量和元数据，并按相似度查询。collection 可以先理解为一份有固定向量维度的索引集合。第 9 章的生成路线不变，这次只把内存里的检索数据搬到服务中。</p>
+<pre><code class="language-bash"># 创建专用持久卷；容器移除后数据仍留在这个卷中。
+docker volume create classics-qdrant
+# 仅把服务端口开放给本机；首次下载镜像需要网络，已有同名容器时改用 start。
+docker run -d --name classics-qdrant -p 127.0.0.1:6333:6333 -v classics-qdrant:/qdrant/storage qdrant/qdrant:v1.15.5
+# 连接本机 Qdrant；正常课程不要设置仅供离线测试的 QDRANT_MODE=local。
+export QDRANT_URL=http://127.0.0.1:6333
+# 编码当前快照并发布活动索引指针；预期 count 与 corpus 中片段数一致。
+python -m companion index
+# 按语义查询持久索引；返回的仍是可回查的讲稿片段。
+python -m companion search &quot;文言文序言&quot; --method semantic
+</code></pre>
+<p>若 connection refused，先看容器是否运行及端口映射；若提示模型窗口超限，检查是否仍用第 9 章的 80/16 小块。向量维度由编码器决定，不要手填一个猜测的维度。</p>
+<h2 id="section-2">证明数据确实持久化</h2>
+<pre><code class="language-bash"># 停止再启动同一个练习容器；预期原集合仍在，不需要删除卷或重建资料。
+docker stop classics-qdrant
+docker start classics-qdrant
+# 服务启动完成后重查；若暂时连接失败，先检查容器状态再重试。
+python -m companion search &quot;文言文序言&quot; --method semantic
+</code></pre>
+<p>记录重启前后的集合名、条数和一条来源 ID。这证明的是本次恢复可用，不证明公司级可用性。卷损坏或主机丢失仍需备份，第 28 章专门演练。</p>
+<h2 id="section-3">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>容器和卷分别保存什么？</li>
+<li>Qdrant 能替你判断讲稿观点正确吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>容器和卷分别保存什么？</strong></p>
+<p>容器运行 Qdrant 进程，命名卷保存持久数据。删容器不等于删卷，但删除卷会丢失其中索引。</p>
+<p><strong>Qdrant 能替你判断讲稿观点正确吗？</strong></p>
+<p>不能。它负责存储和检索，文学事实与解释仍需来源和评测。</p>
+<p>**通过证据：**有真实 Qdrant 容器记录和重启后相同来源的查询结果；未在 Docker 跑过就标待运行。</p>
+</details>
+
+<h2 id="section-4">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-5">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0034-qdrant-persistence"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0033-embedding-comparison.html"><small>上一单元</small>检验向量有没有帮到你的失败题</a><a href="0035-index-versions.html"><small>下一单元</small>资料更新后，不让旧索引混进来 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>对话、记忆与流程状态有什么区别 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>对话、记忆与流程状态有什么区别</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先分清保存的目的</a></li><li><a href="#section-2">在伴读项目里怎么选</a></li><li><a href="#section-3">继续读哪一段</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0042-reader-sessions.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / Agent 与上线工程</p><h1>对话、记忆与流程状态有什么区别</h1><div class="lesson-meta"><span>预计 8—10 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>这是独立选读。读懂一个概念就可以返回主线，不要求另装服务或完成额外作业。</p>
+<h2 id="section-1">先分清保存的目的</h2>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>用来做什么</th>
+<th>典型边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>知识库片段</td>
+<td>回答时找到有来源的资料</td>
+<td>作品、版本、资料权限</td>
+</tr>
+<tr>
+<td>最近对话</td>
+<td>理解这次阅读的上下文</td>
+<td>本人、长度、删除与进度变化</td>
+</tr>
+<tr>
+<td>显式阅读进度</td>
+<td>记录读者明确选择的范围</td>
+<td>可查看、修正，不从闲聊猜测</td>
+</tr>
+<tr>
+<td>批准动作</td>
+<td>记住待确认内容与执行状态</td>
+<td>版本、有效期、幂等</td>
+</tr>
+<tr>
+<td>图检查点</td>
+<td>恢复流程停在哪一步</td>
+<td>线程归属、恢复时再核验权限</td>
+</tr>
+</tbody></table>
+<p>它们都能存进数据库，却不因此变成同一种“记忆”。把全部对话永久拼进 Prompt，会增加成本，也可能把旧范围之外的剧情带回回答。</p>
+<h2 id="section-2">在伴读项目里怎么选</h2>
+<p>先保存明确需要的最小状态。最近两轮帮助接话，进度由读者选择，笔记由本人确认。长期偏好只有在产品确实需要、读者知道且能修改时再增加。图检查点还可能含草稿，个人数据删除不能只清 notes 表。</p>
+<h2 id="section-3">继续读哪一段</h2>
+<p>先读 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 第八章</a> 的记忆与检索职责，再读 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">第九章</a> 的上下文组织。想理解暂停与继续，可看 <a href="https://docs.langchain.com/oss/python/langgraph/interrupts">LangGraph interrupt 官方说明</a>，重点看检查点、thread_id 与恢复节点。框架保存位置，不代替业务批准。</p>
+<div class="knowledge-return"><a href="../../../lessons/0042-reader-sessions.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

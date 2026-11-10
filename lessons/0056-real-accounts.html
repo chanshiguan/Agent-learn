@@ -1,0 +1,125 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从测试身份切到登录账号 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0056-real-accounts">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从测试身份切到登录账号</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-21">← 返回课程地图</a><p class="rail-label">第 21 章 · 接入真实账号与数据归属</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0056-real-accounts.html" aria-current="page"><span class="unit-number">1</span><span>从测试身份切到登录账号<small>40—55 分钟</small></span></a></li><li><a href="0057-authorization-matrix.html"><span class="unit-number">2</span><span>用权限表查出遗漏的入口<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先确认是谁，再判断能做什么</a></li><li><a href="#section-2">令牌不是永久钥匙</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 21 章 / 单元 1 · 共 2 个</p><h1>从测试身份切到登录账号</h1><div class="lesson-meta"><span>本单元 40—55 分钟</span><span>本章 75—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>40—55 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">先确认是谁，再判断能做什么</h2>
+<p>认证回答“你是谁”，授权回答“你能读写哪些内容”。之前有授权检查但身份可由测试请求头选择，这次换成登录后签发的短期令牌。口令不存明文，令牌在数据库也只存摘要。</p>
+<p>先关闭服务。以下使用虚构账号，不录入真实学生姓名；输入口令时终端不回显，避免口令出现在命令历史。</p>
+<pre><code class="language-bash"># 分别创建读者、家长和内容管理员；每条命令会要求输入两次至少 12 字符的口令。
+python -m companion create-user student-a
+python -m companion create-user parent-a --role parent
+python -m companion create-user editor-a --role content_admin
+# 在实际产品中先核实家长关系；此处只关联自己创建的虚构测试账号。
+python -m companion link-family parent-a student-a
+# 换为真实登录模式，页面显示登录入口；测试读者请求头不再决定身份。
+export APP_MODE=authenticated
+export COURSE_CHAPTER=21
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>先以 student-a 登录创建阅读，再退出。parent-a 登录后只能查看已关联孩子明确记录的进度，不自动看到私密对话或笔记。editor-a 也不能靠角色名读取别人私人内容；内容导入仍通过受控的管理员命令行执行，本课没有公开上传后台。</p>
+<h2 id="section-2">令牌不是永久钥匙</h2>
+<p>本实现令牌有效期一小时，保存在浏览器内存，刷新后需重新登录；退出会撤销服务端令牌。口令派生、登录限流和 HTTPS 是不同层面的保护，不能互相代替。</p>
+<p>公司上线前还需按实际身份体系决定 SSO、账号恢复、MFA、审计和用户生命周期。本课程最小账号实现用于把边界跑通，不代表已经覆盖公司身份平台。</p>
+<h2 id="section-3">对照完整实现</h2>
+<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
+<details><summary>展开本单元完整源码：companion/auth.py</summary>
+
+
+<pre><code class="language-python">&quot;&quot;&quot;账号由管理员创建，口令只保存派生值，访问令牌只保存摘要。&quot;&quot;&quot;
+import hashlib
+import hmac
+import re
+import secrets
+import time
+
+from .state import Actor, connect
+
+
+def password_value(password, salt):
+    return hashlib.pbkdf2_hmac(&quot;sha256&quot;, password.encode(), bytes.fromhex(salt), 600_000).hex()
+
+
+def create_user(tenant, username, password, role=&quot;reader&quot;):
+    if not re.fullmatch(r&quot;[a-zA-Z0-9_-]{1,40}&quot;, tenant) or not re.fullmatch(r&quot;[a-zA-Z0-9_-]{1,40}&quot;, username):
+        raise ValueError(&quot;租户和账号使用 1—40 位字母、数字、下划线或连字符。&quot;)
+    if not 12 &lt;= len(password) &lt;= 128 or role not in {&quot;reader&quot;, &quot;parent&quot;, &quot;content_admin&quot;}:
+        raise ValueError(&quot;口令需要 12—128 字符，并选择有效角色。&quot;)
+    salt = secrets.token_hex(16)
+    with connect() as db:
+        db.execute(&quot;INSERT INTO users(tenant,username,role,salt,password_hash) VALUES(?,?,?,?,?)&quot;,
+                   (tenant, username, role, salt, password_value(password, salt)))
+
+
+def login(tenant, username, password, peer):
+    now = time.time()
+    # 两个桶分别限制同一来源和同一账号，避免只换用户名或只换地址就无限尝试。
+    buckets = [hashlib.sha256(f&quot;peer:{peer}&quot;.encode()).hexdigest(), hashlib.sha256(f&quot;user:{tenant}:{username}&quot;.encode()).hexdigest()]
+    with connect() as db:
+        db.execute(&quot;CREATE TABLE IF NOT EXISTS login_attempts(bucket TEXT, at REAL)&quot;)
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        db.execute(&quot;DELETE FROM login_attempts WHERE at &lt; ?&quot;, (now - 300,))
+        for bucket in buckets:
+            count = db.execute(&quot;SELECT count(*) FROM login_attempts WHERE bucket=?&quot;, (bucket,)).fetchone()[0]
+            if count &gt;= 10:
+                raise PermissionError(&quot;暂时无法登录，请稍后再试。&quot;)
+        for bucket in buckets:
+            db.execute(&quot;INSERT INTO login_attempts VALUES(?,?)&quot;, (bucket, now))
+    with connect() as db:
+        row = db.execute(&quot;SELECT * FROM users WHERE tenant=? AND username=?&quot;, (tenant, username)).fetchone()
+    salt = row[&quot;salt&quot;] if row else &quot;0&quot; * 32
+    expected = row[&quot;password_hash&quot;] if row else &quot;0&quot; * 64
+    actual = password_value(password, salt)
+    if not row or row[&quot;disabled&quot;] or not hmac.compare_digest(actual, expected):
+        raise PermissionError(&quot;账号或口令不正确。&quot;)
+    token = secrets.token_urlsafe(32)
+    with connect() as db:
+        db.execute(&quot;INSERT INTO tokens VALUES(?,?,?,?)&quot;, (hashlib.sha256(token.encode()).hexdigest(), tenant, username, now + 3600))
+    return {&quot;access_token&quot;: token, &quot;expires_in&quot;: 3600, &quot;role&quot;: row[&quot;role&quot;]}
+
+
+def authenticate(token):
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    with connect() as db:
+        row = db.execute(&quot;&quot;&quot;SELECT u.tenant,u.username,u.role FROM tokens t JOIN users u
+          ON t.tenant=u.tenant AND t.username=u.username
+          WHERE t.digest=? AND t.expires&gt;? AND u.disabled=0&quot;&quot;&quot;, (token_hash, time.time())).fetchone()
+    if not row:
+        raise PermissionError(&quot;登录已过期或无效，请重新登录。&quot;)
+    return Actor(row[&quot;tenant&quot;], row[&quot;username&quot;], row[&quot;role&quot;])
+
+
+def logout(token):
+    with connect() as db:
+        db.execute(&quot;DELETE FROM tokens WHERE digest=?&quot;, (hashlib.sha256(token.encode()).hexdigest(),))
+
+
+def link_family(tenant, parent, child):
+    with connect() as db:
+        roles = dict(db.execute(&quot;SELECT username,role FROM users WHERE tenant=? AND username IN (?,?)&quot;, (tenant, parent, child)).fetchall())
+        if roles.get(parent) != &quot;parent&quot; or roles.get(child) != &quot;reader&quot;:
+            raise ValueError(&quot;先创建本租户家长和读者账号。管理员应在线下核对关联关系。&quot;)
+        db.execute(&quot;INSERT OR IGNORE INTO families VALUES(?,?,?)&quot;, (tenant, parent, child))
+</code></pre>
+</details>
+
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>家长身份是否意味着能看孩子全部数据？</li>
+<li>刷新后需要重新登录是错误吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>家长身份是否意味着能看孩子全部数据？</strong></p>
+<p>不意味着。这里仅允许已核实关联的显式进度，私密对话和笔记仍归本人。</p>
+<p><strong>刷新后需要重新登录是错误吗？</strong></p>
+<p>这是本课程把令牌只存内存的取舍；持久登录需要另外评估安全存储与会话策略。</p>
+<p>**通过证据：**三种角色的真实登录与越权尝试记录，明确哪些公司身份能力尚待接入。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0056-real-accounts"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0055-langgraph-checkpoint.html"><small>上一单元</small>用状态图重现同一个批准流程</a><a href="0057-authorization-matrix.html"><small>下一单元</small>用权限表查出遗漏的入口 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

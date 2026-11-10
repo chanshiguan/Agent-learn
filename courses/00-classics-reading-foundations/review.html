@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>课程审查记录 · 名著伴读实战</title><link rel="stylesheet" href="../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="index.html">课程地图</a><a href="knowledge/index.html">知识拓展 · 选读</a><a href="resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>课程审查记录</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><h1>课程审查与修复记录</h1>
+<p>2026-11-10，对当前公开课程进行代码和教学两条线的审查。核对章节前置条件、命令、实际实现、完成条件，以及验证记录是否符合实际。审查后保留章节、题目和两条模型路线，修复以下可复现问题。</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>调整</th>
+<th>验证方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可选 uv 环境没有 pip，下一步安装会失败</td>
+<td>创建环境时增加 <code>--seed</code></td>
+<td>新建隔离环境，实际执行 <code>python -m pip --version</code></td>
+</tr>
+<tr>
+<td>导入批次混入空 Word 仍显示成功</td>
+<td>逐文件检查可读正文，失败不替换旧快照</td>
+<td>正常文件与空文件混合导入回归</td>
+</tr>
+<tr>
+<td>本地模型请求被系统代理转走</td>
+<td>本地路线直接连接，线上保留代理设置</td>
+<td>代理环境回归及真实本地调用</td>
+</tr>
+<tr>
+<td>向量模型的私有版本字段为空，索引失败</td>
+<td>使用公开 <code>revision</code> 参数固定模型提交</td>
+<td>真实编码、建索引、缓存复用、跨进程查询</td>
+</tr>
+<tr>
+<td>向量过滤接受错误的布尔阅读范围</td>
+<td>导入检查类型，查询结果再与当前允许范围相交</td>
+<td>真实 Qdrant 本地存储和边界回归</td>
+</tr>
+<tr>
+<td>旧页面可覆盖新阅读进度</td>
+<td>页面携带 revision，服务端检查冲突；问答返回新 revision</td>
+<td>API 层旧版本冲突回归</td>
+</tr>
+<tr>
+<td>切换读者后，旧笔记、会话或登录响应覆盖新页面</td>
+<td>每次异步返回检查视图代次</td>
+<td>4 个受控响应顺序测试及浏览器操作</td>
+</tr>
+<tr>
+<td>取消草稿生成仍留下待确认内容</td>
+<td>模型调用前后检查取消状态</td>
+<td>生成过程中取消的回归</td>
+</tr>
+<tr>
+<td>删除个人内容与图检查点写入发生竞争</td>
+<td>同一个跨进程锁保护图写入与删除</td>
+<td>两个真实进程交错操作，确认删除后无草稿残留</td>
+</tr>
+<tr>
+<td>进入 Compose 时旧 API 占用 8000 端口</td>
+<td>章节明确先停止自己的旧服务</td>
+<td>命令顺序核对及 CI 独立部署</td>
+</tr>
+<tr>
+<td>Linux 挂载目录用户与容器用户不匹配</td>
+<td>显式填写宿主 UID/GID</td>
+<td>CI 按 Runner 用户挂载、读取并写入</td>
+</tr>
+<tr>
+<td>开发题全命中，验收却强制要求提交失败</td>
+<td>允许如实记录命中，另测自己的边界题</td>
+<td>与公开样本评测结果逐项核对</td>
+</tr>
+<tr>
+<td>截断输出或字段合法容易被误认为答案通过</td>
+<td>明确报告截断，解释预算与证据不足字段，保留失败记录</td>
+<td>真实模型失败记录及修订后复测</td>
+</tr>
+</tbody></table>
+<h2>章节是否连得起来</h2>
+<p>导学先说明资料边界；第 1—4 章解决文件、程序、容器和模型；随后从手工给证据到自动检索，再做向量、产品交互、Agent、权限、部署和恢复。同一份程序逐步开放能力，没有要求先学完整框架才能完成早期练习。依赖随对应章节安装，本地与线上生成路线汇合后使用同一套业务代码。</p>
+<p>主线任选一条模型路线约 35—51 小时，与章节用时总和一致；首次下载、排错和公司审核另计。终点是能运行、能检验、能准备上线评审的项目，公司验收仍需要真实业务证据。</p>
+<h2>如何看待这次结果</h2>
+<p>主要运行链路已实际执行，自动回归覆盖已发现的程序问题。真实模型仍出现过格式、长度、证据状态错误，同义检索也有失败，因此没有把课程写成“照做就能保证所有答案正确”。执行条件、结果和未覆盖范围见<a href="verification.html">验证记录</a>。</p>
+<p>公开网站与源码只使用课程新编五讲，私人原稿和私人工作区历史没有纳入公开提交。后续以公开分支作为这套公开教材的维护入口，重新构建和发布时继续执行文件白名单检查。</p>
+</div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="sources.html">资料来源</a><a href="verification.html">验证范围</a><a href="index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../assets/classics.js"></script></body></html>

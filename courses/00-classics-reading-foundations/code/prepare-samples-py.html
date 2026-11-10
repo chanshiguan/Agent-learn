@@ -1,0 +1,81 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>prepare_samples.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>prepare_samples.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>prepare_samples.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/prepare_samples.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;从公开 Markdown 生成确定的 DOCX；不读取私人知识库，也不联网。&quot;&quot;&quot;
+
+import argparse
+from datetime import datetime, timezone
+import hashlib
+from io import BytesIO
+import json
+from pathlib import Path
+import re
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+
+from docx import Document
+
+
+MATERIALS = Path(__file__).resolve().parents[1] / &quot;public-materials&quot;
+
+
+def render_docx(markdown):
+    # 只去掉标题标记，保留文字与段内换行，供后续“长段落切块”实验使用。
+    text = re.sub(r&quot;^#{1,6} +&quot;, &quot;&quot;, markdown, flags=re.MULTILINE).strip()
+    document = Document()
+    props = document.core_properties
+    props.author = &quot;名著伴读课程&quot;
+    props.last_modified_by = &quot;&quot;
+    props.title = text.splitlines()[0]
+    props.subject = &quot;课程自编讲解稿&quot;
+    props.comments = &quot;由公开 Markdown 生成；非私人授课转写稿。&quot;
+    props.created = props.modified = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    document.add_paragraph(text)
+    buffer = BytesIO()
+    document.save(buffer)
+    result = BytesIO()
+    # DOCX 本质是 ZIP；固定条目时间，避免相同正文因生成时间不同而改变指纹。
+    with ZipFile(buffer) as source, ZipFile(result, &quot;w&quot;, ZIP_DEFLATED) as target:
+        for name in sorted(source.namelist()):
+            entry = ZipInfo(name, (2000, 1, 1, 0, 0, 0))
+            entry.compress_type = ZIP_DEFLATED
+            target.writestr(entry, source.read(name))
+    return result.getvalue(), text
+
+
+def prepare(output):
+    manifest = json.loads((MATERIALS / &quot;manifest.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+    pending, records = [], []
+    for item in manifest[&quot;documents&quot;]:
+        source = MATERIALS / item[&quot;text&quot;]
+        content, text = render_docx(source.read_text(encoding=&quot;utf-8&quot;))
+        destination = output / item[&quot;file&quot;]
+        # 先检查完全部输入再写文件，避免遇到冲突时只更新了一半样本。
+        if destination.exists() and destination.read_bytes() != content:
+            raise ValueError(f&quot;已有不同内容，未覆盖：{destination.name}；请备份后改用空目录。&quot;)
+        pending.append((destination, content))
+        records.append({&quot;file&quot;: item[&quot;file&quot;], &quot;source&quot;: &quot;public-materials/&quot; + item[&quot;text&quot;],
+                        &quot;source_kind&quot;: manifest[&quot;source_kind&quot;], &quot;lecture&quot;: item[&quot;lecture&quot;],
+                        &quot;sha256&quot;: hashlib.sha256(content).hexdigest(),
+                        &quot;source_sha256&quot;: hashlib.sha256(source.read_bytes()).hexdigest(),
+                        &quot;bytes&quot;: len(content), &quot;paragraph_count&quot;: 1, &quot;character_count&quot;: len(text)})
+    output.mkdir(parents=True, exist_ok=True)
+    for destination, content in pending:
+        if not destination.exists():
+            destination.write_bytes(content)
+    # 清单只记录仓库内的来源名，不写作者电脑的绝对路径。
+    record = {&quot;version&quot;: manifest[&quot;version&quot;], &quot;documents&quot;: records}
+    (output.parent / &quot;sample-manifest.json&quot;).write_text(
+        json.dumps(record, ensure_ascii=False, indent=2) + &quot;\n&quot;, encoding=&quot;utf-8&quot;)
+    return record
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--output&quot;, type=Path, default=Path(&quot;data/input&quot;))
+    args = parser.parse_args()
+    try:
+        result = prepare(args.output)
+    except ValueError as error:
+        parser.error(str(error))
+    print(f&quot;已准备 {len(result['documents'])} 份课程自编讲解稿；来源见 data/sample-manifest.json。&quot;)
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

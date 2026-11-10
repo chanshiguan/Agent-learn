@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>给模型回答打分，也保留不通过 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0031-answer-rubric">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>给模型回答打分，也保留不通过</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-8">← 返回课程地图</a><p class="rail-label">第 8 章 · 先定题集，再谈优化</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0030-retrieval-baseline.html"><span class="unit-number">1</span><span>用固定题集观察检索失败<small>30—45 分钟</small></span></a></li><li><a href="0031-answer-rubric.html" aria-current="page"><span class="unit-number">2</span><span>给模型回答打分，也保留不通过<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">把生成质量与检索质量分开</a></li><li><a href="#section-2">用一条规则统一评分</a></li><li><a href="#section-3">阶段二交付</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 8 章 / 单元 2 · 共 2 个</p><h1>给模型回答打分，也保留不通过</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">把生成质量与检索质量分开</h2>
+<p>这次才调用真实模型。评分看三件事：解释是否被证据支持、引用是否支持对应说法、表达是否适合目标读者。年龄适配不是简单地“用词可爱”：不羞辱读者，不替读者强下价值结论，遇到复杂内容可提示家长共同讨论。</p>
+<pre><code class="language-bash"># 对开发题执行真实检索和生成；线上路线会发送命中的讲稿片段并产生费用。
+python -m companion evaluate --generate --output answer-baseline.json
+# 在人工评分尚未填写时检查门槛；预期不通过，提醒缺少证据而不是自动补分。
+python -m companion grade data/live/answer-baseline.json
+</code></pre>
+<p>用编辑器打开报告。每题 <code>manual</code> 的三项默认是 <code>null</code>。逐题对照 <code>sources</code> 与 <code>response</code>，确实符合才填 <code>true</code>，不符填 <code>false</code>，拿不准保持 <code>null</code>，另写理由。JSON 布尔值用小写，不能填字符串 <code>&quot;true&quot;</code>。</p>
+<h2 id="section-2">用一条规则统一评分</h2>
+<p>“这个解释和我的解读不同”不自动算错；它应提供证据并说明解释空间。“片段只说序言，回答却给出未提供的出版社”应判不支持。无答案题的合格输出必须承认不足。引用真实存在但与结论无关，仍判引用不支持。</p>
+<p>填写后再运行 grade。程序检查的是这份记录是否满足约定，不能知道评分人是否认真，也不能据此认证教学效果。保留初始报告、人工评阅版和失败原因，不覆盖失败历史。</p>
+<h2 id="section-3">阶段二交付</h2>
+<p>到这里应有结构化资料、三个查询实验、固定题集和一份真实生成评阅。下一阶段所有检索优化先用同一组题比较，不先追新名词。选读页会解释更复杂的方法，但主线每次只改一个条件。</p>
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>null、false 和 true 分别是什么意思？</li>
+<li>模型可以给自己打满分吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>null、false 和 true 分别是什么意思？</strong></p>
+<p>null 是未评或无法判断，false 是已评且不通过，true 是已核对通过。缺测不能当通过。</p>
+<p><strong>模型可以给自己打满分吗？</strong></p>
+<p>可以辅助发现问题，但不能替代这里的人工作证。文学依据与年龄表达要由能阅读资料的人核查。</p>
+<p>**通过证据：**有人工逐项评阅和失败理由；grade 的结果与报告一致，未实测项仍明确留空。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0031-answer-rubric"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0030-retrieval-baseline.html"><small>上一单元</small>用固定题集观察检索失败</a><a href="0032-embedding-first.html"><small>下一单元</small>把讲稿和问题变成可比较的向量 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

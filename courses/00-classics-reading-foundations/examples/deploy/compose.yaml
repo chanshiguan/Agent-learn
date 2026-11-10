@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: classics-companion:${RELEASE_TAG:-candidate}
+    # 绑定目录由宿主用户拥有时，使用对应 UID/GID，避免只能读取却无法保存状态。
+    user: '${APP_UID:-1000}:${APP_GID:-1000}'
+    env_file: ../.env
+    environment:
+      APP_MODE: authenticated
+      APP_ENV: production
+      COURSE_CHAPTER: '29'
+      READING_DATA_DIR: /app/data/live
+      QDRANT_URL: http://qdrant:6333
+      HF_HOME: /app/data/live/hf-cache
+    ports:
+      - '127.0.0.1:8000:8000'
+    volumes:
+      - ../data:/app/data
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      qdrant:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+  qdrant:
+    image: qdrant/qdrant:v1.15.5
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+volumes:
+  qdrant_data:

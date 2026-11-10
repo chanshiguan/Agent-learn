@@ -1,0 +1,42 @@
+[
+  {
+    "id": "dev-01",
+    "question": "第一讲怎样解释文言文序言和白话日记的关系？",
+    "expected_document_prefixes": [
+      "06 "
+    ],
+    "expected_quotes": [
+      "文言文序言提供外部叙述，白话日记呈现人物的内部感受"
+    ],
+    "expected_insufficient": false
+  },
+  {
+    "id": "dev-02",
+    "question": "第三讲谈到吃人时，为什么提到徐锡麟？",
+    "expected_document_prefixes": [
+      "08 "
+    ],
+    "expected_quotes": [
+      "把古代故事、较近的名字和眼前听闻连成一条线"
+    ],
+    "expected_insufficient": false
+  },
+  {
+    "id": "dev-03",
+    "question": "第二讲借月亮怎样讲平等？",
+    "expected_document_prefixes": [
+      "07 "
+    ],
+    "expected_quotes": [
+      "平等在这里指每个人都值得被尊重"
+    ],
+    "expected_insufficient": false
+  },
+  {
+    "id": "dev-04",
+    "question": "这五份讲稿使用的原著版本的准确页码是多少？",
+    "expected_document_prefixes": [],
+    "expected_quotes": [],
+    "expected_insufficient": true
+  }
+]

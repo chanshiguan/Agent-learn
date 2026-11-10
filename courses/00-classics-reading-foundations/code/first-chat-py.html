@@ -1,0 +1,82 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>first_chat.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>first_chat.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>first_chat.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/first_chat.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;验证一次真实模型调用；本章不读取或上传讲稿。&quot;&quot;&quot;
+
+import argparse
+import json
+import os
+from pathlib import Path
+from time import perf_counter
+from urllib.parse import urlparse
+
+from openai import APIConnectionError, APIStatusError, APITimeoutError, OpenAI, DefaultHttpxClient
+
+
+parser = argparse.ArgumentParser(description=&quot;用相同程序连接本地或兼容接口的线上模型&quot;)
+parser.add_argument(&quot;--question&quot;, default=&quot;请用两句话说明阅读《狂人日记》时可以留意什么。&quot;)
+parser.add_argument(&quot;--output&quot;, type=Path, default=Path(&quot;data/output/model-run.json&quot;))
+args = parser.parse_args()
+mode = os.environ.get(&quot;LLM_MODE&quot;, &quot;local&quot;)
+model = os.environ.get(&quot;LLM_MODEL&quot;, &quot;&quot;).strip()
+base_url = os.environ.get(&quot;LLM_BASE_URL&quot;, &quot;http://127.0.0.1:11434/v1&quot;).strip()
+key = os.environ.get(&quot;LLM_API_KEY&quot;, &quot;&quot;)
+if mode not in {&quot;local&quot;, &quot;cloud&quot;} or not model:
+    parser.error(&quot;请设置 LLM_MODE 为 local 或 cloud，并用 LLM_MODEL 指定真实模型名。&quot;)
+address = urlparse(base_url)
+if mode == &quot;cloud&quot; and (address.scheme != &quot;https&quot; or not key):
+    parser.error(&quot;线上路线需要 HTTPS 服务地址和 LLM_API_KEY。&quot;)
+if mode == &quot;local&quot;:
+    if address.hostname not in {&quot;127.0.0.1&quot;, &quot;localhost&quot;, &quot;host.docker.internal&quot;}:
+        parser.error(&quot;本章本地路线只连接本机或 Docker 宿主地址。远程服务器连接留到部署阶段。&quot;)
+    key = &quot;ollama&quot;
+
+# 本地请求不经过环境中的联网代理，避免把回环地址交给代理或触发额外 SOCKS 依赖。
+client = OpenAI(base_url=base_url, api_key=key, timeout=90.0, max_retries=0,
+                http_client=DefaultHttpxClient(trust_env=mode != &quot;local&quot;))
+# 初次实验不自动重试：一次运行对应一次请求，出错时先定位，也便于记录实际用量。
+request = {
+    &quot;model&quot;: model,
+    &quot;messages&quot;: [
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;请用清楚的中文回答。这次没有提供讲稿，不要声称读过用户的资料。&quot;},
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: args.question},
+    ],
+    &quot;max_tokens&quot;: 256,
+}
+# 仅在已经核对模型能力后设置此项；基础练习不要求模型支持推理参数。
+# 其他模型未必支持同一参数；留空时不发送，避免把本地选项误带到云端。
+reasoning_effort = os.environ.get(&quot;LLM_REASONING_EFFORT&quot;, &quot;&quot;).strip()
+if reasoning_effort:
+    request[&quot;reasoning_effort&quot;] = reasoning_effort
+
+started = perf_counter()
+try:
+    response = client.chat.completions.create(**request)
+except APITimeoutError:
+    parser.exit(2, &quot;请求超时。先检查服务和模型负载，不要连续重复发送。\n&quot;)
+except APIConnectionError:
+    parser.exit(2, &quot;无法连接服务。检查模型是否启动，以及地址、端口和网络。\n&quot;)
+except APIStatusError as error:
+    # 不打印原始响应或凭据；先用状态码区分认证、模型名、额度等问题。
+    parser.exit(2, f&quot;服务返回 HTTP {error.status_code}。按教材排错表检查配置。\n&quot;)
+
+if not response.choices:
+    parser.exit(2, &quot;接口没有返回候选答案。请检查该服务是否支持本章使用的接口。\n&quot;)
+choice = response.choices[0]
+answer = (choice.message.content or &quot;&quot;).strip()
+complete = bool(answer) and choice.finish_reason == &quot;stop&quot;
+record = {
+    &quot;mode&quot;: mode, &quot;model&quot;: model, &quot;question&quot;: args.question,
+    &quot;answer&quot;: answer, &quot;finish_reason&quot;: choice.finish_reason, &quot;complete&quot;: complete,
+    &quot;elapsed_seconds&quot;: round(perf_counter() - started, 3),
+    &quot;usage&quot;: response.usage.model_dump() if response.usage else None,
+    &quot;knowledge_base_used&quot;: False,
+}
+args.output.parent.mkdir(parents=True, exist_ok=True)
+# 只记实验结果，不保存密钥；这份记录能证明调用过程，不能证明文学解读正确。
+args.output.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
+print(answer or &quot;本次没有返回可见文字。&quot;)
+print(f&quot;完整响应：{complete}；耗时：{record['elapsed_seconds']} 秒；记录：{args.output}&quot;)
+if not complete:
+    parser.exit(2, &quot;响应为空或未正常结束，保留记录排查，不将本次标为通过。\n&quot;)
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

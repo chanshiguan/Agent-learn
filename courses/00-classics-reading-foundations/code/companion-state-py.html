@@ -1,0 +1,153 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/state.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/state.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/state.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/state.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;SQLite 保存读者状态；查询始终带租户和本人身份。&quot;&quot;&quot;
+import json
+import fcntl
+import sqlite3
+import time
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+
+from .files import data_dir, load
+
+
+@dataclass(frozen=True)
+class Actor:
+    tenant: str
+    user: str
+    role: str = &quot;reader&quot;
+
+
+@contextmanager
+def personal_data_lock():
+    # CLI 与 API 可能是两个进程；用文件锁协调检查点写入和删除，线程锁不够。
+    # 这里只保护不调用模型的短操作，进程异常退出时系统也会释放锁。
+    with (data_dir() / &quot;.personal-data.lock&quot;).open(&quot;a&quot;) as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+@contextmanager
+def connect():
+    db = sqlite3.connect(data_dir() / &quot;reading.sqlite3&quot;, timeout=10)
+    db.row_factory = sqlite3.Row
+    db.execute(&quot;PRAGMA foreign_keys=ON&quot;)
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+def initialize():
+    with connect() as db:
+        db.executescript(&quot;&quot;&quot;
+        CREATE TABLE IF NOT EXISTS sessions(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          book TEXT NOT NULL, progress INTEGER NOT NULL DEFAULT 0,
+          strict INTEGER NOT NULL DEFAULT 0, phase TEXT NOT NULL DEFAULT 'question',
+          history TEXT NOT NULL DEFAULT '[]', revision INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS actions(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          request_key TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL,
+          digest TEXT NOT NULL, revision INTEGER NOT NULL DEFAULT 1,
+          expires REAL NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+          UNIQUE(tenant,owner,request_key));
+        CREATE TABLE IF NOT EXISTS notes(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          kind TEXT NOT NULL, body TEXT NOT NULL, created REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS feedback(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          category TEXT NOT NULL, trace_id TEXT NOT NULL, created REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS users(
+          tenant TEXT NOT NULL, username TEXT NOT NULL, role TEXT NOT NULL,
+          salt TEXT NOT NULL, password_hash TEXT NOT NULL, disabled INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY(tenant,username));
+        CREATE TABLE IF NOT EXISTS tokens(
+          digest TEXT PRIMARY KEY, tenant TEXT NOT NULL, username TEXT NOT NULL, expires REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS families(
+          tenant TEXT NOT NULL, parent TEXT NOT NULL, child TEXT NOT NULL,
+          PRIMARY KEY(tenant,parent,child));
+        CREATE TABLE IF NOT EXISTS quotas(
+          tenant TEXT NOT NULL, owner TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL,
+          PRIMARY KEY(tenant,owner,day));
+        &quot;&quot;&quot;)
+        if db.execute(&quot;PRAGMA user_version&quot;).fetchone()[0] == 0:
+            db.execute(&quot;PRAGMA user_version=1&quot;)
+
+
+def create_session(actor, book=&quot;狂人日记&quot;):
+    identity = uuid.uuid4().hex
+    with connect() as db:
+        db.execute(&quot;INSERT INTO sessions(id,tenant,owner,book) VALUES(?,?,?,?)&quot;, (identity, actor.tenant, actor.user, book))
+    return get_session(actor, identity)
+
+
+def get_session(actor, identity):
+    with connect() as db:
+        row = db.execute(&quot;SELECT * FROM sessions WHERE id=? AND tenant=? AND owner=?&quot;, (identity, actor.tenant, actor.user)).fetchone()
+    if row is None:
+        raise PermissionError(&quot;会话不存在或不属于当前读者。&quot;)
+    result = dict(row)
+    result[&quot;history&quot;] = json.loads(result[&quot;history&quot;])
+    return result
+
+
+def update_session(actor, session, history=None, progress=None, strict=None, phase=None):
+    with connect() as db:
+        # 乐观版本检查防止两次并发提问互相覆盖；冲突时由页面提示重新读取。
+        cursor = db.execute(&quot;&quot;&quot;UPDATE sessions SET history=?,progress=?,strict=?,phase=?,revision=revision+1
+          WHERE id=? AND tenant=? AND owner=? AND revision=?&quot;&quot;&quot;,
+          (json.dumps(session[&quot;history&quot;] if history is None else history, ensure_ascii=False),
+           session[&quot;progress&quot;] if progress is None else progress,
+           session[&quot;strict&quot;] if strict is None else int(strict), phase or session[&quot;phase&quot;],
+           session[&quot;id&quot;], actor.tenant, actor.user, session[&quot;revision&quot;]))
+        if cursor.rowcount != 1:
+            raise ValueError(&quot;会话已被另一请求修改，请重新读取后再试。&quot;)
+    return get_session(actor, session[&quot;id&quot;])
+
+
+def delete_session(actor, identity):
+    with connect() as db:
+        db.execute(&quot;DELETE FROM sessions WHERE id=? AND tenant=? AND owner=?&quot;, (identity, actor.tenant, actor.user))
+
+
+def list_sessions(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute(&quot;SELECT id,book,progress,strict,phase,revision FROM sessions WHERE tenant=? AND owner=?&quot;, (actor.tenant, actor.user))]
+
+
+def family_report(actor, child):
+    with connect() as db:
+        linked = db.execute(&quot;SELECT 1 FROM families WHERE tenant=? AND parent=? AND child=?&quot;, (actor.tenant, actor.user, child)).fetchone()
+        if actor.role != &quot;parent&quot; or not linked:
+            raise PermissionError(&quot;没有已确认的家长关联。&quot;)
+        # 家长仅查看显式进度，不自动读取孩子的私密对话或笔记。
+        return [dict(r) for r in db.execute(&quot;SELECT book,progress FROM sessions WHERE tenant=? AND owner=?&quot;, (actor.tenant, child))]
+
+
+def erase_personal_data(actor):
+    # 同一锁内清除检查点和业务行，防止另一个进程在删除后又写回旧草稿预览。
+    with personal_data_lock():
+        if (data_dir() / &quot;checkpoints.sqlite3&quot;).exists():
+            from .graph import erase_threads
+            erase_threads(actor)
+        with connect() as db:
+            db.execute(&quot;BEGIN IMMEDIATE&quot;)
+            preview = load(&quot;graph-preview.json&quot;)
+            if preview and db.execute(&quot;SELECT 1 FROM actions WHERE id=? AND tenant=? AND owner=?&quot;, (preview.get(&quot;id&quot;), actor.tenant, actor.user)).fetchone():
+                (data_dir() / &quot;graph-preview.json&quot;).unlink()
+            # 当日额度不随内容删除重置，避免反复删除绕过限制；下次请求时清理过期计数。
+            for table in (&quot;sessions&quot;, &quot;actions&quot;, &quot;notes&quot;, &quot;feedback&quot;):
+                db.execute(f&quot;DELETE FROM {table} WHERE tenant=? AND owner=?&quot;, (actor.tenant, actor.user))
+            db.execute(&quot;DELETE FROM tokens WHERE tenant=? AND username=?&quot;, (actor.tenant, actor.user))
+    return {&quot;deleted&quot;: True, &quot;scope&quot;: &quot;已删除当前业务库个人内容与会话令牌；账号和当日限额计数保留，备份按留存流程另行处理&quot;}
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

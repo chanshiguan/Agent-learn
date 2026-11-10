@@ -1,0 +1,6 @@
+# 由公司运维把域名换成真实域名并配置 DNS、TLS、访问范围后使用。
+# Caddy 运行在宿主机时代理本地端口；不要同时向公网开放 8000 或 6333。
+reading.example.com {
+    encode gzip
+    reverse_proxy 127.0.0.1:8000
+}

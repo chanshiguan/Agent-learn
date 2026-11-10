@@ -1,0 +1,4 @@
+# 第 13 章才安装：页面服务与离线 API 验证，不包含 Embedding 权重。
+fastapi==0.162.2
+uvicorn==0.54.0
+httpx==0.28.1

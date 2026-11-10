@@ -1,0 +1,130 @@
+[
+  {
+    "slug": "python-environments",
+    "title": "Python、pip 与虚拟环境",
+    "description": "装的是库，为什么换个终端就找不到？",
+    "minutes": "8—10",
+    "group": "跟着实战查概念",
+    "unit": "0011-python-environment"
+  },
+  {
+    "slug": "docker-boundaries",
+    "title": "镜像、容器与文件挂载",
+    "description": "程序搬进容器后，文件和结果分别在哪里？",
+    "minutes": "8—10",
+    "group": "跟着实战查概念",
+    "unit": "0015-mount-files"
+  },
+  {
+    "slug": "model-interfaces",
+    "title": "本地与线上模型，哪些相同，哪些不同",
+    "description": "分清模型、服务、SDK、token 和 Embedding。",
+    "minutes": "10—12",
+    "group": "跟着实战查概念",
+    "unit": "0022-first-model-call"
+  },
+  {
+    "slug": "rag-map",
+    "title": "RAG 技术地图：先选问题，再选方法",
+    "description": "对比常见做法，了解为什么不能只换一个更大的模型。",
+    "minutes": "12—15",
+    "group": "提前看看 RAG",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-basic",
+    "title": "基础 RAG：先找资料，再组织回答",
+    "description": "走一遍文档、切块、检索、生成与引用。",
+    "minutes": "6—8",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-hybrid",
+    "title": "混合检索：同时照顾原词与意思",
+    "description": "关键词检索和向量检索为什么常常一起用？",
+    "minutes": "6—8",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-rerank",
+    "title": "重排序：把更合适的证据往前排",
+    "description": "已经找到了资料，为什么还要再排一次？",
+    "minutes": "6—8",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-query",
+    "title": "查询改写、Multi-query 与 HyDE",
+    "description": "读者的问法和讲稿措辞对不上，怎么办？",
+    "minutes": "8—10",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-context",
+    "title": "上下文增强：切块后别丢掉来龙去脉",
+    "description": "区分父子块和 Contextual Retrieval。",
+    "minutes": "8—10",
+    "group": "RAG 方法详解",
+    "unit": "0013-save-json"
+  },
+  {
+    "slug": "rag-graph",
+    "title": "GraphRAG：跨资料整理关系与主题",
+    "description": "适合全局问题，但也增加索引和核对成本。",
+    "minutes": "8—10",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "rag-agentic",
+    "title": "Agentic RAG：让程序决定何时再查",
+    "description": "从固定流程走向有边界的工具调用。",
+    "minutes": "8—10",
+    "group": "RAG 方法详解",
+    "unit": "0023-stage-checkpoint"
+  },
+  {
+    "slug": "state-and-memory",
+    "title": "对话、记忆与流程状态有什么区别",
+    "description": "别把所有需要保存的内容都塞进聊天历史。",
+    "minutes": "8—10",
+    "group": "Agent 与上线工程",
+    "unit": "0042-reader-sessions"
+  },
+  {
+    "slug": "agent-boundaries",
+    "title": "工具、权限、批准与恢复",
+    "description": "模型会调用，不表示它有权执行。",
+    "minutes": "10—12",
+    "group": "Agent 与上线工程",
+    "unit": "0048-readonly-tools"
+  },
+  {
+    "slug": "service-boundaries",
+    "title": "从本机 API 到真实账号",
+    "description": "认证、授权、输入校验各自解决什么。",
+    "minutes": "8—10",
+    "group": "Agent 与上线工程",
+    "unit": "0040-first-api"
+  },
+  {
+    "slug": "evaluation-design",
+    "title": "评测、观测与容量怎么分工",
+    "description": "答案好不好、哪里失败、能接多少请求，分别怎样看。",
+    "minutes": "10—12",
+    "group": "Agent 与上线工程",
+    "unit": "0030-retrieval-baseline"
+  },
+  {
+    "slug": "delivery-and-recovery",
+    "title": "候选发布、回滚与恢复",
+    "description": "把能运行的 Demo 变成可以交接的服务，需要哪些证据。",
+    "minutes": "8—10",
+    "group": "Agent 与上线工程",
+    "unit": "0064-compose-deployment"
+  }
+]

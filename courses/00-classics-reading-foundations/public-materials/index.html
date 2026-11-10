@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>公开阅读材料 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>公开阅读材料</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 课程自编讲解稿</p><h1>《狂人日记》公开教学样本</h1>
+<p>这五篇是为名著伴读开发课程重新编写的阅读材料，供学生、家长和开发者练习有据问答。正文保留叙述视角、平等、伤害、反省与未来等讨论主题，重新组织论证和例子，不收录私人授课录音的转写稿。它们不是鲁迅的作品全文，也不是某位教师的原讲义。</p>
+<table>
+<thead>
+<tr>
+<th>材料</th>
+<th>主要阅读问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="texts/06.html">第一讲：先分清谁在讲故事</a></td>
+<td>文言文序言与白话日记怎样互相影响？</td>
+</tr>
+<tr>
+<td><a href="texts/07.html">第二讲：从月光谈到平等</a></td>
+<td>如何提出一种解释，又不把它说成唯一答案？</td>
+</tr>
+<tr>
+<td><a href="texts/08.html">第三讲：吃人与历史联想</a></td>
+<td>名字和事件怎样进入叙述，文学与史实如何区分？</td>
+</tr>
+<tr>
+<td><a href="texts/09.html">第四讲：不可靠叙述</a></td>
+<td>怀疑人物的判断，是否意味着忽略他的问题？</td>
+</tr>
+<tr>
+<td><a href="texts/10.html">第五讲：传统与未来</a></td>
+<td>做法的延续时间能否证明它合理？</td>
+</tr>
+</tbody></table>
+<h2>来源与解释边界</h2>
+<p>小说细节和短引句依据<a href="https://zh.wikisource.org/w/index.php?title=%E7%8B%82%E4%BA%BA%E6%97%A5%E8%A8%98&oldid=2605391">维基文库《狂人日记》的固定版本</a>核对，查阅于 2026-11-10。原作作者为鲁迅；本课程引句按简体转写，其他讲解为课程新编。固定网页用于复核文字，不代表已经建立纸质版本的页码映射。</p>
+<p>“月光与平等”被标为一种可讨论的读法；“已经恢复”是序言中的转述；不把小说当成独立史料，不根据人物为现实中的人作疾病诊断。题目沿用“徐锡麟”，核对文本中的写法为“徐锡林”，第三讲专门说明差异。</p>
+<p>讲次、Word 段落 ID 和原著节号是三套不同标记。样本没有提供准确纸质页码或出版社对应表，因此两道证据不足题仍应说明资料缺失，不能猜页码。讲解中提到的原著节号也不等于防剧透范围已经人工审核。</p>
+<h2>文件如何进入课程</h2>
+<p>Markdown 是可编辑的正文源。练习目录中的 <code>prepare_samples.py</code> 从它们生成五份 DOCX 和一份来源清单。为了保留“长段落为什么需要切块”的实验，每份 DOCX 使用一个正文段落，段内保留换行；这是一项明确的教学存储选择。</p>
+<p>生成脚本清空个人作者、上次修改者等属性，并固定时间和 ZIP 条目时间；同一份源文本可以重复生成相同字节。它检查已有输入，遇到不同内容会停止，不覆盖学习者修改的文件。DOCX 是本课程的新样本，不继承私人文件的元数据。</p>
+<p><a href="answers.html">题目与参考答案</a>供人工核对，不进入检索库。开发题和保留题的题干、ID、目标讲次及无答案设计均保持不变；只更新新讲稿中的证据短句。六题只用于教学，不能充当真实公司完整质量验收。</p>
+<p>公开课程目录只包含这批新编样本。真实公司的知识库、学生信息、聊天记录、密钥和生成的数据库仍放在本地数据目录。重新发布时须检查实际打包内容；公开代码不等于应当公开业务数据。</p>
+<p><a href="index.html">返回公开样本目录</a> · <a href="../../../lessons/0009-samples.html">回到导学：准备样本</a></p></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

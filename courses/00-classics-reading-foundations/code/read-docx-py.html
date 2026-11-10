@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>read_docx.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>read_docx.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>read_docx.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/read_docx.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;把一份讲稿的正文段落保存为 JSON，保留回查来源所需的信息。&quot;&quot;&quot;
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+from docx import Document
+
+
+parser = argparse.ArgumentParser(description=&quot;读取一份 DOCX 讲稿&quot;)
+parser.add_argument(&quot;source&quot;, type=Path, help=&quot;输入的 .docx 文件&quot;)
+parser.add_argument(&quot;output&quot;, type=Path, help=&quot;新生成的 .json 文件&quot;)
+args = parser.parse_args()
+if not args.source.is_file() or args.source.suffix.lower() != &quot;.docx&quot;:
+    parser.error(&quot;输入必须是存在的 .docx 文件。先检查路径和引号。&quot;)
+if args.output.suffix.lower() != &quot;.json&quot;:
+    parser.error(&quot;输出请使用 .json 扩展名，避免误把原讲稿当成输出覆盖。&quot;)
+
+document = Document(args.source)
+paragraphs = []
+for position, paragraph in enumerate(document.paragraphs, start=1):
+    text = paragraph.text.strip()
+    if text:
+        # 保留 Word 正文中的位置，而不是过滤空段后重新编号，方便回查原文件。
+        paragraphs.append({&quot;id&quot;: f&quot;p{position:04d}&quot;, &quot;text&quot;: text})
+
+if not paragraphs:
+    parser.error(&quot;正文没有读出文字。请检查是否为扫描图片或主要内容在表格中。&quot;)
+
+result = {
+    &quot;source_file&quot;: args.source.name,
+    &quot;source_sha256&quot;: hashlib.sha256(args.source.read_bytes()).hexdigest(),
+    &quot;source_kind&quot;: &quot;讲解稿&quot;,
+    &quot;unit&quot;: &quot;Word 正文段落，不是原著章回&quot;,
+    &quot;paragraph_count&quot;: len(paragraphs),
+    &quot;character_count&quot;: sum(len(item[&quot;text&quot;]) for item in paragraphs),
+    &quot;skipped_table_count&quot;: len(document.tables),
+    &quot;paragraphs&quot;: paragraphs,
+}
+
+args.output.parent.mkdir(parents=True, exist_ok=True)
+# 保存为 UTF-8，并直接保留中文，便于用编辑器逐段核对，不必先读转义字符。
+args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
+print(f&quot;来源：{result['source_file']}&quot;)
+print(f&quot;正文非空段落：{result['paragraph_count']}；字符数：{result['character_count']}&quot;)
+print(f&quot;输出：{args.output}&quot;)
+if document.tables:
+    print(&quot;注意：本章程序不读取表格；请在记录里说明这项遗漏。&quot;)
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

@@ -1,0 +1,80 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>线上路线 把服务地址和凭据配置清楚 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0021-cloud-model">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>线上路线 把服务地址和凭据配置清楚</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-4">← 返回课程地图</a><p class="rail-label">第 4 章 · 接通一种真实模型</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0020-local-model.html"><span class="unit-number">1</span><span>本地路线 先让模型服务准备好<small>25—40 分钟</small></span></a></li><li><a href="0021-cloud-model.html" aria-current="page"><span class="unit-number">2</span><span>线上路线 把服务地址和凭据配置清楚<small>20—30 分钟</small></span></a></li><li><a href="0022-first-model-call.html"><span class="unit-number">3</span><span>用同一个程序获得回答<small>30—45 分钟</small></span></a></li><li><a href="0023-stage-checkpoint.html"><span class="unit-number">4</span><span>用一次排错和一次重跑完成第一阶段<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">选择本章能直接连接的接口</a></li><li><a href="#section-2">输入配置，不把密钥写进代码</a></li><li><a href="#section-3">确认这次会发送什么</a></li><li><a href="#section-4">常见配置错误</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 4 章 / 单元 2 · 共 4 个</p><h1>线上路线 把服务地址和凭据配置清楚</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 本地 75—115 分钟 / 线上 70—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—30 分钟</strong>，开通账号和申请凭据的等待时间另计。第 4 章线上路线共 <strong>70—105 分钟</strong>。已经选本地路线的学员可以跳过；想比较两条路线，可以在本地跑通后回来做。</p>
+<h2 id="section-1">选择本章能直接连接的接口</h2>
+<p>本章使用 Chat Completions 兼容接口，也就是 Python 程序能调用 <code>client.chat.completions.create</code> 的服务。供应商需要提供服务地址、准确模型标识和 API key。仅有网页聊天账号，未必就有 API 访问权限。</p>
+<p>本阶段先选择一种兼容服务。若供应商只提供自己的原生协议，不能保证改地址就能运行；以后需要在模型调用部分增加对应实现。我们不会为连接第一个模型同时教多套 SDK。</p>
+<p>在供应商控制台准备三项信息：接口的基础地址、开通的模型名、密钥。地址应包含供应商要求的 API 前缀，但不要填完整的 <code>/chat/completions</code> 路径，因为客户端会追加它。</p>
+<h2 id="section-2">输入配置，不把密钥写进代码</h2>
+<p>在实际学习电脑的终端执行下面这组命令。每次提示后输入对应的真实值，按回车继续。输入路径或模型名时不用额外加引号。</p>
+<pre><code class="language-bash"># 让共用程序启用线上连接检查；后续需要 HTTPS 地址与真实密钥。
+export LLM_MODE=cloud
+# 在终端显示输入提示或换行；这一步不读取资料，也不发送网络请求。
+printf &#39;请输入兼容接口基础地址（HTTPS）：&#39;
+# 把你随后输入的一整行保存到变量；输入真实值后按回车，路径不用另加引号。
+read -r LLM_BASE_URL
+# 在终端显示输入提示或换行；这一步不读取资料，也不发送网络请求。
+printf &#39;请输入账号已开通的模型名：&#39;
+# 把你随后输入的一整行保存到变量；输入真实值后按回车，路径不用另加引号。
+read -r LLM_MODEL
+# 在终端显示输入提示或换行；这一步不读取资料，也不发送网络请求。
+printf &#39;请输入 API key（输入不回显）：&#39;
+# 接收密钥但不回显；预期输入后屏幕不显示密钥文字，按回车结束。
+read -r -s LLM_API_KEY
+# 在终端显示输入提示或换行；这一步不读取资料，也不发送网络请求。
+printf &#39;\n&#39;
+# 将刚输入的配置传给后续 Python 进程；不打印密钥，也不把它保存到代码中。
+export LLM_BASE_URL LLM_MODEL LLM_API_KEY
+# 清除其他实验留下的专用推理参数，减少当前模型因不支持该参数而报错的可能。
+unset LLM_REASONING_EFFORT
+</code></pre>
+<p><code>read -s</code> 不把输入显示在屏幕上；密钥也没有被写进脚本或命令参数。<code>export</code> 让后面启动的 Python 进程可以读取变量。不要把密钥截图、发进聊天或提交到 Git。</p>
+<h2 id="section-3">确认这次会发送什么</h2>
+<p>共用程序只发送一个关于《狂人日记》的短问题，不读取 <code>data/input/</code>，也不会上传整套讲稿。后面要把讲稿放进线上请求时，再明确资料可用范围和发送内容。</p>
+<p>先在账号中设置适合自己的小额预算或额度提醒，只运行一次验证。程序关闭自动重试，便于你把一次命令与一次请求对应起来。返回的 token 用量可用于估算费用，但没有实际单价就不能从 token 数直接得到金额。</p>
+<h2 id="section-4">常见配置错误</h2>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>先查什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 401 或 403</td>
+<td>密钥、账号权限及模型开通状态</td>
+</tr>
+<tr>
+<td>HTTP 404</td>
+<td>基础地址是否填错，模型标识是否存在；具体含义也看服务返回规则</td>
+</tr>
+<tr>
+<td>HTTP 429</td>
+<td>额度或请求限制；先确认原因，不连续重试</td>
+</tr>
+<tr>
+<td>HTTP 400</td>
+<td>请求参数或接口能力不匹配，尤其是误带其他模型的专用参数</td>
+</tr>
+<tr>
+<td>连接失败或超时</td>
+<td>地址、网络、代理与服务可用性</td>
+</tr>
+</tbody></table>
+<p>状态码用来缩小范围，不替代服务方的具体错误说明。需要排错时，只分享去掉凭据的错误与配置形状。</p>
+<p>**本单元完成条件：**三项配置已由你输入，并且知道随后会发送的内容。实际调用在下一单元完成；没有付费账号时，本地路线仍可继续。</p>
+<h2 id="section-5">本单元验收与参考答案</h2>
+<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>需要哪三项配置？</strong> 兼容接口的 HTTPS 基础地址、账号已开通的模型标识、真实 API key。基础地址不包含客户端会追加的 <code>/chat/completions</code>。</p>
+<p><strong>这次会发什么？</strong> 共用程序发送 system 要求和一个公开阅读问题，不读取或发送五份讲稿。看到文学回答并不能证明服务访问过知识库。</p>
+<p><strong>配置报错怎样判断？</strong> 401/403 先查凭据与权限；404 查地址或模型；429 查额度或限流；400 查参数支持；连接错误查网络和服务。仍须结合供应商具体错误，不只凭数字猜测。</p>
+<p>**通过证据：**三项配置已在自己的终端输入，能说明请求内容和预算限制；记录模型名及不含密钥的地址即可。不要把真实密钥写进验收记录。配置完成还不是调用成功，下一单元再验证。</p>
+</details>
+
+<h2 id="section-6">资料依据</h2>
+<p><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>介绍按 provider、model、base URL 和 key 配置模型客户端；<a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md">Stage 1</a>强调记录实际用量和错误。本单元不固定某个供应商的价格。</p>
+<label class="study-check"><input type="checkbox" data-study-check="0021-cloud-model"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0020-local-model.html"><small>上一单元</small>本地路线 先让模型服务准备好</a><a href="0022-first-model-call.html"><small>下一单元</small>用同一个程序获得回答 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

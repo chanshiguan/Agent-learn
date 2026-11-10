@@ -1,0 +1,59 @@
+{
+  "scope": "真实 CPU 编码和 Qdrant SDK 本地存储，不是 Docker 服务实测",
+  "steps": [
+    {
+      "step": "ingest",
+      "documents": 5,
+      "chunks": 106
+    },
+    {
+      "step": "encoder_loaded",
+      "seconds_with_download": 5.05,
+      "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+      "max_seq_length": 128
+    },
+    {
+      "step": "real_encoding",
+      "vectors": 106,
+      "dimensions": 384,
+      "seconds": 0.39
+    },
+    {
+      "step": "persisted_index",
+      "count": 106,
+      "cached_new_embeddings": 0,
+      "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "model_revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+    },
+    {
+      "step": "semantic_query",
+      "hits": [
+        {
+          "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+          "score": 0.584307439950598,
+          "text": "问：为什么这种事情仍会被接受？\n\n需要保留一个文字差异：课程题目写“徐锡麟”，本次核对的小说文本写“徐锡林”。这里将两个写法关联起来，帮助读者定位题目所指的段落"
+        },
+        {
+          "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+          "score": 0.5803958650594803,
+          "text": "文字。\n\n不把意象当作词语替换题\n\n日记第三节里，叙述者把周围的话语、眼神和听来的故事联系在一起，最后从历史书的字缝里读出“吃人”。书面上令人信服的道德说辞，与"
+        },
+        {
+          "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+          "score": 0.5797313508602016,
+          "text": "\n徐锡麟这个名字起了什么作用\n\n第三讲提到徐锡麟，是为了说明叙述者如何把古代故事、较近的名字和眼前听闻连成一条线。在小说第十节，叙述者连续列举不同时间的事件与人"
+        },
+        {
+          "file": "10 《狂人日记》第五讲传统与未来.docx",
+          "score": 0.5783909206904594,
+          "text": "法古老就一概否定它，也不能因为一种方法新出现就直接接受它。判断的关键是理由和后果，而不是新旧标签。本讲采用这个角度，是为了说明小说的追问怎样推动阅读；它不是一份"
+        },
+        {
+          "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+          "score": 0.5673045149224498,
+          "text": "，首先服务于文学表达。它们是否具有现实关联，需要另找史料核对，不能仅凭情节相似就认定完全相同。知道何时应当另查资料，也是阅读能力的一部分。\n\n为什么那些道理令人"
+        }
+      ]
+    }
+  ]
+}

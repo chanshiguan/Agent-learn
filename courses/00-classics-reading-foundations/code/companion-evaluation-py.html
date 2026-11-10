@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/evaluation.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/evaluation.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/evaluation.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/evaluation.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;固定题集分别记录检索与回答；没有人工评分时不自动宣告质量通过。&quot;&quot;&quot;
+import json
+import time
+from pathlib import Path
+from .files import load, save
+from .rag import retrieve, answer, rewrite, rerank
+
+
+def evaluate(cases_file, method=&quot;keyword&quot;, generate=False, expand=False, reranking=False, rewriting=False, output=&quot;evaluation.json&quot;):
+    cases = json.loads(Path(cases_file).read_text(encoding=&quot;utf-8&quot;))
+    records = []
+    for case in cases:
+        started = time.monotonic()
+        query = rewrite(case[&quot;question&quot;]) if rewriting else case[&quot;question&quot;]
+        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
+        if reranking:
+            hits = rerank(case[&quot;question&quot;], hits)
+        prefixes = case.get(&quot;expected_document_prefixes&quot;, [])
+        found = {prefix for prefix in prefixes if any(h[&quot;file&quot;].startswith(prefix) for h in hits)}
+        quotes = case.get(&quot;expected_quotes&quot;, [])
+        record = {&quot;id&quot;: case[&quot;id&quot;], &quot;question&quot;: case[&quot;question&quot;], &quot;query&quot;: query,
+                  &quot;source_ids&quot;: [h[&quot;id&quot;] for h in hits], &quot;sources&quot;: hits,
+                  &quot;document_recall&quot;: len(found) / len(prefixes) if prefixes else None,
+                  &quot;quote_hit&quot;: any(q in h[&quot;text&quot;] for q in quotes for h in hits) if quotes else None,
+                  &quot;expected_insufficient&quot;: case.get(&quot;expected_insufficient&quot;, False),
+                  &quot;manual&quot;: {&quot;answer_supported&quot;: None, &quot;citation_supported&quot;: None, &quot;age_appropriate&quot;: None}}
+        # 检索测试默认不调用生成模型；generate 显式开启后才可能向云端发送讲稿片段。
+        if generate:
+            try:
+                record[&quot;response&quot;] = answer(case[&quot;question&quot;], hits)
+            except Exception as error:
+                record[&quot;error_type&quot;] = type(error).__name__
+        record[&quot;seconds&quot;] = round(time.monotonic() - started, 3)
+        records.append(record)
+    report = {&quot;corpus_revision&quot;: load(&quot;corpus.json&quot;)[&quot;revision&quot;], &quot;method&quot;: method,
+              &quot;generated&quot;: generate, &quot;options&quot;: {&quot;expand&quot;: expand, &quot;rerank&quot;: reranking, &quot;rewrite&quot;: rewriting},
+              &quot;records&quot;: records, &quot;quality_passed&quot;: None}
+    save(output, report)
+    return report
+
+
+def quality_gate(report_file):
+    report = json.loads(Path(report_file).read_text(encoding=&quot;utf-8&quot;))
+    failures = []
+    if not report.get(&quot;generated&quot;) or not report.get(&quot;records&quot;):
+        failures.append(&quot;没有真实生成记录。&quot;)
+    for item in report.get(&quot;records&quot;, []):
+        if item.get(&quot;error_type&quot;) or not item.get(&quot;response&quot;):
+            failures.append(f&quot;{item['id']} 没有成功响应。&quot;)
+        if not all(item.get(&quot;manual&quot;, {}).get(k) is True for k in (&quot;answer_supported&quot;, &quot;citation_supported&quot;, &quot;age_appropriate&quot;)):
+            failures.append(f&quot;{item['id']} 缺少逐项人工通过结论。&quot;)
+        if item.get(&quot;response&quot;, {}).get(&quot;insufficient&quot;) is not item.get(&quot;expected_insufficient&quot;):
+            failures.append(f&quot;{item['id']} 的证据不足行为未达到预期。&quot;)
+    return {&quot;passed&quot;: not failures, &quot;failures&quot;: failures,
+            &quot;scope&quot;: &quot;仅这份题集的记录；不是生产容量、教学效果或公司上线批准&quot;}
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

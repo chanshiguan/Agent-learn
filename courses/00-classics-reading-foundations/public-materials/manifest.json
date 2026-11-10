@@ -1,0 +1,17 @@
+{
+  "version": "public-reading-v1",
+  "source_kind": "课程自编讲解稿",
+  "original_work": "鲁迅《狂人日记》",
+  "text_reference": "https://zh.wikisource.org/w/index.php?title=狂人日記&oldid=2605391",
+  "checked_on": "2026-11-10",
+  "edition": null,
+  "publisher": null,
+  "page_mapping": null,
+  "documents": [
+    {"lecture": 1, "text": "texts/06.md", "file": "06 《狂人日记》第一讲两种叙述声音.docx"},
+    {"lecture": 2, "text": "texts/07.md", "file": "07 《狂人日记》第二讲月光与平等.docx"},
+    {"lecture": 3, "text": "texts/08.md", "file": "08 《狂人日记》第三讲吃人的历史联想.docx"},
+    {"lecture": 4, "text": "texts/09.md", "file": "09 《狂人日记》第四讲不可靠叙述.docx"},
+    {"lecture": 5, "text": "texts/10.md", "file": "10 《狂人日记》第五讲传统与未来.docx"}
+  ]
+}

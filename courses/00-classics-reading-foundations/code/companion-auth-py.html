@@ -1,0 +1,78 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/auth.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/auth.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/auth.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/auth.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;账号由管理员创建，口令只保存派生值，访问令牌只保存摘要。&quot;&quot;&quot;
+import hashlib
+import hmac
+import re
+import secrets
+import time
+
+from .state import Actor, connect
+
+
+def password_value(password, salt):
+    return hashlib.pbkdf2_hmac(&quot;sha256&quot;, password.encode(), bytes.fromhex(salt), 600_000).hex()
+
+
+def create_user(tenant, username, password, role=&quot;reader&quot;):
+    if not re.fullmatch(r&quot;[a-zA-Z0-9_-]{1,40}&quot;, tenant) or not re.fullmatch(r&quot;[a-zA-Z0-9_-]{1,40}&quot;, username):
+        raise ValueError(&quot;租户和账号使用 1—40 位字母、数字、下划线或连字符。&quot;)
+    if not 12 &lt;= len(password) &lt;= 128 or role not in {&quot;reader&quot;, &quot;parent&quot;, &quot;content_admin&quot;}:
+        raise ValueError(&quot;口令需要 12—128 字符，并选择有效角色。&quot;)
+    salt = secrets.token_hex(16)
+    with connect() as db:
+        db.execute(&quot;INSERT INTO users(tenant,username,role,salt,password_hash) VALUES(?,?,?,?,?)&quot;,
+                   (tenant, username, role, salt, password_value(password, salt)))
+
+
+def login(tenant, username, password, peer):
+    now = time.time()
+    # 两个桶分别限制同一来源和同一账号，避免只换用户名或只换地址就无限尝试。
+    buckets = [hashlib.sha256(f&quot;peer:{peer}&quot;.encode()).hexdigest(), hashlib.sha256(f&quot;user:{tenant}:{username}&quot;.encode()).hexdigest()]
+    with connect() as db:
+        db.execute(&quot;CREATE TABLE IF NOT EXISTS login_attempts(bucket TEXT, at REAL)&quot;)
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        db.execute(&quot;DELETE FROM login_attempts WHERE at &lt; ?&quot;, (now - 300,))
+        for bucket in buckets:
+            count = db.execute(&quot;SELECT count(*) FROM login_attempts WHERE bucket=?&quot;, (bucket,)).fetchone()[0]
+            if count &gt;= 10:
+                raise PermissionError(&quot;暂时无法登录，请稍后再试。&quot;)
+        for bucket in buckets:
+            db.execute(&quot;INSERT INTO login_attempts VALUES(?,?)&quot;, (bucket, now))
+    with connect() as db:
+        row = db.execute(&quot;SELECT * FROM users WHERE tenant=? AND username=?&quot;, (tenant, username)).fetchone()
+    salt = row[&quot;salt&quot;] if row else &quot;0&quot; * 32
+    expected = row[&quot;password_hash&quot;] if row else &quot;0&quot; * 64
+    actual = password_value(password, salt)
+    if not row or row[&quot;disabled&quot;] or not hmac.compare_digest(actual, expected):
+        raise PermissionError(&quot;账号或口令不正确。&quot;)
+    token = secrets.token_urlsafe(32)
+    with connect() as db:
+        db.execute(&quot;INSERT INTO tokens VALUES(?,?,?,?)&quot;, (hashlib.sha256(token.encode()).hexdigest(), tenant, username, now + 3600))
+    return {&quot;access_token&quot;: token, &quot;expires_in&quot;: 3600, &quot;role&quot;: row[&quot;role&quot;]}
+
+
+def authenticate(token):
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    with connect() as db:
+        row = db.execute(&quot;&quot;&quot;SELECT u.tenant,u.username,u.role FROM tokens t JOIN users u
+          ON t.tenant=u.tenant AND t.username=u.username
+          WHERE t.digest=? AND t.expires&gt;? AND u.disabled=0&quot;&quot;&quot;, (token_hash, time.time())).fetchone()
+    if not row:
+        raise PermissionError(&quot;登录已过期或无效，请重新登录。&quot;)
+    return Actor(row[&quot;tenant&quot;], row[&quot;username&quot;], row[&quot;role&quot;])
+
+
+def logout(token):
+    with connect() as db:
+        db.execute(&quot;DELETE FROM tokens WHERE digest=?&quot;, (hashlib.sha256(token.encode()).hexdigest(),))
+
+
+def link_family(tenant, parent, child):
+    with connect() as db:
+        roles = dict(db.execute(&quot;SELECT username,role FROM users WHERE tenant=? AND username IN (?,?)&quot;, (tenant, parent, child)).fetchall())
+        if roles.get(parent) != &quot;parent&quot; or roles.get(child) != &quot;reader&quot;:
+            raise ValueError(&quot;先创建本租户家长和读者账号。管理员应在线下核对关联关系。&quot;)
+        db.execute(&quot;INSERT OR IGNORE INTO families VALUES(?,?,?)&quot;, (tenant, parent, child))
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Python、pip 与虚拟环境 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>Python、pip 与虚拟环境</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">三件事各自负责什么</a></li><li><a href="#section-2">把一条命令拆开看</a></li><li><a href="#section-3">为什么有了虚拟环境还要学 Docker</a></li><li><a href="#section-4">可以继续读什么</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0011-python-environment.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / 跟着实战查概念</p><h1>Python、pip 与虚拟环境</h1><div class="lesson-meta"><span>预计 8—10 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>遇到“刚才装好了库，现在却导入失败”，先别继续安装。要先确认：现在跑程序的 Python，和刚才安装包时用的 Python，是不是同一个。</p>
+<h2 id="section-1">三件事各自负责什么</h2>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>负责什么</th>
+<th>在伴读项目中的例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python 解释器</td>
+<td>执行 Python 程序</td>
+<td>运行 <code>read_docx.py</code></td>
+</tr>
+<tr>
+<td>pip</td>
+<td>为某个 Python 安装第三方包</td>
+<td>安装 <code>python-docx</code></td>
+</tr>
+<tr>
+<td>venv</td>
+<td>为项目准备独立环境</td>
+<td>把本课程依赖放进 <code>.venv</code></td>
+</tr>
+</tbody></table>
+<p>虚拟环境主要解决项目依赖互相影响的问题。启用它，会让当前终端优先找到该环境的 Python；它不是一台新电脑，也不会让所有终端同时切换。<a href="https://docs.python.org/3.12/tutorial/venv.html">Python 3.12 官方教程</a>解释了这种隔离方式。</p>
+<h2 id="section-2">把一条命令拆开看</h2>
+<p><code>python -m pip install -r requirements.txt</code> 可以从左向右读：用当前 <code>python</code>，以模块方式运行 <code>pip</code>，执行安装，依赖条目从 <code>requirements.txt</code> 读取。</p>
+<p>这里的 <code>-m</code> 解决“让谁来运行 pip”；<code>-r</code> 解决“安装清单从哪里来”。命令不会读取 Word，不会创建向量库，也不会下载聊天模型。本课成功后的直接结果是程序能够导入 <code>docx</code>。</p>
+<h2 id="section-3">为什么有了虚拟环境还要学 Docker</h2>
+<p><code>.venv</code> 便于在一台开发电脑上隔离 Python 依赖；Docker 镜像把程序和运行所需的用户态环境一起交付。二者解决的范围不同。我们先用 <code>.venv</code> 看清程序怎么工作，再用相同输入验证换进容器后结果是否一致。</p>
+<p>假设主机运行成功、容器提示找不到 <code>docx</code>。优先检查容器里是否安装了依赖，而不是反复启用主机 <code>.venv</code>。这正是第二章临时安装、第三章改为构建时安装的原因。</p>
+<h2 id="section-4">可以继续读什么</h2>
+<ul>
+<li><a href="https://docs.python.org/3.12/tutorial/venv.html">Python 官方教程：虚拟环境与包</a>（英文，选读约 10 分钟）：先读 12.1 和 12.2；暂时不用研究全部包管理命令。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md">Hello-Agents 环境配置</a>（中文）：把独立环境与本课程的实际操作对照。</li>
+</ul>
+<p>读到能解释“包安装给谁”即可回主线。无需再安装一套环境管理工具。</p>
+<div class="knowledge-return"><a href="../../../lessons/0011-python-environment.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

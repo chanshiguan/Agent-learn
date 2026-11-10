@@ -1,0 +1,74 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/actions.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/actions.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/actions.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/actions.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;草稿与实际写入分开；批准绑定具体内容、版本、本人和有效期。&quot;&quot;&quot;
+import json
+import time
+import uuid
+
+from .files import digest
+from .state import connect
+
+
+def draft(actor, kind, body, request_key, session_id=None):
+    if kind not in {&quot;note&quot;, &quot;review_plan&quot;} or not isinstance(body, str) or not 1 &lt;= len(body.strip()) &lt;= 6000:
+        raise ValueError(&quot;只接受非空笔记或复习计划，最多 6000 字符。&quot;)
+    hashed = digest([kind, body])
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        # 草稿生成期间读者可能删除阅读；在同一写事务里复核，避免删除后又留下新草稿。
+        if session_id is not None and not db.execute(&quot;SELECT 1 FROM sessions WHERE id=? AND tenant=? AND owner=?&quot;, (session_id, actor.tenant, actor.user)).fetchone():
+            raise PermissionError(&quot;阅读记录已删除，不再保存这份草稿。&quot;)
+        existing = db.execute(&quot;SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?&quot;, (actor.tenant, actor.user, request_key)).fetchone()
+        if existing:
+            if existing[&quot;digest&quot;] != hashed:
+                raise ValueError(&quot;同一幂等键不能用于不同内容，请生成新的请求键。&quot;)
+            return dict(existing)
+        identity = uuid.uuid4().hex
+        db.execute(&quot;INSERT INTO actions(id,tenant,owner,request_key,kind,body,digest,expires) VALUES(?,?,?,?,?,?,?,?)&quot;,
+                   (identity, actor.tenant, actor.user, request_key, kind, body, hashed, time.time() + 900))
+        return dict(db.execute(&quot;SELECT * FROM actions WHERE id=?&quot;, (identity,)).fetchone())
+
+
+def pending(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute(&quot;SELECT * FROM actions WHERE tenant=? AND owner=? ORDER BY rowid DESC&quot;, (actor.tenant, actor.user))]
+
+
+def revise(actor, identity, body):
+    if not isinstance(body, str) or not 1 &lt;= len(body.strip()) &lt;= 6000:
+        raise ValueError(&quot;草稿长度需为 1—6000 字符。&quot;)
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        row = db.execute(&quot;SELECT * FROM actions WHERE id=? AND tenant=? AND owner=? AND status='pending'&quot;, (identity, actor.tenant, actor.user)).fetchone()
+        if row is None:
+            raise PermissionError(&quot;没有可修改的本人草稿。&quot;)
+        db.execute(&quot;UPDATE actions SET body=?,digest=?,revision=revision+1,expires=? WHERE id=?&quot;,
+                   (body, digest([row[&quot;kind&quot;], body]), time.time() + 900, identity))
+        return dict(db.execute(&quot;SELECT * FROM actions WHERE id=?&quot;, (identity,)).fetchone())
+
+
+def approve(actor, identity, revision, expected_digest, confirmed):
+    if confirmed is not True:
+        raise ValueError(&quot;未获得对当前草稿的明确确认。&quot;)
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        row = db.execute(&quot;SELECT * FROM actions WHERE id=? AND tenant=? AND owner=?&quot;, (identity, actor.tenant, actor.user)).fetchone()
+        if row is None:
+            raise PermissionError(&quot;草稿不存在或不属于本人。&quot;)
+        if row[&quot;revision&quot;] != revision or row[&quot;digest&quot;] != expected_digest:
+            raise ValueError(&quot;草稿已改变，请重新查看并确认。&quot;)
+        if row[&quot;status&quot;] == &quot;committed&quot;:
+            return {&quot;id&quot;: identity, &quot;status&quot;: &quot;committed&quot;, &quot;replayed&quot;: True}
+        if row[&quot;expires&quot;] &lt; time.time():
+            raise ValueError(&quot;确认已过期，请重新生成或修改草稿后确认。&quot;)
+        # 写入业务记录和标记完成在同一个事务内；中途崩溃时不会只完成一半。
+        db.execute(&quot;INSERT INTO notes(id,tenant,owner,kind,body,created) VALUES(?,?,?,?,?,?)&quot;, (identity, actor.tenant, actor.user, row[&quot;kind&quot;], row[&quot;body&quot;], time.time()))
+        db.execute(&quot;UPDATE actions SET status='committed' WHERE id=?&quot;, (identity,))
+    return {&quot;id&quot;: identity, &quot;status&quot;: &quot;committed&quot;, &quot;replayed&quot;: False}
+
+
+def notes(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute(&quot;SELECT id,kind,body,created FROM notes WHERE tenant=? AND owner=?&quot;, (actor.tenant, actor.user))]
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

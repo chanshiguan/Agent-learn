@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>资料来源 · 名著伴读实战</title><link rel="stylesheet" href="../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="index.html">课程地图</a><a href="knowledge/index.html">知识拓展 · 选读</a><a href="resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>资料来源</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><h1>完整课程的资料来源</h1>
+<p>本课程以可迁移的新开发环境为起点，不以课程编写电脑上的软件或模型作为学员前置。主线以两个指定仓库为技术依据，DOCX 小样本和教学代码为本课程的实际练习。根据新增的选读要求，知识拓展页另引入官方文档、工程博客与原论文，不增加主线必修任务。</p>
+<h2>Knowledge</h2>
+<ul>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md">awesome-agentic-ai-zh Stage 0</a>：终端、Python、文件、JSON 与可观察结果；用于导学和第 1 章。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md">awesome-agentic-ai-zh Stage 1</a>：本地模型、消息、延迟、用量与连接错误；用于第 4 章。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">awesome-agentic-ai-zh FastAPI 与 Docker 练习</a>：Dockerfile、运行参数及宿主 Ollama 连接；先拆为第 2—3 章的纯文件实验，第 13、25 章再引入 Web 与组合部署。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md">Hello-Agents Extra07 环境配置</a>：独立环境和依赖安装；用于第 1 章。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>：统一模型客户端、本地与线上服务的配置；用于第 4 章。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 第八章</a>：文档进入检索流程的背景；用于第 5—12 章资料、检索、Embedding 和 Qdrant。</li>
+</ul>
+<h2>Wisdom</h2>
+<p>可以通过两个仓库的公开讨论与问题记录了解其他学习者的卡点。参与讨论不是课程验收要求；分享报错时去掉密钥和私人讲稿。不把未经复现的单条讨论当作确定结论。</p>
+<h2>本课程新增的编排</h2>
+<p>同一组《狂人日记》讲稿贯穿主机读取、容器读取和镜像运行；先对照可确定的 JSON，再观察有波动的模型回答。Docker 入门和 DOCX 程序是围绕既有资料任务拆解出的桥接实验，不声称上游原文已经逐字提供这套伴读课程。</p>
+<p>课堂代码固定直接依赖 <code>python-docx==1.2.0</code>、<code>openai==3.37.0</code>，在独立 Python 3.12 环境做安装检查。镜像使用 <code>python:3.12-slim</code>；标签及间接依赖仍可能变化，更严格的可重现发布留到后续阶段。具体验证状态另见验证记录。</p>
+<h2>Gaps</h2>
+<ul>
+<li>课程没有本次目标 M1 16 GB 机器的速度和容量实测；不得把其他机器的结果作为保证。</li>
+<li>Docker、默认候选 <code>qwen2.5:3b</code> 和付费线上路线仍须按验证记录所列范围在实际学习环境检查。</li>
+<li>本版采用 macOS 终端命令，没有提供原生 PowerShell 版本。课程内容和目录不依赖特定用户名，移到其他系统时须调整终端与容器网络差异。</li>
+<li>主线与选读分开：外部拓展文章不是章节验收前置，不以厂商文章中的实验数字保证本项目效果。</li>
+</ul>
+<h2>新增选读来源</h2>
+<p>查阅日期：2026-11-10。知识拓展每页都标出相关来源和建议阅读段落。方法对比是原理与适用问题的比较，不是使用率或热度排名。</p>
+<ul>
+<li><a href="https://docs.python.org/3.12/tutorial/venv.html">Python 3.12 虚拟环境教程</a>：补充解释 Python、pip 与独立环境。</li>
+<li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">Docker 容器概念</a>：对照容器与虚拟机。</li>
+<li><a href="https://docs.ollama.com/api/openai-compatibility">Ollama 接口兼容说明</a>：说明兼容范围与本地连接角色。</li>
+<li><a href="https://qdrant.tech/articles/hybrid-search/">Qdrant Hybrid Search</a>：词项检索、稠密检索与融合的取舍。</li>
+<li><a href="https://qdrant.tech/documentation/tutorials-basics/reranking-hybrid-search/">Qdrant 重排序教程</a>：候选检索与重排各自的位置。</li>
+<li><a href="https://www.anthropic.com/research/contextual-retrieval">Anthropic Contextual Retrieval</a>：切块后补充背景的思路，发表于 2024-09-19。</li>
+<li><a href="https://aclanthology.org/2023.acl-long.99/">HyDE 原论文</a>：假想文档用于定位真实资料，不能充当引用证据。</li>
+<li><a href="https://developers.llamaindex.ai/python/framework/integrations/retrievers/recursive_retriever_nodes/">LlamaIndex 递归检索</a>：小块检索与父块上下文的关系。</li>
+<li><a href="https://microsoft.github.io/graphrag/">微软 GraphRAG 文档</a>与<a href="https://www.microsoft.com/en-us/research/blog/graphrag-improving-global-search-via-dynamic-community-selection/">全局搜索工程博客</a>：结构化索引与全局问题；博客发表于 2024-11-15。</li>
+<li><a href="https://docs.langchain.com/oss/python/deepagents/retrieval">LangChain Retrieval</a>：固定检索生成流程、Agentic RAG 与查询增强。原检索文档地址目前会重定向到此页。</li>
+</ul>
+<h2>第 5—29 章新增的主线映射</h2>
+<ul>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/02-prompt-engineering.zh-Hans.md">Stage 2 Prompt</a>：第 5 章的资料与指令分离、输出协议。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">Stage 6 RAG 与 Memory</a>及<a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/resources/advanced-rag.zh-Hans.md">进阶 RAG</a>：第 6—12 章的检索、向量、切分、融合、重排与改写。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">Stage 3 工具与 Agent</a>、<a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4">Hello-Agents 第四章</a>：第 17—19 章工具协议、循环、停止与执行边界。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/04-agent-frameworks.zh-Hans.md">Stage 4 框架</a>：第 20 章从手写批准流程迁移到 LangGraph 检查点。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 第九章</a>：第 14—16 章上下文、显式状态与教学流程；伴读教学状态与防剧透策略是本课程场景设计。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">Stage 7 上线工程</a>、<a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12">Hello-Agents 第十二章</a>：第 21—29 章安全边界、评测、观测、部署与恢复原则；公司阈值和批准不由教程代填。</li>
+</ul>
+<p>本课程的网页、账号、草稿事务、范围审核、测量与维护脚本为围绕名著任务编写的完整练习实现，不能误称是上游原样代码。单机 SQLite、维护窗口发布、固定教学提示和保守片段展示都是明确教学取舍，不声称已实现多机高可用、个性化能力诊断或绝对防剧透。</p>
+<h2>后半程选读与接口核对</h2>
+<ul>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/interrupts">LangGraph interrupts</a>：暂停、恢复和检查点的实际接口。</li>
+<li><a href="https://fastapi.tiangolo.com/tutorial/security/">FastAPI 安全教程</a>：认证机制与依赖注入背景。</li>
+<li><a href="https://docs.docker.com/compose/intro/features-uses/">Docker Compose 使用场景</a>：多服务配置与单主机部署定位。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10">Hello-Agents 第十章</a>：MCP 选读；不作为完成主线的前置。</li>
+</ul>
+<p>直接依赖按各 requirements 文件固定，编写环境安装验证详见验证记录。间接依赖和容器摘要在第 27 章由实际发布环境记录；不能只凭一个 requirements 文件声称跨所有系统完全复现。</p>
+<h2>公开阅读材料</h2>
+<p>五份 DOCX 为课程新编讲解稿，正文、原著核对入口及解释边界见<a href="public-materials/index.html">公开样本说明</a>。原有六道题保持题干，新的人工参考答案单独保存，不导入检索库。</p>
+</div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="sources.html">资料来源</a><a href="verification.html">验证范围</a><a href="index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../assets/classics.js"></script></body></html>

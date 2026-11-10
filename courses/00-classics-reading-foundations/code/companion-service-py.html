@@ -1,0 +1,79 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/service.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/service.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/service.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/service.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;应用层连接资料、会话与模型；页面和命令行可以共用这些行为。&quot;&quot;&quot;
+import time
+from . import actions
+from .agent import run_agent
+from .corpus import visible
+from .files import load
+from .models import complete
+from .operations import job, log_event
+from .rag import answer, retrieve
+from .state import get_session, update_session
+from .tutor import teach_turn
+
+
+def ask(actor, session_id, question, request_id, mode=&quot;qa&quot;, method=&quot;keyword&quot;):
+    started = time.monotonic()
+    session = get_session(actor, session_id)
+    with job(actor, request_id) as flag:
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消。&quot;)
+        if mode == &quot;agent&quot;:
+            result = run_agent(actor, session_id, question, method, cancelled=flag.is_set)
+        elif mode == &quot;tutor&quot;:
+            result = teach_turn(actor, session_id, question, method)
+        else:
+            retrieved_at = time.monotonic()
+            # 防剧透开启时不带旧对话；每次用当前权限重新检索，不复用过去的来源。
+            hits = retrieve(question, actor.tenant, session[&quot;book&quot;], method, session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+            log_event(request_id, &quot;retrieve&quot;, seconds=round(time.monotonic() - retrieved_at, 3), source_count=len(hits), method=method)
+            generated_at = time.monotonic()
+            result = answer(question, hits, [] if session[&quot;strict&quot;] else session[&quot;history&quot;], strict=bool(session[&quot;strict&quot;]))
+            log_event(request_id, &quot;generate&quot;, seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get(&quot;usage&quot;) or {}).get(&quot;total_tokens&quot;), status=&quot;ok&quot;)
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消，本次结果没有写入阅读对话。&quot;)
+        if mode == &quot;tutor&quot;:
+            updated = update_session(actor, session, **result.pop(&quot;state_changes&quot;))
+        if mode != &quot;tutor&quot;:
+            history = [] if session[&quot;strict&quot;] else (session[&quot;history&quot;] + [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: result[&quot;answer&quot;]}])[-4:]
+            updated = update_session(actor, session, history=history)
+    for entry in result.get(&quot;trace&quot;, []):
+        log_event(request_id, &quot;tool&quot;, seconds=entry.get(&quot;seconds&quot;), status=entry.get(&quot;status&quot;))
+    usage = result.get(&quot;usage&quot;)
+    total_tokens = (sum(u[&quot;total_tokens&quot;] for u in usage) if usage and all(u and u.get(&quot;total_tokens&quot;) is not None for u in usage) else None) if isinstance(usage, list) else (usage or {}).get(&quot;total_tokens&quot;)
+    log_event(request_id, &quot;answer&quot;, seconds=round(time.monotonic() - started, 3), status=&quot;ok&quot;, method=method,
+              input_chars=len(question), source_count=len(result.get(&quot;sources&quot;, [])), tool_count=len(result.get(&quot;trace&quot;, [])), tokens=total_tokens)
+    # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。
+    return {**result, &quot;trace_id&quot;: request_id, &quot;session_revision&quot;: updated[&quot;revision&quot;]}
+
+
+def source(actor, session_id, source_id):
+    session = get_session(actor, session_id)
+    corpus = load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})
+    allowed = visible(corpus[&quot;chunks&quot;], actor.tenant, session[&quot;book&quot;], session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+    hit = next((c for c in allowed if c[&quot;id&quot;] == source_id), None)
+    if hit is None:
+        raise PermissionError(&quot;当前阅读范围内没有此来源。&quot;)
+    return hit
+
+
+def make_draft(actor, session_id, kind, request_id):
+    existing = next((a for a in actions.pending(actor) if a[&quot;request_key&quot;] == request_id), None)
+    if existing:
+        return existing
+    session = get_session(actor, session_id)
+    if session[&quot;strict&quot;] or not session[&quot;history&quot;]:
+        raise ValueError(&quot;当前没有可整理的普通阅读对话；受限模式下请手动写笔记。&quot;)
+    task = &quot;一份简短阅读笔记&quot; if kind == &quot;note&quot; else &quot;一份三次复习计划草稿，日期由读者确认&quot;
+    with job(actor, request_id) as flag:
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消。&quot;)
+        response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。&quot;}, *session[&quot;history&quot;]])
+        # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消，本次结果没有保存为草稿。&quot;)
+        body = response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;
+        return actions.draft(actor, kind, body, request_id, session_id=session_id)
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

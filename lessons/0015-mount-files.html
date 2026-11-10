@@ -1,0 +1,72 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>把讲稿交给容器，把结果带回来 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0015-mount-files">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把讲稿交给容器，把结果带回来</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-2">← 返回课程地图</a><p class="rail-label">第 2 章 · 第一次运行 Docker</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0014-first-container.html"><span class="unit-number">1</span><span>先在容器里运行一行 Python<small>20—30 分钟</small></span></a></li><li><a href="0015-mount-files.html" aria-current="page"><span class="unit-number">2</span><span>把讲稿交给容器，把结果带回来<small>25—35 分钟</small></span></a></li><li><a href="0016-container-lifecycle.html"><span class="unit-number">3</span><span>程序退出后，容器和文件分别去哪了<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先画清楚文件在哪</a></li><li><a href="#section-2">第一次在容器里读讲稿</a></li><li><a href="#section-3">检查结果落在何处</a></li><li><a href="#section-4">动手验证只读挂载</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 2 章 / 单元 2 · 共 3 个</p><h1>把讲稿交给容器，把结果带回来</h1><div class="lesson-meta"><span>本单元 25—35 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>25—35 分钟</strong>。上一节的容器只打印了一句话；现在让它运行第一章同一个读取程序。先确认终端位于练习目录，运行 <code>pwd</code> 和 <code>ls</code>，应看到 <code>read_docx.py</code> 与 <code>data/input/</code>。</p>
+<h2 id="section-1">先画清楚文件在哪</h2>
+<table>
+<thead>
+<tr>
+<th>主机上的位置</th>
+<th>容器里的位置</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>read_docx.py</code></td>
+<td><code>/app/read_docx.py</code></td>
+<td>要运行的程序，只读</td>
+</tr>
+<tr>
+<td><code>data/input/</code></td>
+<td><code>/input/</code></td>
+<td>五份讲稿，只读</td>
+</tr>
+<tr>
+<td><code>data/output/</code></td>
+<td><code>/output/</code></td>
+<td>接收新结果，可写</td>
+</tr>
+</tbody></table>
+<p>这叫<a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html">绑定挂载</a>：把主机的一处文件或目录接到容器内的指定位置。这里没有复制整个知识库，也没有让镜像永久包含讲稿。</p>
+<p>先创建输出目录：</p>
+<pre><code class="language-bash"># 准备接收结果的主机目录；已存在时保留原文件，成功通常没有输出。
+mkdir -p data/output
+</code></pre>
+<h2 id="section-2">第一次在容器里读讲稿</h2>
+<pre><code class="language-bash"># 将主机输入只读挂载、输出可写挂载，再运行读稿程序；预期 JSON 出现在主机 data/output 中。
+docker run --rm \
+  --mount &quot;type=bind,src=$(pwd)/read_docx.py,dst=/app/read_docx.py,readonly&quot; \
+  --mount &quot;type=bind,src=$(pwd)/data/input,dst=/input,readonly&quot; \
+  --mount &quot;type=bind,src=$(pwd)/data/output,dst=/output&quot; \
+  --workdir /app \
+  python:3.12-slim \
+  sh -c &#39;python -m pip install python-docx==1.2.0 &amp;&amp; python read_docx.py &quot;/input/06 《狂人日记》第一讲两种叙述声音.docx&quot; /output/container.json&#39;
+</code></pre>
+<p><code>$(pwd)</code> 由主机终端展开为当前目录的完整路径，所以必须先进入练习目录。外层双引号保留路径里的空格，<code>sh -c</code> 后的单引号让整段命令交给容器执行。里面的 <code>&amp;&amp;</code> 表示只有依赖安装成功，才继续读取讲稿。</p>
+<p>这次把安装依赖也写在运行命令里，是为了看清容器需要自己的依赖。第三章会把安装移到构建阶段，避免每次运行都重复做。不要把这里的临时做法直接当成最终部署方式。</p>
+<h2 id="section-3">检查结果落在何处</h2>
+<p>命令成功后，在主机打开 <code>data/output/container.json</code>。虽然 Python 在容器中写的是 <code>/output/container.json</code>，你仍能在主机看到它，因为这两个位置通过挂载连接在一起。</p>
+<p>如果提示 <code>No such file or directory</code>，先区分是挂载源不存在，还是程序在容器里找错位置。程序的输入必须使用 <code>/input/</code> 下的完整文件名，不能把主机个人目录的路径原样当作容器路径。</p>
+<h2 id="section-4">动手验证只读挂载</h2>
+<p>下面这次故意把输出指向只读输入目录。它应该失败；该目录中不应新增 <code>should-fail.json</code>。</p>
+<pre><code class="language-bash"># 故意向只读挂载目录写文件；预期权限错误，并且输入目录不新增 should-fail.json。
+docker run --rm \
+  --mount &quot;type=bind,src=$(pwd)/data/input,dst=/input,readonly&quot; \
+  python:3.12-slim \
+  python -c &quot;from pathlib import Path; Path(&#39;/input/should-fail.json&#39;).write_text(&#39;test&#39;)&quot;
+</code></pre>
+<p>只读挂载限制程序对该位置的写入。它并不代表整个容器已经拥有完整安全隔离；本章只是明确输入和输出的职责。</p>
+<p>**本单元完成条件：**主机能找到容器生成的 JSON；你能解释 <code>/input</code> 和 <code>/output</code> 分别对应哪里；只读写入实验按预期失败。</p>
+<h2 id="section-5">本单元验收与参考答案</h2>
+<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>输入输出分别在哪？</strong> 主机 <code>data/input/</code> 对应容器 <code>/input/</code>；主机 <code>data/output/</code> 对应容器 <code>/output/</code>。所以容器写 <code>/output/container.json</code> 后，主机能在 <code>data/output/container.json</code> 读到它。</p>
+<p><strong>只读实验应该成功吗？</strong> 应失败。写 <code>/input/should-fail.json</code> 会被只读挂载拒绝；主机输入目录中不应新增这个文件。这次错误恰好是实验的预期结果。</p>
+<p>**通过证据：**主机能打开 <code>container.json</code> 并核对第一讲来源；保留只读写入的报错，确认输入没有被改写。输入用容器路径 <code>/input/...</code>，不能直接照搬主机路径。</p>
+</details>
+
+<h2 id="section-6">资料依据</h2>
+<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">部署练习</a>说明运行参数与文件系统限制；本节将文件输入输出拆成可观察实验，供后面知识库服务复用。</p>
+<label class="study-check"><input type="checkbox" data-study-check="0015-mount-files"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0014-first-container.html"><small>上一单元</small>先在容器里运行一行 Python</a><a href="0016-container-lifecycle.html"><small>下一单元</small>程序退出后，容器和文件分别去哪了 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

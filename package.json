@@ -1,0 +1,13 @@
+{
+  "name": "classics-reading-course",
+  "private": true,
+  "scripts": {
+    "build": "node courses/00-classics-reading-foundations/tooling/build.mjs"
+  },
+  "devDependencies": {
+    "marked": "17.0.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

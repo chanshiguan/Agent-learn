@@ -1,0 +1,121 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先预览一份笔记，确认后再保存 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0052-write-drafts">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先预览一份笔记，确认后再保存</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-19">← 返回课程地图</a><p class="rail-label">第 19 章 · 写入之前确认具体内容</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0052-write-drafts.html" aria-current="page"><span class="unit-number">1</span><span>先预览一份笔记，确认后再保存<small>35—50 分钟</small></span></a></li><li><a href="0053-approval-replays.html"><span class="unit-number">2</span><span>重复点击、过期与换人都要试<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">写入与查询的风险不同</a></li><li><a href="#section-2">暂不依赖模型，单独练写入协议</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 19 章 / 单元 1 · 共 2 个</p><h1>先预览一份笔记，确认后再保存</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">写入与查询的风险不同</h2>
+<p>读错一条资料可以重查，写错笔记会影响以后阅读。模型先产出草稿，页面展示具体内容；读者确认当前版本后才保存。复习计划同样只是草稿，不自动改日历、发送消息或改变阅读进度。</p>
+<pre><code class="language-bash"># 停止旧服务后显示笔记区；仍沿用现有会话与资料。
+export COURSE_CHAPTER=19
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>先完成一轮普通有据问答，再点“生成笔记草稿”。读完内容，修改一个不准确表达，点“保存修改，重新预览”。只有新预览正确时再点“确认保存这一版”。受限模式不从对话自动生成草稿，避免重新引入范围外内容。</p>
+<h2 id="section-2">暂不依赖模型，单独练写入协议</h2>
+<pre><code class="language-bash"># 创建一份教师拟写的练习草稿，测试批准逻辑；这不是模型生成结果。
+python -m companion action draft --text &quot;我会回查讲稿中序言与日记的关系，并区分讲解观点和原著引文。&quot;
+# 列出本人的草稿 ID，便于选择要确认的那一份。
+python -m companion action list
+# 交互输入草稿 ID，看到完整内容后输入 YES 才保存；其他输入不批准。
+python -m companion action approve
+# 检查已保存笔记，预期出现刚才明确确认的内容。
+python -m companion action notes
+</code></pre>
+<p>命令行练习使用测试身份，正式服务的身份由登录决定。不要把通用的“你可以保存笔记”理解为对以后任何内容都批准；确认应绑定当时看到的具体版本。</p>
+<h2 id="section-3">对照完整实现</h2>
+<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
+<details><summary>展开本单元完整源码：companion/actions.py</summary>
+
+
+<pre><code class="language-python">&quot;&quot;&quot;草稿与实际写入分开；批准绑定具体内容、版本、本人和有效期。&quot;&quot;&quot;
+import json
+import time
+import uuid
+
+from .files import digest
+from .state import connect
+
+
+def draft(actor, kind, body, request_key, session_id=None):
+    if kind not in {&quot;note&quot;, &quot;review_plan&quot;} or not isinstance(body, str) or not 1 &lt;= len(body.strip()) &lt;= 6000:
+        raise ValueError(&quot;只接受非空笔记或复习计划，最多 6000 字符。&quot;)
+    hashed = digest([kind, body])
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        # 草稿生成期间读者可能删除阅读；在同一写事务里复核，避免删除后又留下新草稿。
+        if session_id is not None and not db.execute(&quot;SELECT 1 FROM sessions WHERE id=? AND tenant=? AND owner=?&quot;, (session_id, actor.tenant, actor.user)).fetchone():
+            raise PermissionError(&quot;阅读记录已删除，不再保存这份草稿。&quot;)
+        existing = db.execute(&quot;SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?&quot;, (actor.tenant, actor.user, request_key)).fetchone()
+        if existing:
+            if existing[&quot;digest&quot;] != hashed:
+                raise ValueError(&quot;同一幂等键不能用于不同内容，请生成新的请求键。&quot;)
+            return dict(existing)
+        identity = uuid.uuid4().hex
+        db.execute(&quot;INSERT INTO actions(id,tenant,owner,request_key,kind,body,digest,expires) VALUES(?,?,?,?,?,?,?,?)&quot;,
+                   (identity, actor.tenant, actor.user, request_key, kind, body, hashed, time.time() + 900))
+        return dict(db.execute(&quot;SELECT * FROM actions WHERE id=?&quot;, (identity,)).fetchone())
+
+
+def pending(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute(&quot;SELECT * FROM actions WHERE tenant=? AND owner=? ORDER BY rowid DESC&quot;, (actor.tenant, actor.user))]
+
+
+def revise(actor, identity, body):
+    if not isinstance(body, str) or not 1 &lt;= len(body.strip()) &lt;= 6000:
+        raise ValueError(&quot;草稿长度需为 1—6000 字符。&quot;)
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        row = db.execute(&quot;SELECT * FROM actions WHERE id=? AND tenant=? AND owner=? AND status=&#39;pending&#39;&quot;, (identity, actor.tenant, actor.user)).fetchone()
+        if row is None:
+            raise PermissionError(&quot;没有可修改的本人草稿。&quot;)
+        db.execute(&quot;UPDATE actions SET body=?,digest=?,revision=revision+1,expires=? WHERE id=?&quot;,
+                   (body, digest([row[&quot;kind&quot;], body]), time.time() + 900, identity))
+        return dict(db.execute(&quot;SELECT * FROM actions WHERE id=?&quot;, (identity,)).fetchone())
+
+
+def approve(actor, identity, revision, expected_digest, confirmed):
+    if confirmed is not True:
+        raise ValueError(&quot;未获得对当前草稿的明确确认。&quot;)
+    with connect() as db:
+        db.execute(&quot;BEGIN IMMEDIATE&quot;)
+        row = db.execute(&quot;SELECT * FROM actions WHERE id=? AND tenant=? AND owner=?&quot;, (identity, actor.tenant, actor.user)).fetchone()
+        if row is None:
+            raise PermissionError(&quot;草稿不存在或不属于本人。&quot;)
+        if row[&quot;revision&quot;] != revision or row[&quot;digest&quot;] != expected_digest:
+            raise ValueError(&quot;草稿已改变，请重新查看并确认。&quot;)
+        if row[&quot;status&quot;] == &quot;committed&quot;:
+            return {&quot;id&quot;: identity, &quot;status&quot;: &quot;committed&quot;, &quot;replayed&quot;: True}
+        if row[&quot;expires&quot;] &lt; time.time():
+            raise ValueError(&quot;确认已过期，请重新生成或修改草稿后确认。&quot;)
+        # 写入业务记录和标记完成在同一个事务内；中途崩溃时不会只完成一半。
+        db.execute(&quot;INSERT INTO notes(id,tenant,owner,kind,body,created) VALUES(?,?,?,?,?,?)&quot;, (identity, actor.tenant, actor.user, row[&quot;kind&quot;], row[&quot;body&quot;], time.time()))
+        db.execute(&quot;UPDATE actions SET status=&#39;committed&#39; WHERE id=?&quot;, (identity,))
+    return {&quot;id&quot;: identity, &quot;status&quot;: &quot;committed&quot;, &quot;replayed&quot;: False}
+
+
+def notes(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute(&quot;SELECT id,kind,body,created FROM notes WHERE tenant=? AND owner=?&quot;, (actor.tenant, actor.user))]
+</code></pre>
+</details>
+
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为什么修改后必须重新预览？</li>
+<li>确认复习计划会自动修改进度吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为什么修改后必须重新预览？</strong></p>
+<p>旧批准针对旧内容。修改改变了语义和摘要，新版本需要新的明确确认。</p>
+<p><strong>确认复习计划会自动修改进度吗？</strong></p>
+<p>不会。本课程只把确认后的计划作为本人笔记保存，进度由读者单独明确设置。</p>
+<p>**通过证据：**一份真实模型草稿、一份修改后确认的笔记和未批准时没有写入的记录。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0052-write-drafts"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0051-agent-stopping.html"><small>上一单元</small>比较固定 RAG 与 Agent，练习及时停止</a><a href="0053-approval-replays.html"><small>下一单元</small>重复点击、过期与换人都要试 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>混合检索：同时照顾原词与意思 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>混合检索：同时照顾原词与意思</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">两路找，再合并</a></li><li><a href="#section-2">在伴读里怎样验证是否值得</a></li><li><a href="#section-3">什么时候暂时不用</a></li><li><a href="#section-4">推荐选读</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / RAG 方法详解</p><h1>混合检索：同时照顾原词与意思</h1><div class="lesson-meta"><span>预计 6—8 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>读者可能说“日记前面的古文有什么作用”，讲稿可能写“文言文序言”。只看相同词语可能漏掉；但遇到准确人物名或讲次，纯语义相似又可能把别的对象排上来。这是本项目可用来设计测试题的两种情形。</p>
+<h2 id="section-1">两路找，再合并</h2>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>主要线索</th>
+<th>值得留意的不足</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>词项检索，如 BM25</td>
+<td>问题与文档里的词项匹配</td>
+<td>换一种表达可能匹配不足</td>
+</tr>
+<tr>
+<td>稠密向量检索</td>
+<td>Embedding 表示的相似性</td>
+<td>精确字符串未必得到足够权重</td>
+</tr>
+</tbody></table>
+<p>混合检索同时使用两类信号，再融合候选。不同检索器的分数不能未经处理直接相加；一种办法是按排名做融合，例如 RRF。增加一路也意味着增加索引、存储与查询工作。<a href="https://qdrant.tech/articles/hybrid-search/">Qdrant 官方技术文章：Hybrid Search</a></p>
+<h2 id="section-2">在伴读里怎样验证是否值得</h2>
+<p>保留两组题：带准确人名、讲次的题，以及用日常语言重新描述同一问题的题。先分别看两路能否找回已人工确认的证据，再看融合结果。不要只挑一题成功就宣布整体更好。</p>
+<p>中文资料还要注意分词与索引配置。BM25 不是完整字符串的严格相等判断；人物名能否被正确匹配，要以实际检索结果为准。</p>
+<h2 id="section-3">什么时候暂时不用</h2>
+<p>还没保存来源，或者连单路候选内容都没看过时，先补这些观察能力。否则多加一路会增加排错变量，而你仍不知道究竟漏掉了什么。</p>
+<h2 id="section-4">推荐选读</h2>
+<p><a href="https://qdrant.tech/articles/hybrid-search/">Qdrant：Hybrid Search in Qdrant</a>（英文，约 10 分钟）。先看两路各会漏什么、如何融合，暂时跳过具体产品配置。文章用于理解方法，不要求本项目立即采用 Qdrant。</p>
+<p>找到候选以后，可接着了解<a href="rag-rerank.html">重排序</a>。</p>
+<div class="knowledge-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

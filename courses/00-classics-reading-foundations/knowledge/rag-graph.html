@@ -1,0 +1,16 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GraphRAG：跨资料整理关系与主题 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>GraphRAG：跨资料整理关系与主题</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">它增加了什么</a></li><li><a href="#section-2">对名著伴读有什么吸引力</a></li><li><a href="#section-3">为什么暂时不放进主线</a></li><li><a href="#section-4">推荐选读</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / RAG 方法详解</p><h1>GraphRAG：跨资料整理关系与主题</h1><div class="lesson-meta"><span>预计 8—10 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>“第一讲某句是什么意思”是局部问题；“五讲分别从哪些角度理解狂人，这些角度有什么联系”需要跨资料归纳。后者可以用来研究结构化检索，但并不因此必须建立知识图谱。</p>
+<h2 id="section-1">它增加了什么</h2>
+<p>以微软 GraphRAG 为例，索引阶段从文本提取实体和关系，组织社区层次并生成摘要；查询阶段可借助这些结构处理实体相关或全局主题问题。这里介绍的是该实现路径，不把所有“图＋检索”系统都视为同一套方案。<a href="https://microsoft.github.io/graphrag/">微软 GraphRAG 官方介绍</a></p>
+<h2 id="section-2">对名著伴读有什么吸引力</h2>
+<p>人物、事件、讲次和主题之间存在联系。整理这些关系，可能帮助跨篇比较或生成主题导读。这是根据任务特点作出的使用设想，当前课程没有对五份讲稿实测 GraphRAG。</p>
+<p>同时要留意：讲稿中的文学解释不总是客观关系。若某位讲解者认为人物象征某种思想，关系记录应保留“谁提出、来自哪里”，而不是直接变成唯一事实。</p>
+<h2 id="section-3">为什么暂时不放进主线</h2>
+<p>抽取和摘要要额外工作，资料更新还要考虑重建或增量处理；错误关系可能继续影响后续归纳。对当前五份资料，先试带来源的普通检索与明确的多段比较，往往更容易看清问题。</p>
+<h2 id="section-4">推荐选读</h2>
+<p><a href="https://www.microsoft.com/en-us/research/blog/graphrag-improving-global-search-via-dynamic-community-selection/">微软研究博客：通过动态社区选择改进 GraphRAG 全局搜索</a>（2024-11-15，英文，约 12 分钟）。先看为什么全局问题需要汇总、为什么汇总所有社区会增加成本。这篇适合建立取舍意识，不要求现在搭建图谱。</p>
+<p>若问题只是“相关段落排在后面”，先读<a href="rag-rerank.html">重排序</a>，不必因此升级整个索引体系。</p>
+<div class="knowledge-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

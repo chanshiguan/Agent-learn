@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>工具、权限、批准与恢复 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>工具、权限、批准与恢复</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">四个问题分别回答</a></li><li><a href="#section-2">固定流程与 Agent 的取舍</a></li><li><a href="#section-3">MCP 和多 Agent 放在哪里</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0048-readonly-tools.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / Agent 与上线工程</p><h1>工具、权限、批准与恢复</h1><div class="lesson-meta"><span>预计 10—12 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>这是独立选读。读懂一个概念就可以返回主线，不要求另装服务或完成额外作业。</p>
+<h2 id="section-1">四个问题分别回答</h2>
+<p>工具 schema 说明“能请求什么格式”；参数校验判断“这次请求格式是否有效”；授权判断“当前读者是否有权访问”；批准判断“这份具体写入内容是否被同意”。少一层，都不能靠更长的 Prompt 补齐。</p>
+<h2 id="section-2">固定流程与 Agent 的取舍</h2>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>优点</th>
+<th>需要承担的代价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>固定 RAG</td>
+<td>路径短、容易比较、成本可预测</td>
+<td>不灵活决定多次查询</td>
+</tr>
+<tr>
+<td>固定教学状态机</td>
+<td>节奏清楚，便于内容审核</td>
+<td>不自动诊断所有学习情况</td>
+</tr>
+<tr>
+<td>工具循环</td>
+<td>能根据结果选择后续动作</td>
+<td>多轮耗时、失败、预算与权限控制</td>
+</tr>
+<tr>
+<td>状态图</td>
+<td>暂停、恢复与分支更清楚</td>
+<td>新框架和检查点维护，仍要幂等</td>
+</tr>
+</tbody></table>
+<p>伴读中可以混用：简单问答走固定路径，跨资料核对才用 Agent，写笔记始终走预览批准。没有必要让一个循环管理全部行为。</p>
+<h2 id="section-3">MCP 和多 Agent 放在哪里</h2>
+<p>MCP 提供工具连接协议，不负责证明每个调用都获准。多个 Agent 可以分工，也会增加通信、共享状态和成本。先找到单个 Agent 无法解决的具体瓶颈，再决定是否引入。</p>
+<p>主线依据见 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">Stage 3</a>。协议选读看 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10">Hello-Agents 第十章</a>；多角色可从 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6">第六章框架实践</a>了解。现在不读也能完成单 Agent 项目。</p>
+<div class="knowledge-return"><a href="../../../lessons/0048-readonly-tools.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

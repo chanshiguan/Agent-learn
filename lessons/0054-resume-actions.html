@@ -1,0 +1,62 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>关闭程序后，接着处理同一草稿 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0054-resume-actions">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>关闭程序后，接着处理同一草稿</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-20">← 返回课程地图</a><p class="rail-label">第 20 章 · 暂停、重启与框架迁移</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0054-resume-actions.html" aria-current="page"><span class="unit-number">1</span><span>关闭程序后，接着处理同一草稿<small>35—50 分钟</small></span></a></li><li><a href="0055-langgraph-checkpoint.html"><span class="unit-number">2</span><span>用状态图重现同一个批准流程<small>40—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">恢复的对象是业务状态</a></li><li><a href="#section-2">故障表要有具体动作</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 20 章 / 单元 1 · 共 2 个</p><h1>关闭程序后，接着处理同一草稿</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 75—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">恢复的对象是业务状态</h2>
+<p>前一章 actions 表保存草稿、版本、状态和期限。进程退出不会抹掉它。恢复不是重新执行整个对话，也不是把上次所有工具再跑一次；先读当前动作状态，判断还允许做什么。</p>
+<pre><code class="language-bash"># 创建尚未批准的新草稿，记录输出 ID；命令结束后进程已经退出。
+python -m companion action draft --text &quot;重启后先检查当前版本，再决定是否保存这份阅读笔记。&quot;
+# 新命令是新的 Python 进程；预期仍能列出刚才的持久草稿。
+python -m companion action list
+# 再读完整预览并决定是否批准；不是自动续用上一次的口头同意。
+python -m companion action approve
+</code></pre>
+<p>分别在三种时点模拟退出：创建后、批准前、批准成功后但页面尚未看到响应。恢复时预期分别是待确认、待确认、已保存且重复提交不新增。</p>
+<h2 id="section-2">故障表要有具体动作</h2>
+<table>
+<thead>
+<tr>
+<th>看到的状态</th>
+<th>可以做什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pending 且当前版本有效</td>
+<td>展示内容，请用户确认</td>
+</tr>
+<tr>
+<td>pending 但已过期</td>
+<td>重新生成或修订预览，再确认</td>
+</tr>
+<tr>
+<td>committed</td>
+<td>返回原结果，不能再写一条</td>
+</tr>
+<tr>
+<td>找不到或不属于本人</td>
+<td>拒绝，不猜测相近 ID</td>
+</tr>
+</tbody></table>
+<p>受限资料、账号身份和作品范围在恢复时也要重新检查。持久化一个 ID 不等于永久保留权限。</p>
+<p>下一单元引入框架，是为了清楚表达流程与检查点；业务批准规则继续复用，不让框架替代它。</p>
+<h2 id="section-3">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>恢复任务就是重跑所有步骤吗？</li>
+<li>为什么恢复时还要看期限？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>恢复任务就是重跑所有步骤吗？</strong></p>
+<p>不是。先读已完成状态，避免重复副作用；只继续当前允许的步骤。</p>
+<p><strong>为什么恢复时还要看期限？</strong></p>
+<p>进程保存了状态，但读者的批准可能已经失效，数据也可能变化。</p>
+<p>**通过证据：**三个退出时点的状态记录，以及恢复后没有重复笔记的证据。</p>
+</details>
+
+<h2 id="section-4">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-5">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/04-agent-frameworks.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0054-resume-actions"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0053-approval-replays.html"><small>上一单元</small>重复点击、过期与换人都要试</a><a href="0055-langgraph-checkpoint.html"><small>下一单元</small>用状态图重现同一个批准流程 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

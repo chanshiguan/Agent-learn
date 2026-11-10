@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>资料更新后，不让旧索引混进来 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0035-index-versions">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>资料更新后，不让旧索引混进来</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-10">← 返回课程地图</a><p class="rail-label">第 10 章 · 把向量放进 Qdrant</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0034-qdrant-persistence.html"><span class="unit-number">1</span><span>启动向量库，重启后继续查<small>35—50 分钟</small></span></a></li><li><a href="0035-index-versions.html" aria-current="page"><span class="unit-number">2</span><span>资料更新后，不让旧索引混进来<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先看两种版本</a></li><li><a href="#section-2">更新和删除怎样落到索引</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 10 章 / 单元 2 · 共 2 个</p><h1>资料更新后，不让旧索引混进来</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">先看两种版本</h2>
+<p><code>corpus.json</code> 记录资料快照；<code>index.json</code> 记录活动集合、编码器名称、权重提交指纹和资料 revision。查询前会核对二者。资料已变而索引未更新时，失败比悄悄返回旧证据更容易发现。</p>
+<p>编码器在 <code>vectors.py</code> 中通过 <code>MODEL_REVISION</code> 指定<a href="https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/e8f8c211226b894fcb81acc59f3b34ba3efd5f42">模型仓库的固定提交</a>。加载、缓存和索引都使用这个值，不从依赖库的内部字段猜测版本。要升级权重，先明确修改提交值，再重新运行本章对照；不要只换模型文件而保留旧索引。</p>
+<pre><code class="language-bash"># 相同资料再次建索引；预期 new_embeddings 为 0，复用同一模型版本的文本向量缓存。
+python -m companion index
+# 只改重叠长度，制造新的资料快照；这是可恢复的实验，不动原件。
+python -m companion ingest --size 80 --overlap 12
+# 此时旧索引版本不匹配，预期被拒绝；拒绝正是本实验要验证的行为。
+python -m companion search &quot;文言文序言&quot; --method semantic
+# 构建完新集合后才发布指针；然后重查，应使用新快照。
+python -m companion index
+python -m companion search &quot;文言文序言&quot; --method semantic
+</code></pre>
+<p>实验后用 80/16 重新 ingest 和 index，恢复比较基线。缓存键包含实际模型提交版本及文本指纹，不能跨不同权重盲目复用。未变化的文本复用向量，新文本才编码；这里是“增量计算、整份快照发布”，不是逐条在线增删的完整服务。</p>
+<h2 id="section-2">更新和删除怎样落到索引</h2>
+<p>在第 6 章的实验目录撤下一份文件后导入，新集合只含新快照；活动指针切过去后，新查询不再用旧文件。旧集合暂留用于回滚，并未物理删除。正式删除必须把保留集合、缓存与备份也列入留存流程。</p>
+<p>本实现用 <code>index.json</code> 作为单实例活动指针，不是 Qdrant alias。构建期间资料与指针不一致会暂时拒绝查询；第 28 章用维护窗口发布，避免把它说成无中断切换。</p>
+<h2 id="section-3">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>new_embeddings=0 说明没工作吗？</li>
+<li>索引更新后旧数据是否已经永久删除？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>new_embeddings=0 说明没工作吗？</strong></p>
+<p>不是。程序复用了已知文本的同版本向量，并检查集合条数；它不意味着本轮没有存储操作。</p>
+<p><strong>索引更新后旧数据是否已经永久删除？</strong></p>
+<p>没有。旧集合和缓存还可能存在；撤下在线使用与永久清除是两件需要分别验收的事。</p>
+<p>**通过证据：**版本不匹配的预期失败、更新后的成功查询与缓存复用记录；恢复 80/16 基线。</p>
+</details>
+
+<h2 id="section-4">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-5">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0035-index-versions"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0034-qdrant-persistence.html"><small>上一单元</small>启动向量库，重启后继续查</a><a href="0036-chunking-lab.html"><small>下一单元</small>同一份讲稿，三种切法 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,0 +1,74 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RAG 技术地图：先选问题，再选方法 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>RAG 技术地图：先选问题，再选方法</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先有一个可以检查的基线</a></li><li><a href="#section-2">常见方法怎样选</a></li><li><a href="#section-3">先看错误，再决定改哪里</a></li><li><a href="#section-4">看完之后做什么</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / 提前看看 RAG</p><h1>RAG 技术地图：先选问题，再选方法</h1><div class="lesson-meta"><span>预计 12—15 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>RAG 是“检索增强生成”：先从外部资料里取回相关内容，再让模型结合这些内容回答。不是把文件放进某个目录，模型就自动学会了；也不等于重新训练模型。</p>
+<p>这是一张选读地图。你现在不用安装向量库，不用实现下列全部方法。第一阶段先让文件和模型各自跑通，下一阶段才把两者接起来。</p>
+<h2 id="section-1">先有一个可以检查的基线</h2>
+<p>对于这五份公开讲稿，我们会先手动选定资料给模型，再自动检索。每一步都要能看见：问题、找回的片段、来源、发送内容和答案。确定问题出在哪，再选择改进方法。这是本课程的编排建议，不是行业通用排名。</p>
+<h2 id="section-2">常见方法怎样选</h2>
+<p>下表整理截至 <strong>2026-11-10</strong> 仍有官方文档或原作者资料可查的常见方法及研究方向，不代表使用率排名。“代价”是相对于简单检索流程的定性比较，实际延迟和费用需要实测。点击名称进入独立说明页。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>主要解决什么</th>
+<th>代价或限制</th>
+<th>对伴读项目的考虑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="rag-basic.html">基础 RAG</a></td>
+<td>问答需要依据自己的资料</td>
+<td>切块和检索偏差会传到回答中</td>
+<td>先建立可检查的起点</td>
+</tr>
+<tr>
+<td><a href="rag-hybrid.html">混合检索</a></td>
+<td>只按语义找会漏专名，只按词找会漏换一种问法</td>
+<td>维护多路检索与结果融合</td>
+<td>人物名、讲次与口语问题并存时值得比较</td>
+</tr>
+<tr>
+<td><a href="rag-rerank.html">重排序 Reranking</a></td>
+<td>相关片段找到了，却排在后面</td>
+<td>多一轮评分，增加计算</td>
+<td>先确认候选里已经有证据</td>
+</tr>
+<tr>
+<td><a href="rag-query.html">查询改写 / Multi-query / HyDE</a></td>
+<td>问题省略对象、用词与资料不同</td>
+<td>增加请求，可能改偏原意</td>
+<td>多轮追问或口语表达较多时评估</td>
+</tr>
+<tr>
+<td><a href="rag-context.html">父子块 / Contextual Retrieval</a></td>
+<td>小块丢掉标题、主语或上下文</td>
+<td>更多上下文或索引预处理</td>
+<td>五讲各是一长段，切分后尤其要观察</td>
+</tr>
+<tr>
+<td><a href="rag-graph.html">GraphRAG</a></td>
+<td>跨资料的关系、主题和全局归纳</td>
+<td>实体关系抽取、摘要和更新成本</td>
+<td>先有跨篇问题集，再判断是否值得引入</td>
+</tr>
+<tr>
+<td><a href="rag-agentic.html">Agentic RAG</a></td>
+<td>需要决定查什么、是否再查、调用哪个工具</td>
+<td>路径和耗时更不固定，要限制循环</td>
+<td>留到固定检索问答可评测以后</td>
+</tr>
+</tbody></table>
+<p>这些不是互斥产品：混合检索后可以重排，Agent 也可以调用已有检索器。不要把“混合检索”与某些框架说的“Hybrid RAG 流程”当成同一术语。前者通常指多种检索信号融合，后者还可能包括查询改写和结果检查。<a href="https://qdrant.tech/articles/hybrid-search/">Qdrant 混合检索说明</a>、<a href="https://docs.langchain.com/oss/python/deepagents/retrieval">LangChain 检索架构说明</a>分别展示了这两种用法。</p>
+<h2 id="section-3">先看错误，再决定改哪里</h2>
+<ol>
+<li><strong>资料中根本没有所需信息。</strong> 说明证据不足，或补资料。重排不能凭空补出原著版本页码。</li>
+<li><strong>资料有，但候选里没找到。</strong> 检查切块、过滤条件、查询表达和检索方式。</li>
+<li><strong>候选里有，但排得太后。</strong> 再比较融合策略或重排序。</li>
+<li><strong>证据正确，答案却乱说。</strong> 检查提示、引用约束、模型能力和生成评测。</li>
+</ol>
+<p>例如读者问原著准确页码，但讲稿没有版本信息，合格回答是说明无法确认，而不是升级到 GraphRAG 后猜一个数字。这个例子来自本项目的问题设计，不是任何技术的跑分结论。</p>
+<h2 id="section-4">看完之后做什么</h2>
+<p>只挑一个你感兴趣的方法读即可。比较时保留同一套问题、资料与评价标准，分别看证据是否找全、引用是否支持回答、延迟和成本怎样变化。选读不会解锁或阻挡主线，也不计入章节预计用时。</p>
+<div class="knowledge-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

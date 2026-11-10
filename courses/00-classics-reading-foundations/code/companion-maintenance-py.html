@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/maintenance.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/maintenance.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/maintenance.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/maintenance.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;备份与恢复实验：保存数据库快照、资料版本及哈希，不复制凭据。&quot;&quot;&quot;
+import hashlib
+import json
+import os
+import shutil
+import sqlite3
+from pathlib import Path
+from .files import data_dir, load
+
+
+def backup(destination):
+    target = Path(destination)
+    target.mkdir(parents=True, exist_ok=False)
+    original = data_dir()
+    # SQLite backup API 取得一致快照。完整系统备份仍需先停止写入和索引任务，保证多文件版本一致。
+    for name in (&quot;reading.sqlite3&quot;, &quot;checkpoints.sqlite3&quot;):
+        if (original / name).exists():
+            with sqlite3.connect(original / name) as source, sqlite3.connect(target / name) as copy:
+                source.backup(copy)
+    for name in (&quot;corpus.json&quot;, &quot;ranges.json&quot;, &quot;index.json&quot;):
+        if (original / name).exists():
+            shutil.copy2(original / name, target / name)
+    hashes = {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in target.iterdir() if file.is_file()}
+    (target / &quot;manifest.json&quot;).write_text(json.dumps({&quot;files&quot;: hashes, &quot;strategy&quot;: &quot;索引可由 corpus 重建；此包不含 Qdrant 卷与模型权重&quot;}, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
+    return {&quot;backup&quot;: str(target), &quot;files&quot;: list(hashes)}
+
+
+def restore(source, destination):
+    source, target = Path(source), Path(destination)
+    manifest = json.loads((source / &quot;manifest.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+    allowed = {&quot;reading.sqlite3&quot;, &quot;checkpoints.sqlite3&quot;, &quot;corpus.json&quot;, &quot;ranges.json&quot;, &quot;index.json&quot;}
+    if not set(manifest[&quot;files&quot;]).issubset(allowed):
+        raise ValueError(&quot;备份包含未约定的文件名。&quot;)
+    for name, expected in manifest[&quot;files&quot;].items():
+        if hashlib.sha256((source / name).read_bytes()).hexdigest() != expected:
+            raise ValueError(f&quot;备份指纹不符：{name}&quot;)
+    target.mkdir(parents=True, exist_ok=False)
+    for name in manifest[&quot;files&quot;]:
+        if name != &quot;index.json&quot;:
+            shutil.copy2(source / name, target / name)
+    if (target / &quot;reading.sqlite3&quot;).exists():
+        with sqlite3.connect(target / &quot;reading.sqlite3&quot;) as db:
+            if db.execute(&quot;PRAGMA integrity_check&quot;).fetchone()[0] != &quot;ok&quot;:
+                raise ValueError(&quot;数据库完整性检查失败。&quot;)
+            # 恢复后重新登录，避免把备份里的旧访问令牌重新激活。
+            db.execute(&quot;DELETE FROM tokens&quot;)
+            db.execute(&quot;UPDATE actions SET expires=0 WHERE status='pending'&quot;)
+    return {&quot;restored&quot;: str(target), &quot;index_rebuild_required&quot;: True, &quot;login_required&quot;: True}
+
+
+def manifest():
+    import importlib.metadata
+    packages = {}
+    for name in (&quot;python-docx&quot;, &quot;openai&quot;, &quot;fastapi&quot;, &quot;qdrant-client&quot;, &quot;sentence-transformers&quot;, &quot;langgraph&quot;):
+        try:
+            packages[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            packages[name] = None
+    from .state import connect
+    with connect() as db:
+        schema_version = db.execute(&quot;PRAGMA user_version&quot;).fetchone()[0]
+    source_root = Path(__file__).parent
+    source_hashes = {str(f.relative_to(source_root)): hashlib.sha256(f.read_bytes()).hexdigest()
+                     for f in source_root.rglob(&quot;*&quot;) if f.is_file() and f.suffix in {&quot;.py&quot;, &quot;.html&quot;, &quot;.js&quot;, &quot;.css&quot;}}
+    return {&quot;application&quot;: &quot;classics-course-v2&quot;, &quot;source_hashes&quot;: source_hashes,
+            &quot;generation_model&quot;: os.environ.get(&quot;LLM_MODEL&quot;), &quot;generation_route&quot;: os.environ.get(&quot;LLM_MODE&quot;), &quot;prompt_version&quot;: &quot;grounded-v1&quot;,
+            &quot;corpus_revision&quot;: (load(&quot;corpus.json&quot;) or {}).get(&quot;revision&quot;),
+            &quot;index&quot;: load(&quot;index.json&quot;), &quot;packages&quot;: packages,
+            &quot;schema_version&quot;: schema_version}
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

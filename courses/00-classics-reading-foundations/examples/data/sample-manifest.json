@@ -1,0 +1,60 @@
+{
+  "version": "public-reading-v1",
+  "documents": [
+    {
+      "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+      "source": "public-materials/texts/06.md",
+      "source_kind": "课程自编讲解稿",
+      "lecture": 1,
+      "sha256": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+      "source_sha256": "e2dbd00e0e54311b1d1893c52e0299e4a236818e67fc7d78abb425449a7810e1",
+      "bytes": 38985,
+      "paragraph_count": 1,
+      "character_count": 1302
+    },
+    {
+      "file": "07 《狂人日记》第二讲月光与平等.docx",
+      "source": "public-materials/texts/07.md",
+      "source_kind": "课程自编讲解稿",
+      "lecture": 2,
+      "sha256": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+      "source_sha256": "a0755d8c816694934c0fc4de0747b75322bf62373e05387f096b7cb4d2a0c469",
+      "bytes": 39048,
+      "paragraph_count": 1,
+      "character_count": 1306
+    },
+    {
+      "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+      "source": "public-materials/texts/08.md",
+      "source_kind": "课程自编讲解稿",
+      "lecture": 3,
+      "sha256": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+      "source_sha256": "23c5ffd51903bcf5521df34739271fec104a93f3fb663c98413bcf0f861322c4",
+      "bytes": 39141,
+      "paragraph_count": 1,
+      "character_count": 1337
+    },
+    {
+      "file": "09 《狂人日记》第四讲不可靠叙述.docx",
+      "source": "public-materials/texts/09.md",
+      "source_kind": "课程自编讲解稿",
+      "lecture": 4,
+      "sha256": "26715e9d3892093a870e6c39a9355b1b6d3e7de95ba8a45c6f8119be8121b9c8",
+      "source_sha256": "9cf62be05980d0753952a8e04a1167a127c151d073d563f6f25f02ac4f0a5241",
+      "bytes": 39019,
+      "paragraph_count": 1,
+      "character_count": 1298
+    },
+    {
+      "file": "10 《狂人日记》第五讲传统与未来.docx",
+      "source": "public-materials/texts/10.md",
+      "source_kind": "课程自编讲解稿",
+      "lecture": 5,
+      "sha256": "d28e00afe3065369fd99a38b09bd9a018ad74c562116f5ecc70b4e8dd118bbb5",
+      "source_sha256": "0cfd29c9697e26669ee3d3ce460045690569ffbb3401fe1bc2425b2f1e7813a0",
+      "bytes": 39142,
+      "paragraph_count": 1,
+      "character_count": 1359
+    }
+  ]
+}

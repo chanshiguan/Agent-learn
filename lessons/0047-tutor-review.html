@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>检验提示有没有帮助读者思考 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0047-tutor-review">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>检验提示有没有帮助读者思考</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-16">← 返回课程地图</a><p class="rail-label">第 16 章 · 从问答走向启发式伴读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0046-tutor-states.html"><span class="unit-number">1</span><span>让读者先说理解，再给提示<small>35—50 分钟</small></span></a></li><li><a href="0047-tutor-review.html" aria-current="page"><span class="unit-number">2</span><span>检验提示有没有帮助读者思考<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">教学效果不能只看回答多长</a></li><li><a href="#section-2">做一次模式切换</a></li><li><a href="#section-3">给提示写一个可比较的修改</a></li><li><a href="#section-4">阶段四交付</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 16 章 / 单元 2 · 共 2 个</p><h1>检验提示有没有帮助读者思考</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>30—45 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">教学效果不能只看回答多长</h2>
+<p>把上一单元三轮对话当作一段小课堂。检查提示是否指向可观察的阅读动作：找词、找依据、比较解释。只说“再想想”没有给读者下一步。</p>
+<p>请你自己先扮演学生，再扮演家长，各走一次流程。学生可以提出不同理解；家长可以问如何继续讨论。系统应鼓励回到资料，而不是把不同解释直接判错。</p>
+<h2 id="section-2">做一次模式切换</h2>
+<p>在 hint 阶段切到普通问答，直接问具体问题，应该得到普通有据回答，不强迫先完成教学流程。再新建阅读重走三步。当前普通问答不会自动重置旧教学阶段，所以需要从头练习时新建阅读；这是明确的产品行为，不把它当隐藏规则。</p>
+<h2 id="section-3">给提示写一个可比较的修改</h2>
+<p>只改 <code>tutor.py</code> 中 question 的一句话，例如加入“先选出讲稿里一个支持你的词”。重启服务，用相同三轮输入比较。判断标准是读者是否知道该做什么、是否过早泄露答案、是否允许不同观点。</p>
+<p>把修改前后文字与理由保存在学习记录里。这里可以使用教师拟写的理想提示做参考，但不能把它算作模型实测结果。公司试用时还需要真实目标读者反馈和内容审核。</p>
+<h2 id="section-4">阶段四交付</h2>
+<p>已有可操作网页、独立会话、显式范围和三步教学。下一阶段只在“固定流程不能灵活处理的问题”上加入工具循环，不为了叫 Agent 就让它任意写数据库。</p>
+<h2 id="section-5">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为什么不把不同解读直接判错？</li>
+<li>什么时候值得引入 Agent？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为什么不把不同解读直接判错？</strong></p>
+<p>文学阅读容许有证据的不同解释。应核对依据和推理，而不是强迫复述唯一措辞。</p>
+<p><strong>什么时候值得引入 Agent？</strong></p>
+<p>当任务需要根据情况决定是否再查、查哪类资料或何时停止，固定流程难以覆盖时；仍要保留权限和预算边界。</p>
+<p>**通过证据：**两种角色的课堂记录、一条提示的前后对照和模式切换结果。</p>
+</details>
+
+<h2 id="section-6">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-7">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0047-tutor-review"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-agentic.html" data-knowledge-link>Agentic RAG：让程序决定何时再查<span>8—10 分钟 · 从固定流程走向有边界的工具调用。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0046-tutor-states.html"><small>上一单元</small>让读者先说理解，再给提示</a><a href="0048-readonly-tools.html"><small>下一单元</small>先由程序员调用工具，再交给模型 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

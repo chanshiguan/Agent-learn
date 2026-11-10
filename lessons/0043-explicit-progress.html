@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让记忆可以被查看、修正和删除 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0043-explicit-progress">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让记忆可以被查看、修正和删除</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-14">← 返回课程地图</a><p class="rail-label">第 14 章 · 保存每位读者自己的阅读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0042-reader-sessions.html"><span class="unit-number">1</span><span>两位读者，不共用一段对话<small>35—50 分钟</small></span></a></li><li><a href="0043-explicit-progress.html" aria-current="page"><span class="unit-number">2</span><span>让记忆可以被查看、修正和删除<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">不要从聊天里偷偷推断读到哪里</a></li><li><a href="#section-2">做一次可逆的状态实验</a></li><li><a href="#section-3">思考一次并发修改</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 14 章 / 单元 2 · 共 2 个</p><h1>让记忆可以被查看、修正和删除</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>30—45 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">不要从聊天里偷偷推断读到哪里</h2>
+<p>“我知道结尾”不代表读者愿意开放全部剧情。进度应由读者明确设置。对本课程，进度数字表示你人工定义的阅读范围，不自动对应讲次或原著页码。第 15 章才把它绑定到核对过的片段。</p>
+<p>当前会话只保留最近两轮普通问答，防止上下文无限增长；它不是完整聊天归档。页面暂不展示历史列表，数据库中的 history 用于下一轮请求。隐含偏好不自动写成长久记忆。</p>
+<h2 id="section-2">做一次可逆的状态实验</h2>
+<p>创建两次阅读，分别提问。关闭服务，用编辑器以只读方式查看数据库或运行下面的查询；不要把真实读者对话复制到公开工单。</p>
+<pre><code class="language-bash"># 仅查看测试账号的会话概况，不打印私人对话正文；预期各条记录有独立 ID 与 revision。
+python -c &#39;from companion.state import Actor,list_sessions; print(list_sessions(Actor(&quot;demo&quot;,&quot;reader-a&quot;)))&#39;
+</code></pre>
+<p>重启后删除其中一次阅读，再刷新列表。另一条应保留。删除会话不删除原始讲稿，也不自动删除已保存笔记；这些是不同对象，后面提供更完整的个人数据删除入口。</p>
+<h2 id="section-3">思考一次并发修改</h2>
+<p>同一页面的两个标签页都读到 revision=0，分别写入不同进度。页面保存时会一并发送这个版本号。第一次写完 revision=1，第二次带旧版本应失败，并保留第一次的进度。若允许覆盖，就可能把新进度退回旧值。看到冲突提示后，在阅读列表中重新打开当前记录，再决定要不要修改；不要自动重试覆盖别人刚保存的值。</p>
+<p>普通提问也会更新会话版本，接口会把新版本返回页面。因此在同一页面提问后保存进度仍能成功；跨标签页的旧记录则需要重新打开。</p>
+<p>把“能存下来”与“存得有边界”一起验收：谁能看、能改哪一项、什么时候清掉、是否会带入下一轮模型请求。</p>
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>最近对话与知识库是什么关系？</li>
+<li>删会话为什么不删讲稿？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>最近对话与知识库是什么关系？</strong></p>
+<p>对话是某位读者的短期上下文，知识库是有来源的资料。两者归属、更新和删除规则不同。</p>
+<p><strong>删会话为什么不删讲稿？</strong></p>
+<p>讲稿属于资料库，可能服务多个读者；删除某人的阅读记录不应影响公共学习材料。</p>
+<p>**通过证据：**删除单条会话前后列表、另一条记录保留的证据，以及对 revision 冲突的解释。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0043-explicit-progress"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0042-reader-sessions.html"><small>上一单元</small>两位读者，不共用一段对话</a><a href="0044-reviewed-ranges.html"><small>下一单元</small>先核对片段属于哪个阅读范围 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

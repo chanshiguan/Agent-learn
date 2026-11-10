@@ -1,0 +1,281 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/app.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/app.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/app.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/app.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;第 13 章起的同源页面和 API；第 21 章切换认证模式。&quot;&quot;&quot;
+import os
+import time
+import uuid
+from pathlib import Path
+from typing import Literal
+
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, ConfigDict, Field
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+from . import actions, auth, operations, service, state
+from .files import load
+
+MODE = os.environ.get(&quot;APP_MODE&quot;, &quot;lab&quot;)
+CHAPTER = int(os.environ.get(&quot;COURSE_CHAPTER&quot;, &quot;14&quot;))
+if MODE not in {&quot;lab&quot;, &quot;authenticated&quot;}:
+    raise ValueError(&quot;APP_MODE 只能是 lab 或 authenticated。&quot;)
+if os.environ.get(&quot;APP_ENV&quot;) == &quot;production&quot; and MODE != &quot;authenticated&quot;:
+    raise ValueError(&quot;生产配置禁止使用测试身份。&quot;)
+state.initialize()
+app = FastAPI(title=&quot;名著伴读助手&quot;, docs_url=None, redoc_url=None)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=os.environ.get(&quot;ALLOWED_HOSTS&quot;, &quot;localhost,127.0.0.1,testserver&quot;).split(&quot;,&quot;))
+web = Path(__file__).with_name(&quot;web&quot;)
+app.mount(&quot;/static&quot;, StaticFiles(directory=web), name=&quot;static&quot;)
+
+
+class Input(BaseModel):
+    model_config = ConfigDict(extra=&quot;forbid&quot;)
+
+
+class Login(Input):
+    tenant: str = Field(min_length=1, max_length=40)
+    username: str = Field(min_length=1, max_length=40)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class NewSession(Input):
+    book: str = Field(default=&quot;狂人日记&quot;, min_length=1, max_length=80)
+
+
+class Question(Input):
+    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    question: str = Field(min_length=1, max_length=800)
+    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    mode: Literal[&quot;qa&quot;, &quot;tutor&quot;, &quot;agent&quot;] = &quot;qa&quot;
+
+
+class Progress(Input):
+    progress: int = Field(ge=0, le=10000)
+    strict: bool
+    revision: int = Field(ge=0)
+
+
+class Draft(Input):
+    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    kind: Literal[&quot;note&quot;, &quot;review_plan&quot;]
+
+
+class Confirmation(Input):
+    revision: int = Field(ge=1)
+    digest: str = Field(pattern=r&quot;^[a-f0-9]{64}$&quot;)
+    confirmed: bool
+
+
+class Revision(Input):
+    body: str = Field(min_length=1, max_length=6000)
+
+
+class Feedback(Input):
+    category: Literal[&quot;答非所问&quot;, &quot;证据不符&quot;, &quot;内容不适合&quot;, &quot;其他&quot;]
+    trace_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+
+
+def actor(request: Request):
+    if MODE == &quot;lab&quot;:
+        if request.client and request.client.host not in {&quot;127.0.0.1&quot;, &quot;::1&quot;, &quot;testclient&quot;}:
+            raise HTTPException(403, &quot;测试身份仅允许本机练习。&quot;)
+        reader = request.headers.get(&quot;X-Lab-Reader&quot;, &quot;reader-a&quot;)
+        if reader not in {&quot;reader-a&quot;, &quot;reader-b&quot;}:
+            raise HTTPException(400, &quot;无效的测试读者。&quot;)
+        return state.Actor(&quot;demo&quot;, reader)
+    bearer = request.headers.get(&quot;Authorization&quot;, &quot;&quot;)
+    if not bearer.startswith(&quot;Bearer &quot;):
+        raise HTTPException(401, &quot;请先登录。&quot;)
+    return auth.authenticate(bearer[7:])
+
+
+@app.exception_handler(PermissionError)
+def denied(request, error):
+    return JSONResponse(status_code=403, content={&quot;detail&quot;: str(error)})
+
+
+@app.exception_handler(ValueError)
+def invalid(request, error):
+    return JSONResponse(status_code=409, content={&quot;detail&quot;: str(error)})
+
+
+@app.exception_handler(TimeoutError)
+def busy(request, error):
+    return JSONResponse(status_code=429, content={&quot;detail&quot;: &quot;当前请求较多，请稍后再试。&quot;}, headers={&quot;Retry-After&quot;: &quot;3&quot;})
+
+
+@app.exception_handler(Exception)
+def unavailable(request, error):
+    trace_id = getattr(request.state, &quot;trace_id&quot;, uuid.uuid4().hex)
+    operations.log_event(trace_id, &quot;failure&quot;, status=type(error).__name__)
+    # 不把模型供应商的原始响应、密钥或文件路径回传给读者。
+    return JSONResponse(status_code=503, content={&quot;detail&quot;: &quot;服务暂时不可用，请稍后重试。&quot;, &quot;trace_id&quot;: trace_id})
+
+
+@app.get(&quot;/&quot;)
+def index():
+    return FileResponse(web / &quot;index.html&quot;)
+
+
+@app.get(&quot;/healthz&quot;)
+def health():
+    return {&quot;status&quot;: &quot;alive&quot;}
+
+
+@app.get(&quot;/readyz&quot;)
+def ready():
+    corpus = load(&quot;corpus.json&quot;)
+    if not corpus:
+        raise HTTPException(503, &quot;资料尚未准备好。&quot;)
+    with state.connect() as db:
+        db.execute(&quot;SELECT 1 FROM sessions LIMIT 1&quot;)
+    if os.environ.get(&quot;RETRIEVAL&quot;, &quot;keyword&quot;) != &quot;keyword&quot;:
+        from .vectors import connection
+        current = load(&quot;index.json&quot;)
+        if not current or current[&quot;corpus_revision&quot;] != corpus[&quot;revision&quot;]:
+            raise HTTPException(503, &quot;资料索引待更新。&quot;)
+        with connection() as db:
+            db.get_collection(current[&quot;collection&quot;])
+    from .models import client
+    sdk, model = client(timeout=5)
+    with sdk:
+        available = {item.id for item in sdk.models.list().data}
+    if model not in available:
+        raise HTTPException(503, &quot;生成模型尚未就绪。&quot;)
+    return {&quot;status&quot;: &quot;ready&quot;, &quot;revision&quot;: corpus[&quot;revision&quot;][:12]}
+
+
+@app.get(&quot;/api/config&quot;)
+def config():
+    return {&quot;mode&quot;: MODE, &quot;chapter&quot;: CHAPTER}
+
+
+@app.post(&quot;/api/login&quot;)
+def login(body: Login, request: Request):
+    if MODE != &quot;authenticated&quot;:
+        raise HTTPException(409, &quot;当前是本机练习模式。&quot;)
+    return auth.login(body.tenant, body.username, body.password, request.client.host if request.client else &quot;unknown&quot;)
+
+
+@app.post(&quot;/api/logout&quot;)
+def logout(request: Request, who=Depends(actor)):
+    auth.logout(request.headers.get(&quot;Authorization&quot;, &quot;&quot;)[7:])
+    return {&quot;logged_out&quot;: True}
+
+
+@app.get(&quot;/api/books&quot;)
+def books(who=Depends(actor)):
+    return sorted({c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant})
+
+
+@app.get(&quot;/api/sessions&quot;)
+def sessions(who=Depends(actor)):
+    return state.list_sessions(who)
+
+
+@app.post(&quot;/api/sessions&quot;)
+def new_session(body: NewSession, who=Depends(actor)):
+    books = {c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant}
+    if body.book not in books:
+        raise HTTPException(404, &quot;没有可用的这部作品资料。&quot;)
+    return state.create_session(who, body.book)
+
+
+@app.get(&quot;/api/sessions/{identity}&quot;)
+def session(identity: str, who=Depends(actor)):
+    return state.get_session(who, identity)
+
+
+@app.patch(&quot;/api/sessions/{identity}&quot;)
+def progress(identity: str, body: Progress, who=Depends(actor)):
+    current = state.get_session(who, identity)
+    # 用页面实际读到的版本比较，才能拒绝后来到达的旧页面更新。
+    if current[&quot;revision&quot;] != body.revision:
+        raise ValueError(&quot;阅读记录已更新，请重新打开当前记录后再保存进度。&quot;)
+    # 进度或模式改变时丢弃旧上下文，避免旧对话把后文带进受限阅读。
+    return state.update_session(who, current, history=[], progress=body.progress, strict=body.strict, phase=&quot;question&quot;)
+
+
+@app.delete(&quot;/api/sessions/{identity}&quot;)
+def remove_session(identity: str, who=Depends(actor)):
+    state.delete_session(who, identity)
+    return {&quot;deleted&quot;: True}
+
+
+@app.post(&quot;/api/ask&quot;)
+def ask(body: Question, request: Request, who=Depends(actor)):
+    request.state.trace_id = body.request_id
+    return service.ask(who, body.session_id, body.question, body.request_id, body.mode, os.environ.get(&quot;RETRIEVAL&quot;, &quot;keyword&quot;))
+
+
+@app.post(&quot;/api/cancel/{request_id}&quot;)
+def cancel(request_id: str, who=Depends(actor)):
+    return operations.cancel(who, request_id)
+
+
+@app.get(&quot;/api/sources/{source_id}&quot;)
+def source(source_id: str, session_id: str, who=Depends(actor)):
+    return service.source(who, session_id, source_id)
+
+
+@app.post(&quot;/api/drafts&quot;)
+def make_draft(body: Draft, who=Depends(actor)):
+    return service.make_draft(who, body.session_id, body.kind, body.request_id)
+
+
+@app.get(&quot;/api/drafts&quot;)
+def drafts(who=Depends(actor)):
+    return actions.pending(who)
+
+
+@app.patch(&quot;/api/drafts/{identity}&quot;)
+def revise(identity: str, body: Revision, who=Depends(actor)):
+    return actions.revise(who, identity, body.body)
+
+
+@app.post(&quot;/api/drafts/{identity}/approve&quot;)
+def approve(identity: str, body: Confirmation, who=Depends(actor)):
+    return actions.approve(who, identity, body.revision, body.digest, body.confirmed)
+
+
+@app.get(&quot;/api/notes&quot;)
+def notes(who=Depends(actor)):
+    return actions.notes(who)
+
+
+@app.get(&quot;/api/family/{child}&quot;)
+def family(child: str, who=Depends(actor)):
+    return state.family_report(who, child)
+
+
+@app.post(&quot;/api/feedback&quot;)
+def feedback(body: Feedback, who=Depends(actor)):
+    identity = uuid.uuid4().hex
+    with state.connect() as db:
+        db.execute(&quot;INSERT INTO feedback VALUES(?,?,?,?,?,?)&quot;, (identity, who.tenant, who.user, body.category, body.trace_id, time.time()))
+    return {&quot;receipt&quot;: identity}
+
+
+@app.delete(&quot;/api/personal-data&quot;)
+def erase(who=Depends(actor)):
+    return state.erase_personal_data(who)
+
+
+@app.exception_handler(RequestValidationError)
+def bad_input(request, error):
+    # 默认校验结果可能带回原始输入；这里只返回位置，避免回显口令和私人问题。
+    return JSONResponse(status_code=422, content={&quot;detail&quot;: &quot;输入格式不合要求。&quot;, &quot;fields&quot;: [list(e[&quot;loc&quot;]) for e in error.errors()]})
+
+
+@app.middleware(&quot;http&quot;)
+async def response_headers(request, call_next):
+    response = await call_next(request)
+    response.headers[&quot;X-Content-Type-Options&quot;] = &quot;nosniff&quot;
+    response.headers[&quot;Cache-Control&quot;] = &quot;no-store&quot;
+    response.headers[&quot;Content-Security-Policy&quot;] = &quot;default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'&quot;
+    return response
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

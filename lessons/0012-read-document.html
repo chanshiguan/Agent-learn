@@ -1,0 +1,82 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让 Python 读出第一讲 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0012-read-document">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让 Python 读出第一讲</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-1">← 返回课程地图</a><p class="rail-label">第 1 章 · 用 Python 读取讲稿</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0011-python-environment.html"><span class="unit-number">1</span><span>给伴读项目准备独立的 Python 环境<small>20—30 分钟</small></span></a></li><li><a href="0012-read-document.html" aria-current="page"><span class="unit-number">2</span><span>让 Python 读出第一讲<small>25—35 分钟</small></span></a></li><li><a href="0013-save-json.html"><span class="unit-number">3</span><span>保存结果，并证明没有读错资料<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先读一小段代码</a></li><li><a href="#section-2">把语法和这次任务对上</a></li><li><a href="#section-3">自己改一个条件</a></li><li><a href="#section-4">本单元验收与参考答案</a></li><li><a href="#section-5">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 1 章 / 单元 2 · 共 3 个</p><h1>让 Python 读出第一讲</h1><div class="lesson-meta"><span>本单元 25—35 分钟</span><span>本章 75—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>25—35 分钟</strong>。开始前，你应能启用虚拟环境，并看到“DOCX 读取库可用”。若五份样本尚未准备，先回到导学的资料单元运行准备脚本。</p>
+<h2 id="section-1">先读一小段代码</h2>
+<p>在练习目录创建 <code>peek_docx.py</code>，完整输入下面的代码。这里把路径直接写在代码里，方便你先看清读取过程；下一单元再改用现成的命令行参数。</p>
+<pre><code class="language-python">from pathlib import Path
+from docx import Document
+
+# 指定同一份样本，后面改运行环境时才不会把资料差异误当成程序差异。
+source = Path(&quot;data/input/06 《狂人日记》第一讲两种叙述声音.docx&quot;)
+document = Document(source)
+
+# 先只观察少量文字，确认读取位置正确，避免把长篇讲稿刷满终端。
+print(&quot;文件：&quot;, source.name)
+print(&quot;正文段落数量：&quot;, len(document.paragraphs))
+for position, paragraph in enumerate(document.paragraphs, start=1):
+    print(&quot;段落位置：&quot;, position)
+    print(&quot;开头文字：&quot;, paragraph.text[:80])
+</code></pre>
+<p>运行：</p>
+<pre><code class="language-bash"># 运行你刚写的预览程序；本课程第一、第二讲都应显示 1 个正文段落。
+python peek_docx.py
+</code></pre>
+<p>对于本课程选中的第一讲，预期正文段落数量为 <code>1</code>。开头文字应该能在 Word 中找到。显示 80 个字符只限制终端预览，没有截短 <code>document</code> 中的内容。</p>
+<h2 id="section-2">把语法和这次任务对上</h2>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>在这里有什么用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Path(...)</code></td>
+<td>表示文件位置，后面可以取文件名或检查文件是否存在</td>
+</tr>
+<tr>
+<td><code>Document(source)</code></td>
+<td>让读取库解析 Word 文件，不把 DOCX 当普通文本硬读</td>
+</tr>
+<tr>
+<td><code>document.paragraphs</code></td>
+<td>得到正文段落列表；不会自动包含页眉、脚注和所有表格文字</td>
+</tr>
+<tr>
+<td><code>enumerate(..., start=1)</code></td>
+<td>同时取到位置和段落，方便人从第一段开始核对</td>
+</tr>
+<tr>
+<td><code>paragraph.text</code></td>
+<td>取出当前段落里的文字</td>
+</tr>
+<tr>
+<td><code>[:80]</code></td>
+<td>只拿开头一小段来观察</td>
+</tr>
+</tbody></table>
+<p>Python 用缩进表示哪些语句属于循环。这里两条循环内的 <code>print</code> 都缩进四个空格。代码如果报 <code>IndentationError</code>，先检查缩进，别先改文件路径。</p>
+<h2 id="section-3">自己改一个条件</h2>
+<p>把文件名换成第二讲，再运行一次。先预测段落数是否变化，再用结果验证。随后把预览从 80 个字符改成 120 个字符，确认变化只发生在终端显示。</p>
+<p>再故意把文件名中的一个字改错。你应该看到找不到文件的错误。这次排错只检查当前目录、文件名和引号，不去重装读取库。改回正确名称后应恢复。</p>
+<details><summary>为什么不能直接使用 open(...).read() 读 DOCX</summary>
+
+<p>DOCX 内部包含结构化的文档部件，并不是按 UTF-8 保存的一整篇纯文本。这里借助读取库取正文段落。你只需要知道这层区别，不必在第一章自己解析 Word 的内部格式。</p>
+</details>
+
+<p>**本单元完成条件：**你能读取第一讲和第二讲，找到打印文字在源文件中的位置，并解释预览长度为什么不等于全文长度。</p>
+<h2 id="section-4">本单元验收与参考答案</h2>
+<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>第一讲和第二讲各有几段？</strong> 本课程附带版本各有 1 个正文段落。需要同时在 Word 中核对预览文字，不能仅凭这个数字判断文件选对了。</p>
+<p><strong>80 改成 120 会改变原文吗？</strong> 不会。<code>paragraph.text[:120]</code> 只截取打印时的预览；源 DOCX 和已读入的完整段落不变。</p>
+<p><strong>把文件名写错后先检查什么？</strong> 工作目录、真实文件名与引号。能导入读取库却找不到文件时，重装库不能修正路径。</p>
+<p>**通过证据：**保留两讲的运行输出，能在源文件中找到打印的开头文字；改错文件名会失败，改回后恢复。</p>
+</details>
+
+<h2 id="section-5">资料依据</h2>
+<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md">Stage 0</a>中的文件和程序练习是基础；<a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 第八章</a>提供文档进入系统的上下文。这里的 DOCX 小程序是为你的讲稿编写的桥接练习，尚未做检索。</p>
+<label class="study-check"><input type="checkbox" data-study-check="0012-read-document"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/python-environments.html" data-knowledge-link>Python、pip 与虚拟环境<span>8—10 分钟 · 装的是库，为什么换个终端就找不到？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0011-python-environment.html"><small>上一单元</small>给伴读项目准备独立的 Python 环境</a><a href="0013-save-json.html"><small>下一单元</small>保存结果，并证明没有读错资料 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

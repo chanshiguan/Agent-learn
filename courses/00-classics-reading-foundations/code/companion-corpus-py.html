@@ -1,0 +1,113 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/corpus.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/corpus.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/corpus.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/corpus.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;读取、去重、切分并保留来源；讲次不自动推断成原著章节。&quot;&quot;&quot;
+import hashlib
+import re
+from pathlib import Path
+
+from docx import Document
+from .files import digest, load, save
+
+
+def split_text(text, strategy=&quot;fixed&quot;, size=600, overlap=60):
+    if not 0 &lt;= overlap &lt; size or size &lt; 20:
+        raise ValueError(&quot;需要 size &gt;= 20 且 0 &lt;= overlap &lt; size。&quot;)
+    if strategy in {&quot;paragraph&quot;, &quot;heading&quot;}:
+        # 标题模式的分组由外层处理；没有标题的文档不会凭空长出语义结构。
+        return [(0, text)]
+    return [(start, text[start:start + size]) for start in range(0, len(text), size - overlap)]
+
+
+def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, overlap=60, tenant=&quot;demo&quot;, book=&quot;狂人日记&quot;):
+    source = Path(source)
+    documents, chunks, duplicates, seen = [], [], [], {}
+    annotations = load(&quot;ranges.json&quot;, {})
+    for file in sorted(source.glob(&quot;*.docx&quot;)):
+        version = hashlib.sha256(file.read_bytes()).hexdigest()
+        if version in seen:
+            duplicates.append({&quot;file&quot;: file.name, &quot;same_as&quot;: seen[version]})
+            continue
+        seen[version] = file.name
+        document = Document(file)
+        doc_id = digest([tenant, book, file.name])[:16]
+        lecture = re.search(r&quot;第([一二三四五六七八九十]+)讲&quot;, file.name)
+        groups = []
+        for position, paragraph in enumerate(document.paragraphs, 1):
+            text = paragraph.text.strip()
+            if not text:
+                continue
+            heading = paragraph.style.name.startswith(&quot;Heading&quot;) if paragraph.style else False
+            if strategy == &quot;heading&quot; and groups and not heading:
+                groups[-1][1] += &quot;\n&quot; + text
+            else:
+                groups.append([f&quot;p{position:04d}&quot;, text])
+        if not groups:
+            # 整批成功后才发布新快照，避免把扫描件或空文档悄悄当作已完成的导入。
+            raise ValueError(f&quot;{file.name} 没有可读正文；本次导入未更新资料快照。&quot;)
+        documents.append({&quot;doc_id&quot;: doc_id, &quot;version&quot;: version, &quot;file&quot;: file.name,
+                          &quot;tenant&quot;: tenant, &quot;book&quot;: book, &quot;paragraphs&quot;: len(groups), &quot;tables_skipped&quot;: len(document.tables)})
+        for parent, text in groups:
+            for start, part in split_text(text, strategy, size, overlap):
+                chunk_id = digest([doc_id, version, parent, strategy, size, overlap, start])[:24]
+                review = annotations.get(chunk_id, {})
+                if review.get(&quot;reviewed&quot;) is True and (type(review.get(&quot;range_end&quot;)) is not int or review[&quot;range_end&quot;] &lt; 0):
+                    raise ValueError(&quot;已审核的阅读范围必须是非负整数，不能用 true/false 代替。&quot;)
+                chunks.append({&quot;id&quot;: chunk_id, &quot;doc_id&quot;: doc_id, &quot;version&quot;: version,
+                               &quot;tenant&quot;: tenant, &quot;book&quot;: book, &quot;file&quot;: file.name,
+                               &quot;kind&quot;: &quot;讲解稿&quot;, &quot;lecture&quot;: lecture.group(1) if lecture else None,
+                               &quot;edition&quot;: None, &quot;parent&quot;: parent, &quot;start&quot;: start,
+                               &quot;end&quot;: start + len(part), &quot;text&quot;: part,
+                               &quot;range_end&quot;: review.get(&quot;range_end&quot;),
+                               &quot;range_reviewed&quot;: review.get(&quot;reviewed&quot;) is True})
+    if not chunks:
+        raise ValueError(&quot;没有可读正文，请检查输入目录；原文件不会被覆盖。&quot;)
+    previous = load(&quot;corpus.json&quot;, {&quot;documents&quot;: [], &quot;chunks&quot;: []})
+    documents += [d for d in previous[&quot;documents&quot;] if (d.get(&quot;tenant&quot;, &quot;demo&quot;), d.get(&quot;book&quot;, &quot;狂人日记&quot;)) != (tenant, book)]
+    chunks += [c for c in previous[&quot;chunks&quot;] if (c[&quot;tenant&quot;], c[&quot;book&quot;]) != (tenant, book)]
+    result = {&quot;documents&quot;: documents, &quot;chunks&quot;: chunks, &quot;duplicates&quot;: duplicates,
+              &quot;strategy&quot;: strategy, &quot;size&quot;: size, &quot;overlap&quot;: overlap}
+    result[&quot;revision&quot;] = digest(result)
+    save(&quot;corpus.json&quot;, result)
+    return {&quot;documents&quot;: len(documents), &quot;chunks&quot;: len(chunks), &quot;duplicates&quot;: duplicates,
+            &quot;revision&quot;: result[&quot;revision&quot;], &quot;tables_skipped&quot;: sum(d[&quot;tables_skipped&quot;] for d in documents)}
+
+
+def visible(chunks, tenant, book, progress=None):
+    # 先限制可见范围再排序，避免先检索出其他租户资料，再让模型自己过滤。
+    result = [c for c in chunks if c[&quot;tenant&quot;] == tenant and c[&quot;book&quot;] == book]
+    if progress is not None:
+        result = [c for c in result if c.get(&quot;range_reviewed&quot;) is True
+                  and type(c.get(&quot;range_end&quot;)) is int and 0 &lt;= c[&quot;range_end&quot;] &lt;= progress]
+    return result
+
+
+def terms(text):
+    # 中文双字片段是可解释的入门词面基线，不冒称完整分词器或 BM25。
+    lower = text.lower()
+    words = set(re.findall(r&quot;[a-z0-9]+&quot;, lower))
+    for run in re.findall(r&quot;[\u4e00-\u9fff]+&quot;, lower):
+        words.update(run[i:i + 2] for i in range(len(run) - 1))
+    return words
+
+
+def keyword_search(question, chunks, k=5):
+    query = terms(question)
+    ranked = []
+    for chunk in chunks:
+        matches = query &amp; terms(chunk[&quot;text&quot;])
+        if matches:
+            ranked.append({**chunk, &quot;score&quot;: len(matches) / max(1, len(query))})
+    return sorted(ranked, key=lambda c: (-c[&quot;score&quot;], c[&quot;id&quot;]))[:k]
+
+
+def neighbors(hits, chunks):
+    selected = {c[&quot;id&quot;]: c for c in hits}
+    for hit in hits:
+        siblings = sorted((c for c in chunks if c[&quot;doc_id&quot;] == hit[&quot;doc_id&quot;] and c[&quot;parent&quot;] == hit[&quot;parent&quot;]), key=lambda c: c[&quot;start&quot;])
+        position = next((i for i, c in enumerate(siblings) if c[&quot;id&quot;] == hit[&quot;id&quot;]), -1)
+        if position &gt;= 0:
+            for item in siblings[max(0, position - 1):position + 2]:
+                selected[item[&quot;id&quot;]] = item
+    return list(selected.values())
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

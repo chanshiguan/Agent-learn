@@ -1,0 +1,80 @@
+{
+  "scope": "实际公开样本、固定模型提交、106块、开发题，无生成模型",
+  "runs": [
+    {
+      "method": "keyword",
+      "records": [
+        {
+          "id": "dev-01",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-02",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-03",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-04",
+          "document_recall": null,
+          "quote_hit": null
+        }
+      ]
+    },
+    {
+      "method": "semantic",
+      "records": [
+        {
+          "id": "dev-01",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-02",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-03",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-04",
+          "document_recall": null,
+          "quote_hit": null
+        }
+      ]
+    },
+    {
+      "method": "hybrid",
+      "records": [
+        {
+          "id": "dev-01",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-02",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-03",
+          "document_recall": 1.0,
+          "quote_hit": true
+        },
+        {
+          "id": "dev-04",
+          "document_recall": null,
+          "quote_hit": null
+        }
+      ]
+    }
+  ]
+}

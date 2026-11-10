@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用一次排错和一次重跑完成第一阶段 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0023-stage-checkpoint">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用一次排错和一次重跑完成第一阶段</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-4">← 返回课程地图</a><p class="rail-label">第 4 章 · 接通一种真实模型</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0020-local-model.html"><span class="unit-number">1</span><span>本地路线 先让模型服务准备好<small>25—40 分钟</small></span></a></li><li><a href="0021-cloud-model.html"><span class="unit-number">2</span><span>线上路线 把服务地址和凭据配置清楚<small>20—30 分钟</small></span></a></li><li><a href="0022-first-model-call.html"><span class="unit-number">3</span><span>用同一个程序获得回答<small>30—45 分钟</small></span></a></li><li><a href="0023-stage-checkpoint.html" aria-current="page"><span class="unit-number">4</span><span>用一次排错和一次重跑完成第一阶段<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先制造一个可控的连接错误</a></li><li><a href="#section-2">再改一次正常问题</a></li><li><a href="#section-3">记录时分开写三件事</a></li><li><a href="#section-4">第一阶段交付</a></li><li><a href="#section-5">下次开始前的回忆练习</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 4 章 / 单元 4 · 共 4 个</p><h1>用一次排错和一次重跑完成第一阶段</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 本地 75—115 分钟 / 线上 70—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—30 分钟</strong>。你已经有读取程序、镜像和模型客户端。最后用两次小实验检查：出了问题能否定位，换个终端能否恢复工作。</p>
+<h2 id="section-1">先制造一个可控的连接错误</h2>
+<p>下面的环境变量只对这一条命令生效，不会覆盖你之前配置的值。它故意指向未提供模型服务的端口：</p>
+<pre><code class="language-bash"># 仅给这次请求使用故意错误的本机地址；预期连接失败，不改动当前终端原有配置。
+LLM_MODE=local LLM_MODEL=connection-check \
+LLM_BASE_URL=http://127.0.0.1:1/v1 \
+python first_chat.py --output data/output/connection-failure.json
+</code></pre>
+<p>预期出现连接失败提示。若这台机器恰好在该端口运行服务，换一个确认空闲的本机端口再试。该实验不应产生“成功回答”记录，也不需要重装 SDK。报错来自连接层，先看地址与服务。</p>
+<h2 id="section-2">再改一次正常问题</h2>
+<p>回到真实配置，只改变提问：</p>
+<pre><code class="language-bash"># 只更改提问并保存到新记录；连接成功后还要人工核对是否遵守“只提问”的要求。
+python first_chat.py \
+  --question &quot;请提出一个适合讨论《狂人日记》的开放式问题，不给出答案。&quot; \
+  --output data/output/model-question.json
+</code></pre>
+<p>观察它是否只提出了问题。没遵守要求时，把现象记下来；这正是后面需要 Prompt 与评测的原因。不能因为 HTTP 成功，就把输出行为记为正确。</p>
+<h2 id="section-3">记录时分开写三件事</h2>
+<table>
+<thead>
+<tr>
+<th>记录</th>
+<th>示例含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>程序连接是否成功</td>
+<td>收到了非空且正常结束的响应</td>
+</tr>
+<tr>
+<td>输出是否符合本次要求</td>
+<td>是否只提一个开放问题，没有自己作答</td>
+</tr>
+<tr>
+<td>回答有没有资料依据</td>
+<td>本阶段未发送讲稿，因此这项尚未实现</td>
+</tr>
+</tbody></table>
+<p>延迟和 token 用量也保留。一次测量只描述这次请求，不能直接推出 M1 的稳定并发量或哪种模型一定更好。两条路线比较时保持同一问题，分别保存记录，并明确哪些路径没有运行。</p>
+<h2 id="section-4">第一阶段交付</h2>
+<p>保留项目卡、题单、来源清单、两份主机 JSON、容器读取结果和模型记录。在项目卡给每项写“通过、失败或待运行”，并附对应文件或报错。不能用编写课程时的结果替代你自己的运行证据。</p>
+<details><summary>验收时我会怎样问你</summary>
+
+<p>请你换一份讲稿完成读取，再解释结果里为什么保存来源；删除一个已停止的练习容器后，找到挂载输出；改用一个错误模型地址，判断失败发生在哪一步；最后说明模型现在是否已经读过五份讲稿。</p>
+<p>我更关心你能否自己改动和解释，而不是把命令背下来。遇到问题时，把命令、去掉密钥的错误、你预期的结果一起发给我。</p>
+</details>
+
+<h2 id="section-5">下次开始前的回忆练习</h2>
+<p>隔一天，不打开讲义，画出“主机文件→容器中的读取程序→主机输出”的路径，再画出“Python 客户端→模型服务→回答”的路径。找出两张图之间还缺哪条连接。</p>
+<p>那条连接就是下一阶段的工作：把选定资料放进模型请求，再逐步让程序自动找到资料。本次只把入口准备好，不提前用复杂框架把过程隐藏起来。</p>
+<h2 id="section-6">本单元验收与参考答案</h2>
+<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>换一份讲稿后为什么仍要保存来源？</strong> 答案和读取结果将来要能回查文件与段落；指纹还能帮助判断是否换了输入版本。它不代替内容核查。</p>
+<p><strong>删掉练习容器后，到哪里找结果？</strong> 去主机的 <code>data/output/</code>，因为运行时已把它绑定到容器 <code>/output/</code>。未挂载的容器内部文件不具备这种保留方式。</p>
+<p><strong>错误模型地址导致哪一层失败？</strong> 本节故意指向未提供模型服务的端口，预期停在连接层，还没生成文学回答。无需为此重装 SDK；临时环境变量也不会覆盖原有配置。</p>
+<p><strong>开放问题的合格示例？</strong> “你觉得文言文序言与白话日记给读者的距离感有何不同？”这只是教师拟写的行为示例，不是模型实测输出。实际答案只要是一个可讨论的问题、没有替读者作答即可；HTTP 成功但没遵守要求时，应分开记录。</p>
+<p><strong>模型读过五份讲稿了吗？</strong> 没有。目前“读稿并保存 JSON”和“向模型发问题”是两条分开的流程；下一阶段才把资料接入请求，再加入检索。</p>
+<p>**通过证据：**项目卡、题单、来源清单、两份主机 JSON、容器输出和真实模型记录可回查；错误连接按预期失败。隔天能独立画出两条流程并说出缺失连接，比记住命令更能说明理解。未实际运行的项继续标“待运行”。</p>
+</details>
+
+<h2 id="section-7">资料依据</h2>
+<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md">Stage 1</a>中的用量、延迟和错误练习用于本章验收；<a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>用于核对模型调用结构。</p>
+<label class="study-check"><input type="checkbox" data-study-check="0023-stage-checkpoint"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0022-first-model-call.html"><small>上一单元</small>用同一个程序获得回答</a><a href="0024-manual-context.html"><small>下一单元</small>把一段讲稿放进模型请求 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

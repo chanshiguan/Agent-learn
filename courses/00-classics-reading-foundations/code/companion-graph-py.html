@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/graph.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/graph.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/graph.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/graph.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;把第 19 章的同一批准动作迁移到有磁盘检查点的状态图。&quot;&quot;&quot;
+import sqlite3
+from typing import TypedDict
+
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Command, interrupt
+from .actions import pending, approve
+from .files import data_dir, digest, save
+from .state import personal_data_lock
+
+
+class ReviewState(TypedDict, total=False):
+    action_id: str
+    result: dict
+
+
+def run_review(actor, action_id, decision=None):
+    def review(state):
+        candidates = {a[&quot;id&quot;]: a for a in pending(actor)}
+        item = candidates.get(state[&quot;action_id&quot;])
+        if item is None:
+            raise PermissionError(&quot;当前读者没有此待确认动作。&quot;)
+        confirmation = interrupt({&quot;id&quot;: item[&quot;id&quot;], &quot;body&quot;: item[&quot;body&quot;], &quot;revision&quot;: item[&quot;revision&quot;], &quot;digest&quot;: item[&quot;digest&quot;]})
+        if not isinstance(confirmation, dict):
+            raise ValueError(&quot;恢复时必须带回对具体版本的确认。&quot;)
+        return {&quot;result&quot;: approve(actor, item[&quot;id&quot;], confirmation.get(&quot;revision&quot;), confirmation.get(&quot;digest&quot;), confirmation.get(&quot;confirmed&quot;))}
+
+    flow = StateGraph(ReviewState)
+    flow.add_node(&quot;review&quot;, review)
+    flow.add_edge(START, &quot;review&quot;)
+    flow.add_edge(&quot;review&quot;, END)
+    # 线程标识包含租户和本人，知道 action_id 也不能恢复另一个人的流程。
+    config = {&quot;configurable&quot;: {&quot;thread_id&quot;: digest([actor.tenant, actor.user, action_id])}}
+    with personal_data_lock(), sqlite3.connect(data_dir() / &quot;checkpoints.sqlite3&quot;, check_same_thread=False) as db:
+        graph = flow.compile(checkpointer=SqliteSaver(db))
+        if decision is not None:
+            checkpoint = graph.get_state(config)
+            if not checkpoint.values:
+                raise ValueError(&quot;没有可恢复的检查点，请先运行 start。&quot;)
+            if not checkpoint.next:
+                return {&quot;status&quot;: &quot;finished&quot;, &quot;result&quot;: checkpoint.values.get(&quot;result&quot;)}
+        value = Command(resume=decision) if decision is not None else {&quot;action_id&quot;: action_id}
+        result = graph.invoke(value, config=config)
+        # 预览也在同一锁内保存，避免删除完成后 CLI 又把旧正文写回磁盘。
+        if &quot;__interrupt__&quot; in result:
+            preview = result[&quot;__interrupt__&quot;][0].value
+            save(&quot;graph-preview.json&quot;, preview)
+            return {&quot;status&quot;: &quot;awaiting_confirmation&quot;, &quot;preview&quot;: preview}
+        return {&quot;status&quot;: &quot;finished&quot;, &quot;result&quot;: result.get(&quot;result&quot;)}
+
+
+def erase_threads(actor):
+    with sqlite3.connect(data_dir() / &quot;checkpoints.sqlite3&quot;, check_same_thread=False) as db:
+        saver = SqliteSaver(db)
+        for item in pending(actor):
+            saver.delete_thread(digest([actor.tenant, actor.user, item[&quot;id&quot;]]))
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

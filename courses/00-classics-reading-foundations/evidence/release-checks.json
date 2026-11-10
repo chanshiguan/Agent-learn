@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-10",
+  "python_tests_passed": 33,
+  "reader_async_regressions_passed": 4,
+  "python_environment": {
+    "version": "3.12.14",
+    "clean_install": "五份依赖清单成功安装，pip check 通过",
+    "uv_seed": "新建环境可运行 python -m pip"
+  },
+  "evaluation_contract_preserved": true,
+  "browser": {
+    "mobilePages": 144,
+    "viewports": [
+      375,
+      768,
+      812,
+      1024,
+      1440
+    ],
+    "checks": [
+      "navigation",
+      "answers",
+      "copy and fallback",
+      "progress and resume",
+      "optional return",
+      "route choice",
+      "keyboard"
+    ],
+    "errors": []
+  },
+  "reader_browser": {
+    "scope": "真实页面、API 协议夹具",
+    "checks": [
+      "来源文本显示",
+      "脚本按文本处理",
+      "草稿修改确认",
+      "请求失败清旧答案",
+      "读者切换丢弃旧响应",
+      "375/768/1024/1440 布局"
+    ],
+    "errors": []
+  },
+  "html_pages_and_links_checked": 145,
+  "shell_blocks_syntax_checked": 92,
+  "package": {
+    "allowlisted_files": 321,
+    "archive_entries": 322,
+    "original_docx_unchanged": true,
+    "original_bytes_and_names_absent": true,
+    "verbatim_40_character_matches": 0,
+    "comparison_scope": "仅比较新旧五篇正文，机械匹配不代替来源审核。",
+    "relocated_prepare_passed": true,
+    "public_docx": 5
+  },
+  "real_generation": "主要路径已运行；质量失败与修订复测另见 real-model-run.json、evidence-flag-recheck.json",
+  "real_embedding": "106 个 384 维真实向量、持久化和缓存复用；另见 real-embedding-run.json",
+  "docker": "发布工作流必须现场通过真实构建与 Compose 协议检查才能部署，结果以对应 Actions run 为准",
+  "not_proven": [
+    "目标 M1 性能与容量",
+    "各线上模型实际调用",
+    "全部文学与适龄质量",
+    "真实公司上线验收"
+  ]
+}

@@ -1,0 +1,71 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>镜像、容器与文件挂载 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>镜像、容器与文件挂载</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">用同一次读稿任务对照</a></li><li><a href="#section-2">用一张路径表推演</a></li><li><a href="#section-3">localhost 也是一个视角问题</a></li><li><a href="#section-4">可以继续读什么</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0015-mount-files.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / 跟着实战查概念</p><h1>镜像、容器与文件挂载</h1><div class="lesson-meta"><span>预计 8—10 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>第一次读到容器路径 <code>/input</code> 时，可以先问一句：这是主机上的目录，还是程序在容器里看到的目录？把这两个视角分清，许多“文件明明存在却找不到”的问题就有了解释。</p>
+<h2 id="section-1">用同一次读稿任务对照</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>本课中的具体对象</th>
+<th>改变它会发生什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dockerfile</td>
+<td>构建步骤文件</td>
+<td>改完还要重新构建，已有镜像不会自动变化</td>
+</tr>
+<tr>
+<td>镜像</td>
+<td><code>classics-reader:chapter3</code></td>
+<td>包含程序副本与依赖，可创建多个容器</td>
+</tr>
+<tr>
+<td>容器</td>
+<td>一次读稿程序的运行实例</td>
+<td>主进程完成后停止，可保留记录或删除</td>
+</tr>
+<tr>
+<td>绑定挂载</td>
+<td>主机目录与容器路径的对应关系</td>
+<td>换输入资料时可以保持镜像不变</td>
+</tr>
+</tbody></table>
+<p>容器以隔离的进程环境运行程序；它和包含完整操作系统的虚拟机不是同一概念。隔离也不代表任何运行配置都天然安全。<a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">Docker 官方概念说明</a>提供了容器与虚拟机的对照。</p>
+<h2 id="section-2">用一张路径表推演</h2>
+<table>
+<thead>
+<tr>
+<th>你在主机上看到</th>
+<th>程序在容器里看到</th>
+<th>容器删除之后</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>data/input/第一讲.docx</code></td>
+<td><code>/input/第一讲.docx</code></td>
+<td>主机原文件保留</td>
+</tr>
+<tr>
+<td><code>data/output/image.json</code></td>
+<td><code>/output/image.json</code></td>
+<td>主机结果保留</td>
+</tr>
+<tr>
+<td>未挂载的容器内部文件</td>
+<td><code>/tmp/inside.txt</code></td>
+<td>随该容器文件层删除</td>
+</tr>
+</tbody></table>
+<p>表中“第一讲.docx”是帮助理解路径的简写，实际运行仍使用课程里的完整文件名。输入设为只读，输出单独可写，是为了让读取程序不能意外改掉讲稿。</p>
+<p>如果把挂载目标改成 <code>/books</code>，读取参数也要跟着改。只改一边，就像告诉程序去一个没有接上资料的位置找文件。</p>
+<h2 id="section-3">localhost 也是一个视角问题</h2>
+<p>第 4 章中，Python 在主机上运行时，<code>127.0.0.1</code> 指主机；放进容器后，它指容器自身。课程使用 Docker Desktop for Mac 的宿主访问地址连接主机模型。其他运行环境不能照搬这条网络约定。</p>
+<h2 id="section-4">可以继续读什么</h2>
+<ul>
+<li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">Docker：什么是容器</a>（英文，约 8 分钟）：先看概念对照，无需把官方练习再做一遍。</li>
+<li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">指定仓库的部署练习</a>（中文）：看文件、运行参数和宿主服务怎样衔接。Web 服务部分留到后续主线。</li>
+</ul>
+<div class="knowledge-return"><a href="../../../lessons/0015-mount-files.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

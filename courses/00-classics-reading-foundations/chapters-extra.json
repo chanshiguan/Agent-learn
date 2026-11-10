@@ -1,0 +1,253 @@
+[
+  {
+    "chapter": 5,
+    "title": "第 5 章 · 第一次把讲稿放进回答",
+    "outcome": "手选证据，对比模型有没有真正使用资料。",
+    "topics": [
+      "rag-basic",
+      "rag-context"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 6,
+    "title": "第 6 章 · 把五份讲稿整理成可检索资料",
+    "outcome": "保留来源、版本和片段位置，识别重复与未知信息。",
+    "topics": [
+      "rag-context",
+      "rag-basic"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 7,
+    "title": "第 7 章 · 做出第一个有据问答 RAG",
+    "outcome": "用词面检索接上生成，检查正确引用和证据不足。",
+    "topics": [
+      "rag-basic",
+      "rag-map"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 8,
+    "title": "第 8 章 · 先定题集，再谈优化",
+    "outcome": "建立检索与生成两份基线，留下真实失败和人工评分。",
+    "topics": [
+      "rag-map",
+      "evaluation-design"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 9,
+    "title": "第 9 章 · 认识真正的 Embedding",
+    "outcome": "用真实向量比较同义问法，理解窗口与相似度。",
+    "topics": [
+      "model-interfaces",
+      "rag-hybrid"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 10,
+    "title": "第 10 章 · 把向量放进 Qdrant",
+    "outcome": "保存索引，验证重启、缓存与资料版本一致。",
+    "topics": [
+      "rag-basic",
+      "docker-boundaries"
+    ],
+    "time": "70—100 分钟"
+  },
+  {
+    "chapter": 11,
+    "title": "第 11 章 · 切块与上下文实验",
+    "outcome": "用实际漏检比较切分方式，再补回必要的相邻内容。",
+    "topics": [
+      "rag-context",
+      "rag-map"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 12,
+    "title": "第 12 章 · 一次只加一种检索优化",
+    "outcome": "分别测混合检索、重排与改写，再决定是否保留。",
+    "topics": [
+      "rag-hybrid",
+      "rag-rerank",
+      "rag-query"
+    ],
+    "time": "75—105 分钟"
+  },
+  {
+    "chapter": 13,
+    "title": "第 13 章 · 把问答放进一个页面",
+    "outcome": "从命令行走到同源网页，给读者清楚的成功与失败反馈。",
+    "topics": [
+      "model-interfaces",
+      "service-boundaries"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 14,
+    "title": "第 14 章 · 保存每位读者自己的阅读",
+    "outcome": "建立会话与显式进度，理解记忆的归属和更新。",
+    "topics": [
+      "state-and-memory",
+      "service-boundaries"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 15,
+    "title": "第 15 章 · 做一个保守的防剧透模式",
+    "outcome": "人工核对阅读范围，只展示范围内证据并清理旧上下文。",
+    "topics": [
+      "state-and-memory",
+      "rag-context"
+    ],
+    "time": "70—100 分钟"
+  },
+  {
+    "chapter": 16,
+    "title": "第 16 章 · 从问答走向启发式伴读",
+    "outcome": "用固定教学状态机先提问、再提示、最后给解释。",
+    "topics": [
+      "state-and-memory",
+      "rag-agentic"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 17,
+    "title": "第 17 章 · 先给 Agent 三个只读工具",
+    "outcome": "把检索、来源和进度封装成有参数边界的工具。",
+    "topics": [
+      "rag-agentic",
+      "agent-boundaries"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 18,
+    "title": "第 18 章 · 手写一个有停止条件的 Agent",
+    "outcome": "用真实 tool_calls 驱动循环，观察行动与停止。",
+    "topics": [
+      "rag-agentic",
+      "agent-boundaries"
+    ],
+    "time": "75—105 分钟"
+  },
+  {
+    "chapter": 19,
+    "title": "第 19 章 · 写入之前确认具体内容",
+    "outcome": "生成笔记与复习计划草稿，验证批准、版本和幂等。",
+    "topics": [
+      "agent-boundaries",
+      "state-and-memory"
+    ],
+    "time": "70—100 分钟"
+  },
+  {
+    "chapter": 20,
+    "title": "第 20 章 · 暂停、重启与框架迁移",
+    "outcome": "先恢复持久动作，再用 LangGraph 重现同一批准流程。",
+    "topics": [
+      "agent-boundaries",
+      "state-and-memory"
+    ],
+    "time": "75—110 分钟"
+  },
+  {
+    "chapter": 21,
+    "title": "第 21 章 · 接入真实账号与数据归属",
+    "outcome": "替换测试身份，验证读者、家长和内容管理员的边界。",
+    "topics": [
+      "service-boundaries",
+      "agent-boundaries"
+    ],
+    "time": "75—105 分钟"
+  },
+  {
+    "chapter": 22,
+    "title": "第 22 章 · 面对不可信输入与个人数据",
+    "outcome": "练习注入拒绝、内容反馈和可核验的数据删除。",
+    "topics": [
+      "agent-boundaries",
+      "service-boundaries"
+    ],
+    "time": "70—100 分钟"
+  },
+  {
+    "chapter": 23,
+    "title": "第 23 章 · 看清一次请求走过哪里",
+    "outcome": "用不含正文的 Trace 定位慢点、失败和成本来源。",
+    "topics": [
+      "evaluation-design",
+      "service-boundaries"
+    ],
+    "time": "65—95 分钟"
+  },
+  {
+    "chapter": 24,
+    "title": "第 24 章 · 建立发布前的回归集",
+    "outcome": "把文学质量、工具行为与隔离分别验证，保留人工结论。",
+    "topics": [
+      "evaluation-design",
+      "agent-boundaries"
+    ],
+    "time": "80—115 分钟"
+  },
+  {
+    "chapter": 25,
+    "title": "第 25 章 · 把应用按同一方式部署",
+    "outcome": "用 Compose 管理应用、资料与向量库，验证就绪和故障。",
+    "topics": [
+      "docker-boundaries",
+      "delivery-and-recovery"
+    ],
+    "time": "80—110 分钟"
+  },
+  {
+    "chapter": 26,
+    "title": "第 26 章 · 测容量，再选本地或线上",
+    "outcome": "区分首字和完整耗时，测并发、取消与请求额度。",
+    "topics": [
+      "model-interfaces",
+      "evaluation-design"
+    ],
+    "time": "80—115 分钟"
+  },
+  {
+    "chapter": 27,
+    "title": "第 27 章 · 让发布可以检查和撤回",
+    "outcome": "冻结程序、Prompt、依赖与数据，形成候选版本和回滚记录。",
+    "topics": [
+      "delivery-and-recovery",
+      "evaluation-design"
+    ],
+    "time": "70—100 分钟"
+  },
+  {
+    "chapter": 28,
+    "title": "第 28 章 · 更新、备份、恢复与迁移",
+    "outcome": "在维护窗口发布资料，在新目录恢复并验证数据完整。",
+    "topics": [
+      "delivery-and-recovery",
+      "state-and-memory"
+    ],
+    "time": "85—120 分钟"
+  },
+  {
+    "chapter": 29,
+    "title": "第 29 章 · 用证据完成公司上线评审",
+    "outcome": "完成受控试用、问题复测与操作交接，明确放行或阻塞。",
+    "topics": [
+      "delivery-and-recovery",
+      "evaluation-design"
+    ],
+    "time": "90—130 分钟"
+  }
+]

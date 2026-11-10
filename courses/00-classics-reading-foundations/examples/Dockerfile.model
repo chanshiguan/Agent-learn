@@ -1,0 +1,9 @@
+# 这是第 4 章的模型客户端镜像，不包含模型权重或讲稿。
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY requirements-model.txt ./
+RUN python -m pip install --no-cache-dir -r requirements-model.txt
+COPY first_chat.py ./
+# 模型地址和凭据在运行时传入，避免它们随镜像分发。
+ENTRYPOINT ["python", "first_chat.py"]

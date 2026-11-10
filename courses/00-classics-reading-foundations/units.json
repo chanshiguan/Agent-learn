@@ -1,0 +1,398 @@
+[
+  {
+    "file": "0008-mission",
+    "chapter": 0,
+    "minutes": "20—25",
+    "title": "从五份讲稿开始做伴读助手"
+  },
+  {
+    "file": "0009-samples",
+    "chapter": 0,
+    "minutes": "20—30",
+    "title": "看清这五份文件究竟是什么"
+  },
+  {
+    "file": "0010-baseline",
+    "chapter": 0,
+    "minutes": "15—20",
+    "title": "先留下问题，后面才能判断有没有进步"
+  },
+  {
+    "file": "0011-python-environment",
+    "chapter": 1,
+    "minutes": "20—30",
+    "title": "给伴读项目准备独立的 Python 环境"
+  },
+  {
+    "file": "0012-read-document",
+    "chapter": 1,
+    "minutes": "25—35",
+    "title": "让 Python 读出第一讲"
+  },
+  {
+    "file": "0013-save-json",
+    "chapter": 1,
+    "minutes": "30—45",
+    "title": "保存结果，并证明没有读错资料"
+  },
+  {
+    "file": "0014-first-container",
+    "chapter": 2,
+    "minutes": "20—30",
+    "title": "先在容器里运行一行 Python"
+  },
+  {
+    "file": "0015-mount-files",
+    "chapter": 2,
+    "minutes": "25—35",
+    "title": "把讲稿交给容器，把结果带回来"
+  },
+  {
+    "file": "0016-container-lifecycle",
+    "chapter": 2,
+    "minutes": "20—30",
+    "title": "程序退出后，容器和文件分别去哪了"
+  },
+  {
+    "file": "0017-dockerfile",
+    "chapter": 3,
+    "minutes": "25—35",
+    "title": "把临时安装步骤写进 Dockerfile"
+  },
+  {
+    "file": "0018-build-image",
+    "chapter": 3,
+    "minutes": "25—35",
+    "title": "构建镜像，再处理同一份讲稿"
+  },
+  {
+    "file": "0019-image-boundaries",
+    "chapter": 3,
+    "minutes": "20—30",
+    "title": "确认程序和资料没有绑死在一起"
+  },
+  {
+    "file": "0020-local-model",
+    "chapter": 4,
+    "minutes": "25—40",
+    "title": "本地路线 先让模型服务准备好"
+  },
+  {
+    "file": "0021-cloud-model",
+    "chapter": 4,
+    "minutes": "20—30",
+    "title": "线上路线 把服务地址和凭据配置清楚"
+  },
+  {
+    "file": "0022-first-model-call",
+    "chapter": 4,
+    "minutes": "30—45",
+    "title": "用同一个程序获得回答"
+  },
+  {
+    "file": "0023-stage-checkpoint",
+    "chapter": 4,
+    "minutes": "20—30",
+    "title": "用一次排错和一次重跑完成第一阶段"
+  },
+  {
+    "file": "0024-manual-context",
+    "chapter": 5,
+    "minutes": "30—45",
+    "title": "把一段讲稿放进模型请求"
+  },
+  {
+    "file": "0025-evidence-boundary",
+    "chapter": 5,
+    "minutes": "35—50",
+    "title": "让回答说清依据和不知道的部分"
+  },
+  {
+    "file": "0026-corpus-metadata",
+    "chapter": 6,
+    "minutes": "35—50",
+    "title": "给每个片段一张来源卡"
+  },
+  {
+    "file": "0027-corpus-dedup",
+    "chapter": 6,
+    "minutes": "30—45",
+    "title": "用副本练习去重与更新"
+  },
+  {
+    "file": "0028-keyword-retrieval",
+    "chapter": 7,
+    "minutes": "30—45",
+    "title": "先让程序找到相关文字"
+  },
+  {
+    "file": "0029-first-rag",
+    "chapter": 7,
+    "minutes": "35—50",
+    "title": "把检索结果接到回答里"
+  },
+  {
+    "file": "0030-retrieval-baseline",
+    "chapter": 8,
+    "minutes": "30—45",
+    "title": "用固定题集观察检索失败"
+  },
+  {
+    "file": "0031-answer-rubric",
+    "chapter": 8,
+    "minutes": "35—50",
+    "title": "给模型回答打分，也保留不通过"
+  },
+  {
+    "file": "0032-embedding-first",
+    "chapter": 9,
+    "minutes": "35—50",
+    "title": "把讲稿和问题变成可比较的向量"
+  },
+  {
+    "file": "0033-embedding-comparison",
+    "chapter": 9,
+    "minutes": "30—45",
+    "title": "检验向量有没有帮到你的失败题"
+  },
+  {
+    "file": "0034-qdrant-persistence",
+    "chapter": 10,
+    "minutes": "35—50",
+    "title": "启动向量库，重启后继续查"
+  },
+  {
+    "file": "0035-index-versions",
+    "chapter": 10,
+    "minutes": "35—50",
+    "title": "资料更新后，不让旧索引混进来"
+  },
+  {
+    "file": "0036-chunking-lab",
+    "chapter": 11,
+    "minutes": "35—50",
+    "title": "同一份讲稿，三种切法"
+  },
+  {
+    "file": "0037-context-neighbors",
+    "chapter": 11,
+    "minutes": "30—45",
+    "title": "检索小块，再补它旁边的语境"
+  },
+  {
+    "file": "0038-hybrid-rerank",
+    "chapter": 12,
+    "minutes": "40—55",
+    "title": "先混合检索，再单独试重排"
+  },
+  {
+    "file": "0039-query-rewrite",
+    "chapter": 12,
+    "minutes": "35—50",
+    "title": "检验改写有没有改变原问题"
+  },
+  {
+    "file": "0040-first-api",
+    "chapter": 13,
+    "minutes": "35—50",
+    "title": "用一个 API 接住读者的问题"
+  },
+  {
+    "file": "0041-source-page",
+    "chapter": 13,
+    "minutes": "30—45",
+    "title": "让来源和错误都能看见"
+  },
+  {
+    "file": "0042-reader-sessions",
+    "chapter": 14,
+    "minutes": "35—50",
+    "title": "两位读者，不共用一段对话"
+  },
+  {
+    "file": "0043-explicit-progress",
+    "chapter": 14,
+    "minutes": "30—45",
+    "title": "让记忆可以被查看、修正和删除"
+  },
+  {
+    "file": "0044-reviewed-ranges",
+    "chapter": 15,
+    "minutes": "35—50",
+    "title": "先核对片段属于哪个阅读范围"
+  },
+  {
+    "file": "0045-spoiler-safe-mode",
+    "chapter": 15,
+    "minutes": "35—50",
+    "title": "把进度限制贯穿检索和回答"
+  },
+  {
+    "file": "0046-tutor-states",
+    "chapter": 16,
+    "minutes": "35—50",
+    "title": "让读者先说理解，再给提示"
+  },
+  {
+    "file": "0047-tutor-review",
+    "chapter": 16,
+    "minutes": "30—45",
+    "title": "检验提示有没有帮助读者思考"
+  },
+  {
+    "file": "0048-readonly-tools",
+    "chapter": 17,
+    "minutes": "35—50",
+    "title": "先由程序员调用工具，再交给模型"
+  },
+  {
+    "file": "0049-tool-contracts",
+    "chapter": 17,
+    "minutes": "30—45",
+    "title": "让越界请求有可重复的失败结果"
+  },
+  {
+    "file": "0050-agent-loop",
+    "chapter": 18,
+    "minutes": "40—55",
+    "title": "模型请求工具，程序检查后执行"
+  },
+  {
+    "file": "0051-agent-stopping",
+    "chapter": 18,
+    "minutes": "35—50",
+    "title": "比较固定 RAG 与 Agent，练习及时停止"
+  },
+  {
+    "file": "0052-write-drafts",
+    "chapter": 19,
+    "minutes": "35—50",
+    "title": "先预览一份笔记，确认后再保存"
+  },
+  {
+    "file": "0053-approval-replays",
+    "chapter": 19,
+    "minutes": "35—50",
+    "title": "重复点击、过期与换人都要试"
+  },
+  {
+    "file": "0054-resume-actions",
+    "chapter": 20,
+    "minutes": "35—50",
+    "title": "关闭程序后，接着处理同一草稿"
+  },
+  {
+    "file": "0055-langgraph-checkpoint",
+    "chapter": 20,
+    "minutes": "40—60",
+    "title": "用状态图重现同一个批准流程"
+  },
+  {
+    "file": "0056-real-accounts",
+    "chapter": 21,
+    "minutes": "40—55",
+    "title": "从测试身份切到登录账号"
+  },
+  {
+    "file": "0057-authorization-matrix",
+    "chapter": 21,
+    "minutes": "35—50",
+    "title": "用权限表查出遗漏的入口"
+  },
+  {
+    "file": "0058-untrusted-input",
+    "chapter": 22,
+    "minutes": "35—50",
+    "title": "讲稿里的命令不能控制助手"
+  },
+  {
+    "file": "0059-privacy-feedback",
+    "chapter": 22,
+    "minutes": "35—50",
+    "title": "让反馈与删除都有明确范围"
+  },
+  {
+    "file": "0060-request-trace",
+    "chapter": 23,
+    "minutes": "35—50",
+    "title": "给一次提问一个可以追踪的编号"
+  },
+  {
+    "file": "0061-latency-cost",
+    "chapter": 23,
+    "minutes": "30—45",
+    "title": "把一次模型调用拆成时间和用量"
+  },
+  {
+    "file": "0062-regression-suite",
+    "chapter": 24,
+    "minutes": "40—55",
+    "title": "自动检查行为，不假装评完文学"
+  },
+  {
+    "file": "0063-release-quality",
+    "chapter": 24,
+    "minutes": "40—60",
+    "title": "冻结题集，用真实模型和人工复核"
+  },
+  {
+    "file": "0064-compose-deployment",
+    "chapter": 25,
+    "minutes": "45—60",
+    "title": "从单个容器走到一组服务"
+  },
+  {
+    "file": "0065-readiness-failures",
+    "chapter": 25,
+    "minutes": "35—50",
+    "title": "活着不等于已经能接待读者"
+  },
+  {
+    "file": "0066-latency-measure",
+    "chapter": 26,
+    "minutes": "40—55",
+    "title": "先测一个请求，别急着加并发"
+  },
+  {
+    "file": "0067-load-and-limits",
+    "chapter": 26,
+    "minutes": "40—60",
+    "title": "小步加负载，检查拒绝与取消"
+  },
+  {
+    "file": "0068-release-manifest",
+    "chapter": 27,
+    "minutes": "35—50",
+    "title": "把这次能跑的条件记录下来"
+  },
+  {
+    "file": "0069-release-rollback",
+    "chapter": 27,
+    "minutes": "35—50",
+    "title": "先小范围验证，再练一次撤回"
+  },
+  {
+    "file": "0070-corpus-release",
+    "chapter": 28,
+    "minutes": "40—55",
+    "title": "审核新资料，再切换活动快照"
+  },
+  {
+    "file": "0071-restore-migration",
+    "chapter": 28,
+    "minutes": "45—65",
+    "title": "真的恢复一次，再谈备份可靠"
+  },
+  {
+    "file": "0072-acceptance-evidence",
+    "chapter": 29,
+    "minutes": "45—65",
+    "title": "把练习成果整理成可审查的版本"
+  },
+  {
+    "file": "0073-handover-and-next",
+    "chapter": 29,
+    "minutes": "45—65",
+    "title": "完成受控试用与交接，决定下一步"
+  }
+]

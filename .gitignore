@@ -1,0 +1,11 @@
+.DS_Store
+.venv*/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+node_modules/
+.scratch/
+*.zip.tmp
+*.zip
+!courses/00-classics-reading-foundations/classics-companion-course.zip

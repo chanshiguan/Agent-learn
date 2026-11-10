@@ -1,0 +1,16 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>重排序：把更合适的证据往前排 · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-knowledge">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="index.html" aria-current="page">知识拓展 · 选读</a><a href="../resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>知识拓展 · 选读</span><span>/</span><span>重排序：把更合适的证据往前排</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本页目录与返回入口</summary><a class="back-link" href="index.html">← 全部知识拓展</a><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么再评一次</a></li><li><a href="#section-2">本项目可以怎样做对照</a></li><li><a href="#section-3">得到什么，付出什么</a></li><li><a href="#section-4">推荐选读</a></li></ol></nav><div class="rail-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><p class="meta">从单元打开时，可返回刚才的阅读位置。</p></div></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">选读知识 / RAG 方法详解</p><h1>重排序：把更合适的证据往前排</h1><div class="lesson-meta"><span>预计 6—8 分钟</span><span>不计入主线验收</span><span>无需额外安装</span></div>
+<p>假设检索找回了 20 段资料，而请求里只准备放 4 段。真正回答问题的那段排在第 12 位，仅仅“找到了”仍不足以让模型看到它。这里的 20 和 4 只是说明流程的示例，不是课程推荐参数。</p>
+<h2 id="section-1">为什么再评一次</h2>
+<p>第一轮先较快地取候选；第二轮只针对候选，用更细的相关性信号重新评分。Cross-encoder 和 late interaction 等是不同实现路径，不必一开始全部掌握。重排作用于已有候选，无法恢复第一轮根本没取回的证据。<a href="https://qdrant.tech/documentation/tutorials-basics/reranking-hybrid-search/">Qdrant：Hybrid Search with Reranking</a></p>
+<h2 id="section-2">本项目可以怎样做对照</h2>
+<p>给同一问题固定一份候选列表。人工标出哪几段确实解释了问题，再比较重排前后这些片段的位置。这样才能区分“第一轮检索进步”和“第二轮排序进步”。</p>
+<p>如果问题指定第一讲，先遵守讲次过滤；不要希望重排模型替你补救所有业务限制。分数高也不是“该观点为真”的证明。</p>
+<h2 id="section-3">得到什么，付出什么</h2>
+<p>更相关的材料有机会进入有限的请求空间；代价是额外评分与延迟，模型部署或调用也可能带来成本。候选越多，工作量通常越大；具体收益要结合问题集、硬件和实现测量。</p>
+<h2 id="section-4">推荐选读</h2>
+<p><a href="https://qdrant.tech/documentation/tutorials-basics/reranking-hybrid-search/">Qdrant 官方教程：Hybrid Search with Reranking</a>（英文，概念部分约 10 分钟）。先看 Ingestion Stage 和 Retrieval Stage，认清检索与重排的位置；不要因为教程用了特定服务就现在去开通账号。</p>
+<p>如果证据根本不在候选里，返回<a href="rag-hybrid.html">混合检索</a>或<a href="rag-query.html">查询改写</a>更有帮助。</p>
+<div class="knowledge-return"><a href="../../../lessons/0023-stage-checkpoint.html" data-return-to-lesson>← 返回相关主线单元</a><a href="rag-map.html">查看 RAG 技术地图 →</a></div><p class="meta">外部资料核对日期：2026-11-10。伴读例子为本课程设计的说明，不代表已在知识库上实测效果。</p></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

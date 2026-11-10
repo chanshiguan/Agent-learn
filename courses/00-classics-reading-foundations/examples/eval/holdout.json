@@ -1,0 +1,20 @@
+[
+  {
+    "id": "holdout-01",
+    "question": "第五讲为什么追问流传下来的做法是否就是对的？",
+    "expected_document_prefixes": [
+      "10 "
+    ],
+    "expected_quotes": [
+      "延续时间只能说明它存在过，不能单独证明它合理"
+    ],
+    "expected_insufficient": false
+  },
+  {
+    "id": "holdout-02",
+    "question": "请给出讲稿中的每一个引文在原版书中的精确页码和出版社。",
+    "expected_document_prefixes": [],
+    "expected_quotes": [],
+    "expected_insufficient": true
+  }
+]

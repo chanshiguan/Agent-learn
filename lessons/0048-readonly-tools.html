@@ -1,0 +1,84 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先由程序员调用工具，再交给模型 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0048-readonly-tools">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先由程序员调用工具，再交给模型</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-17">← 返回课程地图</a><p class="rail-label">第 17 章 · 先给 Agent 三个只读工具</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0048-readonly-tools.html" aria-current="page"><span class="unit-number">1</span><span>先由程序员调用工具，再交给模型<small>35—50 分钟</small></span></a></li><li><a href="0049-tool-contracts.html"><span class="unit-number">2</span><span>让越界请求有可重复的失败结果<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">工具先是一段普通程序</a></li><li><a href="#section-2">动手改一个参数</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 17 章 / 单元 1 · 共 2 个</p><h1>先由程序员调用工具，再交给模型</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<h2 id="section-1">工具先是一段普通程序</h2>
+<p>“让 Agent 查资料”可以拆成三个动作：search_lectures 查询当前范围，read_source 读取本轮已见来源，get_progress 查看当前进度。先证明这些动作独立正确，再让模型决定调用顺序。</p>
+<p>工具 schema 告诉模型工具名、用途和参数结构；服务端仍要重新校验，因为 schema 不是执行权限。<code>ReaderTools</code> 初始化时绑定 actor 与 session_id，模型参数里没有可任意更改的 tenant 或 owner。</p>
+<pre><code class="language-bash"># 创建虚构读者的独立练习会话，直接调用工具；预期得到当前范围内讲稿，而不是生成回答。
+python -c &#39;from companion.state import Actor,initialize,create_session; from companion.tools import ReaderTools; initialize(); a=Actor(&quot;demo&quot;,&quot;reader-a&quot;); s=create_session(a); t=ReaderTools(a,s[&quot;id&quot;]); print(t.execute(&quot;search_lectures&quot;,{&quot;query&quot;:&quot;文言文序言&quot;}))&#39;
+</code></pre>
+<p>打开 <code>tools.py</code>，顺着 execute 看：先确认当前会话归属，再验证字段与长度，再执行固定函数。它没有 eval，也不接收任意 shell 命令或文件路径。</p>
+<h2 id="section-2">动手改一个参数</h2>
+<p>将 query 改成空字符串，应该被拒绝；添加 tenant=other 字段，也应该被拒绝。新建一个工具实例后直接读一个从未检索过的来源，应失败。这样来源工具不能变成“知道 ID 就能随便读”的入口。</p>
+<p>只读工具仍可能泄露资料，因此权限检查不能等到写操作才开始。下一单元把这组边界写成可重复测试。</p>
+<h2 id="section-3">对照完整实现</h2>
+<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
+<details><summary>展开本单元完整源码：companion/tools.py</summary>
+
+
+<pre><code class="language-python">&quot;&quot;&quot;只读工具共享服务端身份；模型参数不能更改读者或租户。&quot;&quot;&quot;
+import json
+import re
+from .rag import retrieve, budget
+from .state import get_session
+
+SCHEMAS = [
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;search_lectures&quot;, &quot;description&quot;: &quot;在当前读者允许范围内查询讲稿。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;query&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;query&quot;], &quot;additionalProperties&quot;: False}}},
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;read_source&quot;, &quot;description&quot;: &quot;读取本次已经检索到的一条来源。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;source_id&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;source_id&quot;], &quot;additionalProperties&quot;: False}}},
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;get_progress&quot;, &quot;description&quot;: &quot;查看当前会话的显式阅读进度。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}, &quot;additionalProperties&quot;: False}}},
+]
+
+
+class ReaderTools:
+    def __init__(self, actor, session_id, method=&quot;keyword&quot;):
+        self.actor, self.session_id, self.method = actor, session_id, method
+        self.seen = {}
+
+    def execute(self, name, arguments):
+        if not isinstance(arguments, dict):
+            raise ValueError(&quot;工具参数必须为对象。&quot;)
+        session = get_session(self.actor, self.session_id)
+        if name == &quot;get_progress&quot;:
+            if arguments:
+                raise ValueError(&quot;读取进度不接受用户身份参数。&quot;)
+            return {&quot;book&quot;: session[&quot;book&quot;], &quot;progress&quot;: session[&quot;progress&quot;], &quot;strict&quot;: bool(session[&quot;strict&quot;])}
+        if name == &quot;search_lectures&quot;:
+            if set(arguments) != {&quot;query&quot;} or not isinstance(arguments[&quot;query&quot;], str) or not 1 &lt;= len(arguments[&quot;query&quot;]) &lt;= 500:
+                raise ValueError(&quot;检索只接受 1—500 字符的 query。&quot;)
+            hits = budget(retrieve(arguments[&quot;query&quot;], self.actor.tenant, session[&quot;book&quot;], self.method,
+                                   session[&quot;progress&quot;] if session[&quot;strict&quot;] else None))
+            self.seen.update({c[&quot;id&quot;]: c for c in hits})
+            return hits
+        if name == &quot;read_source&quot;:
+            if set(arguments) != {&quot;source_id&quot;} or not isinstance(arguments[&quot;source_id&quot;], str):
+                raise ValueError(&quot;读取来源只接受 source_id。&quot;)
+            source = self.seen.get(arguments[&quot;source_id&quot;])
+            if source is None:
+                raise PermissionError(&quot;不能读取本次未检索到的来源。&quot;)
+            return source
+        raise ValueError(&quot;没有登记这个工具；不会执行模型提供的代码或命令。&quot;)
+</code></pre>
+</details>
+
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>schema 写了 additionalProperties=false 就够了吗？</li>
+<li>为什么身份绑定在工具实例上？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>schema 写了 additionalProperties=false 就够了吗？</strong></p>
+<p>不够。模型和客户端都可能发异常参数，服务端必须再做白名单与类型、范围校验。</p>
+<p><strong>为什么身份绑定在工具实例上？</strong></p>
+<p>身份应来自服务端已经核验的请求上下文，不能由模型通过参数指定要冒充谁。</p>
+<p>**通过证据：**三次直接调用的结果：合法查询成功、空问题拒绝、额外身份参数拒绝。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0048-readonly-tools"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-agentic.html" data-knowledge-link>Agentic RAG：让程序决定何时再查<span>8—10 分钟 · 从固定流程走向有边界的工具调用。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0047-tutor-review.html"><small>上一单元</small>检验提示有没有帮助读者思考</a><a href="0049-tool-contracts.html"><small>下一单元</small>让越界请求有可重复的失败结果 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>
