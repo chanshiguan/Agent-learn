@@ -58,16 +58,6 @@ __pycache__/
 data/
 </code></pre>
 <p>**写完后应当怎样：**Git 只跟踪你之后创建的程序；忽略规则不能删除已经提交过的历史。</p>
-<pre><code class="language-bash"># 让当前终端优先使用项目环境的 Python 和依赖；随后检查解释器路径。
-source .venv/bin/activate
-# 确认启用环境后的 Python 版本；本课程预期为 3.12.x。
-python --version
-# 按清单将 DOCX 读取依赖装入当前 Python 环境；成功后可导入 docx，不会下载模型。
-python -m pip install -r requirements.txt
-# 同时核对解释器位置和读取库；预期路径在 .venv 中，并显示“DOCX 读取库可用”。
-python -c &quot;import sys; from docx import Document; print(sys.executable); print(&#39;DOCX 读取库可用&#39;)&quot;
-</code></pre>
-<p>预期第一条版本输出为 Python 3.12，最后的解释器路径位于本练习目录的 <code>.venv</code> 中。<code>python -m pip</code> 使用当前 Python 安装包，减少“包装到另一个 Python 里”的混乱。安装名是 <code>python-docx</code>，导入名是 <code>docx</code>；不要另装名为 <code>docx</code> 的旧包。</p>
 <h2 id="section-4">重新打开终端时怎么办</h2>
 <p>虚拟环境只对当前终端生效。下次继续时，先 <code>cd</code> 到练习目录，再运行 <code>source .venv/bin/activate</code>。不用每次重建环境或重装依赖。运行 <code>deactivate</code> 可以退出，但不会删除目录。</p>
 <details><summary>遇到 No module named docx</summary>

@@ -77,6 +77,33 @@ def neighbors(hits, chunks):
 <pre><code class="language-python">        hits = retrieve(args.question,args.tenant,args.book,args.method,expand=args.expand)
 </code></pre>
 <p>**写完后应当怎样：**同一问题的扩展结果可与未扩展文件比较。</p>
+<h3>第 6 步：给评测命令接入相邻扩展开关</h3>
+<p>检索功能写完以后，评测入口也要收到同一开关，才能在固定题集上公平比较。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+    parser.add_argument(&quot;--expand&quot;,action=&quot;store_true&quot;)
+</code></pre>
+<p>**写完后应当怎样：**evaluate --expand 能识别参数，仍使用同一套题。</p>
+<h3>第 7 步：把开关传进已经支持 expand 的评测函数</h3>
+<p>只登记终端参数不会改变行为；需要把值交给 evaluate，再传给 retrieve。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**不开开关维持基线，打开后记录扩展结果。</p>
 <h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 在已恢复的 80/16 快照上比较相邻扩展；方法固定为 keyword，先观察输入变化。
 python -m companion evaluate --output context-before.json

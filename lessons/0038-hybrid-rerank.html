@@ -122,6 +122,61 @@ def rerank(question, hits):
         hits=rerank(args.question,hits)
 </code></pre>
 <p>**写完后应当怎样：**最终回答仍只引用已提供的资料。</p>
+<h3>第 9 步：让评测复用本节的重排序函数</h3>
+<p>界面调用与评测必须使用同一实现，否则不能对照结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .rag import retrieve, answer
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .rag import retrieve, answer, rerank
+</code></pre>
+<p>**写完后应当怎样：**本节只引入已经写出的 rerank，改写问题留到下一节。</p>
+<h3>第 10 步：把改写和重排加入逐题对照</h3>
+<p>保留原问题、实际 query、来源、错误与人工评分，不只给平均分。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
+        if reranking:
+            hits = rerank(case[&quot;question&quot;], hits)
+</code></pre>
+<p>**写完后应当怎样：**每个实验仍可以独立保存成不同文件。</p>
+<h3>第 11 步：给评测入口接入重排序开关</h3>
+<p>固定问题和初始候选，再观察排序变化；不要顺便启用尚未实现的问题改写。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    parser.add_argument(&quot;--expand&quot;,action=&quot;store_true&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    parser.add_argument(&quot;--expand&quot;,action=&quot;store_true&quot;)
+    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
+</code></pre>
+<p>**写完后应当怎样：**evaluate --rerank 能被识别。</p>
+<h3>第 12 步：把排序选择传给评测函数</h3>
+<p>让开关真正控制每道题的候选处理。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**报告记录 rerank 选择，能与不开启的结果比较。</p>
 <h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 固定题集与资料，分别保存词面、语义和融合结果；这三步不调用生成模型。
 python -m companion evaluate --method keyword --output retrieval-keyword.json

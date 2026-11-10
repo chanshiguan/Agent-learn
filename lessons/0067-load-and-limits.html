@@ -80,8 +80,7 @@ def job(actor, request_id):
                 raise PermissionError(&quot;今天的试用请求额度已用完。&quot;)
             db.execute(&quot;INSERT INTO quotas VALUES(?,?,?,?) ON CONFLICT(tenant,owner,day) DO UPDATE SET count=excluded.count&quot;, (actor.tenant, actor.user, day, count + 1))
         yield flag
-</code></pre>
-<pre><code class="language-python">    finally:
+    finally:
         if acquired:
             _slots.release()
         with _lock:

@@ -1,7 +1,7 @@
 {
   "scope": "从页面编辑重建的代码；离线行为检查与真实模型质量分开记录",
   "units": 80,
-  "visible_edits": 335,
+  "visible_edits": 340,
   "created_files": 59,
   "incremental_checks": 35,
   "stage_imports": "每个停点导入当时已创建模块，通过",
@@ -29,5 +29,10 @@
     "目标M1速度与并发",
     "线上模型实调用",
     "公司生产身份接入与HTTPS验收"
+  ],
+  "command_options": "逐单元核对，扩展与重排序入口另作实际接线检查",
+  "practice_state_checks": [
+    "已存在两条范围标注时检查通过",
+    "已有正式笔记不受临时批准检查影响"
   ]
 }

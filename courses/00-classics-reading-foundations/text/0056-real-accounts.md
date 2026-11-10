@@ -186,9 +186,6 @@ def login(tenant, username, password, peer):
         raise PermissionError("账号或口令不正确。")
     token = secrets.token_urlsafe(32)
     with connect() as db:
-```
-
-```python
         db.execute("INSERT INTO tokens VALUES(?,?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), tenant, username, now + 3600))
     return {"access_token": token, "expires_in": 3600, "role": row["role"]}
 ```

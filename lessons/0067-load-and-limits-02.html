@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小步加负载，检查拒绝与取消（2/2：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0067-load-and-limits-02">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits.html"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消（1/2：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits-02.html" aria-current="page"><span class="unit-number">3</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">取消和缓存的边界</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li><li><a href="#section-7">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 3 · 共 3 个</p><h1>小步加负载，检查拒绝与取消（2/2：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 170—215 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits.html"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消（1/2：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits-02.html" aria-current="page"><span class="unit-number">3</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">更新容器后再验证</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">取消和缓存的边界</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 3 · 共 3 个</p><h1>小步加负载，检查拒绝与取消（2/2：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 170—215 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0067-load-and-limits.html">《小步加负载，检查拒绝与取消（1/2：保存会话状态）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
@@ -197,18 +197,25 @@ def cancel(request_id: str, who=Depends(actor)):
 });
 </code></pre>
 <p>**写完后应当怎样：**按钮只影响本人正在处理的请求。</p>
-<h2 id="section-2">运行并观察</h2>
+<h2 id="section-2">更新容器后再验证</h2>
+<p>Docker 镜像保存的是构建时的代码。刚改的宿主文件不会自动进入旧容器；先在这个练习环境重建 app 镜像并替换 app 容器，再执行下面的检查。数据目录通过挂载保留，Qdrant 不需要跟着重建。</p>
+<pre><code class="language-bash"># 将本节刚写的代码装进新镜像；不会把 .env 或 data 复制进镜像。
+docker compose --env-file .env -f deploy/compose.yaml build app
+# 按新镜像重新创建 app，仍使用原挂载数据；等待启动后再访问接口。
+docker compose --env-file .env -f deploy/compose.yaml up -d --no-deps --force-recreate app
+</code></pre>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 单并发、四次请求，建立应用完整耗时基线；提示输入令牌时不回显。
 python -m companion.measure api --concurrency 1 --count 4
 # 提升到两并发；观察 429/503、成功吞吐与耗时，而不是只看完成数量。
 python -m companion.measure api --concurrency 2 --count 4
 </code></pre>
 <p>配合 <code>docker stats --no-stream</code> 或系统活动监视器记录内存峰值。默认 MAX_MODEL_JOBS=1，等待槽位超过约 1 秒会拒绝；DAILY_JOB_LIMIT=40 是每用户每天的业务尝试次数，不是 token 或金额硬预算。失败也可能消耗额度，避免无限重试。</p>
-<h2 id="section-3">取消和缓存的边界</h2>
+<h2 id="section-4">取消和缓存的边界</h2>
 <p>正在等待时点击停止，确认不再继续工具和状态提交；已经发出的模型请求可能继续。排队过多时明确拒绝，比无限堆积更可控。当前没有跨进程共享队列，也没有答案缓存；多副本前需要重新设计。</p>
 <p>若以后加缓存，键至少要包含租户、允许资料范围、作品、资料与模型/Prompt 版本、问题；私人会话相关回答还要考虑本人和上下文。失效与删除也要可验证，不能拿另一个学生的答案直接复用。</p>
 <p>小样本的 P95 只用来学习统计，不能写成稳定生产指标。记录错误原因、成功请求分布与质量变化，再逐步扩大经过批准的负载。</p>
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么并发越高可能成功吞吐越低？</li>
@@ -223,11 +230,11 @@ python -m companion.measure api --concurrency 2 --count 4
 <p>**通过证据：**1/2 并发报告、内存记录、一次取消与额度拒绝结果，说明小样本统计的限制。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<h2 id="section-7">用小检查核对自己的实现</h2>
+<h2 id="section-8">用小检查核对自己的实现</h2>
 <p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
 <pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - &lt;&lt;&#39;PY&#39;

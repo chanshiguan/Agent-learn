@@ -89,6 +89,17 @@
 
 **写完后应当怎样：**重新导入后，每块都有 range_end 和 range_reviewed；未知不自动通过。
 
+
+## 让刚写的代码生效
+
+如果上一节的服务仍在运行，先在那个终端按 Ctrl+C 停止。确认当前终端仍有模型配置，再从项目根目录重启，随后刷新浏览器。没有使用自动重载时，仅保存文件不会更新运行中的 Python 进程。
+
+```bash
+# 载入刚写完的接口、业务模块和页面；等终端显示服务启动后再进行下面的交互。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+```
+
+
 ## 运行并观察
 
 ```bash
@@ -100,11 +111,11 @@ python -c 'from companion.files import load,save; rows=load("ranges.json",{}); k
 python -m companion ingest --size 80 --overlap 16
 ```
 
-使用 semantic/hybrid 时还要重新 index，因为过滤用的元数据变了。未标注片段保留在普通检索中，但在受限阅读中排除；没有合格片段就明确不足。
+本节先把核对记录写进语料，下一单元才把范围条件接入检索与回答。使用 semantic/hybrid 时还要重新 index，因为过滤用的元数据变了。未标注片段保留在普通检索中，但在受限阅读中排除；没有合格片段就明确不足。
 
 ## 改一个条件
 
-把刚才片段的 range_end 从 1 改成 2，再导入。阅读进度为 1 的人不应看到它。不要为了让结果丰富，把全部未知片段批量标为 1；那会让边界失去意义。
+把刚才片段的 range_end 从 1 改成 2，再导入。下一单元接入过滤后，再验证阅读进度为 1 的人看不到它。不要为了让结果丰富，把全部未知片段批量标为 1；那会让边界失去意义。
 
 ## 本单元完成条件
 
@@ -144,13 +155,18 @@ python -m companion ingest --size 80 --overlap 16
 python - <<'PY'
 from companion.corpus import ingest
 from companion.files import load
-ingest(size=80,overlap=16)
-assert all(c["range_reviewed"] is False for c in load("corpus.json")["chunks"])
-print("没有人工核对记录，全部保持未知")
+annotations = load("ranges.json", {})
+ingest(size=80, overlap=16)
+chunks = load("corpus.json")["chunks"]
+for chunk in chunks:
+    review = annotations.get(chunk["id"], {})
+    assert chunk["range_reviewed"] == (review.get("reviewed") is True)
+    assert chunk["range_end"] == review.get("range_end")
+print("标注与片段一致，已核对数：", sum(c["range_reviewed"] for c in chunks))
 PY
 ```
 
-**预期：**未知范围没有被自动当成可见。
+**预期：**已标注片段保留核对结果，未标注片段保持未知。按前文完成至少两条标注后，打印的已核对数应至少为2；没有标注时为0。
 
 
 遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

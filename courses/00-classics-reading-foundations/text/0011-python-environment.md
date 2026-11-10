@@ -97,21 +97,6 @@ data/
 
 **写完后应当怎样：**Git 只跟踪你之后创建的程序；忽略规则不能删除已经提交过的历史。
 
-
-
-```bash
-# 让当前终端优先使用项目环境的 Python 和依赖；随后检查解释器路径。
-source .venv/bin/activate
-# 确认启用环境后的 Python 版本；本课程预期为 3.12.x。
-python --version
-# 按清单将 DOCX 读取依赖装入当前 Python 环境；成功后可导入 docx，不会下载模型。
-python -m pip install -r requirements.txt
-# 同时核对解释器位置和读取库；预期路径在 .venv 中，并显示“DOCX 读取库可用”。
-python -c "import sys; from docx import Document; print(sys.executable); print('DOCX 读取库可用')"
-```
-
-预期第一条版本输出为 Python 3.12，最后的解释器路径位于本练习目录的 `.venv` 中。`python -m pip` 使用当前 Python 安装包，减少“包装到另一个 Python 里”的混乱。安装名是 `python-docx`，导入名是 `docx`；不要另装名为 `docx` 的旧包。
-
 ## 重新打开终端时怎么办
 
 虚拟环境只对当前终端生效。下次继续时，先 `cd` 到练习目录，再运行 `source .venv/bin/activate`。不用每次重建环境或重装依赖。运行 `deactivate` 可以退出，但不会删除目录。

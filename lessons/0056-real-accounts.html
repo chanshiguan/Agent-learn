@@ -126,8 +126,7 @@ def login(tenant, username, password, peer):
         raise PermissionError(&quot;账号或口令不正确。&quot;)
     token = secrets.token_urlsafe(32)
     with connect() as db:
-</code></pre>
-<pre><code class="language-python">        db.execute(&quot;INSERT INTO tokens VALUES(?,?,?,?)&quot;, (hashlib.sha256(token.encode()).hexdigest(), tenant, username, now + 3600))
+        db.execute(&quot;INSERT INTO tokens VALUES(?,?,?,?)&quot;, (hashlib.sha256(token.encode()).hexdigest(), tenant, username, now + 3600))
     return {&quot;access_token&quot;: token, &quot;expires_in&quot;: 3600, &quot;role&quot;: row[&quot;role&quot;]}
 </code></pre>
 <p>**写完后应当怎样：**请求头中的虚构读者不再影响已登录身份；无效或过期令牌被拒绝。</p>

@@ -12,7 +12,7 @@
 <p>样例不带密钥，实际值放 .env；UID/GID 对应宿主数据目录所有者。</p>
 <p>**写在哪里：**项目根目录下的 <code>deploy/env.example</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
 <p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
-<pre><code class="language-text"># 复制为 examples/.env 后逐项填写；此文件本身不含凭据。
+<pre><code class="language-text"># 复制为项目根目录的 .env 后逐项填写；此文件本身不含凭据。
 LLM_MODE=local
 LLM_BASE_URL=http://host.docker.internal:11434/v1
 # 填写第 4 章已经验证过的真实模型 ID；空值会使就绪检查失败。

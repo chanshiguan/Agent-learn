@@ -1295,6 +1295,28 @@
         "expect": "同一问题的扩展结果可与未扩展文件比较。",
         "concept": "",
         "exact": true
+      },
+      {
+        "file": "companion/evaluate_cli.py",
+        "action": "replace",
+        "old": "    parser.add_argument(\"--output\",default=\"evaluation.json\")\n",
+        "code": "    parser.add_argument(\"--output\",default=\"evaluation.json\")\n    parser.add_argument(\"--expand\",action=\"store_true\")\n",
+        "exact": true,
+        "title": "给评测命令接入相邻扩展开关",
+        "why": "检索功能写完以后，评测入口也要收到同一开关，才能在固定题集上公平比较。",
+        "expect": "evaluate --expand 能识别参数，仍使用同一套题。",
+        "concept": ""
+      },
+      {
+        "file": "companion/evaluate_cli.py",
+        "action": "replace",
+        "old": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))\n",
+        "code": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))\n",
+        "exact": true,
+        "title": "把开关传进已经支持 expand 的评测函数",
+        "why": "只登记终端参数不会改变行为；需要把值交给 evaluate，再传给 retrieve。",
+        "expect": "不开开关维持基线，打开后记录扩展结果。",
+        "concept": ""
       }
     ],
     "checks": [],
@@ -1394,6 +1416,50 @@
         "expect": "最终回答仍只引用已提供的资料。",
         "concept": "",
         "exact": true
+      },
+      {
+        "file": "companion/evaluation.py",
+        "action": "replace",
+        "old": "from .rag import retrieve, answer\n",
+        "code": "from .rag import retrieve, answer, rerank\n",
+        "exact": true,
+        "title": "让评测复用本节的重排序函数",
+        "why": "界面调用与评测必须使用同一实现，否则不能对照结果。",
+        "expect": "本节只引入已经写出的 rerank，改写问题留到下一节。",
+        "concept": ""
+      },
+      {
+        "file": "companion/evaluation.py",
+        "action": "replace",
+        "old": "        hits = retrieve(query, case.get(\"tenant\", \"demo\"), case.get(\"book\", \"狂人日记\"), method, expand=expand)\n",
+        "code": "        hits = retrieve(query, case.get(\"tenant\", \"demo\"), case.get(\"book\", \"狂人日记\"), method, expand=expand)\n        if reranking:\n            hits = rerank(case[\"question\"], hits)\n",
+        "title": "把改写和重排加入逐题对照",
+        "why": "保留原问题、实际 query、来源、错误与人工评分，不只给平均分。",
+        "expect": "每个实验仍可以独立保存成不同文件。",
+        "concept": "",
+        "exact": true
+      },
+      {
+        "file": "companion/evaluate_cli.py",
+        "action": "replace",
+        "old": "    parser.add_argument(\"--expand\",action=\"store_true\")\n",
+        "code": "    parser.add_argument(\"--expand\",action=\"store_true\")\n    parser.add_argument(\"--rerank\",action=\"store_true\")\n",
+        "exact": true,
+        "title": "给评测入口接入重排序开关",
+        "why": "固定问题和初始候选，再观察排序变化；不要顺便启用尚未实现的问题改写。",
+        "expect": "evaluate --rerank 能被识别。",
+        "concept": ""
+      },
+      {
+        "file": "companion/evaluate_cli.py",
+        "action": "replace",
+        "old": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))\n",
+        "code": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))\n",
+        "exact": true,
+        "title": "把排序选择传给评测函数",
+        "why": "让开关真正控制每道题的候选处理。",
+        "expect": "报告记录 rerank 选择，能与不开启的结果比较。",
+        "concept": ""
       }
     ],
     "checks": [
@@ -1506,7 +1572,7 @@
       {
         "file": "companion/evaluation.py",
         "action": "replace",
-        "old": "from .rag import retrieve, answer\n",
+        "old": "from .rag import retrieve, answer, rerank\n",
         "code": "from .rag import retrieve, answer, rewrite, rerank\n",
         "title": "让批量评测复用已实现的改写与重排",
         "why": "同一题单、同一资料，分别记录各开关，才知道变化来自哪里。",
@@ -1526,21 +1592,10 @@
         "exact": true
       },
       {
-        "file": "companion/evaluation.py",
-        "action": "replace",
-        "old": "        hits = retrieve(query, case.get(\"tenant\", \"demo\"), case.get(\"book\", \"狂人日记\"), method, expand=expand)\n",
-        "code": "        hits = retrieve(query, case.get(\"tenant\", \"demo\"), case.get(\"book\", \"狂人日记\"), method, expand=expand)\n        if reranking:\n            hits = rerank(case[\"question\"], hits)\n",
-        "title": "把改写和重排加入逐题对照",
-        "why": "保留原问题、实际 query、来源、错误与人工评分，不只给平均分。",
-        "expect": "每个实验仍可以独立保存成不同文件。",
-        "concept": "",
-        "exact": true
-      },
-      {
         "file": "companion/evaluate_cli.py",
         "action": "replace",
-        "old": "    parser.add_argument(\"--output\",default=\"evaluation.json\")\n",
-        "code": "    parser.add_argument(\"--output\",default=\"evaluation.json\")\n    parser.add_argument(\"--expand\",action=\"store_true\")\n    parser.add_argument(\"--rerank\",action=\"store_true\")\n    parser.add_argument(\"--rewrite\",action=\"store_true\")\n",
+        "old": "    parser.add_argument(\"--rerank\",action=\"store_true\")\n",
+        "code": "    parser.add_argument(\"--rerank\",action=\"store_true\")\n    parser.add_argument(\"--rewrite\",action=\"store_true\")\n",
         "title": "在评测入口暴露三个独立条件",
         "why": "命令与实际算法选项一致，防止讲义要求的参数实际上未传入。",
         "expect": "可以一次只打开一个条件。",
@@ -1550,7 +1605,7 @@
       {
         "file": "companion/evaluate_cli.py",
         "action": "replace",
-        "old": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))\n",
+        "old": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))\n",
         "code": "    print(json.dumps(evaluate(args.cases,args.method,args.generate,args.expand,args.rerank,args.rewrite,args.output),ensure_ascii=False,indent=2))\n",
         "title": "把条件完整传给评测函数",
         "why": "参数顺序与函数定义对应；理解位置参数后，也可以改成具名参数提高可读性。",
@@ -2400,8 +2455,8 @@
     ],
     "checks": [
       {
-        "code": "from companion.corpus import ingest\nfrom companion.files import load\ningest(size=80,overlap=16)\nassert all(c[\"range_reviewed\"] is False for c in load(\"corpus.json\")[\"chunks\"])\nprint(\"没有人工核对记录，全部保持未知\")\n",
-        "expected": "未知范围没有被自动当成可见。"
+        "code": "from companion.corpus import ingest\nfrom companion.files import load\nannotations = load(\"ranges.json\", {})\ningest(size=80, overlap=16)\nchunks = load(\"corpus.json\")[\"chunks\"]\nfor chunk in chunks:\n    review = annotations.get(chunk[\"id\"], {})\n    assert chunk[\"range_reviewed\"] == (review.get(\"reviewed\") is True)\n    assert chunk[\"range_end\"] == review.get(\"range_end\")\nprint(\"标注与片段一致，已核对数：\", sum(c[\"range_reviewed\"] for c in chunks))\n",
+        "expected": "已标注片段保留核对结果，未标注片段保持未知。按前文完成至少两条标注后，打印的已核对数应至少为2；没有标注时为0。"
       }
     ],
     "original": "0044-reviewed-ranges",
@@ -3071,8 +3126,8 @@
     ],
     "checks": [
       {
-        "code": "from companion import state,actions\nstate.initialize();a=state.Actor(\"demo\",\"reader-a\")\nd=actions.draft(a,\"note\",\"这是需要本人确认的测试笔记\",\"guided-test\")\nassert not actions.notes(a)\nactions.approve(a,d[\"id\"],d[\"revision\"],d[\"digest\"],True)\nassert len(actions.notes(a))==1\nprint(\"批准前无正式笔记，批准后1条\")\n",
-        "expected": "只检查事务与确认边界；测试正文不是模型生成质量证据。"
+        "code": "import os, tempfile\n# 单独检查写入协议，不读写你已经在网页保存的笔记。\nwith tempfile.TemporaryDirectory() as directory:\n    os.environ[\"READING_DATA_DIR\"] = directory\n    from companion import state,actions\n    state.initialize();a=state.Actor(\"demo\",\"reader-a\")\n    d=actions.draft(a,\"note\",\"这是需要本人确认的测试笔记\",\"guided-test\")\n    assert not actions.notes(a)\n    actions.approve(a,d[\"id\"],d[\"revision\"],d[\"digest\"],True)\n    assert len(actions.notes(a))==1\n    print(\"批准前无正式笔记，批准后1条\")\n",
+        "expected": "临时库中只有确认后新增一条笔记；关闭这个检查后临时库删除，网页已有笔记保持不变。"
       }
     ],
     "original": "0052-write-drafts",
@@ -4012,7 +4067,7 @@
         "file": "deploy/env.example",
         "action": "create",
         "old": null,
-        "code": "# 复制为 examples/.env 后逐项填写；此文件本身不含凭据。\nLLM_MODE=local\nLLM_BASE_URL=http://host.docker.internal:11434/v1\n# 填写第 4 章已经验证过的真实模型 ID；空值会使就绪检查失败。\nLLM_MODEL=\nLLM_API_KEY=\n# 后续 RAG/Agent 的输出上限；调大后重新测耗时、用量和完整性。\nLLM_MAX_TOKENS=900\n# 仅填写第 4 章已实际验证的推理选项；不支持的模型留空。\nLLM_REASONING_EFFORT=\nRETRIEVAL=keyword\nMAX_MODEL_JOBS=1\nDAILY_JOB_LIMIT=40\nALLOWED_HOSTS=localhost,127.0.0.1\n# 填写实际运行电脑上 id -u 与 id -g 的结果，保持挂载目录可写。\nAPP_UID=1000\nAPP_GID=1000\n# 改线上模型时填写 HTTPS 地址与私密 API key；不要把 .env 打进镜像。\n",
+        "code": "# 复制为项目根目录的 .env 后逐项填写；此文件本身不含凭据。\nLLM_MODE=local\nLLM_BASE_URL=http://host.docker.internal:11434/v1\n# 填写第 4 章已经验证过的真实模型 ID；空值会使就绪检查失败。\nLLM_MODEL=\nLLM_API_KEY=\n# 后续 RAG/Agent 的输出上限；调大后重新测耗时、用量和完整性。\nLLM_MAX_TOKENS=900\n# 仅填写第 4 章已实际验证的推理选项；不支持的模型留空。\nLLM_REASONING_EFFORT=\nRETRIEVAL=keyword\nMAX_MODEL_JOBS=1\nDAILY_JOB_LIMIT=40\nALLOWED_HOSTS=localhost,127.0.0.1\n# 填写实际运行电脑上 id -u 与 id -g 的结果，保持挂载目录可写。\nAPP_UID=1000\nAPP_GID=1000\n# 改线上模型时填写 HTTPS 地址与私密 API key；不要把 .env 打进镜像。\n",
         "title": "先列出部署所需配置",
         "why": "样例不带密钥，实际值放 .env；UID/GID 对应宿主数据目录所有者。",
         "expect": "逐行解释后再启动；用状态、登录、问答和来源核对实际结果。",

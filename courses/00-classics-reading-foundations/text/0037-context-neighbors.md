@@ -126,6 +126,51 @@ from .corpus import visible, keyword_search, neighbors
 
 **写完后应当怎样：**同一问题的扩展结果可与未扩展文件比较。
 
+### 第 6 步：给评测命令接入相邻扩展开关
+
+检索功能写完以后，评测入口也要收到同一开关，才能在固定题集上公平比较。
+
+**写在哪里：**项目根目录下的 `companion/evaluate_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    parser.add_argument("--output",default="evaluation.json")
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    parser.add_argument("--output",default="evaluation.json")
+    parser.add_argument("--expand",action="store_true")
+```
+
+**写完后应当怎样：**evaluate --expand 能识别参数，仍使用同一套题。
+
+### 第 7 步：把开关传进已经支持 expand 的评测函数
+
+只登记终端参数不会改变行为；需要把值交给 evaluate，再传给 retrieve。
+
+**写在哪里：**项目根目录下的 `companion/evaluate_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))
+```
+
+**写完后应当怎样：**不开开关维持基线，打开后记录扩展结果。
+
 ## 运行并观察
 
 ```bash

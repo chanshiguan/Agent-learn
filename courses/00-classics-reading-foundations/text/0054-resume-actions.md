@@ -47,9 +47,6 @@ def main():
         if args.operation=="revise":result=actions.revise(actor,identity,args.text)
         else:
             print(json.dumps(item,ensure_ascii=False,indent=2))
-```
-
-```python
             confirmed=input("确认当前预览？输入 YES：")=="YES"
             result=actions.approve(actor,identity,item["revision"],item["digest"],confirmed)
     print(json.dumps(result,ensure_ascii=False,indent=2))
@@ -83,6 +80,17 @@ def main():
 ```
 
 **写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+
+## 让刚写的代码生效
+
+如果上一节的服务仍在运行，先在那个终端按 Ctrl+C 停止。确认当前终端仍有模型配置，再从项目根目录重启，随后刷新浏览器。没有使用自动重载时，仅保存文件不会更新运行中的 Python 进程。
+
+```bash
+# 载入刚写完的接口、业务模块和页面；等终端显示服务启动后再进行下面的交互。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+```
+
 
 ## 运行并观察
 

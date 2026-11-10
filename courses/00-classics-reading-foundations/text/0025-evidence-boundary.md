@@ -118,9 +118,6 @@ def answer(question, hits, history=None, strict=False):
     available = {c["id"]: c for c in selected}
     if any(c not in available for c in citations) or (not result["insufficient"] and not citations):
         raise ValueError("模型引用了本次未提供的来源，或无证据却声称充分。")
-```
-
-```python
     return {**result, "sources": [available[c] for c in dict.fromkeys(citations)],
             "usage": response["usage"], "model": response["model"],
             "citation_validation": "仅校验引用属于候选，是否支持结论仍需人工核对"}

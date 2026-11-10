@@ -161,6 +161,7 @@ def notes(who=Depends(actor)):
 ```javascript
   $('result').hidden = false;
 }
+
 ```
 
 </details>
@@ -234,6 +235,7 @@ async function refreshNotes() {
 ```javascript
   }
 }
+
 ```
 
 **写完后应当怎样：**点击确认只提交当前预览，正式笔记重新读取。

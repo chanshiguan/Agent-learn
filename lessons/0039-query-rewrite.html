@@ -120,7 +120,7 @@ def rewrite(question):
 <p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
-<pre><code class="language-python">from .rag import retrieve, answer
+<pre><code class="language-python">from .rag import retrieve, answer, rerank
 </code></pre>
 </details>
 
@@ -141,43 +141,26 @@ def rewrite(question):
 <pre><code class="language-python">        query = rewrite(case[&quot;question&quot;]) if rewriting else case[&quot;question&quot;]
 </code></pre>
 <p>**写完后应当怎样：**每个实验仍可以独立保存成不同文件。</p>
-<h3>第 11 步：把改写和重排加入逐题对照</h3>
-<p>保留原问题、实际 query、来源、错误与人工评分，不只给平均分。</p>
-<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
-<details><summary>定位：本步骤要替换的原文</summary>
-
-<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
-</code></pre>
-</details>
-
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
-<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
-        if reranking:
-            hits = rerank(case[&quot;question&quot;], hits)
-</code></pre>
-<p>**写完后应当怎样：**每个实验仍可以独立保存成不同文件。</p>
-<h3>第 12 步：在评测入口暴露三个独立条件</h3>
+<h3>第 11 步：在评测入口暴露三个独立条件</h3>
 <p>命令与实际算法选项一致，防止讲义要求的参数实际上未传入。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
-<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+<pre><code class="language-python">    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
 </code></pre>
 </details>
 
 <p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
-<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
-    parser.add_argument(&quot;--expand&quot;,action=&quot;store_true&quot;)
-    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
+<pre><code class="language-python">    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
     parser.add_argument(&quot;--rewrite&quot;,action=&quot;store_true&quot;)
 </code></pre>
 <p>**写完后应当怎样：**可以一次只打开一个条件。</p>
-<h3>第 13 步：把条件完整传给评测函数</h3>
+<h3>第 12 步：把条件完整传给评测函数</h3>
 <p>参数顺序与函数定义对应；理解位置参数后，也可以改成具名参数提高可读性。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
-<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))
 </code></pre>
 </details>
 

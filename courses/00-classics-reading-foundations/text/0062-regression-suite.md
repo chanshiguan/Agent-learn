@@ -50,6 +50,7 @@ class WorkflowTests(unittest.TestCase):
         for _ in range(2):
             actions.approve(self.actor,item["id"],item["revision"],item["digest"],True)
         self.assertEqual(len(actions.notes(self.actor)),1)
+
 ```
 
 **连续代码 2/2**（接在上一段后，不额外增加缩进）

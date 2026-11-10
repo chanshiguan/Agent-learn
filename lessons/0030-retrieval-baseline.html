@@ -37,8 +37,7 @@
   {
     &quot;id&quot;: &quot;dev-04&quot;,
     &quot;question&quot;: &quot;这五份讲稿使用的原著版本的准确页码是多少？&quot;,
-</code></pre>
-<pre><code class="language-json">    &quot;expected_document_prefixes&quot;: [],
+    &quot;expected_document_prefixes&quot;: [],
     &quot;expected_quotes&quot;: [],
     &quot;expected_insufficient&quot;: true
   }
@@ -109,8 +108,7 @@ def evaluate(cases_file, method=&quot;keyword&quot;, generate=False, expand=Fals
     report = {&quot;corpus_revision&quot;: load(&quot;corpus.json&quot;)[&quot;revision&quot;], &quot;method&quot;: method,
               &quot;generated&quot;: generate, &quot;options&quot;: {&quot;expand&quot;: expand, &quot;rerank&quot;: reranking, &quot;rewrite&quot;: rewriting},
               &quot;records&quot;: records, &quot;quality_passed&quot;: None}
-</code></pre>
-<pre><code class="language-python">    save(output, report)
+    save(output, report)
     return report
 </code></pre>
 <p>**写完后应当怎样：**生成 evaluation.json，人工语义评分保持 null。</p>

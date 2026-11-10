@@ -117,9 +117,6 @@ def build_index():
             raise ValueError("索引条数不符，不切换活动版本。")
     # 新集合完整后才发布指针。旧集合保留用于回滚；清理需要显式维护操作。
     index = {"collection": name, "corpus_revision": corpus["revision"], "model": MODEL,
-```
-
-```python
              "model_revision": revision, "dimension": len(vectors[0]), "count": len(vectors), "new_embeddings": new_count}
     save("index.json", index)
     return index

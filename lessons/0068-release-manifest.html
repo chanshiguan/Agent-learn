@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>把这次能跑的条件记录下来 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0068-release-manifest">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把这次能跑的条件记录下来</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-27">← 返回课程地图</a><p class="rail-label">第 27 章 · 让发布可以检查和撤回</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0068-release-manifest.html" aria-current="page"><span class="unit-number">1</span><span>把这次能跑的条件记录下来<small>60—75 分钟</small></span></a></li><li><a href="0069-release-rollback.html"><span class="unit-number">2</span><span>先小范围验证，再练一次撤回<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">“我这儿能跑”缺了哪些条件</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">把检查搬到自动流程</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 27 章 / 单元 1 · 共 2 个</p><h1>把这次能跑的条件记录下来</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把这次能跑的条件记录下来</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-27">← 返回课程地图</a><p class="rail-label">第 27 章 · 让发布可以检查和撤回</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0068-release-manifest.html" aria-current="page"><span class="unit-number">1</span><span>把这次能跑的条件记录下来<small>60—75 分钟</small></span></a></li><li><a href="0069-release-rollback.html"><span class="unit-number">2</span><span>先小范围验证，再练一次撤回<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">“我这儿能跑”缺了哪些条件</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">更新容器后再验证</a></li><li><a href="#section-4">运行并观察</a></li><li><a href="#section-5">把检查搬到自动流程</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 27 章 / 单元 1 · 共 2 个</p><h1>把这次能跑的条件记录下来</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0067-load-and-limits-02.html">《小步加负载，检查拒绝与取消（2/2：连接接口与业务）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">“我这儿能跑”缺了哪些条件</h2>
@@ -109,7 +109,14 @@ jobs:
         run: python -m unittest discover -s tests -v
 </code></pre>
 <p>**写完后应当怎样：**推送练习仓库后可查看 Actions 的通过或失败日志；此流程不发布网站或服务。</p>
-<h2 id="section-3">运行并观察</h2>
+<h2 id="section-3">更新容器后再验证</h2>
+<p>Docker 镜像保存的是构建时的代码。刚改的宿主文件不会自动进入旧容器；先在这个练习环境重建 app 镜像并替换 app 容器，再执行下面的检查。数据目录通过挂载保留，Qdrant 不需要跟着重建。</p>
+<pre><code class="language-bash"># 将本节刚写的代码装进新镜像；不会把 .env 或 data 复制进镜像。
+docker compose --env-file .env -f deploy/compose.yaml build app
+# 按新镜像重新创建 app，仍使用原挂载数据；等待启动后再访问接口。
+docker compose --env-file .env -f deploy/compose.yaml up -d --no-deps --force-recreate app
+</code></pre>
+<h2 id="section-4">运行并观察</h2>
 <pre><code class="language-bash"># 执行自动行为检查，先挡住确定的回归。
 python -m unittest discover -s tests -v
 # 记录当前依赖与资料/索引指纹；输出不包含模型密钥。
@@ -122,10 +129,10 @@ python -m pip freeze &gt; data/live/requirements-resolved.txt
 docker image inspect classics-companion:candidate --format &#39;{{.Id}}&#39;
 </code></pre>
 <p>检查 <code>release-manifest.json</code> 的 packages 中是否有 null；没有安装的组件要明确说明，不假装环境完整。课程文件标注的直接依赖版本与 pip freeze 的完整依赖是两个层次。</p>
-<h2 id="section-4">把检查搬到自动流程</h2>
+<h2 id="section-5">把检查搬到自动流程</h2>
 <p>刚写出的 <code>.github/workflows/check.yml</code> 位于你自建项目内。将这个项目作为独立练习仓库推送后，GitHub 才会执行它。它安装依赖并运行行为测试，不需要模型密钥，不进行发布；真实模型评阅和公司审批仍是独立证据。</p>
 <p>不要把私人 DOCX、.env、数据状态库和报告中的私人内容提交到公开仓库。复现依赖程序和合规的测试样本，不依赖公开个人资料。</p>
-<h2 id="section-5">本单元完成条件</h2>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么镜像标签还不够？</li>
@@ -140,9 +147,9 @@ docker image inspect classics-companion:candidate --format &#39;{{.Id}}&#39;
 <p>**通过证据：**候选清单、解析依赖、镜像标识与自动测试报告，明确真实模型评阅另在何处。</p>
 </details>
 
-<h2 id="section-6">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-7">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0068-release-manifest"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0067-load-and-limits-02.html"><small>上一单元</small>小步加负载，检查拒绝与取消（2/2：连接接口与业务）</a><a href="0069-release-rollback.html"><small>下一单元</small>先小范围验证，再练一次撤回 →</a></nav></main></div>

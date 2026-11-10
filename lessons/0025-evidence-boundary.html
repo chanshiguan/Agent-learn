@@ -85,8 +85,7 @@ def budget(hits, maximum=2400):
     available = {c[&quot;id&quot;]: c for c in selected}
     if any(c not in available for c in citations) or (not result[&quot;insufficient&quot;] and not citations):
         raise ValueError(&quot;模型引用了本次未提供的来源，或无证据却声称充分。&quot;)
-</code></pre>
-<pre><code class="language-python">    return {**result, &quot;sources&quot;: [available[c] for c in dict.fromkeys(citations)],
+    return {**result, &quot;sources&quot;: [available[c] for c in dict.fromkeys(citations)],
             &quot;usage&quot;: response[&quot;usage&quot;], &quot;model&quot;: response[&quot;model&quot;],
             &quot;citation_validation&quot;: &quot;仅校验引用属于候选，是否支持结论仍需人工核对&quot;}
 </code></pre>

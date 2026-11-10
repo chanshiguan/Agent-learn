@@ -49,6 +49,19 @@ def ready():
 
 **写完后应当怎样：**healthz 可200而readyz为503；恢复依赖后才返回ready。
 
+
+## 更新容器后再验证
+
+Docker 镜像保存的是构建时的代码。刚改的宿主文件不会自动进入旧容器；先在这个练习环境重建 app 镜像并替换 app 容器，再执行下面的检查。数据目录通过挂载保留，Qdrant 不需要跟着重建。
+
+```bash
+# 将本节刚写的代码装进新镜像；不会把 .env 或 data 复制进镜像。
+docker compose --env-file .env -f deploy/compose.yaml build app
+# 按新镜像重新创建 app，仍使用原挂载数据；等待启动后再访问接口。
+docker compose --env-file .env -f deploy/compose.yaml up -d --no-deps --force-recreate app
+```
+
+
 ## 运行并观察
 
 ```bash

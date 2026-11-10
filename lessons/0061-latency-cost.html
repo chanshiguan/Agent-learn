@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>把一次模型调用拆成时间和用量 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0061-latency-cost">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把一次模型调用拆成时间和用量</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-23">← 返回课程地图</a><p class="rail-label">第 23 章 · 看清一次请求走过哪里</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0060-request-trace.html"><span class="unit-number">1</span><span>给一次提问一个可以追踪的编号<small>50—65 分钟</small></span></a></li><li><a href="0061-latency-cost.html" aria-current="page"><span class="unit-number">2</span><span>把一次模型调用拆成时间和用量<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">两种数字不能互相代替</a></li><li><a href="#section-3">做一个小而可解释的优化</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 23 章 / 单元 2 · 共 2 个</p><h1>把一次模型调用拆成时间和用量</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 85—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把一次模型调用拆成时间和用量</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-23">← 返回课程地图</a><p class="rail-label">第 23 章 · 看清一次请求走过哪里</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0060-request-trace.html"><span class="unit-number">1</span><span>给一次提问一个可以追踪的编号<small>50—65 分钟</small></span></a></li><li><a href="0061-latency-cost.html" aria-current="page"><span class="unit-number">2</span><span>把一次模型调用拆成时间和用量<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">让刚写的代码生效</a></li><li><a href="#section-3">两种数字不能互相代替</a></li><li><a href="#section-4">做一个小而可解释的优化</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 23 章 / 单元 2 · 共 2 个</p><h1>把一次模型调用拆成时间和用量</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 85—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0060-request-trace.html">《给一次提问一个可以追踪的编号》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">现在动手写</h2>
@@ -47,14 +47,19 @@ import time
     log_event(request_id,&quot;answer&quot;,seconds=round(time.monotonic()-started,3),source_count=len(result.get(&quot;sources&quot;,[])))
 </code></pre>
 <p>**写完后应当怎样：**普通问答日志可关联请求和完成事件。</p>
-<h2 id="section-2">两种数字不能互相代替</h2>
+<h2 id="section-2">让刚写的代码生效</h2>
+<p>如果上一节的服务仍在运行，先在那个终端按 Ctrl+C 停止。确认当前终端仍有模型配置，再从项目根目录重启，随后刷新浏览器。没有使用自动重载时，仅保存文件不会更新运行中的 Python 进程。</p>
+<pre><code class="language-bash"># 载入刚写完的接口、业务模块和页面；等终端显示服务启动后再进行下面的交互。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<h2 id="section-3">两种数字不能互相代替</h2>
 <p>elapsed 是等待多久，token usage 是模型接口报告的输入/输出用量。线上费用还取决于实际服务的计费规则；本地模型没有同样的 API 账单，但仍消耗设备时间和内存。缺失 usage 就标未知，不能填 0 冒充免费。</p>
 <p>选一次普通 RAG 和一次 Agent 请求，在 Network 响应里分别记录模型用量。Agent 的 usage 是多次调用列表，要累计每一轮，不能只看最后的答案。重排与查询改写也会增加额外调用。</p>
 <p>做一张表：方法、资料 revision、输入字符数、模型调用次数、输入 token、输出 token、总耗时、费用依据。费率使用你实际服务当时的账单或正式报价，不在课程里写一个永久有效的价格。</p>
-<h2 id="section-3">做一个小而可解释的优化</h2>
+<h2 id="section-4">做一个小而可解释的优化</h2>
 <p>保持问题不变，减少一块明显重复证据，再测一次。结果若更快，但关键依据也丢了，就不是可接受的优化。把支持度与成本放在同一行，避免只追求速度。</p>
 <p>本章事件文件是本地可观测起点，不是完整监控平台。公司部署还要确定日志轮转、访问权限、留存、告警接收人和异常阈值。第 26 章测容量，第 29 章把这些归入上线证据。</p>
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>Agent 最后一轮只有 100 token，整次任务就是 100 吗？</li>
@@ -69,9 +74,9 @@ import time
 <p>**通过证据：**同题 RAG/Agent 的耗时用量对照，注明缺失字段和费用来源。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0061-latency-cost"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0060-request-trace.html"><small>上一单元</small>给一次提问一个可以追踪的编号</a><a href="0062-regression-suite.html"><small>下一单元</small>自动检查行为，不假装评完文学 →</a></nav></main></div>

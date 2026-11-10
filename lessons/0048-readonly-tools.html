@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先由程序员调用工具，再交给模型 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0048-readonly-tools">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先由程序员调用工具，再交给模型</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-17">← 返回课程地图</a><p class="rail-label">第 17 章 · 先给 Agent 三个只读工具</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0048-readonly-tools.html" aria-current="page"><span class="unit-number">1</span><span>先由程序员调用工具，再交给模型<small>45—60 分钟</small></span></a></li><li><a href="0049-tool-contracts.html"><span class="unit-number">2</span><span>让越界请求有可重复的失败结果<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">工具先是一段普通程序</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">动手改一个参数</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 17 章 / 单元 1 · 共 2 个</p><h1>先由程序员调用工具，再交给模型</h1><div class="lesson-meta"><span>本单元 45—60 分钟</span><span>本章 75—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先由程序员调用工具，再交给模型</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-17">← 返回课程地图</a><p class="rail-label">第 17 章 · 先给 Agent 三个只读工具</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0048-readonly-tools.html" aria-current="page"><span class="unit-number">1</span><span>先由程序员调用工具，再交给模型<small>45—60 分钟</small></span></a></li><li><a href="0049-tool-contracts.html"><span class="unit-number">2</span><span>让越界请求有可重复的失败结果<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">工具先是一段普通程序</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">让刚写的代码生效</a></li><li><a href="#section-4">运行并观察</a></li><li><a href="#section-5">动手改一个参数</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li><li><a href="#section-9">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 17 章 / 单元 1 · 共 2 个</p><h1>先由程序员调用工具，再交给模型</h1><div class="lesson-meta"><span>本单元 45—60 分钟</span><span>本章 75—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>45—60 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0047-tutor-review.html">《检验提示有没有帮助读者思考》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">工具先是一段普通程序</h2>
@@ -47,23 +47,27 @@ class ReaderTools:
         if name == &quot;read_source&quot;:
             if set(arguments) != {&quot;source_id&quot;} or not isinstance(arguments[&quot;source_id&quot;], str):
                 raise ValueError(&quot;读取来源只接受 source_id。&quot;)
-</code></pre>
-<pre><code class="language-python">            source = self.seen.get(arguments[&quot;source_id&quot;])
+            source = self.seen.get(arguments[&quot;source_id&quot;])
             if source is None:
                 raise PermissionError(&quot;不能读取本次未检索到的来源。&quot;)
             return source
         raise ValueError(&quot;没有登记这个工具；不会执行模型提供的代码或命令。&quot;)
 </code></pre>
 <p>**写完后应当怎样：**程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。</p>
-<h2 id="section-3">运行并观察</h2>
+<h2 id="section-3">让刚写的代码生效</h2>
+<p>如果上一节的服务仍在运行，先在那个终端按 Ctrl+C 停止。确认当前终端仍有模型配置，再从项目根目录重启，随后刷新浏览器。没有使用自动重载时，仅保存文件不会更新运行中的 Python 进程。</p>
+<pre><code class="language-bash"># 载入刚写完的接口、业务模块和页面；等终端显示服务启动后再进行下面的交互。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<h2 id="section-4">运行并观察</h2>
 <pre><code class="language-bash"># 创建虚构读者的独立练习会话，直接调用工具；预期得到当前范围内讲稿，而不是生成回答。
 python -c &#39;from companion.state import Actor,initialize,create_session; from companion.tools import ReaderTools; initialize(); a=Actor(&quot;demo&quot;,&quot;reader-a&quot;); s=create_session(a); t=ReaderTools(a,s[&quot;id&quot;]); print(t.execute(&quot;search_lectures&quot;,{&quot;query&quot;:&quot;文言文序言&quot;}))&#39;
 </code></pre>
 <p>打开 <code>tools.py</code>，顺着 execute 看：先确认当前会话归属，再验证字段与长度，再执行固定函数。它没有 eval，也不接收任意 shell 命令或文件路径。</p>
-<h2 id="section-4">动手改一个参数</h2>
+<h2 id="section-5">动手改一个参数</h2>
 <p>将 query 改成空字符串，应该被拒绝；添加 tenant=other 字段，也应该被拒绝。新建一个工具实例后直接读一个从未检索过的来源，应失败。这样来源工具不能变成“知道 ID 就能随便读”的入口。</p>
 <p>只读工具仍可能泄露资料，因此权限检查不能等到写操作才开始。下一单元把这组边界写成可重复测试。</p>
-<h2 id="section-5">本单元完成条件</h2>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>schema 写了 additionalProperties=false 就够了吗？</li>
@@ -78,11 +82,11 @@ python -c &#39;from companion.state import Actor,initialize,create_session; from
 <p>**通过证据：**三次直接调用的结果：合法查询成功、空问题拒绝、额外身份参数拒绝。</p>
 </details>
 
-<h2 id="section-6">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-7">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<h2 id="section-8">用小检查核对自己的实现</h2>
+<h2 id="section-9">用小检查核对自己的实现</h2>
 <p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
 <pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - &lt;&lt;&#39;PY&#39;

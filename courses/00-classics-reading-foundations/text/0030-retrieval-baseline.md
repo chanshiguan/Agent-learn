@@ -49,9 +49,6 @@
   {
     "id": "dev-04",
     "question": "这五份讲稿使用的原著版本的准确页码是多少？",
-```
-
-```json
     "expected_document_prefixes": [],
     "expected_quotes": [],
     "expected_insufficient": true
@@ -144,9 +141,6 @@ def evaluate(cases_file, method="keyword", generate=False, expand=False, reranki
     report = {"corpus_revision": load("corpus.json")["revision"], "method": method,
               "generated": generate, "options": {"expand": expand, "rerank": reranking, "rewrite": rewriting},
               "records": records, "quality_passed": None}
-```
-
-```python
     save(output, report)
     return report
 ```

@@ -212,9 +212,6 @@ def logout(request: Request, who=Depends(actor)):
       <label for="child">已关联账号</label><input id="child" /><button id="family">
         查看进度
       </button>
-```
-
-```html
       <pre id="family-result"></pre>
     </section>
 ```
@@ -280,6 +277,7 @@ async function enter() {
 ```javascript
   });
 }
+
 ```
 
 </details>

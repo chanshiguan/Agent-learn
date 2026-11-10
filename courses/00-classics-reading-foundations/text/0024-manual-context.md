@@ -203,9 +203,6 @@ def complete(messages, tools=None, timeout=60):
     if choice.finish_reason not in {"stop", "tool_calls"}:
         raise ValueError(f"模型没有正常完成，结束原因：{choice.finish_reason}")
     return {
-```
-
-```python
         "message": choice.message.model_dump(exclude_none=True),
         "usage": response.usage.model_dump() if response.usage else None,
         "elapsed_seconds": round(perf_counter() - started, 3), "model": model,

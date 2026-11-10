@@ -43,9 +43,6 @@
   },
   "known_blockers": [],
   "decision": "not_reviewed"
-```
-
-```json
 }
 ```
 

@@ -200,7 +200,7 @@ from .rag import retrieve, answer, rerank, rewrite
 <details><summary>定位：本步骤要替换的原文</summary>
 
 ```python
-from .rag import retrieve, answer
+from .rag import retrieve, answer, rerank
 ```
 
 </details>
@@ -235,31 +235,7 @@ from .rag import retrieve, answer, rewrite, rerank
 
 **写完后应当怎样：**每个实验仍可以独立保存成不同文件。
 
-### 第 11 步：把改写和重排加入逐题对照
-
-保留原问题、实际 query、来源、错误与人工评分，不只给平均分。
-
-**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
-
-<details><summary>定位：本步骤要替换的原文</summary>
-
-```python
-        hits = retrieve(query, case.get("tenant", "demo"), case.get("book", "狂人日记"), method, expand=expand)
-```
-
-</details>
-
-**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
-
-```python
-        hits = retrieve(query, case.get("tenant", "demo"), case.get("book", "狂人日记"), method, expand=expand)
-        if reranking:
-            hits = rerank(case["question"], hits)
-```
-
-**写完后应当怎样：**每个实验仍可以独立保存成不同文件。
-
-### 第 12 步：在评测入口暴露三个独立条件
+### 第 11 步：在评测入口暴露三个独立条件
 
 命令与实际算法选项一致，防止讲义要求的参数实际上未传入。
 
@@ -268,7 +244,7 @@ from .rag import retrieve, answer, rewrite, rerank
 <details><summary>定位：本步骤要替换的原文</summary>
 
 ```python
-    parser.add_argument("--output",default="evaluation.json")
+    parser.add_argument("--rerank",action="store_true")
 ```
 
 </details>
@@ -276,15 +252,13 @@ from .rag import retrieve, answer, rewrite, rerank
 **先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
 
 ```python
-    parser.add_argument("--output",default="evaluation.json")
-    parser.add_argument("--expand",action="store_true")
     parser.add_argument("--rerank",action="store_true")
     parser.add_argument("--rewrite",action="store_true")
 ```
 
 **写完后应当怎样：**可以一次只打开一个条件。
 
-### 第 13 步：把条件完整传给评测函数
+### 第 12 步：把条件完整传给评测函数
 
 参数顺序与函数定义对应；理解位置参数后，也可以改成具名参数提高可读性。
 
@@ -293,7 +267,7 @@ from .rag import retrieve, answer, rewrite, rerank
 <details><summary>定位：本步骤要替换的原文</summary>
 
 ```python
-    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))
 ```
 
 </details>

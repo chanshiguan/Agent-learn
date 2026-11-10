@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -54,6 +55,40 @@ with tempfile.TemporaryDirectory(prefix='classics-writing-') as directory:
                 result = current.replace(edit['old'], edit['code'] if edit.get('exact') else edit['code'].rstrip('\n'), 1)
             target.write_text(result)
             edits += 1
+        # Check the command options at the exact lesson where the prose first uses them.
+        command_modules = {}
+        entry = work / 'companion/__main__.py'
+        if entry.exists():
+            for node in ast.walk(ast.parse(entry.read_text())):
+                if isinstance(node, ast.If) and isinstance(node.test, ast.Compare):
+                    test = node.test
+                    if isinstance(test.left, ast.Name) and test.left.id == 'command' and isinstance(test.comparators[0], ast.Constant):
+                        imports = [n for n in node.body if isinstance(n, ast.ImportFrom)]
+                        if imports:
+                            command_modules[test.comparators[0].value] = 'companion/' + imports[0].module + '.py'
+        for block in re.findall(r'^```bash\n([\s\S]*?)\n```', markdown, re.M):
+            for line in block.replace('\\\n', ' ').splitlines():
+                if not re.search(r'\bpython -m companion(?: |\.)', line) or line.lstrip().startswith('#'):
+                    continue
+                tokens = shlex.split(line, comments=True)
+                at = tokens.index('python')
+                module = tokens[at + 2]
+                if module == 'companion':
+                    command = tokens[at + 3]
+                    assert command in command_modules, (unit, '命令尚未接入', command)
+                    filename = command_modules[command]
+                    args = tokens[at + 4:]
+                else:
+                    filename = module.replace('.', '/') + '.py'
+                    args = tokens[at + 3:]
+                assert filename in created, (unit, '模块尚未创建', filename)
+                arguments = {'--help'}
+                for call in ast.walk(ast.parse((work / filename).read_text())):
+                    if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == 'add_argument':
+                        arguments.update(a.value for a in call.args if isinstance(a, ast.Constant) and isinstance(a.value, str))
+                for value in args:
+                    if value.startswith('--'):
+                        assert value.split('=')[0] in arguments, (unit, '参数尚未实现', value)
         for name in created:
             if name.endswith('.py'):
                 ast.parse((work / name).read_text(), filename=name)
@@ -65,10 +100,37 @@ with tempfile.TemporaryDirectory(prefix='classics-writing-') as directory:
                 'import importlib; ' + '; '.join('importlib.import_module(' + repr(m) + ')' for m in modules)],
                 cwd=work, env=env, text=True, capture_output=True)
             assert imports.returncode == 0, (unit, '当前模块无法导入', imports.stderr)
+        # Recreate two states the prose asks learners to produce before its end-of-unit check.
+        precondition = None
+        if unit == '0044-reviewed-ranges':
+            precondition = '''from companion.files import load,save
+chunks=load("corpus.json")["chunks"]
+save("ranges.json",{c["id"]:{"range_end":1,"reviewed":True} for c in chunks[:2]})
+'''
+        if part['original'] == '0052-write-drafts' and part['checks']:
+            precondition = '''from companion import state,actions
+state.initialize();a=state.Actor("demo","reader-a")
+d=actions.draft(a,"note","先前已保存的测试笔记","existing-note")
+actions.approve(a,d["id"],d["revision"],d["digest"],True)
+'''
+        if precondition:
+            subprocess.run([sys.executable, '-B', '-c', precondition], cwd=work, env=env, check=True, capture_output=True)
         for check in part['checks']:
             response = subprocess.run([sys.executable, '-B', '-c', check['code']], cwd=work, env=env, text=True, capture_output=True)
             assert response.returncode == 0, (unit, response.stdout, response.stderr)
             checks += 1
+        if part['original'] == '0052-write-drafts' and part['checks']:
+            subprocess.run([sys.executable, '-B', '-c',
+                'from companion import state,actions; assert len(actions.notes(state.Actor("demo","reader-a")))==1'],
+                cwd=work, env=env, check=True, capture_output=True)
+        if unit == '0037-context-neighbors':
+            subprocess.run([sys.executable, '-m', 'companion', 'evaluate', '--expand', '--output', 'expand-check.json'],
+                cwd=work, env=env, check=True, capture_output=True)
+            assert json.loads((work / 'data/live/expand-check.json').read_text())['options']['expand'] is True
+        if unit == '0038-hybrid-rerank':
+            # A clear test double checks CLI wiring here; it is not a model ranking result.
+            code = 'import runpy,sys\nfrom unittest.mock import patch\nfrom companion.files import load\nsys.argv=["companion","evaluate","--rerank","--output","rerank-check.json"]\nwith patch("companion.evaluation.rerank",side_effect=lambda question,hits:list(reversed(hits))) as ranking:\n    runpy.run_module("companion",run_name="__main__")\n    assert ranking.call_count > 0\nassert load("rerank-check.json")["options"]["rerank"] is True\n'
+            subprocess.run([sys.executable, '-B', '-c', code], cwd=work, env=env, check=True, capture_output=True)
         print(unit + ': 当前代码与检查通过', flush=True)
     for name in created:
         assert (work / name).read_bytes() == (COURSE / 'examples' / name).read_bytes(), ('课后参考文件与逐步写成结果不同', name)

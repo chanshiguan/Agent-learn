@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先核对片段属于哪个阅读范围 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0044-reviewed-ranges">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先核对片段属于哪个阅读范围</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-15">← 返回课程地图</a><p class="rail-label">第 15 章 · 做一个保守的防剧透模式</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0044-reviewed-ranges.html" aria-current="page"><span class="unit-number">1</span><span>先核对片段属于哪个阅读范围<small>35—50 分钟</small></span></a></li><li><a href="0045-spoiler-safe-mode.html"><span class="unit-number">2</span><span>把进度限制贯穿检索和回答<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">讲次不能直接当作剧透边界</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">改一个条件</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 15 章 / 单元 1 · 共 2 个</p><h1>先核对片段属于哪个阅读范围</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 90—120 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先核对片段属于哪个阅读范围</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-15">← 返回课程地图</a><p class="rail-label">第 15 章 · 做一个保守的防剧透模式</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0044-reviewed-ranges.html" aria-current="page"><span class="unit-number">1</span><span>先核对片段属于哪个阅读范围<small>35—50 分钟</small></span></a></li><li><a href="0045-spoiler-safe-mode.html"><span class="unit-number">2</span><span>把进度限制贯穿检索和回答<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">讲次不能直接当作剧透边界</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">让刚写的代码生效</a></li><li><a href="#section-4">运行并观察</a></li><li><a href="#section-5">改一个条件</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li><li><a href="#section-9">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 15 章 / 单元 1 · 共 2 个</p><h1>先核对片段属于哪个阅读范围</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 90—120 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0043-explicit-progress.html">《让记忆可以被查看、修正和删除》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">讲次不能直接当作剧透边界</h2>
@@ -54,7 +54,12 @@
                                &quot;range_reviewed&quot;: review.get(&quot;reviewed&quot;) is True})
 </code></pre>
 <p>**写完后应当怎样：**重新导入后，每块都有 range_end 和 range_reviewed；未知不自动通过。</p>
-<h2 id="section-3">运行并观察</h2>
+<h2 id="section-3">让刚写的代码生效</h2>
+<p>如果上一节的服务仍在运行，先在那个终端按 Ctrl+C 停止。确认当前终端仍有模型配置，再从项目根目录重启，随后刷新浏览器。没有使用自动重载时，仅保存文件不会更新运行中的 Python 进程。</p>
+<pre><code class="language-bash"># 载入刚写完的接口、业务模块和页面；等终端显示服务启动后再进行下面的交互。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<h2 id="section-4">运行并观察</h2>
 <pre><code class="language-bash"># 列出少量片段供人工核对；只显示测试讲稿，先记下准备标注的真实 ID。
 python -c &#39;from companion.files import load; print([(c[&quot;id&quot;],c[&quot;text&quot;]) for c in load(&quot;corpus.json&quot;)[&quot;chunks&quot;][:5]])&#39;
 # 交互输入已核对 ID 和范围，保存标注；只有输入 YES 才标记为已审核。
@@ -62,10 +67,10 @@ python -c &#39;from companion.files import load,save; rows=load(&quot;ranges.jso
 # 同样参数重新导入，让片段带上标注；若改变切分方式，旧 ID 不会自动套到新片段。
 python -m companion ingest --size 80 --overlap 16
 </code></pre>
-<p>使用 semantic/hybrid 时还要重新 index，因为过滤用的元数据变了。未标注片段保留在普通检索中，但在受限阅读中排除；没有合格片段就明确不足。</p>
-<h2 id="section-4">改一个条件</h2>
-<p>把刚才片段的 range_end 从 1 改成 2，再导入。阅读进度为 1 的人不应看到它。不要为了让结果丰富，把全部未知片段批量标为 1；那会让边界失去意义。</p>
-<h2 id="section-5">本单元完成条件</h2>
+<p>本节先把核对记录写进语料，下一单元才把范围条件接入检索与回答。使用 semantic/hybrid 时还要重新 index，因为过滤用的元数据变了。未标注片段保留在普通检索中，但在受限阅读中排除；没有合格片段就明确不足。</p>
+<h2 id="section-5">改一个条件</h2>
+<p>把刚才片段的 range_end 从 1 改成 2，再导入。下一单元接入过滤后，再验证阅读进度为 1 的人看不到它。不要为了让结果丰富，把全部未知片段批量标为 1；那会让边界失去意义。</p>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么未知范围默认不展示？</li>
@@ -80,22 +85,27 @@ python -m companion ingest --size 80 --overlap 16
 <p>**通过证据：**至少两条逐字核对的片段标注，写明范围含义和审核理由，并保留未知片段。</p>
 </details>
 
-<h2 id="section-6">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-7">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<h2 id="section-8">用小检查核对自己的实现</h2>
+<h2 id="section-9">用小检查核对自己的实现</h2>
 <p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
 <pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - &lt;&lt;&#39;PY&#39;
 from companion.corpus import ingest
 from companion.files import load
-ingest(size=80,overlap=16)
-assert all(c[&quot;range_reviewed&quot;] is False for c in load(&quot;corpus.json&quot;)[&quot;chunks&quot;])
-print(&quot;没有人工核对记录，全部保持未知&quot;)
+annotations = load(&quot;ranges.json&quot;, {})
+ingest(size=80, overlap=16)
+chunks = load(&quot;corpus.json&quot;)[&quot;chunks&quot;]
+for chunk in chunks:
+    review = annotations.get(chunk[&quot;id&quot;], {})
+    assert chunk[&quot;range_reviewed&quot;] == (review.get(&quot;reviewed&quot;) is True)
+    assert chunk[&quot;range_end&quot;] == review.get(&quot;range_end&quot;)
+print(&quot;标注与片段一致，已核对数：&quot;, sum(c[&quot;range_reviewed&quot;] for c in chunks))
 PY
 </code></pre>
-<p>**预期：**未知范围没有被自动当成可见。</p>
+<p>**预期：**已标注片段保留核对结果，未标注片段保持未知。按前文完成至少两条标注后，打印的已核对数应至少为2；没有标注时为0。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0044-reviewed-ranges"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0043-explicit-progress.html"><small>上一单元</small>让记忆可以被查看、修正和删除</a><a href="0045-spoiler-safe-mode.html"><small>下一单元</small>把进度限制贯穿检索和回答 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

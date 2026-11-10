@@ -113,6 +113,7 @@ for (const [button, kind] of [
 
 **写完后应当怎样：**按钮先生成草稿，再等待读者确认。
 
+
 ## 运行并观察
 
 ```bash
@@ -141,7 +142,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 
 不会。本课程只把确认后的计划作为本人笔记保存，进度由读者单独明确设置。
 
-**通过证据：**一份真实模型草稿、一份修改后确认的笔记和未批准时没有写入的记录。
+**通过证据：**一份真实模型草稿、一份核对后确认的笔记和未批准时没有写入的记录。
 
 </details>
 
@@ -160,17 +161,21 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 ```bash
 # 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - <<'PY'
-from companion import state,actions
-state.initialize();a=state.Actor("demo","reader-a")
-d=actions.draft(a,"note","这是需要本人确认的测试笔记","guided-test")
-assert not actions.notes(a)
-actions.approve(a,d["id"],d["revision"],d["digest"],True)
-assert len(actions.notes(a))==1
-print("批准前无正式笔记，批准后1条")
+import os, tempfile
+# 单独检查写入协议，不读写你已经在网页保存的笔记。
+with tempfile.TemporaryDirectory() as directory:
+    os.environ["READING_DATA_DIR"] = directory
+    from companion import state,actions
+    state.initialize();a=state.Actor("demo","reader-a")
+    d=actions.draft(a,"note","这是需要本人确认的测试笔记","guided-test")
+    assert not actions.notes(a)
+    actions.approve(a,d["id"],d["revision"],d["digest"],True)
+    assert len(actions.notes(a))==1
+    print("批准前无正式笔记，批准后1条")
 PY
 ```
 
-**预期：**只检查事务与确认边界；测试正文不是模型生成质量证据。
+**预期：**临时库中只有确认后新增一条笔记；关闭这个检查后临时库删除，网页已有笔记保持不变。
 
 
 遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

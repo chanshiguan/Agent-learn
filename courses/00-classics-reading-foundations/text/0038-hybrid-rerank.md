@@ -197,6 +197,97 @@ from .rag import retrieve, answer, rerank
 
 **写完后应当怎样：**最终回答仍只引用已提供的资料。
 
+### 第 9 步：让评测复用本节的重排序函数
+
+界面调用与评测必须使用同一实现，否则不能对照结果。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+from .rag import retrieve, answer
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+from .rag import retrieve, answer, rerank
+```
+
+**写完后应当怎样：**本节只引入已经写出的 rerank，改写问题留到下一节。
+
+### 第 10 步：把改写和重排加入逐题对照
+
+保留原问题、实际 query、来源、错误与人工评分，不只给平均分。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        hits = retrieve(query, case.get("tenant", "demo"), case.get("book", "狂人日记"), method, expand=expand)
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+        hits = retrieve(query, case.get("tenant", "demo"), case.get("book", "狂人日记"), method, expand=expand)
+        if reranking:
+            hits = rerank(case["question"], hits)
+```
+
+**写完后应当怎样：**每个实验仍可以独立保存成不同文件。
+
+### 第 11 步：给评测入口接入重排序开关
+
+固定问题和初始候选，再观察排序变化；不要顺便启用尚未实现的问题改写。
+
+**写在哪里：**项目根目录下的 `companion/evaluate_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    parser.add_argument("--expand",action="store_true")
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    parser.add_argument("--expand",action="store_true")
+    parser.add_argument("--rerank",action="store_true")
+```
+
+**写完后应当怎样：**evaluate --rerank 能被识别。
+
+### 第 12 步：把排序选择传给评测函数
+
+让开关真正控制每道题的候选处理。
+
+**写在哪里：**项目根目录下的 `companion/evaluate_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,output=args.output),ensure_ascii=False,indent=2))
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,expand=args.expand,reranking=args.rerank,output=args.output),ensure_ascii=False,indent=2))
+```
+
+**写完后应当怎样：**报告记录 rerank 选择，能与不开启的结果比较。
+
 ## 运行并观察
 
 ```bash
