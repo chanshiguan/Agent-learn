@@ -1,12 +1,13 @@
-"""读取、去重、切分并保留来源；讲次不自动推断成原著章节。"""
+# 目的：把读取一讲扩成整理多讲，仍保留可回查的文件名和段落位置。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import hashlib
 import re
 from pathlib import Path
-
 from docx import Document
 from .files import digest, load, save
 
-
+# 目的：模型窗口有限，先用可计算的长度和重叠建立基线，后面才能比较其他切法。
+# 预期：600 字块、60 字重叠的下一起点是 540；非法重叠会报错。
 def split_text(text, strategy="fixed", size=600, overlap=60):
     if not 0 <= overlap < size or size < 20:
         raise ValueError("需要 size >= 20 且 0 <= overlap < size。")
@@ -15,7 +16,8 @@ def split_text(text, strategy="fixed", size=600, overlap=60):
         return [(0, text)]
     return [(start, text[start:start + size]) for start in range(0, len(text), size - overlap)]
 
-
+# 目的：外层循环负责文件，内层负责段落与块；一次全部成功后才替换 corpus.json。
+# 预期：五份原始讲稿不改动；600/60 应得到 15 块，空正文会拒绝。
 def ingest(source="data/input", strategy="fixed", size=600, overlap=60, tenant="demo", book="狂人日记"):
     source = Path(source)
     documents, chunks, duplicates, seen = [], [], [], {}
@@ -69,7 +71,8 @@ def ingest(source="data/input", strategy="fixed", size=600, overlap=60, tenant="
     return {"documents": len(documents), "chunks": len(chunks), "duplicates": duplicates,
             "revision": result["revision"], "tables_skipped": sum(d["tables_skipped"] for d in documents)}
 
-
+# 目的：先限制机构和作品，避免排完名才发现搜索了别人的资料。
+# 预期：不同作品的块在评分前就被排除。
 def visible(chunks, tenant, book, progress=None):
     # 先限制可见范围再排序，避免先检索出其他租户资料，再让模型自己过滤。
     result = [c for c in chunks if c["tenant"] == tenant and c["book"] == book]
@@ -78,7 +81,8 @@ def visible(chunks, tenant, book, progress=None):
                   and type(c.get("range_end")) is int and 0 <= c["range_end"] <= progress]
     return result
 
-
+# 目的：用中文相邻双字片段和英文数字词建立可解释基线，不把它叫作完整分词器。
+# 预期：命中只表示词面相关；没有资料的事实不会因此出现。
 def terms(text):
     # 中文双字片段是可解释的入门词面基线，不冒称完整分词器或 BM25。
     lower = text.lower()
@@ -87,7 +91,8 @@ def terms(text):
         words.update(run[i:i + 2] for i in range(len(run) - 1))
     return words
 
-
+# 目的：计算问题与每块文字的词面交集，按分数排序并保留前五条。
+# 预期：命中只表示词面相关；没有资料的事实不会因此出现。
 def keyword_search(question, chunks, k=5):
     query = terms(question)
     ranked = []
@@ -97,7 +102,8 @@ def keyword_search(question, chunks, k=5):
             ranked.append({**chunk, "score": len(matches) / max(1, len(query))})
     return sorted(ranked, key=lambda c: (-c["score"], c["id"]))[:k]
 
-
+# 目的：检索小块容易缺少前因；只补同一父段落附近内容，避免把不相关文档拼在一起。
+# 预期：每个块只出现一次，范围过滤在扩展前已经完成。
 def neighbors(hits, chunks):
     selected = {c["id"]: c for c in hits}
     for hit in hits:

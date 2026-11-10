@@ -1,9 +1,11 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>程序退出后，容器和文件分别去哪了 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0016-container-lifecycle">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>程序退出后，容器和文件分别去哪了</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-2">← 返回课程地图</a><p class="rail-label">第 2 章 · 第一次运行 Docker</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0014-first-container.html"><span class="unit-number">1</span><span>先在容器里运行一行 Python<small>20—30 分钟</small></span></a></li><li><a href="0015-mount-files.html"><span class="unit-number">2</span><span>把讲稿交给容器，把结果带回来<small>25—35 分钟</small></span></a></li><li><a href="0016-container-lifecycle.html" aria-current="page"><span class="unit-number">3</span><span>程序退出后，容器和文件分别去哪了<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">保留一个容器，观察它结束后的状态</a></li><li><a href="#section-2">再次启动与删除</a></li><li><a href="#section-3">观察一次失败</a></li><li><a href="#section-4">第 2 章验收</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 2 章 / 单元 3 · 共 3 个</p><h1>程序退出后，容器和文件分别去哪了</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>20—30 分钟</strong>。你已经成功把结果写回主机。现在要分清容器停止、容器删除和输出文件保留这三件事。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>程序退出后，容器和文件分别去哪了</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-2">← 返回课程地图</a><p class="rail-label">第 2 章 · 第一次运行 Docker</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0014-first-container.html"><span class="unit-number">1</span><span>先在容器里运行一行 Python<small>20—30 分钟</small></span></a></li><li><a href="0015-mount-files.html"><span class="unit-number">2</span><span>把讲稿交给容器，把结果带回来<small>25—35 分钟</small></span></a></li><li><a href="0016-container-lifecycle.html" aria-current="page"><span class="unit-number">3</span><span>程序退出后，容器和文件分别去哪了<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">保留一个容器，观察它结束后的状态</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">再次启动与删除</a></li><li><a href="#section-4">观察一次失败</a></li><li><a href="#section-5">第 2 章验收</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 2 章 / 单元 3 · 共 3 个</p><h1>程序退出后，容器和文件分别去哪了</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—30 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0015-mount-files.html">《把讲稿交给容器，把结果带回来》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">保留一个容器，观察它结束后的状态</h2>
 <p>这次不用 <code>--rm</code>，并给实验容器起一个明确的名字：</p>
+<h2 id="section-2">运行并观察</h2>
 <pre><code class="language-bash"># 保留一个具名实验容器，分别写入容器内部与主机挂载目录；预期打印“两个文件已写入”。
 docker run --name reading-lifecycle \
   --mount &quot;type=bind,src=$(pwd)/data/output,dst=/output&quot; \
@@ -15,7 +17,7 @@ docker ps -a --filter name=reading-lifecycle
 docker logs reading-lifecycle
 </code></pre>
 <p>预期容器显示已退出，退出码为 <code>0</code>；日志中能看到最后那句输出。<code>docker ps</code> 默认只显示正在运行的容器，<code>-a</code> 才包含已经停止的。若提示名字已占用，先用 <code>docker ps -a --filter name=reading-lifecycle</code> 确认是不是你之前的实验，不要清理其他任务的容器。</p>
-<h2 id="section-2">再次启动与删除</h2>
+<h2 id="section-3">再次启动与删除</h2>
 <pre><code class="language-bash"># 重新执行这个已停止容器原先的命令并显示输出；它不会创建新的容器。
 docker start -a reading-lifecycle
 # 删除本节已停止的具名实验容器；预期容器记录消失，主机挂载输出仍保留。
@@ -25,7 +27,7 @@ cat data/output/outside.txt
 </code></pre>
 <p><code>start -a</code> 再次运行这个容器配置好的命令，并显示输出；<code>rm</code> 删除已经退出的实验容器。挂载在主机上的 <code>outside.txt</code> 仍在。容器内部 <code>/tmp/inside.txt</code> 属于被删除容器的文件层，新建容器不会继承它。</p>
 <p>不要在这里运行全局清理命令。我们只删除自己命名并确认已经停止的实验容器。</p>
-<h2 id="section-3">观察一次失败</h2>
+<h2 id="section-4">观察一次失败</h2>
 <pre><code class="language-bash"># 故意让主进程以状态 7 退出；用于验证无日志时也能从状态发现失败。
 docker run --name reading-failure python:3.12-slim python -c &quot;raise SystemExit(7)&quot;
 # 读取实验容器保存的退出码；本节故意失败的程序预期返回 7。
@@ -36,14 +38,14 @@ docker logs reading-failure
 docker rm reading-failure
 </code></pre>
 <p>预期退出码为 <code>7</code>，日志可能为空，因为这段程序没有打印文字。没有日志并不等于成功；要结合退出状态判断。日后资料读取失败，可以先看程序的错误输出，再看退出状态，而不是先重启整台服务器。</p>
-<h2 id="section-4">第 2 章验收</h2>
+<h2 id="section-5">第 2 章验收</h2>
 <p>向我说明三件事：为什么读稿程序完成后容器停止；为什么删除容器后挂载结果仍存在；哪个位置应该只读。保留 <code>container.json</code>，下一章会拿它与镜像运行结果比较。</p>
 <details><summary>参考解释</summary>
 
 <p>容器中的主进程是一次性程序，任务完成就退出。绑定挂载的输出实际位于主机目录，因此删除容器不会同时删除主机文件。讲稿是输入，设为只读能避免本次读取程序误改原资料；结果另写到输出目录。</p>
 </details>
 
-<h2 id="section-5">本单元验收与参考答案</h2>
+<h2 id="section-6">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
@@ -53,7 +55,8 @@ docker rm reading-failure
 <p>**通过证据：**正常实验显示 <code>Exited (0)</code>，失败实验退出码为 7；删除两个具名实验容器后，主机挂载输出仍存在。</p>
 </details>
 
-<h2 id="section-6">资料依据</h2>
+<h2 id="section-7">资料依据</h2>
 <p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">Stage 7 部署练习</a>的容器运行示例是后续应用。本节增加了生命周期观察，不将运行成功等同于生产隔离已完成。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0016-container-lifecycle"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0015-mount-files.html"><small>上一单元</small>把讲稿交给容器，把结果带回来</a><a href="0017-dockerfile.html"><small>下一单元</small>把临时安装步骤写进 Dockerfile →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

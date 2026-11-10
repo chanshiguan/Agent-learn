@@ -1,14 +1,15 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/models.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/models.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/models.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/models.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;复用第 4 章的连接配置；模型只生成内容，不决定资料访问权限。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/models.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/models.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/models.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：把上一章的客户端配置和响应检查提成函数；调用者只需要传入 messages。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 import os
 from time import perf_counter
 from urllib.parse import urlparse
-
 from openai import OpenAI, DefaultHttpxClient
 
-
+# 目的：只负责验证配置并创建连接，返回客户端和模型名。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def client(timeout=60):
     mode = os.environ.get(&quot;LLM_MODE&quot;, &quot;local&quot;)
     base = os.environ.get(&quot;LLM_BASE_URL&quot;, &quot;http://127.0.0.1:11434/v1&quot;)
@@ -27,7 +28,8 @@ def client(timeout=60):
     return OpenAI(base_url=base, api_key=key, timeout=timeout, max_retries=0,
                   http_client=DefaultHttpxClient(trust_env=mode != &quot;local&quot;)), model
 
-
+# 目的：负责一次调用、预算、结束原因与用量；不负责挑选讲稿。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def complete(messages, tools=None, timeout=60):
     maximum = int(os.environ.get(&quot;LLM_MAX_TOKENS&quot;, &quot;900&quot;))
     if not 128 &lt;= maximum &lt;= 4096:
@@ -56,7 +58,8 @@ def complete(messages, tools=None, timeout=60):
         &quot;elapsed_seconds&quot;: round(perf_counter() - started, 3), &quot;model&quot;: model,
     }
 
-
+# 目的：把模型文本解析为 JSON 对象；不偷偷补全损坏的 JSON。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def object_answer(text):
     # 允许模型用 Markdown 围栏包住 JSON，但不猜测或修补不完整的结构。
     cleaned = (text or &quot;&quot;).strip()

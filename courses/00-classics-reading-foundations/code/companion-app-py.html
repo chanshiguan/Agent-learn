@@ -1,83 +1,53 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/app.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/app.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/app.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/app.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;第 13 章起的同源页面和 API；第 21 章切换认证模式。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/app.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/app.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/app.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：在最小 API 的基础上增加会话路由，继续只监听本机；没有账号验证时不得对外开放。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import os
 import time
 import uuid
 from pathlib import Path
 from typing import Literal
-
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-
-from . import actions, auth, operations, service, state
+from pydantic import BaseModel, ConfigDict, Field
+from . import service, state, actions, auth, operations
 from .files import load
 
-MODE = os.environ.get(&quot;APP_MODE&quot;, &quot;lab&quot;)
-CHAPTER = int(os.environ.get(&quot;COURSE_CHAPTER&quot;, &quot;14&quot;))
-if MODE not in {&quot;lab&quot;, &quot;authenticated&quot;}:
+MODE = os.environ.get(&quot;APP_MODE&quot;,&quot;lab&quot;)
+CHAPTER = int(os.environ.get(&quot;COURSE_CHAPTER&quot;,&quot;21&quot;))
+if MODE not in {&quot;lab&quot;,&quot;authenticated&quot;}:
     raise ValueError(&quot;APP_MODE 只能是 lab 或 authenticated。&quot;)
-if os.environ.get(&quot;APP_ENV&quot;) == &quot;production&quot; and MODE != &quot;authenticated&quot;:
-    raise ValueError(&quot;生产配置禁止使用测试身份。&quot;)
+if os.environ.get(&quot;APP_ENV&quot;)==&quot;production&quot; and MODE!=&quot;authenticated&quot;:
+    raise ValueError(&quot;生产配置禁止测试身份。&quot;)
 state.initialize()
-app = FastAPI(title=&quot;名著伴读助手&quot;, docs_url=None, redoc_url=None)
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=os.environ.get(&quot;ALLOWED_HOSTS&quot;, &quot;localhost,127.0.0.1,testserver&quot;).split(&quot;,&quot;))
+app = FastAPI(title=&quot;名著伴读助手&quot;,docs_url=None,redoc_url=None)
+app.add_middleware(TrustedHostMiddleware,allowed_hosts=os.environ.get(&quot;ALLOWED_HOSTS&quot;,&quot;localhost,127.0.0.1,testserver&quot;).split(&quot;,&quot;))
 web = Path(__file__).with_name(&quot;web&quot;)
-app.mount(&quot;/static&quot;, StaticFiles(directory=web), name=&quot;static&quot;)
+app.mount(&quot;/static&quot;,StaticFiles(directory=web),name=&quot;static&quot;)
 
-
+# 目的：拒绝未约定字段，作品名由服务端检查是否存在。
+# 预期：请求不能随意追加身份参数。
 class Input(BaseModel):
     model_config = ConfigDict(extra=&quot;forbid&quot;)
 
-
-class Login(Input):
-    tenant: str = Field(min_length=1, max_length=40)
-    username: str = Field(min_length=1, max_length=40)
-    password: str = Field(min_length=1, max_length=128)
-
-
+# 目的：拒绝未约定字段，作品名由服务端检查是否存在。
+# 预期：请求不能随意追加身份参数。
 class NewSession(Input):
     book: str = Field(default=&quot;狂人日记&quot;, min_length=1, max_length=80)
 
-
+# 目的：会话 ID、请求 ID 和问题分别校验；本阶段不接受尚未实现的模式。
+# 预期：错误格式在业务代码之前被拒绝。
 class Question(Input):
     session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
     question: str = Field(min_length=1, max_length=800)
     request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
     mode: Literal[&quot;qa&quot;, &quot;tutor&quot;, &quot;agent&quot;] = &quot;qa&quot;
 
-
-class Progress(Input):
-    progress: int = Field(ge=0, le=10000)
-    strict: bool
-    revision: int = Field(ge=0)
-
-
-class Draft(Input):
-    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
-    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
-    kind: Literal[&quot;note&quot;, &quot;review_plan&quot;]
-
-
-class Confirmation(Input):
-    revision: int = Field(ge=1)
-    digest: str = Field(pattern=r&quot;^[a-f0-9]{64}$&quot;)
-    confirmed: bool
-
-
-class Revision(Input):
-    body: str = Field(min_length=1, max_length=6000)
-
-
-class Feedback(Input):
-    category: Literal[&quot;答非所问&quot;, &quot;证据不符&quot;, &quot;内容不适合&quot;, &quot;其他&quot;]
-    trace_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
-
-
+# 目的：这是观察数据隔离的练习入口，不能把任意请求头当成真实账号登录。
+# 预期：非本机请求被拒绝，读者只能是 reader-a 或 reader-b。
 def actor(request: Request):
     if MODE == &quot;lab&quot;:
         if request.client and request.client.host not in {&quot;127.0.0.1&quot;, &quot;::1&quot;, &quot;testclient&quot;}:
@@ -91,22 +61,208 @@ def actor(request: Request):
         raise HTTPException(401, &quot;请先登录。&quot;)
     return auth.authenticate(bearer[7:])
 
-
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
 @app.exception_handler(PermissionError)
 def denied(request, error):
     return JSONResponse(status_code=403, content={&quot;detail&quot;: str(error)})
 
-
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
 @app.exception_handler(ValueError)
 def invalid(request, error):
     return JSONResponse(status_code=409, content={&quot;detail&quot;: str(error)})
 
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.exception_handler(RequestValidationError)
+def bad_input(request, error):
+    # 默认校验结果可能带回原始输入；这里只返回位置，避免回显口令和私人问题。
+    return JSONResponse(status_code=422, content={&quot;detail&quot;: &quot;输入格式不合要求。&quot;, &quot;fields&quot;: [list(e[&quot;loc&quot;]) for e in error.errors()]})
 
-@app.exception_handler(TimeoutError)
-def busy(request, error):
-    return JSONResponse(status_code=429, content={&quot;detail&quot;: &quot;当前请求较多，请稍后再试。&quot;}, headers={&quot;Retry-After&quot;: &quot;3&quot;})
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/healthz&quot;)
+def health():
+    return {&quot;status&quot;: &quot;alive&quot;}
 
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/config&quot;)
+def config():
+    return {&quot;mode&quot;: MODE, &quot;chapter&quot;: CHAPTER}
 
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/books&quot;)
+def books(who=Depends(actor)):
+    return sorted({c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant})
+
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/sessions&quot;)
+def sessions(who=Depends(actor)):
+    return state.list_sessions(who)
+
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.post(&quot;/api/sessions&quot;)
+def new_session(body: NewSession, who=Depends(actor)):
+    books = {c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant}
+    if body.book not in books:
+        raise HTTPException(404, &quot;没有可用的这部作品资料。&quot;)
+    return state.create_session(who, body.book)
+
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/sessions/{identity}&quot;)
+def session(identity: str, who=Depends(actor)):
+    return state.get_session(who, identity)
+
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.delete(&quot;/api/sessions/{identity}&quot;)
+def remove_session(identity: str, who=Depends(actor)):
+    state.delete_session(who, identity)
+    return {&quot;deleted&quot;: True}
+
+# 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.post(&quot;/api/ask&quot;)
+def ask(body: Question, request: Request, who=Depends(actor)):
+    request.state.trace_id = body.request_id
+    return service.ask(who, body.session_id, body.question, body.request_id, body.mode, os.environ.get(&quot;RETRIEVAL&quot;, &quot;keyword&quot;))
+
+# 目的：页面文件将跟着本章一步步创建，不靠预置模板。
+# 预期：完成页面文件后 / 才能显示会话界面。
+@app.get(&quot;/&quot;)
+def index():
+    return FileResponse(web / &quot;index.html&quot;)
+
+# 目的：请求带上页面读到的 revision；范围改变时清空旧对话，防止后文残留。
+# 预期：旧 revision 返回 409，成功写入返回新版本。
+class Progress(Input):
+    progress: int = Field(ge=0, le=10000)
+    strict: bool
+    revision: int = Field(ge=0)
+
+# 目的：请求带上页面读到的 revision；范围改变时清空旧对话，防止后文残留。
+# 预期：旧 revision 返回 409，成功写入返回新版本。
+@app.patch(&quot;/api/sessions/{identity}&quot;)
+def progress(identity: str, body: Progress, who=Depends(actor)):
+    current = state.get_session(who, identity)
+    # 用页面实际读到的版本比较，才能拒绝后来到达的旧页面更新。
+    if current[&quot;revision&quot;] != body.revision:
+        raise ValueError(&quot;阅读记录已更新，请重新打开当前记录后再保存进度。&quot;)
+    # 进度或模式改变时丢弃旧上下文，避免旧对话把后文带进受限阅读。
+    return state.update_session(who, current, history=[], progress=body.progress, strict=body.strict, phase=&quot;question&quot;)
+
+# 目的：接口复用 service.source，不再写一套可能遗漏条件的 SQL 或检索。
+# 预期：越界返回403，允许的来源返回正文。
+@app.get(&quot;/api/sources/{source_id}&quot;)
+def source(source_id: str, session_id: str, who=Depends(actor)):
+    return service.source(who, session_id, source_id)
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+class Draft(Input):
+    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    kind: Literal[&quot;note&quot;, &quot;review_plan&quot;]
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+class Confirmation(Input):
+    revision: int = Field(ge=1)
+    digest: str = Field(pattern=r&quot;^[a-f0-9]{64}$&quot;)
+    confirmed: bool
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.post(&quot;/api/drafts&quot;)
+def make_draft(body: Draft, who=Depends(actor)):
+    return service.make_draft(who, body.session_id, body.kind, body.request_id)
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.get(&quot;/api/drafts&quot;)
+def drafts(who=Depends(actor)):
+    return actions.pending(who)
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.post(&quot;/api/drafts/{identity}/approve&quot;)
+def approve(identity: str, body: Confirmation, who=Depends(actor)):
+    return actions.approve(who, identity, body.revision, body.digest, body.confirmed)
+
+# 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.get(&quot;/api/notes&quot;)
+def notes(who=Depends(actor)):
+    return actions.notes(who)
+
+# 目的：只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。
+# 预期：编辑后需要重新预览。
+class Revision(Input):
+    body: str = Field(min_length=1, max_length=6000)
+
+# 目的：只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。
+# 预期：编辑后需要重新预览。
+@app.patch(&quot;/api/drafts/{identity}&quot;)
+def revise(identity: str, body: Revision, who=Depends(actor)):
+    return actions.revise(who, identity, body.body)
+
+# 目的：输入格式、账号校验和令牌撤销分别负责，错误不回显原口令。
+# 预期：登录成功取得短期令牌，退出后令牌失效。
+class Login(Input):
+    tenant: str = Field(min_length=1, max_length=40)
+    username: str = Field(min_length=1, max_length=40)
+    password: str = Field(min_length=1, max_length=128)
+
+# 目的：输入格式、账号校验和令牌撤销分别负责，错误不回显原口令。
+# 预期：登录成功取得短期令牌，退出后令牌失效。
+@app.post(&quot;/api/login&quot;)
+def login(body: Login, request: Request):
+    if MODE != &quot;authenticated&quot;:
+        raise HTTPException(409, &quot;当前是本机练习模式。&quot;)
+    return auth.login(body.tenant, body.username, body.password, request.client.host if request.client else &quot;unknown&quot;)
+
+# 目的：输入格式、账号校验和令牌撤销分别负责，错误不回显原口令。
+# 预期：登录成功取得短期令牌，退出后令牌失效。
+@app.post(&quot;/api/logout&quot;)
+def logout(request: Request, who=Depends(actor)):
+    auth.logout(request.headers.get(&quot;Authorization&quot;, &quot;&quot;)[7:])
+    return {&quot;logged_out&quot;: True}
+
+# 目的：复用 Actor 与关联检查，不接受页面自己声称的家长角色。
+# 预期：未关联或非家长请求被拒绝。
+@app.get(&quot;/api/family/{child}&quot;)
+def family(child: str, who=Depends(actor)):
+    return state.family_report(who, child)
+
+# 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+class Feedback(Input):
+    category: Literal[&quot;答非所问&quot;, &quot;证据不符&quot;, &quot;内容不适合&quot;, &quot;其他&quot;]
+    trace_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+
+# 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+@app.post(&quot;/api/feedback&quot;)
+def feedback(body: Feedback, who=Depends(actor)):
+    identity = uuid.uuid4().hex
+    with state.connect() as db:
+        db.execute(&quot;INSERT INTO feedback VALUES(?,?,?,?,?,?)&quot;, (identity, who.tenant, who.user, body.category, body.trace_id, time.time()))
+    return {&quot;receipt&quot;: identity}
+
+# 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+@app.delete(&quot;/api/personal-data&quot;)
+def erase(who=Depends(actor)):
+    return state.erase_personal_data(who)
+
+# 目的：公开错误只说明暂时不可用和编号；日志只记异常类型。
+# 预期：服务故障有503和trace_id，不回显原始请求。
 @app.exception_handler(Exception)
 def unavailable(request, error):
     trace_id = getattr(request.state, &quot;trace_id&quot;, uuid.uuid4().hex)
@@ -114,17 +270,18 @@ def unavailable(request, error):
     # 不把模型供应商的原始响应、密钥或文件路径回传给读者。
     return JSONResponse(status_code=503, content={&quot;detail&quot;: &quot;服务暂时不可用，请稍后重试。&quot;, &quot;trace_id&quot;: trace_id})
 
+# 目的：no-store 避免私人响应进入缓存，CSP 限制页面脚本和资源来源。
+# 预期：页面脚本来自自己服务，不能执行模型返回的脚本标签。
+@app.middleware(&quot;http&quot;)
+async def response_headers(request, call_next):
+    response = await call_next(request)
+    response.headers[&quot;X-Content-Type-Options&quot;] = &quot;nosniff&quot;
+    response.headers[&quot;Cache-Control&quot;] = &quot;no-store&quot;
+    response.headers[&quot;Content-Security-Policy&quot;] = &quot;default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'&quot;
+    return response
 
-@app.get(&quot;/&quot;)
-def index():
-    return FileResponse(web / &quot;index.html&quot;)
-
-
-@app.get(&quot;/healthz&quot;)
-def health():
-    return {&quot;status&quot;: &quot;alive&quot;}
-
-
+# 目的：资料、状态库、所选索引和生成模型都需要就绪；不通过时先定位依赖，不直接重启一切。
+# 预期：healthz 可200而readyz为503；恢复依赖后才返回ready。
 @app.get(&quot;/readyz&quot;)
 def ready():
     corpus = load(&quot;corpus.json&quot;)
@@ -147,135 +304,16 @@ def ready():
         raise HTTPException(503, &quot;生成模型尚未就绪。&quot;)
     return {&quot;status&quot;: &quot;ready&quot;, &quot;revision&quot;: corpus[&quot;revision&quot;][:12]}
 
+# 目的：名额不足返回429，取消接口按本人身份查任务，读者能区分等待与拒绝。
+# 预期：忙时可稍后重试，不显示上一次答案。
+@app.exception_handler(TimeoutError)
+def busy(request, error):
+    return JSONResponse(status_code=429, content={&quot;detail&quot;: &quot;当前请求较多，请稍后再试。&quot;}, headers={&quot;Retry-After&quot;: &quot;3&quot;})
 
-@app.get(&quot;/api/config&quot;)
-def config():
-    return {&quot;mode&quot;: MODE, &quot;chapter&quot;: CHAPTER}
-
-
-@app.post(&quot;/api/login&quot;)
-def login(body: Login, request: Request):
-    if MODE != &quot;authenticated&quot;:
-        raise HTTPException(409, &quot;当前是本机练习模式。&quot;)
-    return auth.login(body.tenant, body.username, body.password, request.client.host if request.client else &quot;unknown&quot;)
-
-
-@app.post(&quot;/api/logout&quot;)
-def logout(request: Request, who=Depends(actor)):
-    auth.logout(request.headers.get(&quot;Authorization&quot;, &quot;&quot;)[7:])
-    return {&quot;logged_out&quot;: True}
-
-
-@app.get(&quot;/api/books&quot;)
-def books(who=Depends(actor)):
-    return sorted({c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant})
-
-
-@app.get(&quot;/api/sessions&quot;)
-def sessions(who=Depends(actor)):
-    return state.list_sessions(who)
-
-
-@app.post(&quot;/api/sessions&quot;)
-def new_session(body: NewSession, who=Depends(actor)):
-    books = {c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant}
-    if body.book not in books:
-        raise HTTPException(404, &quot;没有可用的这部作品资料。&quot;)
-    return state.create_session(who, body.book)
-
-
-@app.get(&quot;/api/sessions/{identity}&quot;)
-def session(identity: str, who=Depends(actor)):
-    return state.get_session(who, identity)
-
-
-@app.patch(&quot;/api/sessions/{identity}&quot;)
-def progress(identity: str, body: Progress, who=Depends(actor)):
-    current = state.get_session(who, identity)
-    # 用页面实际读到的版本比较，才能拒绝后来到达的旧页面更新。
-    if current[&quot;revision&quot;] != body.revision:
-        raise ValueError(&quot;阅读记录已更新，请重新打开当前记录后再保存进度。&quot;)
-    # 进度或模式改变时丢弃旧上下文，避免旧对话把后文带进受限阅读。
-    return state.update_session(who, current, history=[], progress=body.progress, strict=body.strict, phase=&quot;question&quot;)
-
-
-@app.delete(&quot;/api/sessions/{identity}&quot;)
-def remove_session(identity: str, who=Depends(actor)):
-    state.delete_session(who, identity)
-    return {&quot;deleted&quot;: True}
-
-
-@app.post(&quot;/api/ask&quot;)
-def ask(body: Question, request: Request, who=Depends(actor)):
-    request.state.trace_id = body.request_id
-    return service.ask(who, body.session_id, body.question, body.request_id, body.mode, os.environ.get(&quot;RETRIEVAL&quot;, &quot;keyword&quot;))
-
-
+# 目的：名额不足返回429，取消接口按本人身份查任务，读者能区分等待与拒绝。
+# 预期：忙时可稍后重试，不显示上一次答案。
 @app.post(&quot;/api/cancel/{request_id}&quot;)
 def cancel(request_id: str, who=Depends(actor)):
     return operations.cancel(who, request_id)
-
-
-@app.get(&quot;/api/sources/{source_id}&quot;)
-def source(source_id: str, session_id: str, who=Depends(actor)):
-    return service.source(who, session_id, source_id)
-
-
-@app.post(&quot;/api/drafts&quot;)
-def make_draft(body: Draft, who=Depends(actor)):
-    return service.make_draft(who, body.session_id, body.kind, body.request_id)
-
-
-@app.get(&quot;/api/drafts&quot;)
-def drafts(who=Depends(actor)):
-    return actions.pending(who)
-
-
-@app.patch(&quot;/api/drafts/{identity}&quot;)
-def revise(identity: str, body: Revision, who=Depends(actor)):
-    return actions.revise(who, identity, body.body)
-
-
-@app.post(&quot;/api/drafts/{identity}/approve&quot;)
-def approve(identity: str, body: Confirmation, who=Depends(actor)):
-    return actions.approve(who, identity, body.revision, body.digest, body.confirmed)
-
-
-@app.get(&quot;/api/notes&quot;)
-def notes(who=Depends(actor)):
-    return actions.notes(who)
-
-
-@app.get(&quot;/api/family/{child}&quot;)
-def family(child: str, who=Depends(actor)):
-    return state.family_report(who, child)
-
-
-@app.post(&quot;/api/feedback&quot;)
-def feedback(body: Feedback, who=Depends(actor)):
-    identity = uuid.uuid4().hex
-    with state.connect() as db:
-        db.execute(&quot;INSERT INTO feedback VALUES(?,?,?,?,?,?)&quot;, (identity, who.tenant, who.user, body.category, body.trace_id, time.time()))
-    return {&quot;receipt&quot;: identity}
-
-
-@app.delete(&quot;/api/personal-data&quot;)
-def erase(who=Depends(actor)):
-    return state.erase_personal_data(who)
-
-
-@app.exception_handler(RequestValidationError)
-def bad_input(request, error):
-    # 默认校验结果可能带回原始输入；这里只返回位置，避免回显口令和私人问题。
-    return JSONResponse(status_code=422, content={&quot;detail&quot;: &quot;输入格式不合要求。&quot;, &quot;fields&quot;: [list(e[&quot;loc&quot;]) for e in error.errors()]})
-
-
-@app.middleware(&quot;http&quot;)
-async def response_headers(request, call_next):
-    response = await call_next(request)
-    response.headers[&quot;X-Content-Type-Options&quot;] = &quot;nosniff&quot;
-    response.headers[&quot;Cache-Control&quot;] = &quot;no-store&quot;
-    response.headers[&quot;Content-Security-Policy&quot;] = &quot;default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'&quot;
-    return response
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

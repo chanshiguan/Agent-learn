@@ -1,18 +1,12 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/tools.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/tools.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/tools.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/tools.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;只读工具共享服务端身份；模型参数不能更改读者或租户。&quot;&quot;&quot;
-import json
-import re
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/tools.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/tools.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/tools.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 from .rag import retrieve, budget
 from .state import get_session
 
-SCHEMAS = [
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;search_lectures&quot;, &quot;description&quot;: &quot;在当前读者允许范围内查询讲稿。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;query&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;query&quot;], &quot;additionalProperties&quot;: False}}},
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;read_source&quot;, &quot;description&quot;: &quot;读取本次已经检索到的一条来源。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;source_id&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;source_id&quot;], &quot;additionalProperties&quot;: False}}},
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;get_progress&quot;, &quot;description&quot;: &quot;查看当前会话的显式阅读进度。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}, &quot;additionalProperties&quot;: False}}},
-]
-
-
+# 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
+# 预期：程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。
 class ReaderTools:
     def __init__(self, actor, session_id, method=&quot;keyword&quot;):
         self.actor, self.session_id, self.method = actor, session_id, method
@@ -41,5 +35,13 @@ class ReaderTools:
                 raise PermissionError(&quot;不能读取本次未检索到的来源。&quot;)
             return source
         raise ValueError(&quot;没有登记这个工具；不会执行模型提供的代码或命令。&quot;)
+
+# 目的：JSON Schema 只说明能请求什么；真正的执行权限仍由 ReaderTools 检查。
+# 预期：工具参数中没有 tenant 和 user，未知字段禁止。
+SCHEMAS = [
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;search_lectures&quot;, &quot;description&quot;: &quot;在当前读者允许范围内查询讲稿。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;query&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;query&quot;], &quot;additionalProperties&quot;: False}}},
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;read_source&quot;, &quot;description&quot;: &quot;读取本次已经检索到的一条来源。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;source_id&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;source_id&quot;], &quot;additionalProperties&quot;: False}}},
+    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {&quot;name&quot;: &quot;get_progress&quot;, &quot;description&quot;: &quot;查看当前会话的显式阅读进度。&quot;, &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}, &quot;additionalProperties&quot;: False}}},
+]
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

@@ -1,6 +1,8 @@
-# 从单个容器走到一组服务
+# 从单个容器走到一组服务（1/2：把本节能力连起来）
 
-本单元预计 **45—60 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **50—65 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《冻结题集，用真实模型和人工复核》](0063-release-quality.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 先部署到受控的本机端口
 
@@ -8,79 +10,196 @@ Compose 把应用、Qdrant、网络、卷和健康检查写在一个文件里。
 
 先回到第 21—24 章运行宿主 `uvicorn` 的终端，按 `Ctrl+C` 停止那个练习服务，确认终端已经返回提示符。Compose 应用也要使用 8000 端口，两者不能同时占用它。模型服务继续运行；不要为释放端口去终止不认识的进程。
 
-```bash
-# 复制无凭据的配置样例；只在 .env 尚不存在时执行，避免覆盖自己的配置。
-cp -n deploy/env.example .env
-# 创建持久数据目录；容器将挂载它，原始资料与状态不会打进镜像。
-mkdir -p data/live
-# 查看当前宿主用户与组的数字 ID；将两个结果分别填入 .env 的 APP_UID、APP_GID。
-id -u
-id -g
-# 在编辑器填完 .env 的真实模型 ID、地址和路线后构建；本命令不把 .env COPY 进镜像。
-docker compose --env-file .env -f deploy/compose.yaml build
-# 启动应用和向量库，先测试 keyword 路线，减少首次排错变量。
-docker compose --env-file .env -f deploy/compose.yaml up -d
-# 查看服务状态，检查应用进程是否存活。
-docker compose --env-file .env -f deploy/compose.yaml ps
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：先列出部署所需配置
+
+样例不带密钥，实际值放 .env；UID/GID 对应宿主数据目录所有者。
+
+**写在哪里：**项目根目录下的 `deploy/env.example`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```text
+# 复制为 examples/.env 后逐项填写；此文件本身不含凭据。
+LLM_MODE=local
+LLM_BASE_URL=http://host.docker.internal:11434/v1
+# 填写第 4 章已经验证过的真实模型 ID；空值会使就绪检查失败。
+LLM_MODEL=
+LLM_API_KEY=
+# 后续 RAG/Agent 的输出上限；调大后重新测耗时、用量和完整性。
+LLM_MAX_TOKENS=900
+# 仅填写第 4 章已实际验证的推理选项；不支持的模型留空。
+LLM_REASONING_EFFORT=
+RETRIEVAL=keyword
+MAX_MODEL_JOBS=1
+DAILY_JOB_LIMIT=40
+ALLOWED_HOSTS=localhost,127.0.0.1
+# 填写实际运行电脑上 id -u 与 id -g 的结果，保持挂载目录可写。
+APP_UID=1000
+APP_GID=1000
+# 改线上模型时填写 HTTPS 地址与私密 API key；不要把 .env 打进镜像。
 ```
 
-运行前在编辑器完成 `.env`，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。
+**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。
 
-这些命令都在 `examples/` 中执行。`--env-file .env` 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 `env_file: ../.env` 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 [Docker 官方说明](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)。
+### 第 2 步：把已写出的服务封装进镜像
 
-Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：
+依赖、业务代码和启动命令进入镜像，数据与密钥通过运行时提供。
 
-```bash
-# 在同一挂载数据与 Compose 网络内构建索引；首次可能下载 CPU 编码器权重。
-docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
+**写在哪里：**项目根目录下的 `deploy/Dockerfile`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```dockerfile
+# 与前三章相同，先固定解释器系列；发布时还需记录实际镜像摘要。
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements*.txt ./
+# 本课程在容器内用 CPU 编码，先装 CPU 版，避免 Linux 自动下载不使用的 CUDA 运行库。
+RUN python -m pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+RUN python -m pip install --no-cache-dir -r requirements.txt -r requirements-model.txt -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
+COPY companion ./companion
+COPY eval ./eval
+RUN useradd --uid 1000 --create-home reader && mkdir -p data && chown reader:reader data
+USER reader
+ENV PYTHONUNBUFFERED=1
+EXPOSE 8000
+# 单 worker 与本课程进程内请求额度一致；扩副本前必须改成共享限流与会话存储。
+CMD ["python", "-m", "uvicorn", "companion.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "16", "--no-access-log"]
 ```
 
-成功后再把 `.env` 的 RETRIEVAL 改为 hybrid，重新执行上面的 `up -d` 命令使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，按下面的命令创建测试读者，账号已存在时跳过：
+**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。
 
-```bash
-# 在相同挂载数据库中创建测试读者；交互输入两次至少 12 字符的口令，口令不放进命令历史。
-docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user student-a
+### 第 3 步：写明应用、向量库和持久目录的关系
+
+变量替换显式读 .env，应用只绑定回环地址；先跑 keyword 再验证 hybrid。
+
+**写在哪里：**项目根目录下的 `deploy/compose.yaml`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**YAML 用缩进表示归属；先分清服务名、配置键和值。配置文件本身不会执行，运行 Compose 或触发工作流时才会使用它。
+
+下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
+
+**连续代码 1/2**
+
+```yaml
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: classics-companion:${RELEASE_TAG:-candidate}
+    # 绑定目录由宿主用户拥有时，使用对应 UID/GID，避免只能读取却无法保存状态。
+    user: '${APP_UID:-1000}:${APP_GID:-1000}'
+    env_file: ../.env
+    environment:
+      APP_MODE: authenticated
+      APP_ENV: production
+      COURSE_CHAPTER: '29'
+      READING_DATA_DIR: /app/data/live
+      QDRANT_URL: http://qdrant:6333
+      HF_HOME: /app/data/live/hf-cache
+    ports:
+      - '127.0.0.1:8000:8000'
+    volumes:
+      - ../data:/app/data
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      qdrant:
+        condition: service_started
 ```
 
-Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 `.env` 中的 `APP_UID`、`APP_GID` 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。
+**连续代码 2/2**（接在上一段后，不额外增加缩进）
 
-镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。
+```yaml
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+  qdrant:
+    image: qdrant/qdrant:v1.15.5
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+volumes:
+  qdrant_data:
+```
 
-## 对照完整实现
+**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。
 
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
+### 第 4 步：为真正对外访问准备 HTTPS 入口
 
-<details><summary>展开本单元完整源码：deploy/compose.yaml</summary>
+域名与证书条件需要实际环境满足；示例不会替你获得公司上线批准。
 
-{{code:deploy/compose.yaml}}
+**写在哪里：**项目根目录下的 `deploy/Caddyfile.example`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```text
+# 由公司运维把域名换成真实域名并配置 DNS、TLS、访问范围后使用。
+# Caddy 运行在宿主机时代理本地端口；不要同时向公网开放 8000 或 6333。
+reading.example.com {
+    encode gzip
+    reverse_proxy 127.0.0.1:8000
+}
+```
+
+**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。
+
+### 第 5 步：为对外部署增加主机名边界
+
+明确允许的 Host，与 HTTPS、身份校验分别处理不同边界。
+
+**写在哪里：**项目根目录下的 `companion/app.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+from fastapi.exceptions import RequestValidationError
+```
 
 </details>
 
-## 本单元完成条件
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
 
-先遮住答案，回答下面的问题，再核对自己的运行记录。
+```python
+from fastapi.exceptions import RequestValidationError
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+```
 
-1. 为什么 Dockerfile 不 COPY data 和 .env？
-2. 容器里的 localhost 指宿主机吗？
+**写完后应当怎样：**意外 Host 被拒绝，实际域名需显式加入配置。
 
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+## 在这里停一下，检查刚写的部分
 
-**为什么 Dockerfile 不 COPY data 和 .env？**
+```bash
+# 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/app.py
+```
 
-资料、运行状态和凭据不属于不可变程序镜像；通过受控挂载或环境注入，才能独立更新与保护。
+先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。
 
-**容器里的 localhost 指宿主机吗？**
+<details class="answer-key"><summary>参考答案与下一步</summary>
 
-通常指容器自己。访问 Compose 服务用服务名，访问宿主模型需要已验证的宿主地址。
-
-**通过证据：**Compose 状态、实际登录和一次有据问答；所选向量路线有新服务上的索引验证。
+明确允许的 Host，与 HTTPS、身份校验分别处理不同边界。 意外 Host 被拒绝，实际域名需显式加入配置。 这次停点只检查当前文件；整条链路会在本组最后一节运行。
 
 </details>
-
-## 下次开始前
-
-隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。
 
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

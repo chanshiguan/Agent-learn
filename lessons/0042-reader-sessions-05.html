@@ -1,0 +1,175 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>两位读者，不共用一段对话（5/5：连接页面交互） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0042-reader-sessions-05">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>两位读者，不共用一段对话（5/5：连接页面交互）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-14">← 返回课程地图</a><p class="rail-label">第 14 章 · 保存每位读者自己的阅读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0042-reader-sessions.html"><span class="unit-number">1</span><span>两位读者，不共用一段对话（1/5：保存会话状态）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-02.html"><span class="unit-number">2</span><span>两位读者，不共用一段对话（2/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-03.html"><span class="unit-number">3</span><span>两位读者，不共用一段对话（3/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-04.html"><span class="unit-number">4</span><span>两位读者，不共用一段对话（4/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-05.html" aria-current="page"><span class="unit-number">5</span><span>两位读者，不共用一段对话（5/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0043-explicit-progress.html"><span class="unit-number">6</span><span>让记忆可以被查看、修正和删除<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">身份来自哪里</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li><li><a href="#section-7">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 14 章 / 单元 5 · 共 6 个</p><h1>两位读者，不共用一段对话（5/5：连接页面交互）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 360—450 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0042-reader-sessions-04.html">《两位读者，不共用一段对话（4/5：连接页面交互）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/web/reader.js</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：写页面函数 on</h3>
+<p>给按钮统一挂接错误出口，旧身份的迟到错误不覆盖当前提示。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
+<pre><code class="language-javascript">function on(button, action) {
+  $(button).addEventListener(&#39;click&#39;, () =&gt; {
+    const expectedToken = token,
+      expectedReader = $(&#39;reader&#39;).value;
+    action().catch((e) =&gt; {
+      if (token === expectedToken &amp;&amp; $(&#39;reader&#39;).value === expectedReader)
+        status(e.message);
+    });
+  });
+}
+</code></pre>
+<p>**写完后应当怎样：**保存本段后继续下一个函数；事件接好后再刷新浏览器检查整条交互。</p>
+<h3>第 2 步：让表单调用会话问答接口</h3>
+<p>提交前隐藏旧答案；收到结果后再次检查视图，不能把 A 的回答放到 B 页面。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">$(&#39;ask-form&#39;).onsubmit = async (event) =&gt; {
+  event.preventDefault();
+  const expectedView = viewVersion;
+  try {
+    requireSession();
+    $(&#39;result&#39;).hidden = true;
+    $(&#39;ask&#39;).disabled = true;
+    const result = await api(&#39;/api/ask&#39;, &#39;POST&#39;, {
+      session_id: selected.id,
+      question: $(&#39;question&#39;).value,
+      request_id: id(),
+      mode: $(&#39;mode&#39;).value,
+    });
+    if (viewVersion !== expectedView) return;
+    selected.revision = result.session_revision;
+    display(result);
+    status(&#39;回答已完成，请核对来源。&#39;);
+  } catch (error) {
+    if (viewVersion === expectedView) status(error.message);
+  } finally {
+    $(&#39;ask&#39;).disabled = false;
+  }
+};
+</code></pre>
+<p>**写完后应当怎样：**同一个会话可以连续提问，返回的新版本留给下一次更新。</p>
+<h3>第 3 步：连接 new-session 按钮</h3>
+<p>把刚写出的页面函数接到明确动作，删除必须先确认，刷新不自动新增会话。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">on(&#39;new-session&#39;, async () =&gt; {
+  const expectedView = viewVersion;
+  const result = await api(&#39;/api/sessions&#39;, &#39;POST&#39;, { book: $(&#39;book&#39;).value });
+  if (viewVersion !== expectedView) return;
+  await refresh();
+  if (viewVersion === expectedView) await choose(result.id);
+});
+</code></pre>
+<p>**写完后应当怎样：**按钮只调用当前已经写出的 API。</p>
+<h3>第 4 步：连接 refresh 按钮</h3>
+<p>把刚写出的页面函数接到明确动作，删除必须先确认，刷新不自动新增会话。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
+<pre><code class="language-javascript">on(&#39;refresh&#39;, refresh);
+</code></pre>
+<p>**写完后应当怎样：**按钮只调用当前已经写出的 API。</p>
+<h3>第 5 步：连接 delete-session 按钮</h3>
+<p>把刚写出的页面函数接到明确动作，删除必须先确认，刷新不自动新增会话。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">on(&#39;delete-session&#39;, async () =&gt; {
+  requireSession();
+  if (!confirm(&#39;删除当前阅读记录？这不会删除讲稿。&#39;)) return;
+  const expectedView = viewVersion;
+  await api(&#39;/api/sessions/&#39; + selected.id, &#39;DELETE&#39;);
+  if (viewVersion !== expectedView) return;
+  reset();
+  const refreshedView = viewVersion;
+  await refresh();
+  if (viewVersion === refreshedView) status(&#39;阅读记录已删除。&#39;);
+});
+</code></pre>
+<p>**写完后应当怎样：**按钮只调用当前已经写出的 API。</p>
+<h3>第 6 步：让切换读者立即清除旧页面</h3>
+<p>服务器按请求发出时的身份返回，浏览器必须自己丢弃切换后才到达的旧结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
+<pre><code class="language-javascript">$(&#39;reader&#39;).onchange = () =&gt; {
+  reset();
+  const expectedView = viewVersion;
+  refresh().catch((e) =&gt; {
+    if (viewVersion === expectedView) status(e.message);
+  });
+};
+</code></pre>
+<p>**写完后应当怎样：**切成 B 后看不到 A 的笔记或旧答案。</p>
+<h3>第 7 步：最后才启动页面初始化</h3>
+<p>前面的函数都定义好后，再读取配置和列表；定义函数本身不应提前发请求。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">(async () =&gt; {
+  config = await api(&#39;/api/config&#39;);
+  await enter();
+})().catch((e) =&gt; status(e.message));
+</code></pre>
+<p>**写完后应当怎样：**刷新页面可创建会话、提问和展开来源。</p>
+<h2 id="section-2">运行并观察</h2>
+<pre><code class="language-bash"># 保持测试身份模式，只在本机练习；页面功能由你刚增加的代码提供。
+export APP_MODE=lab
+# 先使用已验证的词面基线；选择 hybrid 时还要保证 Qdrant 与索引就绪。
+export RETRIEVAL=keyword
+# 启动带会话的同源页面；数据写到 data/live/reading.sqlite3。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>选择读者 A，创建《狂人日记》阅读，问一个问题；切到读者 B，应看不到 A 的会话。B 新建记录后，切回 A 检查它仍在。停止并重启服务，再检查持久性。</p>
+<h2 id="section-3">身份来自哪里</h2>
+<p>本章 <code>X-Lab-Reader</code> 只允许两个测试值，且服务限本机。它方便验证隔离，却不是认证系统：知道测试值的人就能选身份。第 21 章才换真实登录。页面功能是在各节实际写入的；显示了按钮仍不等于具备操作权限。</p>
+<p>每次查询会话都带 <code>tenant</code> 和 <code>owner</code>；仅知道会话 ID 不能越过它们。数据库写入还检查 revision，避免两次并发请求用旧状态互相覆盖。冲突会让你重读状态，不静默丢掉一段对话。</p>
+<h2 id="section-4">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>用不同 UUID 是否就实现了权限？</li>
+<li>测试身份模式为什么不能上线？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>用不同 UUID 是否就实现了权限？</strong></p>
+<p>没有。ID 不容易猜也不能替代服务端的所属人和租户检查。</p>
+<p><strong>测试身份模式为什么不能上线？</strong></p>
+<p>客户端能够选择身份，没有证明“你是谁”。本章只检验归属逻辑，真实认证在第 21 章接入。</p>
+<p>**通过证据：**A/B 两个独立会话和重启后的保留记录；能说明测试身份的限制。</p>
+</details>
+
+<h2 id="section-5">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-6">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<h2 id="section-7">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion import state
+state.initialize()
+a=state.Actor(&quot;demo&quot;,&quot;reader-a&quot;);b=state.Actor(&quot;demo&quot;,&quot;reader-b&quot;)
+s=state.create_session(a)
+try:
+    state.get_session(b,s[&quot;id&quot;])
+    raise AssertionError(&quot;不应读到另一个人的会话&quot;)
+except PermissionError:
+    print(&quot;会话归属检查通过&quot;)
+PY
+</code></pre>
+<p>**预期：**A 能访问自己的会话，B 被拒绝。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from fastapi.testclient import TestClient
+from companion.app import app
+with TestClient(app) as c:
+    assert c.get(&quot;/&quot;).status_code==200
+    r=c.post(&quot;/api/sessions&quot;,json={&quot;book&quot;:&quot;狂人日记&quot;});assert r.status_code==200
+    assert c.get(&quot;/api/sessions/&quot;+r.json()[&quot;id&quot;],headers={&quot;X-Lab-Reader&quot;:&quot;reader-b&quot;}).status_code==403
+print(&quot;页面、创建会话和跨读者拒绝通过&quot;)
+PY
+</code></pre>
+<p>**预期：**路由已接通，身份切换不会读到另一位读者的会话。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0042-reader-sessions-05"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0042-reader-sessions-04.html"><small>上一单元</small>两位读者，不共用一段对话（4/5：连接页面交互）</a><a href="0043-explicit-progress.html"><small>下一单元</small>让记忆可以被查看、修正和删除 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

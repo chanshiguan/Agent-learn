@@ -1,10 +1,55 @@
 # 活着不等于已经能接待读者
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《从单个容器走到一组服务（2/2：连接接口与业务）》](0064-compose-deployment-02.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 两个检查回答不同问题
 
 `/healthz` 只表示进程能响应；`/readyz` 检查资料、状态库、所选向量索引与模型列表。模型断了时，进程仍可能活着，因此不能只凭健康状态放行流量。某些供应商不支持 models.list，需要按真实接口调整 readiness，并补最小生成检查，不能伪造模型已就绪。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：把存活和可以接单分开检查
+
+资料、状态库、所选索引和生成模型都需要就绪；不通过时先定位依赖，不直接重启一切。
+
+**写在哪里：**项目根目录下的 `companion/app.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：资料、状态库、所选索引和生成模型都需要就绪；不通过时先定位依赖，不直接重启一切。
+# 预期：healthz 可200而readyz为503；恢复依赖后才返回ready。
+@app.get("/readyz")
+def ready():
+    corpus = load("corpus.json")
+    if not corpus:
+        raise HTTPException(503, "资料尚未准备好。")
+    with state.connect() as db:
+        db.execute("SELECT 1 FROM sessions LIMIT 1")
+    if os.environ.get("RETRIEVAL", "keyword") != "keyword":
+        from .vectors import connection
+        current = load("index.json")
+        if not current or current["corpus_revision"] != corpus["revision"]:
+            raise HTTPException(503, "资料索引待更新。")
+        with connection() as db:
+            db.get_collection(current["collection"])
+    from .models import client
+    sdk, model = client(timeout=5)
+    with sdk:
+        available = {item.id for item in sdk.models.list().data}
+    if model not in available:
+        raise HTTPException(503, "生成模型尚未就绪。")
+    return {"status": "ready", "revision": corpus["revision"][:12]}
+```
+
+**写完后应当怎样：**healthz 可200而readyz为503；恢复依赖后才返回ready。
+
+## 运行并观察
 
 ```bash
 # 检查进程存活；预期返回 alive。
@@ -51,3 +96,6 @@ docker compose --env-file .env -f deploy/compose.yaml logs --tail 40 app
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

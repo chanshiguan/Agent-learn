@@ -1,46 +1,91 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用状态图重现同一个批准流程 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0055-langgraph-checkpoint">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用状态图重现同一个批准流程（1/2：把本节能力连起来） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0055-langgraph-checkpoint">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用状态图重现同一个批准流程</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-20">← 返回课程地图</a><p class="rail-label">第 20 章 · 暂停、重启与框架迁移</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0054-resume-actions.html"><span class="unit-number">1</span><span>关闭程序后，接着处理同一草稿<small>35—50 分钟</small></span></a></li><li><a href="0055-langgraph-checkpoint.html" aria-current="page"><span class="unit-number">2</span><span>用状态图重现同一个批准流程<small>40—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在才引入框架</a></li><li><a href="#section-2">验证规则没有因迁移而变松</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 20 章 / 单元 2 · 共 2 个</p><h1>用状态图重现同一个批准流程</h1><div class="lesson-meta"><span>本单元 40—60 分钟</span><span>本章 75—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>40—60 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用状态图重现同一个批准流程（1/2：把本节能力连起来）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-20">← 返回课程地图</a><p class="rail-label">第 20 章 · 暂停、重启与框架迁移</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0054-resume-actions.html"><span class="unit-number">1</span><span>关闭程序后，接着处理同一草稿<small>40—55 分钟</small></span></a></li><li><a href="0055-langgraph-checkpoint.html" aria-current="page"><span class="unit-number">2</span><span>用状态图重现同一个批准流程（1/2：把本节能力连起来）<small>60—75 分钟</small></span></a></li><li><a href="0055-langgraph-checkpoint-02.html"><span class="unit-number">3</span><span>用状态图重现同一个批准流程（2/2：把本节能力连起来）<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在才引入框架</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">在这里停一下，检查刚写的部分</a></li><li><a href="#section-4">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 20 章 / 单元 2 · 共 3 个</p><h1>用状态图重现同一个批准流程（1/2：把本节能力连起来）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 130—175 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0054-resume-actions.html">《关闭程序后，接着处理同一草稿》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">现在才引入框架</h2>
 <p>StateGraph 用节点表示步骤、边表示顺序；checkpointer 把状态保存到磁盘；interrupt 在需要用户决定时暂停；Command(resume=...) 带着确认继续。thread_id 区分任务，这里同时包含租户、读者和动作 ID。</p>
-<pre><code class="language-bash"># 安装本课程固定的图框架与 SQLite 检查点依赖；业务数据仍由原来的 actions 表负责。
-python -m pip install -r requirements-graph.txt
-# 新建一份未确认草稿，记下 ID，避免拿已经提交的动作混淆实验。
-python -m companion action draft --text &quot;通过状态图恢复的阅读笔记，请先核对这段具体内容。&quot;
-# 输入该 ID，流程暂停并写检查点；命令退出后仍能恢复。
-python -m companion graph start
-# 在新进程中输入同一 ID，查看预览并输入 YES；预期仅保存一条笔记。
-python -m companion graph resume
-# 重跑恢复与删除检查；这里检查真实 SQLite 检查点，不需要模型服务。
-PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_graph_restart_resume_and_erase -v
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：现在才安装状态图与磁盘检查点</h3>
+<p>先理解手写批准和持久状态，再观察框架如何组织同一个流程。</p>
+<p>**写在哪里：**项目根目录下的 <code>requirements-graph.txt</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-text"># 第 20 章新增：磁盘检查点使暂停流程可以跨进程恢复。
+langgraph==1.2.20
+langgraph-checkpoint-sqlite==3.1.3
 </code></pre>
-<p><code>graph-preview.json</code> 是命令行单任务练习的预览文件，一次只练一个暂停任务。实际多用户网页使用服务端动作数据；本课没有把这个文件当成多用户消息队列。</p>
-<h2 id="section-2">验证规则没有因迁移而变松</h2>
-<p>start 后用 action revise 修改草稿，再执行 resume，旧预览应拒绝。重新 start 获取新预览再确认。间隔超过有效期也应拒绝。框架恢复时节点可能重新执行，因此副作用仍在原来的幂等事务里。</p>
-<p>对比第 19 章和本章：最终笔记内容、批准版本、重复提交结果应一致。它不是把整个 Agent 循环全部换成框架；本章迁移的是同一审批工作流，先验证等价再扩大范围。</p>
-<h2 id="section-3">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/graph.py</summary>
+<p>**写完后应当怎样：**安装库不改变批准规则。</p>
+<pre><code class="language-bash"># 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
+python -m pip install -r requirements-graph.txt
+</code></pre>
+<h3>第 2 步：为跨进程状态操作准备文件锁</h3>
+<p>CLI 与 HTTP 可能不是同一进程；线程锁不能协调两个进程。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
 
+<pre><code class="language-python">import json
+</code></pre>
+</details>
 
-<pre><code class="language-python">&quot;&quot;&quot;把第 19 章的同一批准动作迁移到有磁盘检查点的状态图。&quot;&quot;&quot;
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">import json
+import fcntl
+</code></pre>
+<p>**写完后应当怎样：**macOS/Linux 上使用文件排他锁，不宣称支持原生 Windows。</p>
+<h3>第 3 步：让图写入与后续删除共享一把锁</h3>
+<p>保护不调用模型的短状态操作；进程异常退出时系统释放锁。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：保护不调用模型的短状态操作；进程异常退出时系统释放锁。
+# 预期：不会一边报告删除成功，一边又写回旧检查点。
+@contextmanager
+def personal_data_lock():
+    # CLI 与 API 可能是两个进程；用文件锁协调检查点写入和删除，线程锁不够。
+    # 这里只保护不调用模型的短操作，进程异常退出时系统也会释放锁。
+    with (data_dir() / &quot;.personal-data.lock&quot;).open(&quot;a&quot;) as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+</code></pre>
+<p>**写完后应当怎样：**不会一边报告删除成功，一边又写回旧检查点。</p>
+<h3>第 4 步：先写这个文件需要的导入</h3>
+<p>图只管理流程暂停与恢复，最终批准仍调用已经测试过的 actions.approve。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/graph.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：图只管理流程暂停与恢复，最终批准仍调用已经测试过的 actions.approve。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import sqlite3
 from typing import TypedDict
-
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command, interrupt
 from .actions import pending, approve
 from .files import data_dir, digest, save
 from .state import personal_data_lock
-
-
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 5 步：写 ReviewState 的状态边界</h3>
+<p>明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/graph.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 class ReviewState(TypedDict, total=False):
     action_id: str
     result: dict
-
-
+</code></pre>
+<p>**写完后应当怎样：**重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。</p>
+<h3>第 6 步：写 run_review 的状态边界</h3>
+<p>暂停时给具体预览，恢复时带回确认；线程 ID 包含本人身份，检查点写入与预览同锁。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/graph.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-python"># 目的：暂停时给具体预览，恢复时带回确认；线程 ID 包含本人身份，检查点写入与预览同锁。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def run_review(actor, action_id, decision=None):
     def review(state):
         candidates = {a[&quot;id&quot;]: a for a in pending(actor)}
@@ -64,7 +109,9 @@ def run_review(actor, action_id, decision=None):
             checkpoint = graph.get_state(config)
             if not checkpoint.values:
                 raise ValueError(&quot;没有可恢复的检查点，请先运行 start。&quot;)
-            if not checkpoint.next:
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">            if not checkpoint.next:
                 return {&quot;status&quot;: &quot;finished&quot;, &quot;result&quot;: checkpoint.values.get(&quot;result&quot;)}
         value = Command(resume=decision) if decision is not None else {&quot;action_id&quot;: action_id}
         result = graph.invoke(value, config=config)
@@ -74,34 +121,64 @@ def run_review(actor, action_id, decision=None):
             save(&quot;graph-preview.json&quot;, preview)
             return {&quot;status&quot;: &quot;awaiting_confirmation&quot;, &quot;preview&quot;: preview}
         return {&quot;status&quot;: &quot;finished&quot;, &quot;result&quot;: result.get(&quot;result&quot;)}
-
-
+</code></pre>
+<p>**写完后应当怎样：**重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。</p>
+<h3>第 7 步：写 erase_threads 的状态边界</h3>
+<p>为删除个人内容准备本人图线程清理，不能只删除业务表却留下检查点副本。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/graph.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：为删除个人内容准备本人图线程清理，不能只删除业务表却留下检查点副本。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def erase_threads(actor):
     with sqlite3.connect(data_dir() / &quot;checkpoints.sqlite3&quot;, check_same_thread=False) as db:
         saver = SqliteSaver(db)
         for item in pending(actor):
             saver.delete_thread(digest([actor.tenant, actor.user, item[&quot;id&quot;]]))
 </code></pre>
+<p>**写完后应当怎样：**重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。</p>
+<h3>第 8 步：把暂停和恢复接回命令行</h3>
+<p>恢复必须使用已显示的具体预览，不能只传一个“同意”就写入。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/graph_cli.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<pre><code class="language-python"># 目的：恢复必须使用已显示的具体预览，不能只传一个“同意”就写入。
+# 预期：不同进程的 start/resume 能完成一次批准。
+import argparse
+import json
+from .files import load
+from .graph import run_review
+from .state import Actor,initialize
+
+
+def main():
+    parser=argparse.ArgumentParser(description=&quot;暂停与恢复同一批准&quot;)
+    parser.add_argument(&quot;operation&quot;,choices=[&quot;start&quot;,&quot;resume&quot;])
+    parser.add_argument(&quot;--user&quot;,default=&quot;reader-a&quot;)
+    args=parser.parse_args();initialize();actor=Actor(&quot;demo&quot;,args.user)
+    identity=input(&quot;本人草稿 ID：&quot;).strip()
+    decision=None
+    if args.operation==&quot;resume&quot;:
+        preview=load(&quot;graph-preview.json&quot;)
+        if not preview or preview[&quot;id&quot;]!=identity:raise ValueError(&quot;请先取得匹配预览。&quot;)
+        print(json.dumps(preview,ensure_ascii=False,indent=2))
+        if input(&quot;确认这份预览？输入 YES：&quot;)!=&quot;YES&quot;:
+            print(&quot;没有批准，保持暂停。&quot;)
+            return
+        decision={&quot;revision&quot;:preview[&quot;revision&quot;],&quot;digest&quot;:preview[&quot;digest&quot;],&quot;confirmed&quot;:True}
+    print(json.dumps(run_review(actor,identity,decision),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**不同进程的 start/resume 能完成一次批准。</p>
+<h2 id="section-3">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/state.py companion/graph.py companion/graph_cli.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>恢复必须使用已显示的具体预览，不能只传一个“同意”就写入。 不同进程的 start/resume 能完成一次批准。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
 </details>
 
-<h2 id="section-4">本单元完成条件</h2>
-<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
-<ol>
-<li>检查点代替业务数据库了吗？</li>
-<li>为什么恢复节点内仍要幂等？</li>
-</ol>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
-
-<p><strong>检查点代替业务数据库了吗？</strong></p>
-<p>没有。检查点负责流程暂停与继续，actions/notes 负责版本、权限、批准和最终副作用。</p>
-<p><strong>为什么恢复节点内仍要幂等？</strong></p>
-<p>恢复可能重新执行节点，网络也可能重试。没有幂等会重复写入，即使框架成功保存了流程状态。</p>
-<p>**通过证据：**跨进程恢复、旧预览拒绝、重复恢复单条结果三项证据；能解释手写与框架职责。</p>
-</details>
-
-<h2 id="section-5">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-4">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/04-agent-frameworks.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0055-langgraph-checkpoint"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0054-resume-actions.html"><small>上一单元</small>关闭程序后，接着处理同一草稿</a><a href="0056-real-accounts.html"><small>下一单元</small>从测试身份切到登录账号 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0055-langgraph-checkpoint"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0054-resume-actions.html"><small>上一单元</small>关闭程序后，接着处理同一草稿</a><a href="0055-langgraph-checkpoint-02.html"><small>下一单元</small>用状态图重现同一个批准流程（2/2：把本节能力连起来） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

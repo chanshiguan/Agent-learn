@@ -1,21 +1,31 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用同一个程序获得回答 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0022-first-model-call">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用同一个程序获得回答</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-4">← 返回课程地图</a><p class="rail-label">第 4 章 · 接通一种真实模型</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0020-local-model.html"><span class="unit-number">1</span><span>本地路线 先让模型服务准备好<small>25—40 分钟</small></span></a></li><li><a href="0021-cloud-model.html"><span class="unit-number">2</span><span>线上路线 把服务地址和凭据配置清楚<small>20—30 分钟</small></span></a></li><li><a href="0022-first-model-call.html" aria-current="page"><span class="unit-number">3</span><span>用同一个程序获得回答<small>30—45 分钟</small></span></a></li><li><a href="0023-stage-checkpoint.html"><span class="unit-number">4</span><span>用一次排错和一次重跑完成第一阶段<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">安装客户端，先看清请求</a></li><li><a href="#section-2">运行一次真实请求</a></li><li><a href="#section-3">完整程序</a></li><li><a href="#section-4">再把客户端放进 Docker</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 4 章 / 单元 3 · 共 4 个</p><h1>用同一个程序获得回答</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 本地 75—115 分钟 / 线上 70—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>30—45 分钟</strong>。先完成本地或线上配置，两条路线从这里汇合。你应在练习目录、已启用 Python 虚拟环境，并在同一终端设置好模型变量。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用同一个程序获得回答</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-4">← 返回课程地图</a><p class="rail-label">第 4 章 · 接通一种真实模型</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0020-local-model.html"><span class="unit-number">1</span><span>本地路线 先让模型服务准备好<small>25—40 分钟</small></span></a></li><li><a href="0021-cloud-model.html"><span class="unit-number">2</span><span>线上路线 把服务地址和凭据配置清楚<small>20—30 分钟</small></span></a></li><li><a href="0022-first-model-call.html" aria-current="page"><span class="unit-number">3</span><span>用同一个程序获得回答<small>70—85 分钟</small></span></a></li><li><a href="0023-stage-checkpoint.html"><span class="unit-number">4</span><span>用一次排错和一次重跑完成第一阶段<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">安装客户端，先看清请求</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">运行一次真实请求</a></li><li><a href="#section-5">完整程序</a></li><li><a href="#section-6">再把客户端放进 Docker</a></li><li><a href="#section-7">本单元验收与参考答案</a></li><li><a href="#section-8">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 4 章 / 单元 3 · 共 4 个</p><h1>用同一个程序获得回答</h1><div class="lesson-meta"><span>本单元 70—85 分钟</span><span>本章 110—155 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>70—85 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0021-cloud-model.html">《线上路线 把服务地址和凭据配置清楚》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">安装客户端，先看清请求</h2>
-<pre><code class="language-bash"># 把模型接口客户端安装到当前 Python 环境；成功后 first_chat.py 才能导入所需 SDK。
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：只增加模型客户端依赖</h3>
+<p>继续使用同一个虚拟环境，先保存依赖清单，再安装；本地与线上路线共用客户端。</p>
+<p>**写在哪里：**项目根目录下的 <code>requirements-model.txt</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-text"># 第 4 章新增的兼容接口客户端；读取讲稿的依赖仍在 requirements.txt 中。
+openai==3.37.0
+</code></pre>
+<p>**写完后应当怎样：**安装后可以导入 openai，但还没有发送请求。</p>
+<pre><code class="language-bash"># 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
 python -m pip install -r requirements-model.txt
 </code></pre>
-<p>这次新增的是兼容接口客户端。它负责把 Python 参数发成 HTTP 请求，并把响应解析回来；它不会自动替你下载模型或把讲稿加入知识库。</p>
-<p>核心请求由模型名和消息列表组成。消息中的 <code>system</code> 说明本次回答要求，<code>user</code> 放阅读问题。当前请求里没有讲稿，因此模型即使回答得很像老师，也不能说它参考了你的资料。</p>
-<h2 id="section-2">运行一次真实请求</h2>
-<pre><code class="language-bash"># 发送一次公开阅读问题并保存真实响应；预期非空回答、完整响应 True 和输出 JSON。
-python first_chat.py --output data/output/model-run.json
-</code></pre>
-<p>程序会问：“请用两句话说明阅读《狂人日记》时可以留意什么。”预期是出现非空回答、<code>完整响应：True</code>，并生成记录。模型文字和耗时不必与任何示例相同。</p>
-<p>打开 JSON，找到 <code>model</code>、<code>answer</code>、<code>finish_reason</code>、<code>usage</code> 和 <code>knowledge_base_used</code>。最后一个字段必须是 <code>false</code>。它提醒我们：模型已接通，知识库尚未接入。</p>
-<h2 id="section-3">完整程序</h2>
-<pre><code class="language-python">&quot;&quot;&quot;验证一次真实模型调用；本章不读取或上传讲稿。&quot;&quot;&quot;
+<h3>第 2 步：先读取配置并检查地址</h3>
+<p>凭据留在环境变量；本地和线上只换配置。先拒绝缺少模型名或云端 HTTPS/密钥的配置。</p>
+<p>**写在哪里：**项目根目录下的 <code>first_chat.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-python"># 目的：凭据留在环境变量；本地和线上只换配置。先拒绝缺少模型名或云端 HTTPS/密钥的配置。
+# 预期：配置不全时在发请求前停止。
+&quot;&quot;&quot;验证一次真实模型调用；本章不读取或上传讲稿。&quot;&quot;&quot;
 
 import argparse
 import json
@@ -38,13 +48,22 @@ key = os.environ.get(&quot;LLM_API_KEY&quot;, &quot;&quot;)
 if mode not in {&quot;local&quot;, &quot;cloud&quot;} or not model:
     parser.error(&quot;请设置 LLM_MODE 为 local 或 cloud，并用 LLM_MODEL 指定真实模型名。&quot;)
 address = urlparse(base_url)
-if mode == &quot;cloud&quot; and (address.scheme != &quot;https&quot; or not key):
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">if mode == &quot;cloud&quot; and (address.scheme != &quot;https&quot; or not key):
     parser.error(&quot;线上路线需要 HTTPS 服务地址和 LLM_API_KEY。&quot;)
 if mode == &quot;local&quot;:
     if address.hostname not in {&quot;127.0.0.1&quot;, &quot;localhost&quot;, &quot;host.docker.internal&quot;}:
         parser.error(&quot;本章本地路线只连接本机或 Docker 宿主地址。远程服务器连接留到部署阶段。&quot;)
     key = &quot;ollama&quot;
-
+</code></pre>
+<p>**写完后应当怎样：**配置不全时在发请求前停止。</p>
+<h3>第 3 步：组装一份明确的模型请求</h3>
+<p>客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>first_chat.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。
+# 预期：这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。
 # 本地请求不经过环境中的联网代理，避免把回环地址交给代理或触发额外 SOCKS 依赖。
 client = OpenAI(base_url=base_url, api_key=key, timeout=90.0, max_retries=0,
                 http_client=DefaultHttpxClient(trust_env=mode != &quot;local&quot;))
@@ -62,7 +81,14 @@ request = {
 reasoning_effort = os.environ.get(&quot;LLM_REASONING_EFFORT&quot;, &quot;&quot;).strip()
 if reasoning_effort:
     request[&quot;reasoning_effort&quot;] = reasoning_effort
-
+</code></pre>
+<p>**写完后应当怎样：**这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。</p>
+<h3>第 4 步：发送请求，并区分三类网络错误</h3>
+<p>地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。</p>
+<p>**写在哪里：**项目根目录下的 <code>first_chat.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。
+# 预期：能根据错误类型回到地址、负载或服务配置排查。
 started = perf_counter()
 try:
     response = client.chat.completions.create(**request)
@@ -73,7 +99,14 @@ except APIConnectionError:
 except APIStatusError as error:
     # 不打印原始响应或凭据；先用状态码区分认证、模型名、额度等问题。
     parser.exit(2, f&quot;服务返回 HTTP {error.status_code}。按教材排错表检查配置。\n&quot;)
-
+</code></pre>
+<p>**写完后应当怎样：**能根据错误类型回到地址、负载或服务配置排查。</p>
+<h3>第 5 步：检查模型是否真的完成</h3>
+<p>返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。</p>
+<p>**写在哪里：**项目根目录下的 <code>first_chat.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。
+# 预期：空内容或截断会记为未完成，不伪造成功。
 if not response.choices:
     parser.exit(2, &quot;接口没有返回候选答案。请检查该服务是否支持本章使用的接口。\n&quot;)
 choice = response.choices[0]
@@ -86,6 +119,14 @@ record = {
     &quot;usage&quot;: response.usage.model_dump() if response.usage else None,
     &quot;knowledge_base_used&quot;: False,
 }
+</code></pre>
+<p>**写完后应当怎样：**空内容或截断会记为未完成，不伪造成功。</p>
+<h3>第 6 步：保存这次调用的证据</h3>
+<p>把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。</p>
+<p>**写在哪里：**项目根目录下的 <code>first_chat.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。
+# 预期：data/output/model-run.json 有本次真实答案、用量和完成状态。
 args.output.parent.mkdir(parents=True, exist_ok=True)
 # 只记实验结果，不保存密钥；这份记录能证明调用过程，不能证明文学解读正确。
 args.output.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
@@ -94,10 +135,39 @@ print(f&quot;完整响应：{complete}；耗时：{record[&#39;elapsed_seconds&#
 if not complete:
     parser.exit(2, &quot;响应为空或未正常结束，保留记录排查，不将本次标为通过。\n&quot;)
 </code></pre>
+<p>**写完后应当怎样：**data/output/model-run.json 有本次真实答案、用量和完成状态。</p>
+<h3>第 7 步：复用容器知识封装模型客户端</h3>
+<p>读取容器的 ENTRYPOINT 与模型程序不同；单独配方让程序职责清楚，环境变量在运行时传入。</p>
+<p>**写在哪里：**项目根目录下的 <code>Dockerfile.model</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-dockerfile"># 这是第 4 章的模型客户端镜像，不包含模型权重或讲稿。
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY requirements-model.txt ./
+RUN python -m pip install --no-cache-dir -r requirements-model.txt
+COPY first_chat.py ./
+# 模型地址和凭据在运行时传入，避免它们随镜像分发。
+ENTRYPOINT [&quot;python&quot;, &quot;first_chat.py&quot;]
+</code></pre>
+<p>**写完后应当怎样：**模型地址指向实际服务，不把密钥写进镜像。</p>
+<h2 id="section-3">运行并观察</h2>
+<pre><code class="language-bash"># 把模型接口客户端安装到当前 Python 环境；成功后 first_chat.py 才能导入所需 SDK。
+python -m pip install -r requirements-model.txt
+</code></pre>
+<p>这次新增的是兼容接口客户端。它负责把 Python 参数发成 HTTP 请求，并把响应解析回来；它不会自动替你下载模型或把讲稿加入知识库。</p>
+<p>核心请求由模型名和消息列表组成。消息中的 <code>system</code> 说明本次回答要求，<code>user</code> 放阅读问题。当前请求里没有讲稿，因此模型即使回答得很像老师，也不能说它参考了你的资料。</p>
+<h2 id="section-4">运行一次真实请求</h2>
+<pre><code class="language-bash"># 发送一次公开阅读问题并保存真实响应；预期非空回答、完整响应 True 和输出 JSON。
+python first_chat.py --output data/output/model-run.json
+</code></pre>
+<p>程序会问：“请用两句话说明阅读《狂人日记》时可以留意什么。”预期是出现非空回答、<code>完整响应：True</code>，并生成记录。模型文字和耗时不必与任何示例相同。</p>
+<p>打开 JSON，找到 <code>model</code>、<code>answer</code>、<code>finish_reason</code>、<code>usage</code> 和 <code>knowledge_base_used</code>。最后一个字段必须是 <code>false</code>。它提醒我们：模型已接通，知识库尚未接入。</p>
+<h2 id="section-5">完整程序</h2>
 <p>这段代码稍长，可以分三次阅读。先读配置检查，弄清参数从哪里来；再读 <code>request</code> 和模型调用，找出真正发送的消息；最后读异常处理和记录保存，理解怎样判断这次是否正常完成。</p>
 <p><code>max_tokens=256</code> 限制本次输出规模，不表示输入可以无限长，也不是“256 个汉字”。<code>timeout=90.0</code> 是客户端请求超时配置，不是对每台机器响应时间的承诺。<code>max_retries=0</code> 让初次排错不被自动重试掩盖。</p>
 <p><code>finish_reason</code> 可以帮助判断是否因为长度上限等原因停止。程序把非空且正常结束的响应标为完整，其他情况保留记录后返回失败状态。完整只表示响应过程符合本次检查，不表示观点正确。</p>
-<h2 id="section-4">再把客户端放进 Docker</h2>
+<h2 id="section-6">再把客户端放进 Docker</h2>
 <p>这部分复用第三章的构建方法。<code>Dockerfile.model</code> 只包含调用程序和 SDK，不包含模型权重。模型继续由主机上的 Ollama 或线上服务运行。</p>
 <pre><code class="language-bash"># 按模型客户端的 Dockerfile 构建镜像；包含调用程序和 SDK，不包含模型权重。
 docker build -f Dockerfile.model -t classics-chat:chapter4 .
@@ -122,7 +192,7 @@ docker run --rm \
 </code></pre>
 <p><code>-e 变量名</code> 从当前终端取值，不把密钥字面值写入命令。环境变量也不是完整的生产密钥管理方案，后面上线阶段再完善。</p>
 <p>**本单元完成条件：**至少一条真实模型路线在主机成功；容器调用单独记录是否通过。能说明请求里有什么，以及为什么这还不是 <a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html">RAG</a>。</p>
-<h2 id="section-5">本单元验收与参考答案</h2>
+<h2 id="section-7">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
@@ -132,7 +202,8 @@ docker run --rm \
 <p>**通过证据：**保存主机模型记录。容器调用另写“通过、失败或待运行”及证据，不能用主机通过替代。SDK 不负责下载权重，客户端镜像也不包含权重。</p>
 </details>
 
-<h2 id="section-6">资料依据</h2>
+<h2 id="section-8">资料依据</h2>
 <p><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>提供统一客户端的思路；<a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">部署示例</a>展示宿主模型与容器应用的连接方式。本课程代码保持模型调用和资料读取分开。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0022-first-model-call"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0021-cloud-model.html"><small>上一单元</small>线上路线 把服务地址和凭据配置清楚</a><a href="0023-stage-checkpoint.html"><small>下一单元</small>用一次排错和一次重跑完成第一阶段 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,10 +1,171 @@
 # 给模型回答打分，也保留不通过
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **50—65 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《用固定题集观察检索失败（2/2：把本节能力连起来）》](0030-retrieval-baseline-02.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 把生成质量与检索质量分开
 
 这次才调用真实模型。评分看三件事：解释是否被证据支持、引用是否支持对应说法、表达是否适合目标读者。年龄适配不是简单地“用词可爱”：不羞辱读者，不替读者强下价值结论，遇到复杂内容可提示家长共同讨论。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：让生成评测成为显式选择
+
+默认检索不产生模型调用；只有 --generate 才把题目和候选资料送给模型。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+from .rag import retrieve
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+from .rag import retrieve, answer
+```
+
+**写完后应当怎样：**能分别保留检索失败、模型结构错误和人工评分。
+
+### 第 2 步：在同一条记录中保留模型结果
+
+出错时只记录错误类型，人工字段仍留空，避免把协议成功当成文学正确。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    if generate or reranking or rewriting:
+        raise ValueError("本阶段只运行检索基线。")
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+**写完后应当怎样：**每道题都有来源及真实响应或失败类型，等待人工逐项核对。
+
+### 第 3 步：在同一条记录中保留模型结果
+
+出错时只记录错误类型，人工字段仍留空，避免把协议成功当成文学正确。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+                  "manual": {"answer_supported": None, "citation_supported": None, "age_appropriate": None}}
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+                  "manual": {"answer_supported": None, "citation_supported": None, "age_appropriate": None}}
+        # 检索测试默认不调用生成模型；generate 显式开启后才可能向云端发送讲稿片段。
+        if generate:
+            try:
+                record["response"] = answer(case["question"], hits)
+            except Exception as error:
+                record["error_type"] = type(error).__name__
+```
+
+**写完后应当怎样：**每道题都有来源及真实响应或失败类型，等待人工逐项核对。
+
+### 第 4 步：把人工核对变成明确门槛
+
+三个人工字段必须分别为 true，证据不足行为也要匹配预期；少一项就不能放行。
+
+**写在哪里：**项目根目录下的 `companion/evaluation.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。
+
+```python
+# 目的：三个人工字段必须分别为 true，证据不足行为也要匹配预期；少一项就不能放行。
+# 预期：未评分的报告会失败，不能用缺省值蒙混过去。
+def quality_gate(report_file):
+    report = json.loads(Path(report_file).read_text(encoding="utf-8"))
+    failures = []
+    if not report.get("generated") or not report.get("records"):
+        failures.append("没有真实生成记录。")
+    for item in report.get("records", []):
+        if item.get("error_type") or not item.get("response"):
+            failures.append(f"{item['id']} 没有成功响应。")
+        if not all(item.get("manual", {}).get(k) is True for k in ("answer_supported", "citation_supported", "age_appropriate")):
+            failures.append(f"{item['id']} 缺少逐项人工通过结论。")
+        if item.get("response", {}).get("insufficient") is not item.get("expected_insufficient"):
+            failures.append(f"{item['id']} 的证据不足行为未达到预期。")
+    return {"passed": not failures, "failures": failures,
+            "scope": "仅这份题集的记录；不是生产容量、教学效果或公司上线批准"}
+```
+
+**写完后应当怎样：**未评分的报告会失败，不能用缺省值蒙混过去。
+
+### 第 5 步：让质量门槛有明确退出码
+
+自动流水线需要知道通过还是失败；失败应退出非零，而不只打印一句提醒。
+
+**写在哪里：**项目根目录下的 `companion/grade_cli.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
+
+```python
+# 目的：自动流水线需要知道通过还是失败；失败应退出非零，而不只打印一句提醒。
+# 预期：未完成核对时退出码为 2，并说明缺失项。
+import argparse
+import json
+from .evaluation import quality_gate
+
+
+def main():
+    parser=argparse.ArgumentParser(description="检查已人工核对的报告")
+    parser.add_argument("report")
+    result=quality_gate(parser.parse_args().report)
+    print(json.dumps(result,ensure_ascii=False,indent=2))
+    if not result["passed"]:
+        raise SystemExit(2)
+```
+
+**写完后应当怎样：**未完成核对时退出码为 2，并说明缺失项。
+
+### 第 6 步：给命令入口增加 grade
+
+这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。
+
+**写在哪里：**项目根目录下的 `companion/__main__.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        from .evaluate_cli import main
+        main()
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+        from .evaluate_cli import main
+        main()
+    elif command == "grade":
+        from .grade_cli import main
+        main()
+```
+
+**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+## 运行并观察
 
 ```bash
 # 对开发题执行真实检索和生成；线上路线会发送命中的讲稿片段并产生费用。
@@ -53,3 +214,22 @@ null 是未评或无法判断，false 是已评且不通过，true 是已核对�
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+from companion.evaluation import quality_gate
+r=quality_gate("data/live/evaluation.json")
+assert not r["passed"]
+print("没有真实回答和人工评分，正确拒绝通过")
+PY
+```
+
+**预期：**没有评分就不能宣称质量达标。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

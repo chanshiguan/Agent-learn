@@ -1,25 +1,119 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/web/basic.html · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/basic.html</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/basic.html</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/basic.html" download>下载此文件</a></p><pre><code class="language-text">&lt;!doctype html&gt;&lt;html lang=&quot;zh-CN&quot;&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;名著伴读 · 第一次页面问答&lt;/title&gt;
-&lt;style&gt;body{max-width:760px;margin:48px auto;padding:0 20px;font:17px/1.8 system-ui;color:#21324b;background:#f6f8fb}h1{font-size:30px}textarea{box-sizing:border-box;width:100%;min-height:120px;padding:16px;font:inherit;border:1px solid #8192a8;border-radius:8px}button{font:inherit;padding:10px 20px;margin-top:12px;border:0;border-radius:7px;background:#2356c8;color:white;cursor:pointer}button:disabled{background:#526174}pre{white-space:pre-wrap}article{padding:20px;background:white;border:1px solid #dbe2eb;border-radius:10px;margin:20px 0}summary{cursor:pointer}:focus-visible{outline:3px solid #2356c8;outline-offset:3px}&lt;/style&gt;
-&lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;&lt;p&gt;提出一个问题，回答下方可以查看用到的讲稿。&lt;/p&gt;
-&lt;form id=&quot;form&quot;&gt;&lt;label for=&quot;question&quot;&gt;你想了解什么？&lt;/label&gt;&lt;textarea id=&quot;question&quot; maxlength=&quot;800&quot; required&gt;这份讲稿怎样解释文言文序言和白话日记？&lt;/textarea&gt;&lt;button id=&quot;submit&quot;&gt;查资料并回答&lt;/button&gt;&lt;/form&gt;
-&lt;p id=&quot;status&quot; role=&quot;status&quot;&gt;&lt;/p&gt;&lt;article id=&quot;result&quot; hidden&gt;&lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;&lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;&lt;/article&gt;
-&lt;script&gt;
-document.getElementById('form').addEventListener('submit',async event=&gt;{
- event.preventDefault();const button=document.getElementById('submit');button.disabled=true;
- document.getElementById('result').hidden=true;
- document.getElementById('status').textContent='正在查找资料并组织回答……';
- try{
-  const response=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:document.getElementById('question').value,book:'狂人日记'})});
-  const result=await response.json();if(!response.ok)throw new Error(typeof result.detail==='string'?result.detail:'请求未通过检查');
-  // 用 textContent 显示不可信模型输出；其中即使有 HTML，也不会被浏览器执行。
-  document.getElementById('answer').textContent=result.answer;const list=document.getElementById('sources');list.replaceChildren();
-  for(const source of result.sources||[]){const details=document.createElement('details'),summary=document.createElement('summary'),text=document.createElement('p');summary.textContent=source.file+' · '+source.parent;text.textContent=source.text;details.append(summary,text);list.append(details);}
-  document.getElementById('result').hidden=false;document.getElementById('status').textContent='回答已生成，请对照来源判断。';
- }catch(error){document.getElementById('status').textContent=error.message;}
- finally{button.disabled=false;}
-});
-&lt;/script&gt;&lt;/html&gt;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/basic.html</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/basic.html</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/basic.html" download>下载此文件</a></p><pre><code class="language-text">&lt;!doctype html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+  &lt;meta charset=&quot;utf-8&quot; /&gt;&lt;meta
+    name=&quot;viewport&quot;
+    content=&quot;width=device-width,initial-scale=1&quot;
+  /&gt;&lt;title&gt;名著伴读 · 第一次页面问答&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 20px;
+      font: 17px/1.8 system-ui;
+      color: #21324b;
+      background: #f6f8fb;
+    }
+    h1 {
+      font-size: 30px;
+    }
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      font: inherit;
+      border: 1px solid #8192a8;
+      border-radius: 8px;
+    }
+    button {
+      font: inherit;
+      padding: 10px 20px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 7px;
+      background: #2356c8;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #526174;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    article {
+      padding: 20px;
+      background: white;
+      border: 1px solid #dbe2eb;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    summary {
+      cursor: pointer;
+    }
+    :focus-visible {
+      outline: 3px solid #2356c8;
+      outline-offset: 3px;
+    }
+  &lt;/style&gt;
+  &lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;
+  &lt;p&gt;提出一个问题，回答下方可以查看用到的讲稿。&lt;/p&gt;
+  &lt;form id=&quot;form&quot;&gt;
+    &lt;label for=&quot;question&quot;&gt;你想了解什么？&lt;/label
+    &gt;&lt;textarea id=&quot;question&quot; maxlength=&quot;800&quot; required&gt;
+这份讲稿怎样解释文言文序言和白话日记？&lt;/textarea
+    &gt;&lt;button id=&quot;submit&quot;&gt;查资料并回答&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;p id=&quot;status&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+  &lt;article id=&quot;result&quot; hidden&gt;
+    &lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;
+    &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+  &lt;/article&gt;
+  &lt;script&gt;
+    document.getElementById('form').addEventListener('submit', async (event) =&gt; {
+      event.preventDefault();
+      const button = document.getElementById('submit');
+      button.disabled = true;
+      document.getElementById('result').hidden = true;
+      document.getElementById('status').textContent = '正在查找资料并组织回答……';
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: document.getElementById('question').value,
+            book: '狂人日记',
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(
+            typeof result.detail === 'string' ? result.detail : '请求未通过检查',
+          );
+        // 用 textContent 显示不可信模型输出；其中即使有 HTML，也不会被浏览器执行。
+        document.getElementById('answer').textContent = result.answer;
+        const list = document.getElementById('sources');
+        list.replaceChildren();
+        for (const source of result.sources || []) {
+          const details = document.createElement('details'),
+            summary = document.createElement('summary'),
+            text = document.createElement('p');
+          summary.textContent = source.file + ' · ' + source.parent;
+          text.textContent = source.text;
+          details.append(summary, text);
+          list.append(details);
+        }
+        document.getElementById('result').hidden = false;
+        document.getElementById('status').textContent = '回答已生成，请对照来源判断。';
+      } catch (error) {
+        document.getElementById('status').textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  &lt;/script&gt;
+&lt;/html&gt;
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

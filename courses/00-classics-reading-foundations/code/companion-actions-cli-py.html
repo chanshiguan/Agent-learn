@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/actions_cli.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/actions_cli.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/actions_cli.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/actions_cli.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：状态保存在 SQLite 而非 Python 变量；重新启动后仍从数据库确认本人动作。
+# 预期：关闭程序再运行 list，旧草稿仍在；批准仍要求当前预览。
+import argparse
+import json
+import uuid
+from . import actions
+from .state import Actor, initialize
+
+
+def main():
+    parser=argparse.ArgumentParser(description=&quot;跨进程检查待确认动作&quot;)
+    parser.add_argument(&quot;operation&quot;,choices=[&quot;draft&quot;,&quot;list&quot;,&quot;notes&quot;,&quot;revise&quot;,&quot;approve&quot;])
+    parser.add_argument(&quot;--user&quot;,default=&quot;reader-a&quot;)
+    parser.add_argument(&quot;--text&quot;,default=&quot;我想回查文言文序言和日记之间的关系。&quot;)
+    args=parser.parse_args();initialize();actor=Actor(&quot;demo&quot;,args.user)
+    if args.operation==&quot;draft&quot;:result=actions.draft(actor,&quot;note&quot;,args.text,uuid.uuid4().hex)
+    elif args.operation==&quot;list&quot;:result=actions.pending(actor)
+    elif args.operation==&quot;notes&quot;:result=actions.notes(actor)
+    else:
+        identity=input(&quot;本人草稿 ID：&quot;).strip()
+        item=next((x for x in actions.pending(actor) if x[&quot;id&quot;]==identity),None)
+        if not item:raise ValueError(&quot;没有找到本人草稿。&quot;)
+        if args.operation==&quot;revise&quot;:result=actions.revise(actor,identity,args.text)
+        else:
+            print(json.dumps(item,ensure_ascii=False,indent=2))
+            confirmed=input(&quot;确认当前预览？输入 YES：&quot;)==&quot;YES&quot;
+            result=actions.approve(actor,identity,item[&quot;revision&quot;],item[&quot;digest&quot;],confirmed)
+    print(json.dumps(result,ensure_ascii=False,indent=2))
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

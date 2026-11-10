@@ -1,12 +1,53 @@
 # 资料更新后，不让旧索引混进来
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **30—45 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《启动向量库，重启后继续查》](0034-qdrant-persistence.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 先看两种版本
 
 `corpus.json` 记录资料快照；`index.json` 记录活动集合、编码器名称、权重提交指纹和资料 revision。查询前会核对二者。资料已变而索引未更新时，失败比悄悄返回旧证据更容易发现。
 
 编码器在 `vectors.py` 中通过 `MODEL_REVISION` 指定[模型仓库的固定提交](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/e8f8c211226b894fcb81acc59f3b34ba3efd5f42)。加载、缓存和索引都使用这个值，不从依赖库的内部字段猜测版本。要升级权重，先明确修改提交值，再重新运行本章对照；不要只换模型文件而保留旧索引。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：给编码结果加版本化缓存
+
+文本和编码器版本都没变时复用向量；新集合完整后再切换指针，保存旧集合供核对。
+
+**写在哪里：**项目根目录下的 `companion/vectors.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    vectors = embed([chunk["text"] for chunk in corpus["chunks"]])
+    new_count = len(vectors)
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    cache = load(f"embedding-cache-{identity}.json", {})
+    vectors = []
+    new_count = 0
+    for chunk in corpus["chunks"]:
+        key = digest(chunk["text"])
+        if key not in cache:
+            cache[key] = embed([chunk["text"]])[0]
+            new_count += 1
+        vectors.append(cache[key])
+    save(f"embedding-cache-{identity}.json", cache)
+```
+
+**写完后应当怎样：**重复建索引 new_embeddings=0；改正文后只为新文本重新编码。
+
+## 运行并观察
 
 ```bash
 # 相同资料再次建索引；预期 new_embeddings 为 0，复用同一模型版本的文本向量缓存。
@@ -56,3 +97,6 @@ python -m companion search "文言文序言" --method semantic
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

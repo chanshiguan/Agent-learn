@@ -1,12 +1,12 @@
-"""草稿与实际写入分开；批准绑定具体内容、版本、本人和有效期。"""
-import json
+# 目的：草稿预览与正式笔记分开保存，批准必须绑定本人、内容和版本。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import time
 import uuid
-
 from .files import digest
 from .state import connect
 
-
+# 目的：生成草稿不等于保存笔记；请求键防止重复生成同一动作。
+# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
 def draft(actor, kind, body, request_key, session_id=None):
     if kind not in {"note", "review_plan"} or not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:
         raise ValueError("只接受非空笔记或复习计划，最多 6000 字符。")
@@ -26,25 +26,14 @@ def draft(actor, kind, body, request_key, session_id=None):
                    (identity, actor.tenant, actor.user, request_key, kind, body, hashed, time.time() + 900))
         return dict(db.execute("SELECT * FROM actions WHERE id=?", (identity,)).fetchone())
 
-
+# 目的：只列出当前读者的动作，让预览能够回查。
+# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
 def pending(actor):
     with connect() as db:
         return [dict(r) for r in db.execute("SELECT * FROM actions WHERE tenant=? AND owner=? ORDER BY rowid DESC", (actor.tenant, actor.user))]
 
-
-def revise(actor, identity, body):
-    if not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:
-        raise ValueError("草稿长度需为 1—6000 字符。")
-    with connect() as db:
-        db.execute("BEGIN IMMEDIATE")
-        row = db.execute("SELECT * FROM actions WHERE id=? AND tenant=? AND owner=? AND status='pending'", (identity, actor.tenant, actor.user)).fetchone()
-        if row is None:
-            raise PermissionError("没有可修改的本人草稿。")
-        db.execute("UPDATE actions SET body=?,digest=?,revision=revision+1,expires=? WHERE id=?",
-                   (body, digest([row["kind"], body]), time.time() + 900, identity))
-        return dict(db.execute("SELECT * FROM actions WHERE id=?", (identity,)).fetchone())
-
-
+# 目的：在同一事务内写笔记并标记完成，确认必须匹配当前版本和摘要。
+# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
 def approve(actor, identity, revision, expected_digest, confirmed):
     if confirmed is not True:
         raise ValueError("未获得对当前草稿的明确确认。")
@@ -64,7 +53,22 @@ def approve(actor, identity, revision, expected_digest, confirmed):
         db.execute("UPDATE actions SET status='committed' WHERE id=?", (identity,))
     return {"id": identity, "status": "committed", "replayed": False}
 
-
+# 目的：只读取已经批准后的正式笔记，不把 pending 草稿混进来。
+# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
 def notes(actor):
     with connect() as db:
         return [dict(r) for r in db.execute("SELECT id,kind,body,created FROM notes WHERE tenant=? AND owner=?", (actor.tenant, actor.user))]
+
+# 目的：修改正文同时递增版本、更新摘要与有效期；旧确认不能批准新内容。
+# 预期：旧 revision/digest 失败，新预览可以确认。
+def revise(actor, identity, body):
+    if not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:
+        raise ValueError("草稿长度需为 1—6000 字符。")
+    with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute("SELECT * FROM actions WHERE id=? AND tenant=? AND owner=? AND status='pending'", (identity, actor.tenant, actor.user)).fetchone()
+        if row is None:
+            raise PermissionError("没有可修改的本人草稿。")
+        db.execute("UPDATE actions SET body=?,digest=?,revision=revision+1,expires=? WHERE id=?",
+                   (body, digest([row["kind"], body]), time.time() + 900, identity))
+        return dict(db.execute("SELECT * FROM actions WHERE id=?", (identity,)).fetchone())

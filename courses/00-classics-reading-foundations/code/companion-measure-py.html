@@ -1,6 +1,8 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/measure.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/measure.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/measure.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/measure.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/measure.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/measure.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/measure.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+# 预期：报告区分成功、拒绝和失败，不能只看平均速度。
+&quot;&quot;&quot;第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。&quot;&quot;&quot;
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import getpass
@@ -33,7 +35,8 @@ def api_probe(url, concurrency, count):
     if not (url.startswith(&quot;http://127.0.0.1:&quot;) or url.startswith(&quot;https://&quot;)):
         raise ValueError(&quot;仅测试本机 HTTP 或受保护的 HTTPS 地址。&quot;)
     token = getpass.getpass(&quot;输入专用测试账号的访问令牌（不回显、不保存）：&quot;)
-    with httpx.Client(base_url=url, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=130) as client:
+    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。
+    with httpx.Client(trust_env=url.startswith(&quot;https://&quot;), base_url=url, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=130) as client:
         sessions = []
         try:
             # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。

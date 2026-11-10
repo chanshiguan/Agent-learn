@@ -1,3 +1,5 @@
+# 目的：凭据留在环境变量；本地和线上只换配置。先拒绝缺少模型名或云端 HTTPS/密钥的配置。
+# 预期：配置不全时在发请求前停止。
 """验证一次真实模型调用；本章不读取或上传讲稿。"""
 
 import argparse
@@ -28,6 +30,8 @@ if mode == "local":
         parser.error("本章本地路线只连接本机或 Docker 宿主地址。远程服务器连接留到部署阶段。")
     key = "ollama"
 
+# 目的：客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。
+# 预期：这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。
 # 本地请求不经过环境中的联网代理，避免把回环地址交给代理或触发额外 SOCKS 依赖。
 client = OpenAI(base_url=base_url, api_key=key, timeout=90.0, max_retries=0,
                 http_client=DefaultHttpxClient(trust_env=mode != "local"))
@@ -46,6 +50,8 @@ reasoning_effort = os.environ.get("LLM_REASONING_EFFORT", "").strip()
 if reasoning_effort:
     request["reasoning_effort"] = reasoning_effort
 
+# 目的：地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。
+# 预期：能根据错误类型回到地址、负载或服务配置排查。
 started = perf_counter()
 try:
     response = client.chat.completions.create(**request)
@@ -57,6 +63,8 @@ except APIStatusError as error:
     # 不打印原始响应或凭据；先用状态码区分认证、模型名、额度等问题。
     parser.exit(2, f"服务返回 HTTP {error.status_code}。按教材排错表检查配置。\n")
 
+# 目的：返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。
+# 预期：空内容或截断会记为未完成，不伪造成功。
 if not response.choices:
     parser.exit(2, "接口没有返回候选答案。请检查该服务是否支持本章使用的接口。\n")
 choice = response.choices[0]
@@ -69,6 +77,9 @@ record = {
     "usage": response.usage.model_dump() if response.usage else None,
     "knowledge_base_used": False,
 }
+
+# 目的：把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。
+# 预期：data/output/model-run.json 有本次真实答案、用量和完成状态。
 args.output.parent.mkdir(parents=True, exist_ok=True)
 # 只记实验结果，不保存密钥；这份记录能证明调用过程，不能证明文学解读正确。
 args.output.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")

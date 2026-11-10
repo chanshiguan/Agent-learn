@@ -1,9 +1,191 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>检验改写有没有改变原问题 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0039-query-rewrite">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>检验改写有没有改变原问题</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-12">← 返回课程地图</a><p class="rail-label">第 12 章 · 一次只加一种检索优化</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0038-hybrid-rerank.html"><span class="unit-number">1</span><span>先混合检索，再单独试重排<small>40—55 分钟</small></span></a></li><li><a href="0039-query-rewrite.html" aria-current="page"><span class="unit-number">2</span><span>检验改写有没有改变原问题<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">好改写必须保留问题的边界</a></li><li><a href="#section-2">阶段三交付</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 12 章 / 单元 2 · 共 2 个</p><h1>检验改写有没有改变原问题</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 75—105 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>检验改写有没有改变原问题</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-12">← 返回课程地图</a><p class="rail-label">第 12 章 · 一次只加一种检索优化</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0038-hybrid-rerank.html"><span class="unit-number">1</span><span>先混合检索，再单独试重排<small>50—65 分钟</small></span></a></li><li><a href="0039-query-rewrite.html" aria-current="page"><span class="unit-number">2</span><span>检验改写有没有改变原问题<small>50—65 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">好改写必须保留问题的边界</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">阶段三交付</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 12 章 / 单元 2 · 共 2 个</p><h1>检验改写有没有改变原问题</h1><div class="lesson-meta"><span>本单元 50—65 分钟</span><span>本章 100—130 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>50—65 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0038-hybrid-rerank.html">《先混合检索，再单独试重排》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">好改写必须保留问题的边界</h2>
 <p>“为什么不赞同”不能被改成“为什么赞同”。作品、人物、否定和读者限定都应保留。本实现只让模型改写一个检索问题，再用原问题组织答案；不会把改写结果当作事实。</p>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：把改写限制为一次检索问题</h3>
+<p>保留作品、人名、讲次和否定；改写不应直接作答或添事实。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/rag.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：保留作品、人名、讲次和否定；改写不应直接作答或添事实。
+# 预期：空结果和过长结果被拒绝，仍需人工判断含义有没有改变。
+def rewrite(question):
+    response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;只把问题改写为一个更清楚的检索问题，保留作品、人物、讲次和否定。不要回答，不增加事实。&quot;},
+                         {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}])
+    result = (response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;).strip()
+    if not result or len(result) &gt; 500:
+        raise ValueError(&quot;改写为空或过长。&quot;)
+    return result
+</code></pre>
+<p>**写完后应当怎样：**空结果和过长结果被拒绝，仍需人工判断含义有没有改变。</p>
+<h3>第 2 步：引入已写好的改写函数</h3>
+<p>原问题保留用于最后回答，改写只影响找资料。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .rag import retrieve, answer, rerank
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .rag import retrieve, answer, rerank, rewrite
+</code></pre>
+<p>**写完后应当怎样：**不会把模型的改写悄悄替换成用户原话。</p>
+<h3>第 3 步：增加改写开关</h3>
+<p>保持可撤销对照，不把一次看似改善自动设成默认。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
+    parser.add_argument(&quot;--rewrite&quot;,action=&quot;store_true&quot;)
+</code></pre>
+<p>**写完后应当怎样：**同一个问题可以开关对照。</p>
+<h3>第 4 步：先保存这次真正用于检索的问法</h3>
+<p>排查答偏时需要知道原问题和实际检索问题分别是什么。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    args = parser.parse_args()
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    args = parser.parse_args()
+    query=rewrite(args.question) if args.rewrite else args.question
+</code></pre>
+<p>**写完后应当怎样：**query 单独保留，不覆盖 args.question。</p>
+<h3>第 5 步：让向量路线也使用检索问法</h3>
+<p>变量名区分文本和向量，避免下游把数组当问题字符串。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        query=embed([args.question])[0]
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        query_vector=embed([query])[0]
+</code></pre>
+<p>**写完后应当怎样：**编码的是改写后的文本，答案仍针对原问题。</p>
+<h3>第 6 步：更新相似度的输入</h3>
+<p>点积需要两个数值向量，不能与文本逐字相乘。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        hits=sorted([{**c,&quot;score&quot;:sum(a*b for a,b in zip(v,query))}
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        hits=sorted([{**c,&quot;score&quot;:sum(a*b for a,b in zip(v,query_vector))}
+</code></pre>
+<p>**写完后应当怎样：**相似度计算仍使用相同维度。</p>
+<h3>第 7 步：把实际检索问法传下去</h3>
+<p>只有调用处换了输入，改写实验才真的生效。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        hits = retrieve(args.question,args.tenant,args.book,args.method,expand=args.expand)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        hits = retrieve(query,args.tenant,args.book,args.method,expand=args.expand)
+</code></pre>
+<p>**写完后应当怎样：**检索来源随 query 变化，最后生成仍用原 question。</p>
+<h3>第 8 步：同时留下两种问法</h3>
+<p>保留比较依据，后续评测可以发现改写中的语义漂移。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    result = answer(args.question,hits) if kind == &quot;ask&quot; else {&quot;question&quot;:args.question,&quot;hits&quot;:hits}
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    result = answer(args.question,hits) if kind == &quot;ask&quot; else {&quot;question&quot;:args.question,&quot;query&quot;:query,&quot;hits&quot;:hits}
+</code></pre>
+<p>**写完后应当怎样：**search.json 中两种问法都可见。</p>
+<h3>第 9 步：让批量评测复用已实现的改写与重排</h3>
+<p>同一题单、同一资料，分别记录各开关，才知道变化来自哪里。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .rag import retrieve, answer
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .rag import retrieve, answer, rewrite, rerank
+</code></pre>
+<p>**写完后应当怎样：**评测不复制另一套检索算法。</p>
+<h3>第 10 步：把改写和重排加入逐题对照</h3>
+<p>保留原问题、实际 query、来源、错误与人工评分，不只给平均分。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        query = case[&quot;question&quot;]
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        query = rewrite(case[&quot;question&quot;]) if rewriting else case[&quot;question&quot;]
+</code></pre>
+<p>**写完后应当怎样：**每个实验仍可以独立保存成不同文件。</p>
+<h3>第 11 步：把改写和重排加入逐题对照</h3>
+<p>保留原问题、实际 query、来源、错误与人工评分，不只给平均分。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
+        if reranking:
+            hits = rerank(case[&quot;question&quot;], hits)
+</code></pre>
+<p>**写完后应当怎样：**每个实验仍可以独立保存成不同文件。</p>
+<h3>第 12 步：在评测入口暴露三个独立条件</h3>
+<p>命令与实际算法选项一致，防止讲义要求的参数实际上未传入。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+    parser.add_argument(&quot;--expand&quot;,action=&quot;store_true&quot;)
+    parser.add_argument(&quot;--rerank&quot;,action=&quot;store_true&quot;)
+    parser.add_argument(&quot;--rewrite&quot;,action=&quot;store_true&quot;)
+</code></pre>
+<p>**写完后应当怎样：**可以一次只打开一个条件。</p>
+<h3>第 13 步：把条件完整传给评测函数</h3>
+<p>参数顺序与函数定义对应；理解位置参数后，也可以改成具名参数提高可读性。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    print(json.dumps(evaluate(args.cases,args.method,args.generate,args.expand,args.rerank,args.rewrite,args.output),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**报告的 options 与本次命令一致。</p>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 只增加改写，暂不叠加重排；报告会同时保存 question 和 query，便于发现改意。
 python -m companion evaluate --method hybrid --rewrite --output retrieval-rewrite.json
 # 选择最终准备保留的方案后，才对保留题做一次真实生成；此例先用 hybrid，不预设复杂方案获胜。
@@ -11,10 +193,10 @@ python -m companion evaluate --cases eval/holdout.json --method hybrid --generat
 </code></pre>
 <p>先逐题检查 query 是否忠于原意，再看命中。改写输入为空、过长或结构失败时，不把它静默替换成一个“看起来能用”的问题。</p>
 <p>在保留题报告上按第 8 章标准人工评分，再执行 grade。保留题失败可以成为下一轮开发题，但之后要补新的保留题；不能持续调到它全对后仍称它未见过。</p>
-<h2 id="section-2">阶段三交付</h2>
+<h2 id="section-4">阶段三交付</h2>
 <p>写一页选择记录：现有失败是什么；试了哪些单项变化；改善了哪类题；额外耗时多少；最后保留哪一种配置。程序默认仍为 keyword，后面网页通过 <code>RETRIEVAL</code> 选择。若你选 hybrid，必须维护 Qdrant 与索引一致性。</p>
 <p>GraphRAG、HyDE、Multi-query 和 Agentic RAG 都可点开选读。本阶段不要求全部实现，先把“为什么选它”解释清楚。</p>
-<h2 id="section-3">本单元完成条件</h2>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>改写后命中更高就算成功吗？</li>
@@ -29,9 +211,10 @@ python -m companion evaluate --cases eval/holdout.json --method hybrid --generat
 <p>**通过证据：**人工核对的改写报告、一次保留题评阅和明确的最终检索选择。</p>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/resources/advanced-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0039-query-rewrite"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-rerank.html" data-knowledge-link>重排序：把更合适的证据往前排<span>6—8 分钟 · 已经找到了资料，为什么还要再排一次？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-query.html" data-knowledge-link>查询改写、Multi-query 与 HyDE<span>8—10 分钟 · 读者的问法和讲稿措辞对不上，怎么办？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0038-hybrid-rerank.html"><small>上一单元</small>先混合检索，再单独试重排</a><a href="0040-first-api.html"><small>下一单元</small>用一个 API 接住读者的问题 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0039-query-rewrite"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-rerank.html" data-knowledge-link>重排序：把更合适的证据往前排<span>6—8 分钟 · 已经找到了资料，为什么还要再排一次？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-query.html" data-knowledge-link>查询改写、Multi-query 与 HyDE<span>8—10 分钟 · 读者的问法和讲稿措辞对不上，怎么办？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0038-hybrid-rerank.html"><small>上一单元</small>先混合检索，再单独试重排</a><a href="0040-first-api.html"><small>下一单元</small>用一个 API 接住读者的问题 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

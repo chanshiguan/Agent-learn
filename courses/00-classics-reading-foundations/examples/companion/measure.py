@@ -1,3 +1,5 @@
+# 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+# 预期：报告区分成功、拒绝和失败，不能只看平均速度。
 """第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。"""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -31,7 +33,8 @@ def api_probe(url, concurrency, count):
     if not (url.startswith("http://127.0.0.1:") or url.startswith("https://")):
         raise ValueError("仅测试本机 HTTP 或受保护的 HTTPS 地址。")
     token = getpass.getpass("输入专用测试账号的访问令牌（不回显、不保存）：")
-    with httpx.Client(base_url=url, headers={"Authorization": "Bearer " + token}, timeout=130) as client:
+    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。
+    with httpx.Client(trust_env=url.startswith("https://"), base_url=url, headers={"Authorization": "Bearer " + token}, timeout=130) as client:
         sessions = []
         try:
             # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。

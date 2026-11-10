@@ -1,0 +1,183 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先预览一份笔记，确认后再保存（2/3：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0052-write-drafts-02">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先预览一份笔记，确认后再保存（2/3：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-19">← 返回课程地图</a><p class="rail-label">第 19 章 · 写入之前确认具体内容</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0052-write-drafts.html"><span class="unit-number">1</span><span>先预览一份笔记，确认后再保存（1/3：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0052-write-drafts-02.html" aria-current="page"><span class="unit-number">2</span><span>先预览一份笔记，确认后再保存（2/3：连接接口与业务）<small>55—70 分钟</small></span></a></li><li><a href="0052-write-drafts-03.html"><span class="unit-number">3</span><span>先预览一份笔记，确认后再保存（3/3：连接页面交互）<small>40—55 分钟</small></span></a></li><li><a href="0053-approval-replays.html"><span class="unit-number">4</span><span>重复点击、过期与换人都要试<small>45—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">在这里停一下，检查刚写的部分</a></li><li><a href="#section-3">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 19 章 / 单元 2 · 共 4 个</p><h1>先预览一份笔记，确认后再保存（2/3：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 195—255 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0052-write-drafts.html">《先预览一份笔记，确认后再保存（1/3：保存会话状态）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：增加 Draft 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+class Draft(Input):
+    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    kind: Literal[&quot;note&quot;, &quot;review_plan&quot;]
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 2 步：增加 Confirmation 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+class Confirmation(Input):
+    revision: int = Field(ge=1)
+    digest: str = Field(pattern=r&quot;^[a-f0-9]{64}$&quot;)
+    confirmed: bool
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 3 步：增加 make_draft 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.post(&quot;/api/drafts&quot;)
+def make_draft(body: Draft, who=Depends(actor)):
+    return service.make_draft(who, body.session_id, body.kind, body.request_id)
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 4 步：增加 drafts 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.get(&quot;/api/drafts&quot;)
+def drafts(who=Depends(actor)):
+    return actions.pending(who)
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 5 步：增加 approve 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.post(&quot;/api/drafts/{identity}/approve&quot;)
+def approve(identity: str, body: Confirmation, who=Depends(actor)):
+    return actions.approve(who, identity, body.revision, body.digest, body.confirmed)
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 6 步：增加 notes 接口约定</h3>
+<p>分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。
+# 预期：未确认的内容只在草稿列表中，不在正式笔记中。
+@app.get(&quot;/api/notes&quot;)
+def notes(who=Depends(actor)):
+    return actions.notes(who)
+</code></pre>
+<p>**写完后应当怎样：**未确认的内容只在草稿列表中，不在正式笔记中。</p>
+<h3>第 7 步：先把草稿区和正式笔记区分开</h3>
+<p>读者必须看见尚未保存与已经确认的区别，按钮文案也要明确。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/index.html</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-html">      &lt;/article&gt;
+</code></pre>
+</details>
+
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<pre><code class="language-html">      &lt;/article&gt;
+      &lt;section&gt;
+        &lt;h2&gt;阅读笔记&lt;/h2&gt;
+        &lt;button id=&quot;draft-note&quot;&gt;生成笔记草稿&lt;/button
+        &gt;&lt;button id=&quot;draft-plan&quot;&gt;生成复习计划草稿&lt;/button&gt;
+        &lt;div id=&quot;drafts&quot;&gt;&lt;/div&gt;
+        &lt;h3&gt;已确认的笔记&lt;/h3&gt;
+        &lt;div id=&quot;notes&quot;&gt;&lt;/div&gt;
+      &lt;/section&gt;
+</code></pre>
+<p>**写完后应当怎样：**生成后出现在草稿区，批准后才出现在笔记区。</p>
+<h3>第 8 步：在页面展示预览并确认这一版</h3>
+<p>批准绑定当前看到的 revision 和 digest；响应回来后再次检查视图，防止旧身份内容迟到。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-javascript">  $(&#39;result&#39;).hidden = false;
+}
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<p>下面 3 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/3</strong></p>
+<pre><code class="language-javascript">  $(&#39;result&#39;).hidden = false;
+}
+
+async function refreshNotes() {
+  // 每次异步返回都核对视图，防止 A 的迟到私密内容出现在已经切换为 B 的页面。
+  const expectedView = viewVersion;
+  const drafts = await api(&#39;/api/drafts&#39;);
+  if (viewVersion !== expectedView) return;
+  $(&#39;drafts&#39;).replaceChildren();
+  for (const draft of drafts.filter((x) =&gt; x.status === &#39;pending&#39;)) {
+    const box = document.createElement(&#39;div&#39;);
+    box.className = &#39;draft&#39;;
+    const label = document.createElement(&#39;p&#39;),
+      text = document.createElement(&#39;textarea&#39;),
+      edit = document.createElement(&#39;button&#39;),
+      approve = document.createElement(&#39;button&#39;);
+    label.textContent = &#39;待确认草稿 · 版本 &#39; + draft.revision;
+    text.value = draft.body;
+    text.setAttribute(&#39;aria-label&#39;, &#39;编辑草稿内容&#39;);
+    edit.textContent = &#39;保存修改，重新预览&#39;;
+    edit.hidden = true;
+    text.readOnly = true;
+    approve.textContent = &#39;确认保存这一版&#39;;
+    approve.onclick = async () =&gt; {
+      const actionView = viewVersion;
+</code></pre>
+<p><strong>连续代码 2/3</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-javascript">      try {
+        if (text.value !== draft.body)
+          throw new Error(&#39;内容已编辑，请先保存修改并重新预览。&#39;);
+        await api(&#39;/api/drafts/&#39; + draft.id + &#39;/approve&#39;, &#39;POST&#39;, {
+          revision: draft.revision,
+          digest: draft.digest,
+          confirmed: true,
+        });
+        if (viewVersion !== actionView) return;
+        await refreshNotes();
+        if (viewVersion === actionView) status(&#39;当前草稿已保存。&#39;);
+      } catch (e) {
+        if (viewVersion === actionView) status(e.message);
+      }
+    };
+    box.append(label, text, edit, approve);
+    $(&#39;drafts&#39;).append(box);
+  }
+  const notes = await api(&#39;/api/notes&#39;);
+  if (viewVersion !== expectedView) return;
+  $(&#39;notes&#39;).replaceChildren();
+  for (const note of notes) {
+    const paragraph = document.createElement(&#39;p&#39;);
+    paragraph.textContent = note.body;
+    $(&#39;notes&#39;).append(paragraph);
+</code></pre>
+<p><strong>连续代码 3/3</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-javascript">  }
+}
+</code></pre>
+<p>**写完后应当怎样：**点击确认只提交当前预览，正式笔记重新读取。</p>
+<h2 id="section-2">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/app.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>批准绑定当前看到的 revision 和 digest；响应回来后再次检查视图，防止旧身份内容迟到。 点击确认只提交当前预览，正式笔记重新读取。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
+</details>
+
+<h2 id="section-3">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0052-write-drafts-02"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0052-write-drafts.html"><small>上一单元</small>先预览一份笔记，确认后再保存（1/3：保存会话状态）</a><a href="0052-write-drafts-03.html"><small>下一单元</small>先预览一份笔记，确认后再保存（3/3：连接页面交互） →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

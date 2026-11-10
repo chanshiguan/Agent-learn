@@ -97,7 +97,7 @@ if (railMenu && matchMedia("(max-width: 760px)").matches) railMenu.open = false;
 const params = new URLSearchParams(location.search);
 const from = currentUnit || params.get("from");
 const returnSection = /^(section-\d+|optional-reading|main-content)$/.test(params.get("from-section") || "") ? params.get("from-section") : "optional-reading";
-if (from && /^00(?:0[89]|[1-6][0-9]|7[0-3])-[a-z-]+$/.test(from)) {
+if (from && /^00(?:0[89]|[1-6][0-9]|7[0-3])-[a-z-]+(?:-\d{2})?$/.test(from)) {
   document.querySelectorAll(".page-lesson main a, .page-knowledge main a, .page-knowledge .reading-rail a").forEach(link => {
     const url = new URL(link.href);
     if (url.origin === location.origin && /\/knowledge\/[^/]+\.html$/.test(url.pathname) && !link.hasAttribute("data-return-to-lesson")) {

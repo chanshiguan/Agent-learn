@@ -1,9 +1,9 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/graph.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/graph.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/graph.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/graph.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;把第 19 章的同一批准动作迁移到有磁盘检查点的状态图。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/graph.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/graph.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/graph.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：图只管理流程暂停与恢复，最终批准仍调用已经测试过的 actions.approve。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import sqlite3
 from typing import TypedDict
-
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command, interrupt
@@ -11,12 +11,14 @@ from .actions import pending, approve
 from .files import data_dir, digest, save
 from .state import personal_data_lock
 
-
+# 目的：明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 class ReviewState(TypedDict, total=False):
     action_id: str
     result: dict
 
-
+# 目的：暂停时给具体预览，恢复时带回确认；线程 ID 包含本人身份，检查点写入与预览同锁。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def run_review(actor, action_id, decision=None):
     def review(state):
         candidates = {a[&quot;id&quot;]: a for a in pending(actor)}
@@ -51,7 +53,8 @@ def run_review(actor, action_id, decision=None):
             return {&quot;status&quot;: &quot;awaiting_confirmation&quot;, &quot;preview&quot;: preview}
         return {&quot;status&quot;: &quot;finished&quot;, &quot;result&quot;: result.get(&quot;result&quot;)}
 
-
+# 目的：为删除个人内容准备本人图线程清理，不能只删除业务表却留下检查点副本。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def erase_threads(actor):
     with sqlite3.connect(data_dir() / &quot;checkpoints.sqlite3&quot;, check_same_thread=False) as db:
         saver = SqliteSaver(db)

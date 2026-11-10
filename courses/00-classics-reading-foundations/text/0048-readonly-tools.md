@@ -1,12 +1,84 @@
 # 先由程序员调用工具，再交给模型
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **45—60 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《检验提示有没有帮助读者思考》](0047-tutor-review.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 工具先是一段普通程序
 
 “让 Agent 查资料”可以拆成三个动作：search_lectures 查询当前范围，read_source 读取本轮已见来源，get_progress 查看当前进度。先证明这些动作独立正确，再让模型决定调用顺序。
 
 工具 schema 告诉模型工具名、用途和参数结构；服务端仍要重新校验，因为 schema 不是执行权限。`ReaderTools` 初始化时绑定 actor 与 session_id，模型参数里没有可任意更改的 tenant 或 owner。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：先写这个文件需要的导入
+
+工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。
+
+**写在哪里：**项目根目录下的 `companion/tools.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+# 目的：工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+from .rag import retrieve, budget
+from .state import get_session
+```
+
+**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。
+
+### 第 2 步：把三项只读能力收进一个工具入口
+
+先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
+
+**写在哪里：**项目根目录下的 `companion/tools.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**self.actor 和 self.session_id 把一组工具绑定到已验证的本人会话。模型只能选择允许的工具与参数，不能通过参数换成别人的身份。
+
+```python
+# 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
+# 预期：程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。
+class ReaderTools:
+    def __init__(self, actor, session_id, method="keyword"):
+        self.actor, self.session_id, self.method = actor, session_id, method
+        self.seen = {}
+
+    def execute(self, name, arguments):
+        if not isinstance(arguments, dict):
+            raise ValueError("工具参数必须为对象。")
+        session = get_session(self.actor, self.session_id)
+        if name == "get_progress":
+            if arguments:
+                raise ValueError("读取进度不接受用户身份参数。")
+            return {"book": session["book"], "progress": session["progress"], "strict": bool(session["strict"])}
+        if name == "search_lectures":
+            if set(arguments) != {"query"} or not isinstance(arguments["query"], str) or not 1 <= len(arguments["query"]) <= 500:
+                raise ValueError("检索只接受 1—500 字符的 query。")
+            hits = budget(retrieve(arguments["query"], self.actor.tenant, session["book"], self.method,
+                                   session["progress"] if session["strict"] else None))
+            self.seen.update({c["id"]: c for c in hits})
+            return hits
+        if name == "read_source":
+            if set(arguments) != {"source_id"} or not isinstance(arguments["source_id"], str):
+                raise ValueError("读取来源只接受 source_id。")
+```
+
+```python
+            source = self.seen.get(arguments["source_id"])
+            if source is None:
+                raise PermissionError("不能读取本次未检索到的来源。")
+            return source
+        raise ValueError("没有登记这个工具；不会执行模型提供的代码或命令。")
+```
+
+**写完后应当怎样：**程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。
+
+## 运行并观察
 
 ```bash
 # 创建虚构读者的独立练习会话，直接调用工具；预期得到当前范围内讲稿，而不是生成回答。
@@ -21,15 +93,6 @@ python -c 'from companion.state import Actor,initialize,create_session; from com
 
 只读工具仍可能泄露资料，因此权限检查不能等到写操作才开始。下一单元把这组边界写成可重复测试。
 
-## 对照完整实现
-
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
-
-<details><summary>展开本单元完整源码：companion/tools.py</summary>
-
-{{code:companion/tools.py}}
-
-</details>
 
 ## 本单元完成条件
 
@@ -59,3 +122,25 @@ python -c 'from companion.state import Actor,initialize,create_session; from com
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+from companion import state
+from companion.tools import ReaderTools
+a=state.Actor("demo","reader-a");s=state.create_session(a);t=ReaderTools(a,s["id"])
+assert t.execute("get_progress",{})["progress"]==0
+hits=t.execute("search_lectures",{"query":"文言文序言"})
+assert hits and t.execute("read_source",{"source_id":hits[0]["id"]})["id"]==hits[0]["id"]
+print("三个只读工具由程序员直接调用通过")
+PY
+```
+
+**预期：**工具先由确定的程序调用验证；本节没有让模型选工具。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

@@ -1,23 +1,21 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先测一个请求，别急着加并发 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0066-latency-measure">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先测一个请求，别急着加并发</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html" aria-current="page"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>40—55 分钟</small></span></a></li><li><a href="0067-load-and-limits.html"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消<small>40—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先分清用户等的是什么</a></li><li><a href="#section-2">比较两条路线</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 1 · 共 2 个</p><h1>先测一个请求，别急着加并发</h1><div class="lesson-meta"><span>本单元 40—55 分钟</span><span>本章 80—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>40—55 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先测一个请求，别急着加并发</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html" aria-current="page"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits.html"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消（1/2：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits-02.html"><span class="unit-number">3</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先分清用户等的是什么</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">比较两条路线</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 1 · 共 3 个</p><h1>先测一个请求，别急着加并发</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 170—215 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0065-readiness-failures.html">《活着不等于已经能接待读者》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">先分清用户等的是什么</h2>
 <p>首字延迟是请求发出到第一段实际内容到达的时间；完整耗时是整个回答结束的时间。本课程网页目前等完整回答后显示，不能把模型流式接口的首字测量冒充网页已经支持流式输出。</p>
-<pre><code class="language-bash"># 直接测真实模型的首个内容片段与完整响应；使用当前终端的本地或线上模型配置。
-python -m companion.measure stream
-</code></pre>
-<p>记录 <code>data/live/stream-measure.json</code>。至少在模型刚启动和已经预热后各测一次，另存报告。首次加载模型、下载权重与实际推理是不同开销。某些服务只在最后一次性返回内容，首字接近完整耗时也可能是实际行为。</p>
-<p>再在网页测同题完整请求，包含检索、上下文组织和生成。记录机器、内存、模型名称、量化版本、检索模式、输入与输出大小。没有这些条件，单独一个“每秒多少字”无法比较。</p>
-<h2 id="section-2">比较两条路线</h2>
-<p>若有条件，再用同一题与资料切到线上模型，保留独立结果。生成模型不同会影响输出长度和质量，所以同时人工评分。M1 16 GB 的可用性由这些实测决定，不预先规定能服务多少人。</p>
-<p>本地慢时先检查输入长度、模型大小与并发；线上快也要看费用、数据安排和故障策略。选择是基于目标的取舍，不是看哪个名称更新。</p>
-<h2 id="section-3">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/measure.py</summary>
-
-
-<pre><code class="language-python">&quot;&quot;&quot;第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。&quot;&quot;&quot;
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：写一份小规模请求测量程序</h3>
+<p>使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/measure.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<p>下面 3 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/3</strong></p>
+<pre><code class="language-python"># 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+# 预期：报告区分成功、拒绝和失败，不能只看平均速度。
+&quot;&quot;&quot;第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。&quot;&quot;&quot;
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import getpass
@@ -40,7 +38,9 @@ def stream_probe():
                 if content:
                     if first is None: first = time.monotonic() - start
                     size += len(content)
-    if first is None: raise ValueError(&quot;没有收到实际内容片段，不能报告首字延迟。&quot;)
+</code></pre>
+<p><strong>连续代码 2/3</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">    if first is None: raise ValueError(&quot;没有收到实际内容片段，不能报告首字延迟。&quot;)
     result = {&quot;model&quot;: model, &quot;first_content_seconds&quot;: first, &quot;full_seconds&quot;: time.monotonic() - start, &quot;characters&quot;: size, &quot;scope&quot;: &quot;模型流式接口；课程网页目前等完整回答后显示&quot;}
     save(&quot;stream-measure.json&quot;, result)
     return result
@@ -50,7 +50,8 @@ def api_probe(url, concurrency, count):
     if not (url.startswith(&quot;http://127.0.0.1:&quot;) or url.startswith(&quot;https://&quot;)):
         raise ValueError(&quot;仅测试本机 HTTP 或受保护的 HTTPS 地址。&quot;)
     token = getpass.getpass(&quot;输入专用测试账号的访问令牌（不回显、不保存）：&quot;)
-    with httpx.Client(base_url=url, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=130) as client:
+    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。
+    with httpx.Client(trust_env=url.startswith(&quot;https://&quot;), base_url=url, headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token}, timeout=130) as client:
         sessions = []
         try:
             # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。
@@ -64,7 +65,9 @@ def api_probe(url, concurrency, count):
                     return {&quot;status&quot;: response.status_code, &quot;seconds&quot;: time.monotonic() - started}
                 except httpx.HTTPError as error:
                     return {&quot;status&quot;: type(error).__name__, &quot;seconds&quot;: time.monotonic() - started}
-            started = time.monotonic()
+</code></pre>
+<p><strong>连续代码 3/3</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">            started = time.monotonic()
             with ThreadPoolExecutor(max_workers=concurrency) as pool: records = list(pool.map(one, sessions))
             elapsed = time.monotonic() - started
         finally:
@@ -87,9 +90,17 @@ if __name__ == &quot;__main__&quot;:
     args = parser.parse_args()
     print(json.dumps(stream_probe() if args.mode == &quot;stream&quot; else api_probe(args.url, args.concurrency, args.count), ensure_ascii=False, indent=2))
 </code></pre>
-</details>
-
-<h2 id="section-4">本单元完成条件</h2>
+<p>**写完后应当怎样：**报告区分成功、拒绝和失败，不能只看平均速度。</p>
+<h2 id="section-3">运行并观察</h2>
+<pre><code class="language-bash"># 直接测真实模型的首个内容片段与完整响应；使用当前终端的本地或线上模型配置。
+python -m companion.measure stream
+</code></pre>
+<p>记录 <code>data/live/stream-measure.json</code>。至少在模型刚启动和已经预热后各测一次，另存报告。首次加载模型、下载权重与实际推理是不同开销。某些服务只在最后一次性返回内容，首字接近完整耗时也可能是实际行为。</p>
+<p>再在网页测同题完整请求，包含检索、上下文组织和生成。记录机器、内存、模型名称、量化版本、检索模式、输入与输出大小。没有这些条件，单独一个“每秒多少字”无法比较。</p>
+<h2 id="section-4">比较两条路线</h2>
+<p>若有条件，再用同一题与资料切到线上模型，保留独立结果。生成模型不同会影响输出长度和质量，所以同时人工评分。M1 16 GB 的可用性由这些实测决定，不预先规定能服务多少人。</p>
+<p>本地慢时先检查输入长度、模型大小与并发；线上快也要看费用、数据安排和故障策略。选择是基于目标的取舍，不是看哪个名称更新。</p>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>模型首字快就代表页面首字快吗？</li>
@@ -104,9 +115,10 @@ if __name__ == &quot;__main__&quot;:
 <p>**通过证据：**冷启动与预热测量、网页完整请求记录，以及明确的设备/模型条件。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0066-latency-measure"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0065-readiness-failures.html"><small>上一单元</small>活着不等于已经能接待读者</a><a href="0067-load-and-limits.html"><small>下一单元</small>小步加负载，检查拒绝与取消 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0066-latency-measure"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0065-readiness-failures.html"><small>上一单元</small>活着不等于已经能接待读者</a><a href="0067-load-and-limits.html"><small>下一单元</small>小步加负载，检查拒绝与取消（1/2：保存会话状态） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,38 +1,35 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>给一次提问一个可以追踪的编号 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0060-request-trace">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>给一次提问一个可以追踪的编号</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-23">← 返回课程地图</a><p class="rail-label">第 23 章 · 看清一次请求走过哪里</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0060-request-trace.html" aria-current="page"><span class="unit-number">1</span><span>给一次提问一个可以追踪的编号<small>35—50 分钟</small></span></a></li><li><a href="0061-latency-cost.html"><span class="unit-number">2</span><span>把一次模型调用拆成时间和用量<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">用户说“刚才那次很慢”，怎么找</a></li><li><a href="#section-2">练一次故障定位</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 23 章 / 单元 1 · 共 2 个</p><h1>给一次提问一个可以追踪的编号</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>给一次提问一个可以追踪的编号</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-23">← 返回课程地图</a><p class="rail-label">第 23 章 · 看清一次请求走过哪里</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0060-request-trace.html" aria-current="page"><span class="unit-number">1</span><span>给一次提问一个可以追踪的编号<small>50—65 分钟</small></span></a></li><li><a href="0061-latency-cost.html"><span class="unit-number">2</span><span>把一次模型调用拆成时间和用量<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">用户说“刚才那次很慢”，怎么找</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">练一次故障定位</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 23 章 / 单元 1 · 共 2 个</p><h1>给一次提问一个可以追踪的编号</h1><div class="lesson-meta"><span>本单元 50—65 分钟</span><span>本章 85—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>50—65 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0059-privacy-feedback.html">《让反馈与删除都有明确范围》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">用户说“刚才那次很慢”，怎么找</h2>
 <p>trace_id 把同一次请求的检索、生成、工具与最终结果连起来。它不是学生身份，也不需要放入姓名。页面反馈保存这个编号，开发者才知道应查哪一次运行。</p>
 <p>正常模式提问一次，在 Network 响应中记下 trace_id，再查看 <code>data/live/events.jsonl</code>。普通问答会记录 retrieve、generate、answer；Agent 还记录工具结果。受限模式没有生成调用，不能给它编造 token 消耗。</p>
-<pre><code class="language-bash"># 只查看最近的结构化事件，预期是耗时、数量和状态，不包含问题正文、口令或完整讲稿。
-python -c &#39;from companion.files import data_dir; p=data_dir()/&quot;events.jsonl&quot;; print(&quot;\n&quot;.join(p.read_text().splitlines()[-12:]) if p.exists() else &quot;尚无事件，请先在网页提问&quot;)&#39;
-</code></pre>
-<p>把 trace_id 相同的行放在一起：检索用了多久，生成用了多久，返回了几个来源，有无工具拒绝。时间是各阶段实际墙钟耗时，不能简单把所有嵌套阶段相加当作总耗时。</p>
-<h2 id="section-2">练一次故障定位</h2>
-<p>停止模型服务，再发一个需要生成的普通问题。预期页面显示通用失败与可追踪编号，日志保存错误类型，不把供应商原始响应回传给学生。恢复服务后重试，用新的 trace 区分。</p>
-<p>如果检索很快、生成很慢，先查模型服务与输入长度；若工具反复拒绝，先看参数协议，而不是直接加大并发。日志帮助缩小问题，不替代实际重现。</p>
-<h2 id="section-3">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/operations.py</summary>
-
-
-<pre><code class="language-python">&quot;&quot;&quot;请求边界与最少日志：单进程实验配置，不冒称集群级限流。&quot;&quot;&quot;
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：先写这个文件需要的导入</h3>
+<p>先只写最少审计日志；并发名额和每日额度放在负载章节实现。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：先只写最少审计日志；并发名额和每日额度放在负载章节实现。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 import logging
-import os
 import threading
-import time
-from contextlib import contextmanager
 from datetime import datetime, timezone
-from .files import data_dir, digest
-from .state import connect
+from .files import data_dir
 
-_slots = threading.BoundedSemaphore(int(os.environ.get(&quot;MAX_MODEL_JOBS&quot;, &quot;1&quot;)))
-_jobs, _lock = {}, threading.Lock()
-_logger = logging.getLogger(&quot;reading-audit&quot;)
-
-
+_lock=threading.Lock()
+_logger=logging.getLogger(&quot;reading-audit&quot;)
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 2 步：只允许明确列出的日志字段</h3>
+<p>日志便于排错，但不应成为另一份聊天、口令或讲稿数据库。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：日志便于排错，但不应成为另一份聊天、口令或讲稿数据库。
+# 预期：只保存编号、状态、耗时和用量等白名单字段。
 def log_event(trace_id, event, **fields):
     if not _logger.handlers:
         with _lock:
@@ -45,48 +42,72 @@ def log_event(trace_id, event, **fields):
     # 只写明确允许的数值和状态，不接收请求正文、口令、讲稿或完整模型错误。
     safe = {k: v for k, v in fields.items() if k in {&quot;seconds&quot;, &quot;status&quot;, &quot;method&quot;, &quot;input_chars&quot;, &quot;source_count&quot;, &quot;tokens&quot;, &quot;tool_count&quot;}}
     _logger.info(json.dumps({&quot;at&quot;: datetime.now(timezone.utc).isoformat(), &quot;trace_id&quot;: trace_id, &quot;event&quot;: event, **safe}))
+</code></pre>
+<p>**写完后应当怎样：**只保存编号、状态、耗时和用量等白名单字段。</p>
+<h3>第 3 步：把业务结果接到最少日志</h3>
+<p>使用已有 request_id 串联，不把同一请求拆成无法关联的多条记录。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
 
-
-@contextmanager
-def job(actor, request_id):
-    key = (actor.tenant, actor.user, request_id)
-    with _lock:
-        if key in _jobs:
-            raise ValueError(&quot;请求已经在处理中，请不要重复提交。&quot;)
-        flag = threading.Event()
-        _jobs[key] = flag
-    acquired = False
-    try:
-        acquired = _slots.acquire(timeout=1)
-        if not acquired:
-            raise TimeoutError(&quot;当前请求较多，请稍后再试。&quot;)
-        day = datetime.now(timezone.utc).date().isoformat()
-        with connect() as db:
-            db.execute(&quot;BEGIN IMMEDIATE&quot;)
-            db.execute(&quot;DELETE FROM quotas WHERE day &lt; ?&quot;, (day,))
-            row = db.execute(&quot;SELECT count FROM quotas WHERE tenant=? AND owner=? AND day=?&quot;, (actor.tenant, actor.user, day)).fetchone()
-            count = row[0] if row else 0
-            if count &gt;= int(os.environ.get(&quot;DAILY_JOB_LIMIT&quot;, &quot;40&quot;)):
-                raise PermissionError(&quot;今天的试用请求额度已用完。&quot;)
-            db.execute(&quot;INSERT INTO quotas VALUES(?,?,?,?) ON CONFLICT(tenant,owner,day) DO UPDATE SET count=excluded.count&quot;, (actor.tenant, actor.user, day, count + 1))
-        yield flag
-    finally:
-        if acquired:
-            _slots.release()
-        with _lock:
-            _jobs.pop(key, None)
-
-
-def cancel(actor, request_id):
-    with _lock:
-        flag = _jobs.get((actor.tenant, actor.user, request_id))
-        if flag is not None:
-            flag.set()
-    return {&quot;cancel_requested&quot;: flag is not None, &quot;message&quot;: &quot;已发送的模型请求可能仍在运行和计费；停止后不会继续调用工具。&quot;}
+<pre><code class="language-python">from .models import complete
 </code></pre>
 </details>
 
-<h2 id="section-4">本单元完成条件</h2>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .models import complete
+from .operations import log_event
+</code></pre>
+<p>**写完后应当怎样：**日志不影响业务权限。</p>
+<h3>第 4 步：先记录请求编号与长度</h3>
+<p>只记录字符数，不记录问题正文；此时还不宣称知道完整耗时。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        raise ValueError(&quot;当前只支持问答和固定伴读。&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        raise ValueError(&quot;当前只支持问答和固定伴读。&quot;)
+    log_event(request_id,&quot;request&quot;,method=method,input_chars=len(question))
+</code></pre>
+<p>**写完后应当怎样：**events.jsonl 中能找到同一 request_id。</p>
+<h3>第 5 步：让未处理异常也有追踪编号</h3>
+<p>页面看到可报告的编号，供应商原始错误仍留在受控排查流程中。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from . import service, state, actions, auth
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from . import service, state, actions, auth, operations
+</code></pre>
+<p>**写完后应当怎样：**读者不会收到密钥或服务器路径。</p>
+<h3>第 6 步：给不可用错误一个统一出口</h3>
+<p>公开错误只说明暂时不可用和编号；日志只记异常类型。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：公开错误只说明暂时不可用和编号；日志只记异常类型。
+# 预期：服务故障有503和trace_id，不回显原始请求。
+@app.exception_handler(Exception)
+def unavailable(request, error):
+    trace_id = getattr(request.state, &quot;trace_id&quot;, uuid.uuid4().hex)
+    operations.log_event(trace_id, &quot;failure&quot;, status=type(error).__name__)
+    # 不把模型供应商的原始响应、密钥或文件路径回传给读者。
+    return JSONResponse(status_code=503, content={&quot;detail&quot;: &quot;服务暂时不可用，请稍后重试。&quot;, &quot;trace_id&quot;: trace_id})
+</code></pre>
+<p>**写完后应当怎样：**服务故障有503和trace_id，不回显原始请求。</p>
+<h2 id="section-3">运行并观察</h2>
+<pre><code class="language-bash"># 只查看最近的结构化事件，预期是耗时、数量和状态，不包含问题正文、口令或完整讲稿。
+python -c &#39;from companion.files import data_dir; p=data_dir()/&quot;events.jsonl&quot;; print(&quot;\n&quot;.join(p.read_text().splitlines()[-12:]) if p.exists() else &quot;尚无事件，请先在网页提问&quot;)&#39;
+</code></pre>
+<p>把 trace_id 相同的行放在一起：检索用了多久，生成用了多久，返回了几个来源，有无工具拒绝。时间是各阶段实际墙钟耗时，不能简单把所有嵌套阶段相加当作总耗时。</p>
+<h2 id="section-4">练一次故障定位</h2>
+<p>停止模型服务，再发一个需要生成的普通问题。预期页面显示通用失败与可追踪编号，日志保存错误类型，不把供应商原始响应回传给学生。恢复服务后重试，用新的 trace 区分。</p>
+<p>如果检索很快、生成很慢，先查模型服务与输入长度；若工具反复拒绝，先看参数协议，而不是直接加大并发。日志帮助缩小问题，不替代实际重现。</p>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>trace_id 与用户 ID 有什么不同？</li>
@@ -101,9 +122,22 @@ def cancel(actor, request_id):
 <p>**通过证据：**一条成功和一条故障请求的事件链，能按阶段解释慢点或失败位置。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0060-request-trace"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0059-privacy-feedback.html"><small>上一单元</small>让反馈与删除都有明确范围</a><a href="0061-latency-cost.html"><small>下一单元</small>把一次模型调用拆成时间和用量 →</a></nav></main></div>
+<h2 id="section-8">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion.operations import log_event
+from companion.files import data_dir
+log_event(&quot;trace-test&quot;,&quot;check&quot;,status=&quot;ok&quot;,password=&quot;must-not-be-logged&quot;)
+assert &quot;must-not-be-logged&quot; not in (data_dir()/&quot;events.jsonl&quot;).read_text()
+print(&quot;未允许字段不会进入日志&quot;)
+PY
+</code></pre>
+<p>**预期：**日志白名单拒绝口令字段。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0060-request-trace"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0059-privacy-feedback.html"><small>上一单元</small>让反馈与删除都有明确范围</a><a href="0061-latency-cost.html"><small>下一单元</small>把一次模型调用拆成时间和用量 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

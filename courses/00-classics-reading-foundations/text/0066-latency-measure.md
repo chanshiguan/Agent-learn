@@ -1,10 +1,118 @@
 # 先测一个请求，别急着加并发
 
-本单元预计 **40—55 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **55—70 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《活着不等于已经能接待读者》](0065-readiness-failures.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 先分清用户等的是什么
 
 首字延迟是请求发出到第一段实际内容到达的时间；完整耗时是整个回答结束的时间。本课程网页目前等完整回答后显示，不能把模型流式接口的首字测量冒充网页已经支持流式输出。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：写一份小规模请求测量程序
+
+使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+
+**写在哪里：**项目根目录下的 `companion/measure.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
+
+下面 3 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
+
+**连续代码 1/3**
+
+```python
+# 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+# 预期：报告区分成功、拒绝和失败，不能只看平均速度。
+"""第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。"""
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import getpass
+import json
+import time
+import uuid
+import httpx
+from .files import save
+from .models import client
+
+
+def stream_probe():
+    sdk, model = client(timeout=60)
+    start = time.monotonic()
+    first, size = None, 0
+    with sdk:
+        with sdk.chat.completions.create(model=model, messages=[{"role": "user", "content": "用一句话解释什么是阅读笔记。"}], max_tokens=80, stream=True) as stream:
+            for chunk in stream:
+                content = chunk.choices[0].delta.content if chunk.choices else None
+                if content:
+                    if first is None: first = time.monotonic() - start
+                    size += len(content)
+```
+
+**连续代码 2/3**（接在上一段后，不额外增加缩进）
+
+```python
+    if first is None: raise ValueError("没有收到实际内容片段，不能报告首字延迟。")
+    result = {"model": model, "first_content_seconds": first, "full_seconds": time.monotonic() - start, "characters": size, "scope": "模型流式接口；课程网页目前等完整回答后显示"}
+    save("stream-measure.json", result)
+    return result
+
+
+def api_probe(url, concurrency, count):
+    if not (url.startswith("http://127.0.0.1:") or url.startswith("https://")):
+        raise ValueError("仅测试本机 HTTP 或受保护的 HTTPS 地址。")
+    token = getpass.getpass("输入专用测试账号的访问令牌（不回显、不保存）：")
+    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。
+    with httpx.Client(trust_env=url.startswith("https://"), base_url=url, headers={"Authorization": "Bearer " + token}, timeout=130) as client:
+        sessions = []
+        try:
+            # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。
+            for _ in range(count):
+                response = client.post("/api/sessions", json={"book": "狂人日记"})
+                response.raise_for_status(); sessions.append(response.json()["id"])
+            def one(identity):
+                started = time.monotonic()
+                try:
+                    response = client.post("/api/ask", json={"session_id": identity, "request_id": uuid.uuid4().hex, "question": "讲稿怎样解释文言文序言？", "mode": "qa"})
+                    return {"status": response.status_code, "seconds": time.monotonic() - started}
+                except httpx.HTTPError as error:
+                    return {"status": type(error).__name__, "seconds": time.monotonic() - started}
+```
+
+**连续代码 3/3**（接在上一段后，不额外增加缩进）
+
+```python
+            started = time.monotonic()
+            with ThreadPoolExecutor(max_workers=concurrency) as pool: records = list(pool.map(one, sessions))
+            elapsed = time.monotonic() - started
+        finally:
+            for identity in sessions: client.delete("/api/sessions/" + identity)
+    successful = sorted(r["seconds"] for r in records if r["status"] == 200)
+    result = {"concurrency": concurrency, "requests": count, "records": records, "elapsed_seconds": elapsed,
+              "successes_per_second": len(successful) / elapsed, "error_ratio": 1 - len(successful) / count,
+              "p95_success_seconds": successful[min(len(successful) - 1, int(len(successful) * .95))] if successful else None,
+              "scope": "仅此次小样本，不能当作稳定生产 P95"}
+    save(f"load-{concurrency}.json", result)
+    return result
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", choices=["stream", "api"])
+    parser.add_argument("--url", default="http://127.0.0.1:8000")
+    parser.add_argument("--concurrency", type=int, choices=range(1, 5), default=1)
+    parser.add_argument("--count", type=int, choices=range(1, 21), default=4)
+    args = parser.parse_args()
+    print(json.dumps(stream_probe() if args.mode == "stream" else api_probe(args.url, args.concurrency, args.count), ensure_ascii=False, indent=2))
+```
+
+**写完后应当怎样：**报告区分成功、拒绝和失败，不能只看平均速度。
+
+## 运行并观察
 
 ```bash
 # 直接测真实模型的首个内容片段与完整响应；使用当前终端的本地或线上模型配置。
@@ -21,15 +129,6 @@ python -m companion.measure stream
 
 本地慢时先检查输入长度、模型大小与并发；线上快也要看费用、数据安排和故障策略。选择是基于目标的取舍，不是看哪个名称更新。
 
-## 对照完整实现
-
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
-
-<details><summary>展开本单元完整源码：companion/measure.py</summary>
-
-{{code:companion/measure.py}}
-
-</details>
 
 ## 本单元完成条件
 
@@ -59,3 +158,6 @@ python -m companion.measure stream
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

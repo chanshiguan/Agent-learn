@@ -1,10 +1,121 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>把讲稿和问题变成可比较的向量 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0032-embedding-first">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把讲稿和问题变成可比较的向量</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-9">← 返回课程地图</a><p class="rail-label">第 9 章 · 认识真正的 Embedding</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0032-embedding-first.html" aria-current="page"><span class="unit-number">1</span><span>把讲稿和问题变成可比较的向量<small>35—50 分钟</small></span></a></li><li><a href="0033-embedding-comparison.html"><span class="unit-number">2</span><span>检验向量有没有帮到你的失败题<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">词面找不到时，试着按意思找</a></li><li><a href="#section-2">看懂计算，但别迷信分数</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 9 章 / 单元 1 · 共 2 个</p><h1>把讲稿和问题变成可比较的向量</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把讲稿和问题变成可比较的向量</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-9">← 返回课程地图</a><p class="rail-label">第 9 章 · 认识真正的 Embedding</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0032-embedding-first.html" aria-current="page"><span class="unit-number">1</span><span>把讲稿和问题变成可比较的向量<small>50—65 分钟</small></span></a></li><li><a href="0033-embedding-comparison.html"><span class="unit-number">2</span><span>检验向量有没有帮到你的失败题<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">词面找不到时，试着按意思找</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">看懂计算，但别迷信分数</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 9 章 / 单元 1 · 共 2 个</p><h1>把讲稿和问题变成可比较的向量</h1><div class="lesson-meta"><span>本单元 50—65 分钟</span><span>本章 80—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>50—65 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0031-answer-rubric.html">《给模型回答打分，也保留不通过》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">词面找不到时，试着按意思找</h2>
 <p>第 7 章的同义问法可能漏检。Embedding 模型把文字编码成一组数字，让相近表达有机会靠近。它不是负责写答案的生成模型：无论你选择本地还是线上生成，本章都先用同一个本地 CPU 编码器做比较。</p>
 <p>本课使用多语言 MiniLM，沿用指定仓库中小规模向量练习的思路。它的窗口较短，因此先把块减小到 80 个字符、重叠 16 字符。字符数并不保证 token 数，程序会检查实际 tokenizer 长度，超限直接报错，不静默丢掉后半段。</p>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：记录真实编码器和向量客户端的依赖</h3>
+<p>先写清单再安装，权重首次下载另外耗时；库安装成功不代表权重已可用。</p>
+<p>**写在哪里：**项目根目录下的 <code>requirements-rag.txt</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-text"># 第 9—10 章新增：真实多语言 Embedding 与 Qdrant 客户端。
+sentence-transformers==6.2.0
+qdrant-client==1.15.1
+</code></pre>
+<p>**写完后应当怎样：**可以导入客户端；首次编码仍需要取得真实模型权重。</p>
+<pre><code class="language-bash"># 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
+python -m pip install -r requirements-rag.txt
+</code></pre>
+<h3>第 2 步：先写这个文件需要的导入</h3>
+<p>固定编码器提交，避免同名模型后来变化时无法重现；生成模型与编码器职责不同。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：固定编码器提交，避免同名模型后来变化时无法重现；生成模型与编码器职责不同。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+from functools import lru_cache
+from .files import data_dir
+
+MODEL = &quot;sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2&quot;
+MODEL_REVISION = &quot;e8f8c211226b894fcb81acc59f3b34ba3efd5f42&quot;
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 3 步：写 encoder() 并理解输入输出</h3>
+<p>一次进程只加载一次真实 CPU 编码器，不用字符计数伪造向量。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：一次进程只加载一次真实 CPU 编码器，不用字符计数伪造向量。
+# 预期：文本列表变成等长浮点向量列表，保留输入顺序。
+@lru_cache(maxsize=1)
+def encoder():
+    from sentence_transformers import SentenceTransformer
+    # CPU 是两种生成模型路线共同的起点；首次会下载权重，不能当作离线已准备好。
+    # 显式指定公开仓库提交，不依赖库的私有配置字段，也不跟随会移动的 main。
+    return SentenceTransformer(MODEL, revision=MODEL_REVISION, device=&quot;cpu&quot;, cache_folder=str(data_dir() / &quot;models&quot;))
+</code></pre>
+<p>**写完后应当怎样：**文本列表变成等长浮点向量列表，保留输入顺序。</p>
+<h3>第 4 步：写 embed() 并理解输入输出</h3>
+<p>先查 token 长度，超窗就停止；归一化后的向量可以用点积比较。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：先查 token 长度，超窗就停止；归一化后的向量可以用点积比较。
+# 预期：文本列表变成等长浮点向量列表，保留输入顺序。
+def embed(texts):
+    model = encoder()
+    lengths = [len(model.tokenizer.encode(t, add_special_tokens=True)) for t in texts]
+    if any(length &gt; model.max_seq_length for length in lengths):
+        raise ValueError(f&quot;片段超过 Embedding 的 {model.max_seq_length} token 窗口，请减小切块；不静默截断。&quot;)
+    return model.encode(texts, batch_size=8, normalize_embeddings=True).tolist()
+</code></pre>
+<p>**写完后应当怎样：**文本列表变成等长浮点向量列表，保留输入顺序。</p>
+<h3>第 5 步：让直接向量实验读取同一快照</h3>
+<p>比较方法时保持资料范围相同；只在选择 direct-vector 时加载编码器。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .rag import retrieve, answer
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .rag import retrieve, answer
+from .files import load
+from .corpus import visible
+</code></pre>
+<p>**写完后应当怎样：**普通词面检索不会提前加载模型权重。</p>
+<h3>第 6 步：直接比较向量，暂不保存索引</h3>
+<p>让你看见编码、相似度和排序的完整过程，下一章才引入持久化。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/query.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    hits = retrieve(args.question,args.tenant,args.book,args.method)
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">    if kind == &quot;direct-vector&quot;:
+        from .vectors import embed
+        chunks=visible(load(&quot;corpus.json&quot;)[&quot;chunks&quot;],args.tenant,args.book)
+        vectors=embed([c[&quot;text&quot;] for c in chunks])
+        query=embed([args.question])[0]
+        hits=sorted([{**c,&quot;score&quot;:sum(a*b for a,b in zip(v,query))}
+                     for c,v in zip(chunks,vectors)],key=lambda c:-c[&quot;score&quot;])[:5]
+    else:
+        hits = retrieve(args.question,args.tenant,args.book,args.method)
+</code></pre>
+<p>**写完后应当怎样：**每次都重新编码全部块；慢在哪里可以观察。</p>
+<h3>第 7 步：给命令入口增加 direct-vector</h3>
+<p>这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/__main__.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        from .grade_cli import main
+        main()
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">        from .grade_cli import main
+        main()
+    elif command == &quot;direct-vector&quot;:
+        from .query import main
+        main(&#39;direct-vector&#39;)
+</code></pre>
+<p>**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。</p>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 安装真实文本编码与 Qdrant 客户端；预期装进已激活的虚拟环境，首次下载可能较慢。
 python -m pip install -r requirements-rag.txt
 # 将当前五份讲稿切成适合入门编码器的小块；片段 ID 和资料 revision 会随参数变化。
@@ -13,120 +124,10 @@ python -m companion ingest --size 80 --overlap 16
 python -m companion direct-vector &quot;开头古雅的文字和后面的记录有什么关系&quot;
 </code></pre>
 <p>打开 <code>data/live/direct-vector.json</code>，回查前五条。下载等待不算模型推理时间；下载失败先处理网络与缓存，不要拿固定随机数伪装 Embedding。M1 16 GB 也从 CPU 小批量开始，本课不承诺特定速度。</p>
-<h2 id="section-2">看懂计算，但别迷信分数</h2>
+<h2 id="section-4">看懂计算，但别迷信分数</h2>
 <p>编码器把向量归一化，内存检索用点积排序，此时与余弦相似度排序一致。分数衡量这套编码器里的接近程度，不表示结论为真的概率。编码器、文本语言、任务与块大小都会影响结果。</p>
 <p>若问题太长也可能超限。先用简短、保留人物和否定关系的问题做实验，不要让程序偷偷删除关键限定词。</p>
-<h2 id="section-3">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/vectors.py</summary>
-
-
-<pre><code class="language-python">&quot;&quot;&quot;真实 Embedding 与持久 Qdrant；模型缓存和索引版本分别记录。&quot;&quot;&quot;
-import os
-import uuid
-from functools import lru_cache
-from contextlib import closing
-
-from .files import data_dir, digest, load, save
-from .corpus import visible
-
-MODEL = &quot;sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2&quot;
-MODEL_REVISION = &quot;e8f8c211226b894fcb81acc59f3b34ba3efd5f42&quot;
-
-
-@lru_cache(maxsize=1)
-def encoder():
-    from sentence_transformers import SentenceTransformer
-    # CPU 是两种生成模型路线共同的起点；首次会下载权重，不能当作离线已准备好。
-    # 显式指定公开仓库提交，不依赖库的私有配置字段，也不跟随会移动的 main。
-    return SentenceTransformer(MODEL, revision=MODEL_REVISION, device=&quot;cpu&quot;, cache_folder=str(data_dir() / &quot;models&quot;))
-
-
-def embed(texts):
-    model = encoder()
-    lengths = [len(model.tokenizer.encode(t, add_special_tokens=True)) for t in texts]
-    if any(length &gt; model.max_seq_length for length in lengths):
-        raise ValueError(f&quot;片段超过 Embedding 的 {model.max_seq_length} token 窗口，请减小切块；不静默截断。&quot;)
-    return model.encode(texts, batch_size=8, normalize_embeddings=True).tolist()
-
-
-def connection():
-    from qdrant_client import QdrantClient
-    # 离线单元测试可明确选择 local；课程第 10 章默认连接真实 Qdrant 服务。
-    if os.environ.get(&quot;QDRANT_MODE&quot;) == &quot;local&quot;:
-        return closing(QdrantClient(path=str(data_dir() / &quot;qdrant-local&quot;)))
-    return closing(QdrantClient(url=os.environ.get(&quot;QDRANT_URL&quot;, &quot;http://127.0.0.1:6333&quot;),
-                        api_key=os.environ.get(&quot;QDRANT_API_KEY&quot;) or None, timeout=30))
-
-
-def build_index():
-    from qdrant_client import models
-    corpus = load(&quot;corpus.json&quot;)
-    if not corpus:
-        raise ValueError(&quot;先整理 corpus.json。&quot;)
-    encoder()
-    # 加载时已锁定这个提交；缓存与查询必须使用相同版本，升级需要明确改值并重建。
-    revision = MODEL_REVISION
-    identity = digest([MODEL, revision])[:12]
-    cache = load(f&quot;embedding-cache-{identity}.json&quot;, {})
-    vectors = []
-    new_count = 0
-    for chunk in corpus[&quot;chunks&quot;]:
-        key = digest(chunk[&quot;text&quot;])
-        if key not in cache:
-            cache[key] = embed([chunk[&quot;text&quot;]])[0]
-            new_count += 1
-        vectors.append(cache[key])
-    save(f&quot;embedding-cache-{identity}.json&quot;, cache)
-    name = f&quot;reading_{corpus[&#39;revision&#39;][:12]}_{identity}&quot;
-    with connection() as db:
-        if not db.collection_exists(name):
-            db.create_collection(name, vectors_config=models.VectorParams(size=len(vectors[0]), distance=models.Distance.COSINE))
-        for start in range(0, len(vectors), 32):
-            points = [models.PointStruct(id=str(uuid.uuid5(uuid.NAMESPACE_URL, c[&quot;id&quot;])), vector=v, payload=c)
-                      for c, v in zip(corpus[&quot;chunks&quot;][start:start + 32], vectors[start:start + 32])]
-            db.upsert(name, points=points, wait=True)
-        if db.count(name, exact=True).count != len(vectors):
-            raise ValueError(&quot;索引条数不符，不切换活动版本。&quot;)
-    # 新集合完整后才发布指针。旧集合保留用于回滚；清理需要显式维护操作。
-    index = {&quot;collection&quot;: name, &quot;corpus_revision&quot;: corpus[&quot;revision&quot;], &quot;model&quot;: MODEL,
-             &quot;model_revision&quot;: revision, &quot;dimension&quot;: len(vectors[0]), &quot;count&quot;: len(vectors), &quot;new_embeddings&quot;: new_count}
-    save(&quot;index.json&quot;, index)
-    return index
-
-
-def semantic_search(question, tenant, book, progress=None, k=5):
-    from qdrant_client import models
-    index, corpus = load(&quot;index.json&quot;), load(&quot;corpus.json&quot;)
-    if not index or not corpus or index[&quot;corpus_revision&quot;] != corpus[&quot;revision&quot;]:
-        raise ValueError(&quot;活动索引与资料版本不一致，请完成索引构建；不返回旧版证据。&quot;)
-    if index[&quot;model&quot;] != MODEL or index[&quot;model_revision&quot;] != MODEL_REVISION:
-        raise ValueError(&quot;Embedding 版本已变，必须重建索引。&quot;)
-    required = [models.FieldCondition(key=&quot;tenant&quot;, match=models.MatchValue(value=tenant)),
-                models.FieldCondition(key=&quot;book&quot;, match=models.MatchValue(value=book))]
-    if progress is not None:
-        required += [models.FieldCondition(key=&quot;range_reviewed&quot;, match=models.MatchValue(value=True)),
-                     models.FieldCondition(key=&quot;range_end&quot;, range=models.Range(lte=progress))]
-    with connection() as db:
-        points = db.query_points(index[&quot;collection&quot;], query=embed([question])[0],
-                                 query_filter=models.Filter(must=required), limit=k, with_payload=True).points
-    # 不同存储后端对布尔值和数字的比较可能不同；以当前资料的权限规则再次核对。
-    # 正文也从当前快照取得，避免旧索引载荷绕过已修订的阅读范围。
-    allowed = {c[&quot;id&quot;]: c for c in visible(corpus[&quot;chunks&quot;], tenant, book, progress)}
-    return [{**allowed[p.payload[&quot;id&quot;]], &quot;score&quot;: p.score} for p in points if p.payload.get(&quot;id&quot;) in allowed]
-
-
-def fuse(first, second, k=5):
-    scores, items = {}, {}
-    for result in (first, second):
-        for position, item in enumerate(result, 1):
-            items[item[&quot;id&quot;]] = item
-            scores[item[&quot;id&quot;]] = scores.get(item[&quot;id&quot;], 0) + 1 / (60 + position)
-    return [{**items[key], &quot;score&quot;: scores[key]} for key in sorted(scores, key=lambda x: (-scores[x], x))[:k]]
-</code></pre>
-</details>
-
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>Embedding 和生成模型能互换吗？</li>
@@ -141,9 +142,21 @@ def fuse(first, second, k=5):
 <p>**通过证据：**保存真实编码结果、编码器名称和首次/再次运行耗时；能说明本章尚未使用持久向量数据库。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0032-embedding-first"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0031-answer-rubric.html"><small>上一单元</small>给模型回答打分，也保留不通过</a><a href="0033-embedding-comparison.html"><small>下一单元</small>检验向量有没有帮到你的失败题 →</a></nav></main></div>
+<h2 id="section-8">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion.corpus import ingest
+r=ingest(size=80,overlap=16)
+assert r[&quot;chunks&quot;]==106
+print(&quot;已准备106个小块；真实编码按本页命令执行&quot;)
+PY
+</code></pre>
+<p>**预期：**切块适配编码器窗口；此检查本身没有执行 Embedding。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0032-embedding-first"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0031-answer-rubric.html"><small>上一单元</small>给模型回答打分，也保留不通过</a><a href="0033-embedding-comparison.html"><small>下一单元</small>检验向量有没有帮到你的失败题 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

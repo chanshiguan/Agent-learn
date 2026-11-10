@@ -1,11 +1,13 @@
-"""固定题集分别记录检索与回答；没有人工评分时不自动宣告质量通过。"""
+# 目的：把单道检索变成固定题单循环；本节仍不调用生成模型。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 import time
 from pathlib import Path
 from .files import load, save
 from .rag import retrieve, answer, rewrite, rerank
 
-
+# 目的：先开始计时，再找资料；无目标来源的题记为不适用，不凑进召回率。
+# 预期：生成 evaluation.json，人工语义评分保持 null。
 def evaluate(cases_file, method="keyword", generate=False, expand=False, reranking=False, rewriting=False, output="evaluation.json"):
     cases = json.loads(Path(cases_file).read_text(encoding="utf-8"))
     records = []
@@ -38,7 +40,8 @@ def evaluate(cases_file, method="keyword", generate=False, expand=False, reranki
     save(output, report)
     return report
 
-
+# 目的：三个人工字段必须分别为 true，证据不足行为也要匹配预期；少一项就不能放行。
+# 预期：未评分的报告会失败，不能用缺省值蒙混过去。
 def quality_gate(report_file):
     report = json.loads(Path(report_file).read_text(encoding="utf-8"))
     failures = []

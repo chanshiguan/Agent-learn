@@ -1,14 +1,6 @@
-data/*
-!data/input/
-data/input/*
-!data/sample-manifest.json
-!data/input/06 《狂人日记》第一讲两种叙述声音.docx
-!data/input/07 《狂人日记》第二讲月光与平等.docx
-!data/input/08 《狂人日记》第三讲吃人的历史联想.docx
-!data/input/09 《狂人日记》第四讲不可靠叙述.docx
-!data/input/10 《狂人日记》第五讲传统与未来.docx
 .venv/
 __pycache__/
+*.pyc
 .env
 .env.*
-.DS_Store
+data/

@@ -1,42 +1,65 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从单个容器走到一组服务 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0064-compose-deployment">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从单个容器走到一组服务（1/2：把本节能力连起来） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0064-compose-deployment">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从单个容器走到一组服务</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-25">← 返回课程地图</a><p class="rail-label">第 25 章 · 把应用按同一方式部署</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0064-compose-deployment.html" aria-current="page"><span class="unit-number">1</span><span>从单个容器走到一组服务<small>45—60 分钟</small></span></a></li><li><a href="0065-readiness-failures.html"><span class="unit-number">2</span><span>活着不等于已经能接待读者<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先部署到受控的本机端口</a></li><li><a href="#section-2">对照完整实现</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 25 章 / 单元 1 · 共 2 个</p><h1>从单个容器走到一组服务</h1><div class="lesson-meta"><span>本单元 45—60 分钟</span><span>本章 80—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>45—60 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从单个容器走到一组服务（1/2：把本节能力连起来）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-25">← 返回课程地图</a><p class="rail-label">第 25 章 · 把应用按同一方式部署</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0064-compose-deployment.html" aria-current="page"><span class="unit-number">1</span><span>从单个容器走到一组服务（1/2：把本节能力连起来）<small>50—65 分钟</small></span></a></li><li><a href="0064-compose-deployment-02.html"><span class="unit-number">2</span><span>从单个容器走到一组服务（2/2：连接接口与业务）<small>35—50 分钟</small></span></a></li><li><a href="0065-readiness-failures.html"><span class="unit-number">3</span><span>活着不等于已经能接待读者<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先部署到受控的本机端口</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">在这里停一下，检查刚写的部分</a></li><li><a href="#section-4">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 25 章 / 单元 1 · 共 3 个</p><h1>从单个容器走到一组服务（1/2：把本节能力连起来）</h1><div class="lesson-meta"><span>本单元 50—65 分钟</span><span>本章 120—165 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>50—65 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0063-release-quality.html">《冻结题集，用真实模型和人工复核》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">先部署到受控的本机端口</h2>
 <p>Compose 把应用、Qdrant、网络、卷和健康检查写在一个文件里。模型服务仍可以在宿主机或线上；业务代码不因生成路线改变。当前服务只绑定主机 127.0.0.1:8000，不能据此宣称已对外上线。</p>
 <p>先回到第 21—24 章运行宿主 <code>uvicorn</code> 的终端，按 <code>Ctrl+C</code> 停止那个练习服务，确认终端已经返回提示符。Compose 应用也要使用 8000 端口，两者不能同时占用它。模型服务继续运行；不要为释放端口去终止不认识的进程。</p>
-<pre><code class="language-bash"># 复制无凭据的配置样例；只在 .env 尚不存在时执行，避免覆盖自己的配置。
-cp -n deploy/env.example .env
-# 创建持久数据目录；容器将挂载它，原始资料与状态不会打进镜像。
-mkdir -p data/live
-# 查看当前宿主用户与组的数字 ID；将两个结果分别填入 .env 的 APP_UID、APP_GID。
-id -u
-id -g
-# 在编辑器填完 .env 的真实模型 ID、地址和路线后构建；本命令不把 .env COPY 进镜像。
-docker compose --env-file .env -f deploy/compose.yaml build
-# 启动应用和向量库，先测试 keyword 路线，减少首次排错变量。
-docker compose --env-file .env -f deploy/compose.yaml up -d
-# 查看服务状态，检查应用进程是否存活。
-docker compose --env-file .env -f deploy/compose.yaml ps
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：先列出部署所需配置</h3>
+<p>样例不带密钥，实际值放 .env；UID/GID 对应宿主数据目录所有者。</p>
+<p>**写在哪里：**项目根目录下的 <code>deploy/env.example</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-text"># 复制为 examples/.env 后逐项填写；此文件本身不含凭据。
+LLM_MODE=local
+LLM_BASE_URL=http://host.docker.internal:11434/v1
+# 填写第 4 章已经验证过的真实模型 ID；空值会使就绪检查失败。
+LLM_MODEL=
+LLM_API_KEY=
+# 后续 RAG/Agent 的输出上限；调大后重新测耗时、用量和完整性。
+LLM_MAX_TOKENS=900
+# 仅填写第 4 章已实际验证的推理选项；不支持的模型留空。
+LLM_REASONING_EFFORT=
+RETRIEVAL=keyword
+MAX_MODEL_JOBS=1
+DAILY_JOB_LIMIT=40
+ALLOWED_HOSTS=localhost,127.0.0.1
+# 填写实际运行电脑上 id -u 与 id -g 的结果，保持挂载目录可写。
+APP_UID=1000
+APP_GID=1000
+# 改线上模型时填写 HTTPS 地址与私密 API key；不要把 .env 打进镜像。
 </code></pre>
-<p>运行前在编辑器完成 <code>.env</code>，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。</p>
-<p>这些命令都在 <code>examples/</code> 中执行。<code>--env-file .env</code> 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 <code>env_file: ../.env</code> 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 <a href="https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/">Docker 官方说明</a>。</p>
-<p>Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：</p>
-<pre><code class="language-bash"># 在同一挂载数据与 Compose 网络内构建索引；首次可能下载 CPU 编码器权重。
-docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
+<p>**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。</p>
+<h3>第 2 步：把已写出的服务封装进镜像</h3>
+<p>依赖、业务代码和启动命令进入镜像，数据与密钥通过运行时提供。</p>
+<p>**写在哪里：**项目根目录下的 <code>deploy/Dockerfile</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-dockerfile"># 与前三章相同，先固定解释器系列；发布时还需记录实际镜像摘要。
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements*.txt ./
+# 本课程在容器内用 CPU 编码，先装 CPU 版，避免 Linux 自动下载不使用的 CUDA 运行库。
+RUN python -m pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+RUN python -m pip install --no-cache-dir -r requirements.txt -r requirements-model.txt -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
+COPY companion ./companion
+COPY eval ./eval
+RUN useradd --uid 1000 --create-home reader &amp;&amp; mkdir -p data &amp;&amp; chown reader:reader data
+USER reader
+ENV PYTHONUNBUFFERED=1
+EXPOSE 8000
+# 单 worker 与本课程进程内请求额度一致；扩副本前必须改成共享限流与会话存储。
+CMD [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;companion.app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;, &quot;--workers&quot;, &quot;1&quot;, &quot;--limit-concurrency&quot;, &quot;16&quot;, &quot;--no-access-log&quot;]
 </code></pre>
-<p>成功后再把 <code>.env</code> 的 RETRIEVAL 改为 hybrid，重新执行上面的 <code>up -d</code> 命令使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，按下面的命令创建测试读者，账号已存在时跳过：</p>
-<pre><code class="language-bash"># 在相同挂载数据库中创建测试读者；交互输入两次至少 12 字符的口令，口令不放进命令历史。
-docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user student-a
-</code></pre>
-<p>Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 <code>.env</code> 中的 <code>APP_UID</code>、<code>APP_GID</code> 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。</p>
-<p>镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。</p>
-<h2 id="section-2">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：deploy/compose.yaml</summary>
-
-
-<pre><code class="language-text">services:
+<p>**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。</p>
+<h3>第 3 步：写明应用、向量库和持久目录的关系</h3>
+<p>变量替换显式读 .env，应用只绑定回环地址；先跑 keyword 再验证 hybrid。</p>
+<p>**写在哪里：**项目根目录下的 <code>deploy/compose.yaml</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**YAML 用缩进表示归属；先分清服务名、配置键和值。配置文件本身不会执行，运行 Compose 或触发工作流时才会使用它。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-yaml">services:
   app:
     build:
       context: ..
@@ -61,8 +84,16 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m com
     depends_on:
       qdrant:
         condition: service_started
-    healthcheck:
-      test: [&#39;CMD&#39;, &#39;python&#39;, &#39;-c&#39;, &quot;import urllib.request; urllib.request.urlopen(&#39;http://127.0.0.1:8000/healthz&#39;, timeout=3)&quot;]
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-yaml">    healthcheck:
+      test:
+        [
+          &#39;CMD&#39;,
+          &#39;python&#39;,
+          &#39;-c&#39;,
+          &quot;import urllib.request; urllib.request.urlopen(&#39;http://127.0.0.1:8000/healthz&#39;, timeout=3)&quot;,
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -75,26 +106,45 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m com
 volumes:
   qdrant_data:
 </code></pre>
+<p>**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。</p>
+<h3>第 4 步：为真正对外访问准备 HTTPS 入口</h3>
+<p>域名与证书条件需要实际环境满足；示例不会替你获得公司上线批准。</p>
+<p>**写在哪里：**项目根目录下的 <code>deploy/Caddyfile.example</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-text"># 由公司运维把域名换成真实域名并配置 DNS、TLS、访问范围后使用。
+# Caddy 运行在宿主机时代理本地端口；不要同时向公网开放 8000 或 6333。
+reading.example.com {
+    encode gzip
+    reverse_proxy 127.0.0.1:8000
+}
+</code></pre>
+<p>**写完后应当怎样：**逐行解释后再启动；用状态、登录、问答和来源核对实际结果。</p>
+<h3>第 5 步：为对外部署增加主机名边界</h3>
+<p>明确允许的 Host，与 HTTPS、身份校验分别处理不同边界。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from fastapi.exceptions import RequestValidationError
+</code></pre>
 </details>
 
-<h2 id="section-3">本单元完成条件</h2>
-<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
-<ol>
-<li>为什么 Dockerfile 不 COPY data 和 .env？</li>
-<li>容器里的 localhost 指宿主机吗？</li>
-</ol>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from fastapi.exceptions import RequestValidationError
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+</code></pre>
+<p>**写完后应当怎样：**意外 Host 被拒绝，实际域名需显式加入配置。</p>
+<h2 id="section-3">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/app.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
 
-<p><strong>为什么 Dockerfile 不 COPY data 和 .env？</strong></p>
-<p>资料、运行状态和凭据不属于不可变程序镜像；通过受控挂载或环境注入，才能独立更新与保护。</p>
-<p><strong>容器里的 localhost 指宿主机吗？</strong></p>
-<p>通常指容器自己。访问 Compose 服务用服务名，访问宿主模型需要已验证的宿主地址。</p>
-<p>**通过证据：**Compose 状态、实际登录和一次有据问答；所选向量路线有新服务上的索引验证。</p>
+<p>明确允许的 Host，与 HTTPS、身份校验分别处理不同边界。 意外 Host 被拒绝，实际域名需显式加入配置。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<h2 id="section-4">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0064-compose-deployment"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0063-release-quality.html"><small>上一单元</small>冻结题集，用真实模型和人工复核</a><a href="0065-readiness-failures.html"><small>下一单元</small>活着不等于已经能接待读者 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0064-compose-deployment"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0063-release-quality.html"><small>上一单元</small>冻结题集，用真实模型和人工复核</a><a href="0064-compose-deployment-02.html"><small>下一单元</small>从单个容器走到一组服务（2/2：连接接口与业务） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

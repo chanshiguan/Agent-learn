@@ -1,7 +1,7 @@
-"""把第 19 章的同一批准动作迁移到有磁盘检查点的状态图。"""
+# 目的：图只管理流程暂停与恢复，最终批准仍调用已经测试过的 actions.approve。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import sqlite3
 from typing import TypedDict
-
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command, interrupt
@@ -9,12 +9,14 @@ from .actions import pending, approve
 from .files import data_dir, digest, save
 from .state import personal_data_lock
 
-
+# 目的：明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 class ReviewState(TypedDict, total=False):
     action_id: str
     result: dict
 
-
+# 目的：暂停时给具体预览，恢复时带回确认；线程 ID 包含本人身份，检查点写入与预览同锁。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def run_review(actor, action_id, decision=None):
     def review(state):
         candidates = {a["id"]: a for a in pending(actor)}
@@ -49,7 +51,8 @@ def run_review(actor, action_id, decision=None):
             return {"status": "awaiting_confirmation", "preview": preview}
         return {"status": "finished", "result": result.get("result")}
 
-
+# 目的：为删除个人内容准备本人图线程清理，不能只删除业务表却留下检查点副本。
+# 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 def erase_threads(actor):
     with sqlite3.connect(data_dir() / "checkpoints.sqlite3", check_same_thread=False) as db:
         saver = SqliteSaver(db)

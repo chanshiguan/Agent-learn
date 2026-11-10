@@ -1,56 +1,81 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>给每个片段一张来源卡 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0026-corpus-metadata">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>给每个片段一张来源卡</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-6">← 返回课程地图</a><p class="rail-label">第 6 章 · 把五份讲稿整理成可检索资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0026-corpus-metadata.html" aria-current="page"><span class="unit-number">1</span><span>给每个片段一张来源卡<small>35—50 分钟</small></span></a></li><li><a href="0027-corpus-dedup.html"><span class="unit-number">2</span><span>用副本练习去重与更新<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么先整理，再加检索</a></li><li><a href="#section-2">看懂来源卡上的字段</a></li><li><a href="#section-3">运行整理程序</a></li><li><a href="#section-4">自己改一次资料标签</a></li><li><a href="#section-5">对照完整实现</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 6 章 / 单元 1 · 共 2 个</p><h1>给每个片段一张来源卡</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>给每个片段一张来源卡</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-6">← 返回课程地图</a><p class="rail-label">第 6 章 · 把五份讲稿整理成可检索资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0026-corpus-metadata.html" aria-current="page"><span class="unit-number">1</span><span>给每个片段一张来源卡<small>65—80 分钟</small></span></a></li><li><a href="0027-corpus-dedup.html"><span class="unit-number">2</span><span>用副本练习去重与更新<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么先整理，再加检索</a></li><li><a href="#section-2">看懂来源卡上的字段</a></li><li><a href="#section-3">运行整理程序</a></li><li><a href="#section-4">现在动手写</a></li><li><a href="#section-5">运行并观察</a></li><li><a href="#section-6">自己改一次资料标签</a></li><li><a href="#section-7">本单元完成条件</a></li><li><a href="#section-8">下次开始前</a></li><li><a href="#section-9">资料依据与选读</a></li><li><a href="#section-10">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 6 章 / 单元 1 · 共 2 个</p><h1>给每个片段一张来源卡</h1><div class="lesson-meta"><span>本单元 65—80 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>65—80 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0025-evidence-boundary.html">《让回答说清依据和不知道的部分》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">为什么先整理，再加检索</h2>
 <p>如果程序只存文字，找到答案后仍不知道来自哪份文件。本章把第一章的单份读取扩展为小批量资料，不扩大到整个知识库。当前五份《狂人日记》样本足以把流程练清楚。</p>
 <h2 id="section-2">看懂来源卡上的字段</h2>
 <p><code>tenant</code> 是资料所属空间，先用 <code>demo</code>；<code>book</code> 是作品；<code>file</code> 是讲稿文件名；<code>kind</code> 明确写“讲解稿”。<code>lecture</code> 来自文件名中的“第几讲”，不是原著章回。<code>edition</code> 留空，表示尚未核实原著版本。</p>
 <p><code>doc_id</code> 标识某个空间里的一份文件；<code>version</code> 是文件字节的 SHA-256 指纹；片段 <code>id</code> 还包含切分参数和位置。改了文件或切分方式，引用编号可能变化，因此旧答案要保留它当时的资料版本。</p>
 <h2 id="section-3">运行整理程序</h2>
-<pre><code class="language-bash"># 每块最多 600 字符、相邻块重叠 60 字符；预期生成 corpus.json，而不改动 DOCX。
-python -m companion ingest --size 600 --overlap 60
-# 只查找文字，不调用生成模型；预期输出讲稿文件名、片段位置和正文。
-python -m companion search &quot;文言文序言&quot;
+<h2 id="section-4">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：让相同资料得到稳定指纹</h3>
+<p>资料版本变化后需要识别；这里增加哈希，不让文件修改悄悄混进旧结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/files.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 </code></pre>
-<p>打开 <code>data/live/corpus.json</code>，找到结果中的第一个片段，再回到对应 DOCX 对照。<code>parent=p0001</code> 是 Word 段落编号，<code>start/end</code> 是清理首尾空白后在这个段落内的字符区间；标题分组模式另有合并规则，后面再学。</p>
-<h2 id="section-4">自己改一次资料标签</h2>
-<p>先不执行新导入，口头推演：把作品错标为《三国演义》，之后按《狂人日记》筛选会发生什么？问题出在资料层，生成模型无法可靠纠正错误标签。</p>
-<p>一个输入目录只放同一作品、同一租户的资料。新增另一作品时建独立输入目录，并在 ingest 中显式写 <code>--book</code>。程序替换这一作品当前快照，保留已导入的其他作品与租户。不要把不同作品混在默认目录后都标成《狂人日记》。</p>
-<p>如果文档没有读出正文，程序会失败；表格数量会报告为跳过。图片、表格和修订批注不是本读取器已处理的内容，必须留在导入记录里。</p>
-<h2 id="section-5">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/corpus.py</summary>
+</details>
 
-
-<pre><code class="language-python">&quot;&quot;&quot;读取、去重、切分并保留来源；讲次不自动推断成原著章节。&quot;&quot;&quot;
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+import hashlib
+</code></pre>
+<p>**写完后应当怎样：**同一内容重复计算得到相同值。</p>
+<h3>第 2 步：写一个通用的指纹函数</h3>
+<p>字典按键排序后再编码，避免仅因字段排列不同得到不同指纹。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/files.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：字典按键排序后再编码，避免仅因字段排列不同得到不同指纹。
+# 预期：后续用它计算文档和片段身份，不用它代替权限判断。
+def digest(value):
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True).encode(&quot;utf-8&quot;)
+    return hashlib.sha256(raw).hexdigest()
+</code></pre>
+<p>**写完后应当怎样：**后续用它计算文档和片段身份，不用它代替权限判断。</p>
+<h3>第 3 步：先写这个文件需要的导入</h3>
+<p>把读取一讲扩成整理多讲，仍保留可回查的文件名和段落位置。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/corpus.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：把读取一讲扩成整理多讲，仍保留可回查的文件名和段落位置。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import hashlib
 import re
 from pathlib import Path
-
 from docx import Document
 from .files import digest, load, save
-
-
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 4 步：先写固定长度切块</h3>
+<p>模型窗口有限，先用可计算的长度和重叠建立基线，后面才能比较其他切法。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/corpus.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：模型窗口有限，先用可计算的长度和重叠建立基线，后面才能比较其他切法。
+# 预期：600 字块、60 字重叠的下一起点是 540；非法重叠会报错。
 def split_text(text, strategy=&quot;fixed&quot;, size=600, overlap=60):
+    if strategy != &quot;fixed&quot;:
+        raise ValueError(&quot;本阶段只实现固定切分。&quot;)
     if not 0 &lt;= overlap &lt; size or size &lt; 20:
         raise ValueError(&quot;需要 size &gt;= 20 且 0 &lt;= overlap &lt; size。&quot;)
-    if strategy in {&quot;paragraph&quot;, &quot;heading&quot;}:
-        # 标题模式的分组由外层处理；没有标题的文档不会凭空长出语义结构。
-        return [(0, text)]
     return [(start, text[start:start + size]) for start in range(0, len(text), size - overlap)]
-
-
+</code></pre>
+<p>**写完后应当怎样：**600 字块、60 字重叠的下一起点是 540；非法重叠会报错。</p>
+<h3>第 5 步：串起读取、切分和来源记录</h3>
+<p>外层循环负责文件，内层负责段落与块；一次全部成功后才替换 corpus.json。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/corpus.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-python"># 目的：外层循环负责文件，内层负责段落与块；一次全部成功后才替换 corpus.json。
+# 预期：五份原始讲稿不改动；600/60 应得到 15 块，空正文会拒绝。
 def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, overlap=60, tenant=&quot;demo&quot;, book=&quot;狂人日记&quot;):
     source = Path(source)
     documents, chunks, duplicates, seen = [], [], [], {}
-    annotations = load(&quot;ranges.json&quot;, {})
     for file in sorted(source.glob(&quot;*.docx&quot;)):
         version = hashlib.sha256(file.read_bytes()).hexdigest()
-        if version in seen:
-            duplicates.append({&quot;file&quot;: file.name, &quot;same_as&quot;: seen[version]})
-            continue
-        seen[version] = file.name
         document = Document(file)
         doc_id = digest([tenant, book, file.name])[:16]
         lecture = re.search(r&quot;第([一二三四五六七八九十]+)讲&quot;, file.name)
@@ -59,11 +84,7 @@ def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, 
             text = paragraph.text.strip()
             if not text:
                 continue
-            heading = paragraph.style.name.startswith(&quot;Heading&quot;) if paragraph.style else False
-            if strategy == &quot;heading&quot; and groups and not heading:
-                groups[-1][1] += &quot;\n&quot; + text
-            else:
-                groups.append([f&quot;p{position:04d}&quot;, text])
+            groups.append([f&quot;p{position:04d}&quot;, text])
         if not groups:
             # 整批成功后才发布新快照，避免把扫描件或空文档悄悄当作已完成的导入。
             raise ValueError(f&quot;{file.name} 没有可读正文；本次导入未更新资料快照。&quot;)
@@ -72,16 +93,13 @@ def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, 
         for parent, text in groups:
             for start, part in split_text(text, strategy, size, overlap):
                 chunk_id = digest([doc_id, version, parent, strategy, size, overlap, start])[:24]
-                review = annotations.get(chunk_id, {})
-                if review.get(&quot;reviewed&quot;) is True and (type(review.get(&quot;range_end&quot;)) is not int or review[&quot;range_end&quot;] &lt; 0):
-                    raise ValueError(&quot;已审核的阅读范围必须是非负整数，不能用 true/false 代替。&quot;)
                 chunks.append({&quot;id&quot;: chunk_id, &quot;doc_id&quot;: doc_id, &quot;version&quot;: version,
-                               &quot;tenant&quot;: tenant, &quot;book&quot;: book, &quot;file&quot;: file.name,
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">                               &quot;tenant&quot;: tenant, &quot;book&quot;: book, &quot;file&quot;: file.name,
                                &quot;kind&quot;: &quot;讲解稿&quot;, &quot;lecture&quot;: lecture.group(1) if lecture else None,
                                &quot;edition&quot;: None, &quot;parent&quot;: parent, &quot;start&quot;: start,
-                               &quot;end&quot;: start + len(part), &quot;text&quot;: part,
-                               &quot;range_end&quot;: review.get(&quot;range_end&quot;),
-                               &quot;range_reviewed&quot;: review.get(&quot;reviewed&quot;) is True})
+                               &quot;end&quot;: start + len(part), &quot;text&quot;: part})
     if not chunks:
         raise ValueError(&quot;没有可读正文，请检查输入目录；原文件不会被覆盖。&quot;)
     previous = load(&quot;corpus.json&quot;, {&quot;documents&quot;: [], &quot;chunks&quot;: []})
@@ -93,49 +111,57 @@ def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, 
     save(&quot;corpus.json&quot;, result)
     return {&quot;documents&quot;: len(documents), &quot;chunks&quot;: len(chunks), &quot;duplicates&quot;: duplicates,
             &quot;revision&quot;: result[&quot;revision&quot;], &quot;tables_skipped&quot;: sum(d[&quot;tables_skipped&quot;] for d in documents)}
+</code></pre>
+<p>**写完后应当怎样：**五份原始讲稿不改动；600/60 应得到 15 块，空正文会拒绝。</p>
+<h3>第 6 步：把切分条件交给运行命令</h3>
+<p>同一个整理函数接受不同大小；这里不增加检索，也不会连接模型。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/ingest_cli.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<pre><code class="language-python"># 目的：同一个整理函数接受不同大小；这里不增加检索，也不会连接模型。
+# 预期：ingest 命令输出文档数、块数与资料版本。
+import argparse
+import json
+from .corpus import ingest
 
 
-def visible(chunks, tenant, book, progress=None):
-    # 先限制可见范围再排序，避免先检索出其他租户资料，再让模型自己过滤。
-    result = [c for c in chunks if c[&quot;tenant&quot;] == tenant and c[&quot;book&quot;] == book]
-    if progress is not None:
-        result = [c for c in result if c.get(&quot;range_reviewed&quot;) is True
-                  and type(c.get(&quot;range_end&quot;)) is int and 0 &lt;= c[&quot;range_end&quot;] &lt;= progress]
-    return result
+def main():
+    parser = argparse.ArgumentParser(description=&quot;整理当前作品讲稿&quot;)
+    parser.add_argument(&quot;--source&quot;, default=&quot;data/input&quot;)
+    parser.add_argument(&quot;--strategy&quot;, default=&quot;fixed&quot;)
+    parser.add_argument(&quot;--size&quot;, type=int, default=600)
+    parser.add_argument(&quot;--overlap&quot;, type=int, default=60)
+    parser.add_argument(&quot;--tenant&quot;, default=&quot;demo&quot;)
+    parser.add_argument(&quot;--book&quot;, default=&quot;狂人日记&quot;)
+    args = parser.parse_args()
+    print(json.dumps(ingest(args.source,args.strategy,args.size,args.overlap,args.tenant,args.book), ensure_ascii=False, indent=2))
+</code></pre>
+<p>**写完后应当怎样：**ingest 命令输出文档数、块数与资料版本。</p>
+<h3>第 7 步：给命令入口增加 ingest</h3>
+<p>这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/__main__.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
 
-
-def terms(text):
-    # 中文双字片段是可解释的入门词面基线，不冒称完整分词器或 BM25。
-    lower = text.lower()
-    words = set(re.findall(r&quot;[a-z0-9]+&quot;, lower))
-    for run in re.findall(r&quot;[\u4e00-\u9fff]+&quot;, lower):
-        words.update(run[i:i + 2] for i in range(len(run) - 1))
-    return words
-
-
-def keyword_search(question, chunks, k=5):
-    query = terms(question)
-    ranked = []
-    for chunk in chunks:
-        matches = query &amp; terms(chunk[&quot;text&quot;])
-        if matches:
-            ranked.append({**chunk, &quot;score&quot;: len(matches) / max(1, len(query))})
-    return sorted(ranked, key=lambda c: (-c[&quot;score&quot;], c[&quot;id&quot;]))[:k]
-
-
-def neighbors(hits, chunks):
-    selected = {c[&quot;id&quot;]: c for c in hits}
-    for hit in hits:
-        siblings = sorted((c for c in chunks if c[&quot;doc_id&quot;] == hit[&quot;doc_id&quot;] and c[&quot;parent&quot;] == hit[&quot;parent&quot;]), key=lambda c: c[&quot;start&quot;])
-        position = next((i for i, c in enumerate(siblings) if c[&quot;id&quot;] == hit[&quot;id&quot;]), -1)
-        if position &gt;= 0:
-            for item in siblings[max(0, position - 1):position + 2]:
-                selected[item[&quot;id&quot;]] = item
-    return list(selected.values())
+<pre><code class="language-python">        main()
 </code></pre>
 </details>
 
-<h2 id="section-6">本单元完成条件</h2>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">        main()
+    elif command == &quot;ingest&quot;:
+        from .ingest_cli import main
+        main()
+</code></pre>
+<p>**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。</p>
+<h2 id="section-5">运行并观察</h2>
+<pre><code class="language-bash"># 每块最多 600 字符、相邻块重叠 60 字符；预期生成 corpus.json，而不改动 DOCX。
+python -m companion ingest --size 600 --overlap 60
+</code></pre>
+<p>打开 <code>data/live/corpus.json</code>，找到corpus.json 中的第一个片段，再回到对应 DOCX 对照。<code>parent=p0001</code> 是 Word 段落编号，<code>start/end</code> 是清理首尾空白后在这个段落内的字符区间；标题分组模式另有合并规则，后面再学。</p>
+<h2 id="section-6">自己改一次资料标签</h2>
+<p>先不执行新导入，口头推演：把作品错标为《三国演义》，之后按《狂人日记》筛选会发生什么？问题出在资料层，生成模型无法可靠纠正错误标签。</p>
+<p>一个输入目录只放同一作品、同一租户的资料。新增另一作品时建独立输入目录，并在 ingest 中显式写 <code>--book</code>。程序替换这一作品当前快照，保留已导入的其他作品与租户。不要把不同作品混在默认目录后都标成《狂人日记》。</p>
+<p>如果文档没有读出正文，程序会失败；表格数量会报告为跳过。图片、表格和修订批注不是本读取器已处理的内容，必须留在导入记录里。</p>
+<h2 id="section-7">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么 edition 不直接填一个常见版本？</li>
@@ -147,12 +173,25 @@ def neighbors(hits, chunks):
 <p>文件没有证明采用该版本。未知信息保留为空，才能避免错误引用。</p>
 <p><strong>讲次、Word 段落和原著章回有什么区别？</strong></p>
 <p>讲次是课程编排，段落是 DOCX 结构，章回是作品结构；三者不能自动互换。</p>
-<p>**通过证据：**能从一条检索结果回查 DOCX；列出一个真实未知字段，解释 doc_id 与 version 的区别。</p>
+<p>**通过证据：**能从 corpus.json 的一条片段记录回查 DOCX；列出一个真实未知字段，解释 doc_id 与 version 的区别。</p>
 </details>
 
-<h2 id="section-7">下次开始前</h2>
+<h2 id="section-8">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-8">资料依据与选读</h2>
+<h2 id="section-9">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0026-corpus-metadata"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0025-evidence-boundary.html"><small>上一单元</small>让回答说清依据和不知道的部分</a><a href="0027-corpus-dedup.html"><small>下一单元</small>用副本练习去重与更新 →</a></nav></main></div>
+<h2 id="section-10">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion.corpus import ingest
+from companion.files import load
+r=ingest(); assert r[&quot;documents&quot;]==5 and r[&quot;chunks&quot;]==15
+c=load(&quot;corpus.json&quot;)[&quot;chunks&quot;][0]
+print(c[&quot;file&quot;],c[&quot;parent&quot;],c[&quot;start&quot;],c[&quot;end&quot;])
+PY
+</code></pre>
+<p>**预期：**5 份讲稿、15 块；每块能追溯文件、段落和字符范围。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0026-corpus-metadata"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0025-evidence-boundary.html"><small>上一单元</small>让回答说清依据和不知道的部分</a><a href="0027-corpus-dedup.html"><small>下一单元</small>用副本练习去重与更新 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

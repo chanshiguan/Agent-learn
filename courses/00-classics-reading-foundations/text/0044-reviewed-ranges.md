@@ -1,6 +1,8 @@
 # 先核对片段属于哪个阅读范围
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《让记忆可以被查看、修正和删除》](0043-explicit-progress.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 讲次不能直接当作剧透边界
 
@@ -9,6 +11,85 @@
 从 `corpus.json` 找一条不涉及后文的片段，完整读过，再在编辑器创建 `data/live/ranges.json`。文件是 JSON 对象，键填那条真实片段 ID，值填 `range_end` 和 `reviewed`。不要照抄一个示例 ID，否则标注不会生效。
 
 为了避免手敲 ID，可以运行下面的交互程序。它仍要求你自己阅读并确认，程序不会替你判断剧透。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：把人工核对范围加入片段来源卡
+
+范围来自你对片段的核对；缺少记录时保持未知，不能让模型猜一个看似完整的值。
+
+**写在哪里：**项目根目录下的 `companion/corpus.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    documents, chunks, duplicates, seen = [], [], [], {}
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    documents, chunks, duplicates, seen = [], [], [], {}
+    annotations = load("ranges.json", {})
+```
+
+**写完后应当怎样：**重新导入后，每块都有 range_end 和 range_reviewed；未知不自动通过。
+
+### 第 2 步：把人工核对范围加入片段来源卡
+
+范围来自你对片段的核对；缺少记录时保持未知，不能让模型猜一个看似完整的值。
+
+**写在哪里：**项目根目录下的 `companion/corpus.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+                chunk_id = digest([doc_id, version, parent, strategy, size, overlap, start])[:24]
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+                chunk_id = digest([doc_id, version, parent, strategy, size, overlap, start])[:24]
+                review = annotations.get(chunk_id, {})
+                if review.get("reviewed") is True and (type(review.get("range_end")) is not int or review["range_end"] < 0):
+                    raise ValueError("已审核的阅读范围必须是非负整数，不能用 true/false 代替。")
+```
+
+**写完后应当怎样：**重新导入后，每块都有 range_end 和 range_reviewed；未知不自动通过。
+
+### 第 3 步：把人工核对范围加入片段来源卡
+
+范围来自你对片段的核对；缺少记录时保持未知，不能让模型猜一个看似完整的值。
+
+**写在哪里：**项目根目录下的 `companion/corpus.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+                               "end": start + len(part), "text": part})
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+                               "end": start + len(part), "text": part,
+                               "range_end": review.get("range_end"),
+                               "range_reviewed": review.get("reviewed") is True})
+```
+
+**写完后应当怎样：**重新导入后，每块都有 range_end 和 range_reviewed；未知不自动通过。
+
+## 运行并观察
 
 ```bash
 # 列出少量片段供人工核对；只显示测试讲稿，先记下准备标注的真实 ID。
@@ -53,3 +134,23 @@ python -m companion ingest --size 80 --overlap 16
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+from companion.corpus import ingest
+from companion.files import load
+ingest(size=80,overlap=16)
+assert all(c["range_reviewed"] is False for c in load("corpus.json")["chunks"])
+print("没有人工核对记录，全部保持未知")
+PY
+```
+
+**预期：**未知范围没有被自动当成可见。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

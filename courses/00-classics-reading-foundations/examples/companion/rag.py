@@ -1,39 +1,12 @@
-"""先检索，再生成；引用检查只证明 ID 来自候选，语义支持仍需评测。"""
+# 目的：先写“手工给资料”的最小回答函数；本节没有自动检索。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
-import re
-
-from .corpus import keyword_search, neighbors, visible
+from .corpus import visible, keyword_search, neighbors
 from .files import load
 from .models import complete, object_answer
 
-
-def retrieve(question, tenant="demo", book="狂人日记", method="keyword", progress=None, expand=False):
-    if method not in {"keyword", "semantic", "hybrid"}:
-        raise ValueError("未知检索方法。")
-    corpus = load("corpus.json")
-    if not corpus:
-        raise ValueError("请先运行 ingest 整理资料。")
-    allowed = visible(corpus["chunks"], tenant, book, progress)
-    lexical = keyword_search(question, allowed)
-    if method == "keyword":
-        hits = lexical
-    else:
-        from .vectors import fuse, semantic_search
-        dense = semantic_search(question, tenant, book, progress)
-        hits = dense if method == "semantic" else fuse(lexical, dense)
-    return neighbors(hits, allowed) if expand else hits
-
-
-def budget(hits, maximum=2400):
-    result, used = [], 0
-    for hit in hits:
-        if used + len(hit["text"]) > maximum:
-            continue
-        result.append(hit)
-        used += len(hit["text"])
-    return result
-
-
+# 目的：模型只在本次上下文里看到这一段资料；给它资料不会训练模型。
+# 预期：返回真实回答和本次提供的来源；下一单元再检查结构与引用。
 def answer(question, hits, history=None, strict=False):
     selected = budget(hits)
     if not selected:
@@ -68,16 +41,37 @@ def answer(question, hits, history=None, strict=False):
             "usage": response["usage"], "model": response["model"],
             "citation_validation": "仅校验引用属于候选，是否支持结论仍需人工核对"}
 
-
-def rewrite(question):
-    response = complete([{"role": "system", "content": "只把问题改写为一个更清楚的检索问题，保留作品、人物、讲次和否定。不要回答，不增加事实。"},
-                         {"role": "user", "content": question}])
-    result = (response["message"].get("content") or "").strip()
-    if not result or len(result) > 500:
-        raise ValueError("改写为空或过长。")
+# 目的：整块加入或整块跳过，不能只截取结论的一半。字符预算只是入门观察工具。
+# 预期：最多 2400 字符的候选证据进入请求。
+def budget(hits, maximum=2400):
+    result, used = [], 0
+    for hit in hits:
+        if used + len(hit["text"]) > maximum:
+            continue
+        result.append(hit)
+        used += len(hit["text"])
     return result
 
+# 目的：本节只允许关键词方法，显式拒绝尚未实现的其他方法，避免看似生效其实没有执行。
+# 预期：传入问题后返回来源片段列表，不调用生成模型。
+def retrieve(question, tenant="demo", book="狂人日记", method="keyword", progress=None, expand=False):
+    if method not in {"keyword", "semantic", "hybrid"}:
+        raise ValueError("未知检索方法。")
+    corpus = load("corpus.json")
+    if not corpus:
+        raise ValueError("请先运行 ingest 整理资料。")
+    allowed = visible(corpus["chunks"], tenant, book, progress)
+    lexical = keyword_search(question, allowed)
+    if method == "keyword":
+        hits = lexical
+    else:
+        from .vectors import fuse, semantic_search
+        dense = semantic_search(question, tenant, book, progress)
+        hits = dense if method == "semantic" else fuse(lexical, dense)
+    return neighbors(hits, allowed) if expand else hits
 
+# 目的：重排可能更贵，也可能错；要求返回完整候选排列，不能新增或漏掉来源。
+# 预期：新增、重复或遗漏 ID 的排序会失败。
 def rerank(question, hits):
     if not hits:
         return []
@@ -88,3 +82,13 @@ def rerank(question, hits):
     if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids) or len(ids) != len(set(ids)) or set(ids) != set(available):
         raise ValueError("重排必须是候选 ID 的完整排列；不接受新增或漏掉的 ID。")
     return [available[i] for i in ids]
+
+# 目的：保留作品、人名、讲次和否定；改写不应直接作答或添事实。
+# 预期：空结果和过长结果被拒绝，仍需人工判断含义有没有改变。
+def rewrite(question):
+    response = complete([{"role": "system", "content": "只把问题改写为一个更清楚的检索问题，保留作品、人物、讲次和否定。不要回答，不增加事实。"},
+                         {"role": "user", "content": question}])
+    result = (response["message"].get("content") or "").strip()
+    if not result or len(result) > 500:
+        raise ValueError("改写为空或过长。")
+    return result

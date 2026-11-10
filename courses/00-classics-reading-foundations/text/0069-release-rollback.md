@@ -1,10 +1,15 @@
 # 先小范围验证，再练一次撤回
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《把这次能跑的条件记录下来》](0068-release-manifest.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 发布前先知道怎样退回来
 
 给当前候选镜像一个不会覆盖旧版本的标签。选一份已验证旧版本与当前候选，不在运行中随意改源文件。程序和资料若不兼容，单换镜像无法完成回滚，数据库恢复要按下一章演练。
+
+
+## 运行并观察
 
 ```bash
 # 将当前 candidate 镜像标记为一个明确的练习版本；它不推送到任何远程仓库。
@@ -51,3 +56,6 @@ curl --fail http://127.0.0.1:8000/readyz
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

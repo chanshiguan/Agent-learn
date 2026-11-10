@@ -1,6 +1,6 @@
 # 名著 AI 伴读助手实战课程
 
-打开 `index.html` 查看学习地图。全课为导学与第 1—29 章，共 66 个短单元，含本地/线上二选一路线。选一条生成模型路线，主线练习约 35—51 小时；安装下载、真实公司协调与审核另计。每章和每单元分别标明用时。
+打开 `index.html` 查看学习地图。全课为导学与第 1—29 章，共 80 个连续练习单元，含本地/线上二选一路线。选一条生成模型路线，主线练习约 57—77 小时；安装下载、真实公司协调与审核另计。每章和每单元分别标明用时。
 
 同一组《狂人日记》五讲贯穿资料整理、RAG、伴读界面、工具循环、账号隔离和部署恢复。章节按前置能力衔接，知识拓展独立成页，不影响主线进度。每单元有操作、预期结果、失败实验、参考答案与通过证据。
 
@@ -18,22 +18,24 @@
 
 ## 带到实际学习电脑
 
-公开课程包解压后打开根目录 `index.html`，练习目录是 `courses/00-classics-reading-foundations/examples/`。命令以 macOS 的 Bash/Zsh 为主，不要求使用课程编写电脑的用户名、Python 环境或已有模型。M1 16 GB 是本地路线参考，不是性能保证；未提供原生 PowerShell 版本。
+在实际学习电脑新建 `classics-reader/`。导学只下载五份 DOCX，之后所有程序、依赖清单和部署文件都在单元中亲手创建。课程网页在浏览器阅读；课后参考工程只用来核对。命令以 macOS/Linux shell 为主，原生 PowerShell 不在本版范围内。
 
-五份 DOCX 来自随课程提供的公开 Markdown，可按相同输入完成实验。课程包不含私人原讲稿、凭据、模型权重或业务数据库。真实公司资料与学生数据仍按实际授权安排。
+五份 DOCX 来自随课程提供的公开 Markdown，可按相同输入完成实验。公开文件不含私人原讲稿、凭据、模型权重或业务数据库。真实公司资料与学生数据仍按实际授权安排。
 
 ## 项目里的文件
 
-- `text/`：66 个单元的 Markdown；生成的 HTML 位于根目录 `lessons/0008` 至 `0073`。
-- `examples/`：所有可运行配套文件；前四章为根目录脚本，第五章起使用 `companion/` 包。
+- `text/`：80 个单元的 Markdown；生成的 HTML 位于根目录 `lessons/0008` 至 `0073`。
+- `examples/`：最后一个单元完成后的参考文件；前四章为根目录脚本，第五章起使用 `companion/` 包。
 - `examples/data/input/`：五份讲稿；运行后的 `data/output/` 与 `data/live/` 分别保存基础读取和后续业务结果。
 - `examples/eval/`：开发题与保留题；这 6 道教学题不是完整公司验收题库。
-- `examples/deploy/`：Compose、Dockerfile、配置和 CI 示例；`release/`：待填写的验收清单与交接说明。
+- `examples/deploy/`：Compose、Dockerfile 和配置参考；`release/`：待填写的验收清单与交接说明。
 - `knowledge/`：16 篇独立选读；`code/`：逐文件完整源码页，入口 `code.html`。
 - `tests/`：离线行为测试；`evidence/`：教材编写时的验证证据。它们不代替学员自己的实测。
 
 ## 开发者维护
 
-`tooling/build.mjs` 使用 Node 与 marked，把 Markdown 和 `{{code:文件名}}` 引用的真实文件生成 HTML。`tooling/package.py` 只打包教材、示例、测试与五份输入，不带运行状态。修改源码后重新构建再打包。
+`tooling/build.mjs` 使用 Node 与 marked 生成网页。维护者更新正文与 writing/plan.json 后运行构建、逐步复演和公开白名单检查；不生成供学员解压的代码包。
 
 课程使用共享的 `assets/classics.css` 与 `assets/classics.js`。静态教材可离线阅读，伴读应用需按第 13 章启动服务。主线文档、自动行为检查、真实模型质量与公司放行分别验收；不把“教材完成”记成“学员已掌握”或“产品已上线”。
+
+`writing/plan.json` 记录与页面逐段一致的编辑顺序；`tooling/replay_writing.py` 是维护者复演工具，学员不需要运行它。

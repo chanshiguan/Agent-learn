@@ -1,6 +1,9 @@
 # 看清这五份文件究竟是什么
 
-本单元预计 **20—30 分钟**：找到资料约 5 分钟，抽读约 15 分钟，记录差异约 5 分钟。接着上一单元的项目卡，我们现在确定程序实际要读取哪些文件。
+本单元预计 **20—30 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《从五份讲稿开始做伴读助手》](0008-mission.html)继续。
+
 
 ## 先用一套人人都能取得的小样本
 
@@ -22,29 +25,25 @@ Word 的屏幕行数、手动换行和段落数量不是一回事。这批公开
 
 第一章先按文件结构读取，第 11 章再比较不同切法。标题文字写在正文里，也不代表 Word 已使用标题样式；这正是“按标题切分”可能没有效果的原因。
 
-## 在实际学习电脑上准备
+## 只准备阅读材料，程序由你接下来写
 
-解压课程包，或下载公开仓库后，进入 `courses/00-classics-reading-foundations/examples/`。先检查 `data/input/` 是否已有五份 DOCX；附带的文件可以直接使用。还没有配置 Python 时，先用 Markdown 阅读，不必在此提前安装所有工具。
+在 `classics-reader` 下新建 `data`，再在其中新建 `input`。逐份保存下面五个 Word 文件到 `data/input/`，保持文件名不变。这些链接只有阅读材料，不含程序。可以用 Finder 和编辑器完成，本节不要求你会终端命令。
 
-第 1 章完成虚拟环境和 `requirements.txt` 安装后，可以在练习目录运行：
+- [06 《狂人日记》第一讲两种叙述声音.docx](../courses/00-classics-reading-foundations/examples/data/input/06%20《狂人日记》第一讲两种叙述声音.docx)
+- [07 《狂人日记》第二讲月光与平等.docx](../courses/00-classics-reading-foundations/examples/data/input/07%20《狂人日记》第二讲月光与平等.docx)
+- [08 《狂人日记》第三讲吃人的历史联想.docx](../courses/00-classics-reading-foundations/examples/data/input/08%20《狂人日记》第三讲吃人的历史联想.docx)
+- [09 《狂人日记》第四讲不可靠叙述.docx](../courses/00-classics-reading-foundations/examples/data/input/09%20《狂人日记》第四讲不可靠叙述.docx)
+- [10 《狂人日记》第五讲传统与未来.docx](../courses/00-classics-reading-foundations/examples/data/input/10%20《狂人日记》第五讲传统与未来.docx)
 
-```bash
-# 从课程附带的公开 Markdown 生成五份 Word 样本及来源指纹；不需要私人 ZIP 或网络。
-# 如果已有相同文件，保留它们；遇到不同内容则停止，避免覆盖你的修改。
-python prepare_samples.py
-```
-
-预期显示“已准备 5 份课程自编讲解稿”。完整源码在代码索引中；此时知道它从哪里读、往哪里写即可，不要求提前掌握 DOCX 的生成过程。`data/sample-manifest.json` 记录公开源文件、SHA-256 和字符数，不写课程编写者的电脑路径。
-
-Git 版本只跟踪这五份明确列出的公开样本和清单；其他业务数据仍忽略。Docker 构建继续排除整个 `data/`，后面的练习通过挂载传入输入，避免把运行资料固化进镜像。
+从上面的公开样本目录也能阅读对应 Markdown。先核对正文；不用下载仓库、代码包或运行任何准备脚本。现在项目里只有 `project-card.md` 和五个输入文件，`read_docx.py`、`requirements.txt`、`Dockerfile` 都还不存在。
 
 ## 你的资料检查表
 
-在 `project-card.md` 记下：五份文件是否齐全，第一讲能否打开，哪一处是讲解、哪一处需要回到原著核对。再打开来源清单找到第一讲的记录。
+在 `project-card.md` 记下：五份文件是否齐全，第一讲能否打开，哪一处是讲解、哪一处需要回到原著核对。再到公开样本说明找到第一讲的来源记录。
 
 <details><summary>没有看到 data/input 怎么办</summary>
 
-先检查是否进入了课程的 `examples/`。如果取得的是源文本，完成第 1 章环境单元后再运行准备命令。报 `No module named docx` 时，说明当前 Python 尚未安装读取依赖，回到环境单元核对虚拟环境与安装命令。
+在自己的 classics-reader 内手动新建 data/input，保存五份 DOCX。若浏览器给文件名加了编号，改回上方显示的名字。
 
 </details>
 
@@ -65,3 +64,6 @@ Git 版本只跟踪这五份明确列出的公开样本和清单；其他业务�
 ## 资料依据
 
 阅读材料见[公开样本说明](../courses/00-classics-reading-foundations/public-materials/index.html)。[Hello-Agents 第八章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8)说明文档进入检索系统的流程；本单元先完成输入识别，不提前建立索引。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

@@ -1,9 +1,26 @@
 {
   "release_id": null,
   "audience_and_scale": null,
-  "targets": {"quality": null, "p95_seconds": null, "daily_cost_limit": null, "recovery_seconds": null, "allowed_data_loss_seconds": null},
-  "evidence": {"quality": null, "isolation": null, "load": null, "restore": null, "content_review": null},
-  "owners": {"product": null, "content": null, "engineering": null, "operations": null},
+  "targets": {
+    "quality": null,
+    "p95_seconds": null,
+    "daily_cost_limit": null,
+    "recovery_seconds": null,
+    "allowed_data_loss_seconds": null
+  },
+  "evidence": {
+    "quality": null,
+    "isolation": null,
+    "load": null,
+    "restore": null,
+    "content_review": null
+  },
+  "owners": {
+    "product": null,
+    "content": null,
+    "engineering": null,
+    "operations": null
+  },
   "known_blockers": [],
   "decision": "not_reviewed"
 }

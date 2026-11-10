@@ -1,41 +1,14 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/rag.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/rag.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/rag.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/rag.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;先检索，再生成；引用检查只证明 ID 来自候选，语义支持仍需评测。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/rag.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/rag.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/rag.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：先写“手工给资料”的最小回答函数；本节没有自动检索。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
-import re
-
-from .corpus import keyword_search, neighbors, visible
+from .corpus import visible, keyword_search, neighbors
 from .files import load
 from .models import complete, object_answer
 
-
-def retrieve(question, tenant=&quot;demo&quot;, book=&quot;狂人日记&quot;, method=&quot;keyword&quot;, progress=None, expand=False):
-    if method not in {&quot;keyword&quot;, &quot;semantic&quot;, &quot;hybrid&quot;}:
-        raise ValueError(&quot;未知检索方法。&quot;)
-    corpus = load(&quot;corpus.json&quot;)
-    if not corpus:
-        raise ValueError(&quot;请先运行 ingest 整理资料。&quot;)
-    allowed = visible(corpus[&quot;chunks&quot;], tenant, book, progress)
-    lexical = keyword_search(question, allowed)
-    if method == &quot;keyword&quot;:
-        hits = lexical
-    else:
-        from .vectors import fuse, semantic_search
-        dense = semantic_search(question, tenant, book, progress)
-        hits = dense if method == &quot;semantic&quot; else fuse(lexical, dense)
-    return neighbors(hits, allowed) if expand else hits
-
-
-def budget(hits, maximum=2400):
-    result, used = [], 0
-    for hit in hits:
-        if used + len(hit[&quot;text&quot;]) &gt; maximum:
-            continue
-        result.append(hit)
-        used += len(hit[&quot;text&quot;])
-    return result
-
-
+# 目的：模型只在本次上下文里看到这一段资料；给它资料不会训练模型。
+# 预期：返回真实回答和本次提供的来源；下一单元再检查结构与引用。
 def answer(question, hits, history=None, strict=False):
     selected = budget(hits)
     if not selected:
@@ -70,16 +43,37 @@ def answer(question, hits, history=None, strict=False):
             &quot;usage&quot;: response[&quot;usage&quot;], &quot;model&quot;: response[&quot;model&quot;],
             &quot;citation_validation&quot;: &quot;仅校验引用属于候选，是否支持结论仍需人工核对&quot;}
 
-
-def rewrite(question):
-    response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;只把问题改写为一个更清楚的检索问题，保留作品、人物、讲次和否定。不要回答，不增加事实。&quot;},
-                         {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}])
-    result = (response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;).strip()
-    if not result or len(result) &gt; 500:
-        raise ValueError(&quot;改写为空或过长。&quot;)
+# 目的：整块加入或整块跳过，不能只截取结论的一半。字符预算只是入门观察工具。
+# 预期：最多 2400 字符的候选证据进入请求。
+def budget(hits, maximum=2400):
+    result, used = [], 0
+    for hit in hits:
+        if used + len(hit[&quot;text&quot;]) &gt; maximum:
+            continue
+        result.append(hit)
+        used += len(hit[&quot;text&quot;])
     return result
 
+# 目的：本节只允许关键词方法，显式拒绝尚未实现的其他方法，避免看似生效其实没有执行。
+# 预期：传入问题后返回来源片段列表，不调用生成模型。
+def retrieve(question, tenant=&quot;demo&quot;, book=&quot;狂人日记&quot;, method=&quot;keyword&quot;, progress=None, expand=False):
+    if method not in {&quot;keyword&quot;, &quot;semantic&quot;, &quot;hybrid&quot;}:
+        raise ValueError(&quot;未知检索方法。&quot;)
+    corpus = load(&quot;corpus.json&quot;)
+    if not corpus:
+        raise ValueError(&quot;请先运行 ingest 整理资料。&quot;)
+    allowed = visible(corpus[&quot;chunks&quot;], tenant, book, progress)
+    lexical = keyword_search(question, allowed)
+    if method == &quot;keyword&quot;:
+        hits = lexical
+    else:
+        from .vectors import fuse, semantic_search
+        dense = semantic_search(question, tenant, book, progress)
+        hits = dense if method == &quot;semantic&quot; else fuse(lexical, dense)
+    return neighbors(hits, allowed) if expand else hits
 
+# 目的：重排可能更贵，也可能错；要求返回完整候选排列，不能新增或漏掉来源。
+# 预期：新增、重复或遗漏 ID 的排序会失败。
 def rerank(question, hits):
     if not hits:
         return []
@@ -90,5 +84,15 @@ def rerank(question, hits):
     if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids) or len(ids) != len(set(ids)) or set(ids) != set(available):
         raise ValueError(&quot;重排必须是候选 ID 的完整排列；不接受新增或漏掉的 ID。&quot;)
     return [available[i] for i in ids]
+
+# 目的：保留作品、人名、讲次和否定；改写不应直接作答或添事实。
+# 预期：空结果和过长结果被拒绝，仍需人工判断含义有没有改变。
+def rewrite(question):
+    response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;只把问题改写为一个更清楚的检索问题，保留作品、人物、讲次和否定。不要回答，不增加事实。&quot;},
+                         {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}])
+    result = (response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;).strip()
+    if not result or len(result) &gt; 500:
+        raise ValueError(&quot;改写为空或过长。&quot;)
+    return result
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

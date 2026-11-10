@@ -1,6 +1,7 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/agent.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/agent.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/agent.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/agent.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;真实 tool_calls 驱动的有界循环；轨迹记录动作，不记录模型私有思考。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/agent.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/agent.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/agent.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：复用已经验证的工具；循环只解释模型请求，不执行模型生成的代码。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 from time import monotonic
 from .models import complete, object_answer
@@ -8,7 +9,8 @@ from .tools import ReaderTools, SCHEMAS
 from .state import get_session
 from .rag import answer, retrieve
 
-
+# 目的：每轮检查步数、时间与上下文；模型要工具时由程序验证后执行，没有工具时检查最终引用。
+# 预期：结果包含工具动作轨迹与用量；预算耗尽时明确未完成，不伪造答案。
 def run_agent(actor, session_id, question, method=&quot;keyword&quot;, max_rounds=4, deadline_seconds=120, cancelled=None):
     session = get_session(actor, session_id)
     if session[&quot;strict&quot;]:

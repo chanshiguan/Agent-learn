@@ -1,6 +1,82 @@
 # 把一次模型调用拆成时间和用量
 
-本单元预计 **30—45 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《给一次提问一个可以追踪的编号》](0060-request-trace.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：开始测量整个业务请求
+
+客户端模型耗时不等于总耗时，还包括检索、状态读取与保存。
+
+**写在哪里：**项目根目录下的 `companion/service.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+import time
+```
+
+**写完后应当怎样：**用单调时钟记录经过时间，不受系统时钟校正影响。
+
+### 第 2 步：在业务开始处打时间点
+
+结束时相减才是本次请求耗时；不能拿运行日期相减估算。
+
+**写在哪里：**项目根目录下的 `companion/service.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        raise ValueError("当前只支持问答和固定伴读。")
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+        raise ValueError("当前只支持问答和固定伴读。")
+    started=time.monotonic()
+```
+
+**写完后应当怎样：**每次 ask 各自保留开始时间。
+
+### 第 3 步：保存总耗时和来源数量
+
+现在只记录已知的数字，价格与费率需要另按实际供应商填写，缺失用量不能当0。
+
+**写在哪里：**项目根目录下的 `companion/service.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    updated=update_session(actor,session,history=history)
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    updated=update_session(actor,session,history=history)
+    log_event(request_id,"answer",seconds=round(time.monotonic()-started,3),source_count=len(result.get("sources",[])))
+```
+
+**写完后应当怎样：**普通问答日志可关联请求和完成事件。
 
 ## 两种数字不能互相代替
 
@@ -44,3 +120,6 @@ elapsed 是等待多久，token usage 是模型接口报告的输入/输出用�
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

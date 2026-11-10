@@ -1,0 +1,33 @@
+{
+  "scope": "从页面编辑重建的代码；离线行为检查与真实模型质量分开记录",
+  "units": 80,
+  "visible_edits": 335,
+  "created_files": 59,
+  "incremental_checks": 35,
+  "stage_imports": "每个停点导入当时已创建模块，通过",
+  "python_regressions": 33,
+  "browser_race_regressions": 4,
+  "mobile_pages": 173,
+  "viewports": [
+    375,
+    768,
+    812,
+    1024,
+    1440
+  ],
+  "vector_cli": {
+    "backend": "Qdrant SDK local，不是容器服务",
+    "model_weights": "复用此前下载的公开固定提交权重；重新生成向量与索引",
+    "chunks": 106,
+    "dimensions": 384,
+    "first_new_embeddings": 106,
+    "repeat_new_embeddings": 0,
+    "query_hits": 5,
+    "evaluation_generated": false
+  },
+  "unverified": [
+    "目标M1速度与并发",
+    "线上模型实调用",
+    "公司生产身份接入与HTTPS验收"
+  ]
+}

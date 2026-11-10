@@ -1,4 +1,5 @@
-"""备份与恢复实验：保存数据库快照、资料版本及哈希，不复制凭据。"""
+# 目的：把一次能运行的条件写成记录；数据库、资料、模型与源码版本要区分。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import hashlib
 import json
 import os
@@ -7,7 +8,30 @@ import sqlite3
 from pathlib import Path
 from .files import data_dir, load
 
+# 目的：只写镜像标签无法复现真实状态；把本次实际条件和缺失项一起列出。
+# 预期：记录真实值，不把缺失依赖或未测路线写成已验证。
+def manifest():
+    import importlib.metadata
+    packages = {}
+    for name in ("python-docx", "openai", "fastapi", "qdrant-client", "sentence-transformers", "langgraph"):
+        try:
+            packages[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            packages[name] = None
+    from .state import connect
+    with connect() as db:
+        schema_version = db.execute("PRAGMA user_version").fetchone()[0]
+    source_root = Path(__file__).parent
+    source_hashes = {str(f.relative_to(source_root)): hashlib.sha256(f.read_bytes()).hexdigest()
+                     for f in source_root.rglob("*") if f.is_file() and f.suffix in {".py", ".html", ".js", ".css"}}
+    return {"application": "classics-course-v2", "source_hashes": source_hashes,
+            "generation_model": os.environ.get("LLM_MODEL"), "generation_route": os.environ.get("LLM_MODE"), "prompt_version": "grounded-v1",
+            "corpus_revision": (load("corpus.json") or {}).get("revision"),
+            "index": load("index.json"), "packages": packages,
+            "schema_version": schema_version}
 
+# 目的：业务数据库用 SQLite 一致快照 API；先停止写入以保持多文件版本一致。
+# 预期：恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
 def backup(destination):
     target = Path(destination)
     target.mkdir(parents=True, exist_ok=False)
@@ -24,7 +48,8 @@ def backup(destination):
     (target / "manifest.json").write_text(json.dumps({"files": hashes, "strategy": "索引可由 corpus 重建；此包不含 Qdrant 卷与模型权重"}, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"backup": str(target), "files": list(hashes)}
 
-
+# 目的：先核对备份文件白名单与指纹，再恢复到新目录；撤销旧令牌，索引明确重建。
+# 预期：恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
 def restore(source, destination):
     source, target = Path(source), Path(destination)
     manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
@@ -46,24 +71,3 @@ def restore(source, destination):
             db.execute("DELETE FROM tokens")
             db.execute("UPDATE actions SET expires=0 WHERE status='pending'")
     return {"restored": str(target), "index_rebuild_required": True, "login_required": True}
-
-
-def manifest():
-    import importlib.metadata
-    packages = {}
-    for name in ("python-docx", "openai", "fastapi", "qdrant-client", "sentence-transformers", "langgraph"):
-        try:
-            packages[name] = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            packages[name] = None
-    from .state import connect
-    with connect() as db:
-        schema_version = db.execute("PRAGMA user_version").fetchone()[0]
-    source_root = Path(__file__).parent
-    source_hashes = {str(f.relative_to(source_root)): hashlib.sha256(f.read_bytes()).hexdigest()
-                     for f in source_root.rglob("*") if f.is_file() and f.suffix in {".py", ".html", ".js", ".css"}}
-    return {"application": "classics-course-v2", "source_hashes": source_hashes,
-            "generation_model": os.environ.get("LLM_MODEL"), "generation_route": os.environ.get("LLM_MODE"), "prompt_version": "grounded-v1",
-            "corpus_revision": (load("corpus.json") or {}).get("revision"),
-            "index": load("index.json"), "packages": packages,
-            "schema_version": schema_version}

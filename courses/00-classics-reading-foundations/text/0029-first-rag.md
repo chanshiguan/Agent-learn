@@ -1,10 +1,88 @@
 # 把检索结果接到回答里
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《先让程序找到相关文字》](0028-keyword-retrieval.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## RAG 现在只多一条连接
 
 顺序是：问题 → 当前作品可见片段 → 词面排序 → 上下文预算 → 模型解释 → 引用检查。生成模型没有被训练，知识库更新后换的是本次送入的证据。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：复用上一章的有据回答
+
+检索只负责选材，生成函数负责解释。把两者连起来就是当前最小 RAG。
+
+**写在哪里：**项目根目录下的 `companion/query.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+from .rag import retrieve
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+from .rag import retrieve, answer
+```
+
+**写完后应当怎样：**请求中的资料由检索自动提供。
+
+### 第 2 步：增加问答分支，保留检索观察入口
+
+排错时仍可单独 search；不要把所有失败都藏在 ask 的最终答案后面。
+
+**写在哪里：**项目根目录下的 `companion/query.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    result = {"question":args.question,"hits":hits}
+```
+
+</details>
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+    result = answer(args.question,hits) if kind == "ask" else {"question":args.question,"hits":hits}
+```
+
+**写完后应当怎样：**ask 返回引用与解释，search 保持原样。
+
+### 第 3 步：给命令入口增加 ask
+
+这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。
+
+**写在哪里：**项目根目录下的 `companion/__main__.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        main('search')
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+        main('search')
+    elif command == "ask":
+        from .query import main
+        main('ask')
+```
+
+**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+## 运行并观察
 
 ```bash
 # 使用刚才的词面检索，再把候选证据交给真实模型；预期回答含可回查的引用。
@@ -53,3 +131,22 @@ python -m companion ask "这五讲采用哪家出版社哪一版原著？请给�
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+from companion.rag import answer,retrieve
+r=answer("准确页码",retrieve("页码",book="未导入"))
+assert r["insufficient"] is True
+print("检索无结果时不调用模型")
+PY
+```
+
+**预期：**无资料路径已验证；正常问答按正文调用所选真实模型。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

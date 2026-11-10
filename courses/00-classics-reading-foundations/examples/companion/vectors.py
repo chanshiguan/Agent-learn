@@ -1,16 +1,17 @@
-"""真实 Embedding 与持久 Qdrant；模型缓存和索引版本分别记录。"""
+# 目的：固定编码器提交，避免同名模型后来变化时无法重现；生成模型与编码器职责不同。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import os
 import uuid
-from functools import lru_cache
 from contextlib import closing
-
+from functools import lru_cache
 from .files import data_dir, digest, load, save
 from .corpus import visible
 
 MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 MODEL_REVISION = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
 
-
+# 目的：一次进程只加载一次真实 CPU 编码器，不用字符计数伪造向量。
+# 预期：文本列表变成等长浮点向量列表，保留输入顺序。
 @lru_cache(maxsize=1)
 def encoder():
     from sentence_transformers import SentenceTransformer
@@ -18,7 +19,8 @@ def encoder():
     # 显式指定公开仓库提交，不依赖库的私有配置字段，也不跟随会移动的 main。
     return SentenceTransformer(MODEL, revision=MODEL_REVISION, device="cpu", cache_folder=str(data_dir() / "models"))
 
-
+# 目的：先查 token 长度，超窗就停止；归一化后的向量可以用点积比较。
+# 预期：文本列表变成等长浮点向量列表，保留输入顺序。
 def embed(texts):
     model = encoder()
     lengths = [len(model.tokenizer.encode(t, add_special_tokens=True)) for t in texts]
@@ -26,7 +28,8 @@ def embed(texts):
         raise ValueError(f"片段超过 Embedding 的 {model.max_seq_length} token 窗口，请减小切块；不静默截断。")
     return model.encode(texts, batch_size=8, normalize_embeddings=True).tolist()
 
-
+# 目的：默认连接真实 Qdrant 服务；本地 SDK 模式只供作者的离线行为检查，不冒充容器。
+# 预期：离开 with 后关闭客户端，避免本地库被锁住。
 def connection():
     from qdrant_client import QdrantClient
     # 离线单元测试可明确选择 local；课程第 10 章默认连接真实 Qdrant 服务。
@@ -35,7 +38,8 @@ def connection():
     return closing(QdrantClient(url=os.environ.get("QDRANT_URL", "http://127.0.0.1:6333"),
                         api_key=os.environ.get("QDRANT_API_KEY") or None, timeout=30))
 
-
+# 目的：先建立集合、分批写入，确认条数后再发布活动索引指针；中途失败不能切到半成品。
+# 预期：index.json 的 count 等于语料块数，集合内保留来源字段。
 def build_index():
     from qdrant_client import models
     corpus = load("corpus.json")
@@ -71,7 +75,8 @@ def build_index():
     save("index.json", index)
     return index
 
-
+# 目的：先核对资料与编码器版本，再检索当前机构和作品；不让旧索引混进新资料。
+# 预期：返回仍有文件名、段落与块 ID，可与词面结果比较。
 def semantic_search(question, tenant, book, progress=None, k=5):
     from qdrant_client import models
     index, corpus = load("index.json"), load("corpus.json")
@@ -92,7 +97,8 @@ def semantic_search(question, tenant, book, progress=None, k=5):
     allowed = {c["id"]: c for c in visible(corpus["chunks"], tenant, book, progress)}
     return [{**allowed[p.payload["id"]], "score": p.score} for p in points if p.payload.get("id") in allowed]
 
-
+# 目的：词面分数和向量分数的尺度不同；先按名次融合，避免直接把两种分数相加。
+# 预期：去重后的前五条保留来源信息。
 def fuse(first, second, k=5):
     scores, items = {}, {}
     for result in (first, second):

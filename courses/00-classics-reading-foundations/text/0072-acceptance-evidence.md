@@ -1,6 +1,55 @@
 # 把练习成果整理成可审查的版本
 
-本单元预计 **45—65 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **40—55 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《真的恢复一次，再谈备份可靠》](0071-restore-migration.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：创建待填写的验收记录
+
+保留未验证状态，只用自己的真实证据更新条目；格式不应替你虚构通过结论。
+
+**写在哪里：**项目根目录下的 `release/acceptance.json`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```json
+{
+  "release_id": null,
+  "audience_and_scale": null,
+  "targets": {
+    "quality": null,
+    "p95_seconds": null,
+    "daily_cost_limit": null,
+    "recovery_seconds": null,
+    "allowed_data_loss_seconds": null
+  },
+  "evidence": {
+    "quality": null,
+    "isolation": null,
+    "load": null,
+    "restore": null,
+    "content_review": null
+  },
+  "owners": {
+    "product": null,
+    "content": null,
+    "engineering": null,
+    "operations": null
+  },
+  "known_blockers": [],
+  "decision": "not_reviewed"
+```
+
+```json
+}
+```
+
+**写完后应当怎样：**能区分待完成事项、验证路径与真正的公司审批。
 
 ## 课程结业与公司上线是两件可分别检查的事
 
@@ -22,19 +71,10 @@
 
 ## 做一次交叉审查
 
-让没有参与实现的人仅凭课程包、README 与运行手册搭建测试环境。观察在哪一步需要口头补充，把那部分写回文档。再让内容负责人审一组有争议的解释，确认允许的表达边界。
+让没有参与实现的人仅凭课程网站、README 与运行手册搭建测试环境。观察在哪一步需要口头补充，把那部分写回文档。再让内容负责人审一组有争议的解释，确认允许的表达边界。
 
 公司条件尚未齐备时，把 decision 保持 not_reviewed，列出负责人和下一步。任务是做出可判断的证据，不是把每个单元都强行写成通过。
 
-## 对照完整实现
-
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
-
-<details><summary>展开本单元完整源码：release/acceptance.json</summary>
-
-{{code:release/acceptance.json}}
-
-</details>
 
 ## 本单元完成条件
 
@@ -64,3 +104,6 @@
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

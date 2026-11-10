@@ -1,6 +1,8 @@
 # 完成受控试用与交接，决定下一步
 
-本单元预计 **45—65 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **45—65 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《把练习成果整理成可审查的版本》](0072-acceptance-evidence.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 试用先小到能够认真处理问题
 
@@ -12,11 +14,14 @@
 
 至少包括：如何启动与停止、怎样判断依赖就绪、模型故障怎么处理、如何更新资料、如何撤回版本、怎样备份与恢复、如何处理删除和内容反馈、谁值班。每一项链接到你实际验证过的命令或报告。
 
+
+## 运行并观察
+
 ```bash
 # 交接前生成最终版本清单，让接手人知道程序与数据的具体组合。
 python -m companion manifest
 # 最后重跑确定行为回归；这一步不替代试用反馈、真实模型质量或公司批准。
-python -m unittest discover -s ../tests -v
+python -m unittest discover -s tests -v
 ```
 
 完成一次修复→复测→小范围重新验证，再由相应负责人决定继续试用、正式放行或继续阻塞。没有公司环境时，可以完成模拟演练并明确标“模拟”，不能伪造真实用户、审批或上线结果。
@@ -55,3 +60,6 @@ python -m unittest discover -s ../tests -v
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

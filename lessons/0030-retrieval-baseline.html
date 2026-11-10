@@ -1,39 +1,100 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用固定题集观察检索失败 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0030-retrieval-baseline">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用固定题集观察检索失败（1/2：把本节能力连起来） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0030-retrieval-baseline">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用固定题集观察检索失败</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-8">← 返回课程地图</a><p class="rail-label">第 8 章 · 先定题集，再谈优化</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0030-retrieval-baseline.html" aria-current="page"><span class="unit-number">1</span><span>用固定题集观察检索失败<small>30—45 分钟</small></span></a></li><li><a href="0031-answer-rubric.html"><span class="unit-number">2</span><span>给模型回答打分，也保留不通过<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么不能每次都换一道题</a></li><li><a href="#section-2">给失败写一个可行动的名字</a></li><li><a href="#section-3">对照完整实现</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 8 章 / 单元 1 · 共 2 个</p><h1>用固定题集观察检索失败</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>30—45 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用固定题集观察检索失败（1/2：把本节能力连起来）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-8">← 返回课程地图</a><p class="rail-label">第 8 章 · 先定题集，再谈优化</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0030-retrieval-baseline.html" aria-current="page"><span class="unit-number">1</span><span>用固定题集观察检索失败（1/2：把本节能力连起来）<small>55—70 分钟</small></span></a></li><li><a href="0030-retrieval-baseline-02.html"><span class="unit-number">2</span><span>用固定题集观察检索失败（2/2：把本节能力连起来）<small>30—45 分钟</small></span></a></li><li><a href="0031-answer-rubric.html"><span class="unit-number">3</span><span>给模型回答打分，也保留不通过<small>50—65 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么不能每次都换一道题</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">在这里停一下，检查刚写的部分</a></li><li><a href="#section-4">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 8 章 / 单元 1 · 共 3 个</p><h1>用固定题集观察检索失败（1/2：把本节能力连起来）</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 135—180 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0029-first-rag.html">《把检索结果接到回答里》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">为什么不能每次都换一道题</h2>
 <p>换模型、换问题、换资料同时进行，结果变好也不知道原因。先固定输入与评价方法。<code>eval/dev.json</code> 是四道开发题，包含序言关系、徐锡麟、平等的解释和资料未给出的版本页码。题目中的短证据片段来自这五份讲稿。</p>
 <p>开发题用于诊断和调参；<code>eval/holdout.json</code> 的两道保留题用来检查是否只对熟题有效。它们只是教学起点，规模远小于公司验收题库。不要反复看着保留题改 Prompt，再声称“泛化提升”。</p>
-<pre><code class="language-bash"># 不开生成，仅测固定题的检索结果；预期产生每题候选和命中指标。
-python -m companion evaluate --output keyword-baseline.json
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：把导学问题写成机器能遍历的题单</h3>
+<p>题目、目标讲次和证据短句分别保存；来源命中和答案正确是不同指标。</p>
+<p>**写在哪里：**项目根目录下的 <code>eval/dev.json</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;dev-01&quot;,
+    &quot;question&quot;: &quot;第一讲怎样解释文言文序言和白话日记的关系？&quot;,
+    &quot;expected_document_prefixes&quot;: [&quot;06 &quot;],
+    &quot;expected_quotes&quot;: [&quot;文言文序言提供外部叙述，白话日记呈现人物的内部感受&quot;],
+    &quot;expected_insufficient&quot;: false
+  },
+  {
+    &quot;id&quot;: &quot;dev-02&quot;,
+    &quot;question&quot;: &quot;第三讲谈到吃人时，为什么提到徐锡麟？&quot;,
+    &quot;expected_document_prefixes&quot;: [&quot;08 &quot;],
+    &quot;expected_quotes&quot;: [&quot;把古代故事、较近的名字和眼前听闻连成一条线&quot;],
+    &quot;expected_insufficient&quot;: false
+  },
+  {
+    &quot;id&quot;: &quot;dev-03&quot;,
+    &quot;question&quot;: &quot;第二讲借月亮怎样讲平等？&quot;,
+    &quot;expected_document_prefixes&quot;: [&quot;07 &quot;],
+    &quot;expected_quotes&quot;: [&quot;平等在这里指每个人都值得被尊重&quot;],
+    &quot;expected_insufficient&quot;: false
+  },
+  {
+    &quot;id&quot;: &quot;dev-04&quot;,
+    &quot;question&quot;: &quot;这五份讲稿使用的原著版本的准确页码是多少？&quot;,
 </code></pre>
-<p>打开 <code>data/live/keyword-baseline.json</code>。<code>document_recall</code> 看预期文件是否出现，<code>quote_hit</code> 看目标短句是否完整落在候选里。文件命中不表示关键句命中；关键句跨块时，quote_hit 也可能为 false。它们都是诊断信号，不是最终质量分。</p>
-<h2 id="section-2">给失败写一个可行动的名字</h2>
-<p>挑一题，检查候选是否完整保留论据和限定条件。若失败，可写“相关词不重合”“关键句被切开”或“前五条混入重复内容”，并贴出证据；若当前题全部命中，就如实记录命中情况与上下文观察，不需要编造失败。若无法归因，就写待确认，不要用一个笼统的准确率掩盖问题。</p>
-<p>在 dev.json 追加你自己的一个问题，人工找到对应讲稿及短句；只用当前有权限的样本，不把别人的私人问题复制进去。确认 JSON 仍可解析，再重跑。资料 revision、算法与题集一起保存。</p>
-<h2 id="section-3">对照完整实现</h2>
-<p>先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。</p>
-<details><summary>展开本单元完整源码：companion/evaluation.py</summary>
-
-
-<pre><code class="language-python">&quot;&quot;&quot;固定题集分别记录检索与回答；没有人工评分时不自动宣告质量通过。&quot;&quot;&quot;
+<pre><code class="language-json">    &quot;expected_document_prefixes&quot;: [],
+    &quot;expected_quotes&quot;: [],
+    &quot;expected_insufficient&quot;: true
+  }
+]
+</code></pre>
+<p>**写完后应当怎样：**四道开发题可以重复跑，其中页码题没有目标片段。</p>
+<h3>第 2 步：为最终评测留两道未调参题</h3>
+<p>先封存题目，调参期间只跑开发题，避免把记住题库当作泛化。</p>
+<p>**写在哪里：**项目根目录下的 <code>eval/holdout.json</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;holdout-01&quot;,
+    &quot;question&quot;: &quot;第五讲为什么追问流传下来的做法是否就是对的？&quot;,
+    &quot;expected_document_prefixes&quot;: [&quot;10 &quot;],
+    &quot;expected_quotes&quot;: [&quot;延续时间只能说明它存在过，不能单独证明它合理&quot;],
+    &quot;expected_insufficient&quot;: false
+  },
+  {
+    &quot;id&quot;: &quot;holdout-02&quot;,
+    &quot;question&quot;: &quot;请给出讲稿中的每一个引文在原版书中的精确页码和出版社。&quot;,
+    &quot;expected_document_prefixes&quot;: [],
+    &quot;expected_quotes&quot;: [],
+    &quot;expected_insufficient&quot;: true
+  }
+]
+</code></pre>
+<p>**写完后应当怎样：**本阶段不运行或根据保留题改实现。</p>
+<h3>第 3 步：先写这个文件需要的导入</h3>
+<p>把单道检索变成固定题单循环；本节仍不调用生成模型。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：把单道检索变成固定题单循环；本节仍不调用生成模型。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 import time
 from pathlib import Path
 from .files import load, save
-from .rag import retrieve, answer, rewrite, rerank
-
-
+from .rag import retrieve
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 4 步：逐题记录命中与未命中</h3>
+<p>先开始计时，再找资料；无目标来源的题记为不适用，不凑进召回率。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluation.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：先开始计时，再找资料；无目标来源的题记为不适用，不凑进召回率。
+# 预期：生成 evaluation.json，人工语义评分保持 null。
 def evaluate(cases_file, method=&quot;keyword&quot;, generate=False, expand=False, reranking=False, rewriting=False, output=&quot;evaluation.json&quot;):
+    if generate or reranking or rewriting:
+        raise ValueError(&quot;本阶段只运行检索基线。&quot;)
     cases = json.loads(Path(cases_file).read_text(encoding=&quot;utf-8&quot;))
     records = []
     for case in cases:
         started = time.monotonic()
-        query = rewrite(case[&quot;question&quot;]) if rewriting else case[&quot;question&quot;]
+        query = case[&quot;question&quot;]
         hits = retrieve(query, case.get(&quot;tenant&quot;, &quot;demo&quot;), case.get(&quot;book&quot;, &quot;狂人日记&quot;), method, expand=expand)
-        if reranking:
-            hits = rerank(case[&quot;question&quot;], hits)
         prefixes = case.get(&quot;expected_document_prefixes&quot;, [])
         found = {prefix for prefix in prefixes if any(h[&quot;file&quot;].startswith(prefix) for h in hits)}
         quotes = case.get(&quot;expected_quotes&quot;, [])
@@ -43,56 +104,49 @@ def evaluate(cases_file, method=&quot;keyword&quot;, generate=False, expand=Fals
                   &quot;quote_hit&quot;: any(q in h[&quot;text&quot;] for q in quotes for h in hits) if quotes else None,
                   &quot;expected_insufficient&quot;: case.get(&quot;expected_insufficient&quot;, False),
                   &quot;manual&quot;: {&quot;answer_supported&quot;: None, &quot;citation_supported&quot;: None, &quot;age_appropriate&quot;: None}}
-        # 检索测试默认不调用生成模型；generate 显式开启后才可能向云端发送讲稿片段。
-        if generate:
-            try:
-                record[&quot;response&quot;] = answer(case[&quot;question&quot;], hits)
-            except Exception as error:
-                record[&quot;error_type&quot;] = type(error).__name__
         record[&quot;seconds&quot;] = round(time.monotonic() - started, 3)
         records.append(record)
     report = {&quot;corpus_revision&quot;: load(&quot;corpus.json&quot;)[&quot;revision&quot;], &quot;method&quot;: method,
               &quot;generated&quot;: generate, &quot;options&quot;: {&quot;expand&quot;: expand, &quot;rerank&quot;: reranking, &quot;rewrite&quot;: rewriting},
               &quot;records&quot;: records, &quot;quality_passed&quot;: None}
-    save(output, report)
-    return report
-
-
-def quality_gate(report_file):
-    report = json.loads(Path(report_file).read_text(encoding=&quot;utf-8&quot;))
-    failures = []
-    if not report.get(&quot;generated&quot;) or not report.get(&quot;records&quot;):
-        failures.append(&quot;没有真实生成记录。&quot;)
-    for item in report.get(&quot;records&quot;, []):
-        if item.get(&quot;error_type&quot;) or not item.get(&quot;response&quot;):
-            failures.append(f&quot;{item[&#39;id&#39;]} 没有成功响应。&quot;)
-        if not all(item.get(&quot;manual&quot;, {}).get(k) is True for k in (&quot;answer_supported&quot;, &quot;citation_supported&quot;, &quot;age_appropriate&quot;)):
-            failures.append(f&quot;{item[&#39;id&#39;]} 缺少逐项人工通过结论。&quot;)
-        if item.get(&quot;response&quot;, {}).get(&quot;insufficient&quot;) is not item.get(&quot;expected_insufficient&quot;):
-            failures.append(f&quot;{item[&#39;id&#39;]} 的证据不足行为未达到预期。&quot;)
-    return {&quot;passed&quot;: not failures, &quot;failures&quot;: failures,
-            &quot;scope&quot;: &quot;仅这份题集的记录；不是生产容量、教学效果或公司上线批准&quot;}
 </code></pre>
+<pre><code class="language-python">    save(output, report)
+    return report
+</code></pre>
+<p>**写完后应当怎样：**生成 evaluation.json，人工语义评分保持 null。</p>
+<h3>第 5 步：让评测条件能从命令行重复指定</h3>
+<p>保留输出文件名参数，下一次实验不要覆盖上一份基线。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/evaluate_cli.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<pre><code class="language-python"># 目的：保留输出文件名参数，下一次实验不要覆盖上一份基线。
+# 预期：同一份题单与快照可重复观察；记录不自动等于通过。
+import argparse
+import json
+from .evaluation import evaluate
+
+
+def main():
+    parser = argparse.ArgumentParser(description=&quot;记录固定题集表现&quot;)
+    parser.add_argument(&quot;--cases&quot;,default=&quot;eval/dev.json&quot;)
+    parser.add_argument(&quot;--method&quot;,default=&quot;keyword&quot;)
+    parser.add_argument(&quot;--generate&quot;,action=&quot;store_true&quot;)
+    parser.add_argument(&quot;--output&quot;,default=&quot;evaluation.json&quot;)
+    args=parser.parse_args()
+    print(json.dumps(evaluate(args.cases,args.method,args.generate,output=args.output),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**同一份题单与快照可重复观察；记录不自动等于通过。</p>
+<h2 id="section-3">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/evaluation.py companion/evaluate_cli.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>保留输出文件名参数，下一次实验不要覆盖上一份基线。 同一份题单与快照可重复观察；记录不自动等于通过。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
 </details>
 
-<h2 id="section-4">本单元完成条件</h2>
-<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
-<ol>
-<li>文件命中率高就能交付吗？</li>
-<li>为什么保留题不能一直拿来调参？</li>
-</ol>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
-
-<p><strong>文件命中率高就能交付吗？</strong></p>
-<p>不能。命中文件不代表找到了支持结论的那句话，更不代表生成正确。</p>
-<p><strong>为什么保留题不能一直拿来调参？</strong></p>
-<p>一旦依据它持续调整，它就成为开发题。要评估新问题表现，需要另留未参与调参的题。</p>
-<p>**通过证据：**有基线报告、一条带片段依据的结果分析和新增的一道有人工依据的开发题。分析可以指出失败原因，也可以说明当前命中了什么、哪些限定条件仍需检查。</p>
-</details>
-
-<h2 id="section-5">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-4">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0030-retrieval-baseline"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0029-first-rag.html"><small>上一单元</small>把检索结果接到回答里</a><a href="0031-answer-rubric.html"><small>下一单元</small>给模型回答打分，也保留不通过 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0030-retrieval-baseline"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0029-first-rag.html"><small>上一单元</small>把检索结果接到回答里</a><a href="0030-retrieval-baseline-02.html"><small>下一单元</small>用固定题集观察检索失败（2/2：把本节能力连起来） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

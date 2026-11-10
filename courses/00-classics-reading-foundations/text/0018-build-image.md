@@ -1,8 +1,13 @@
 # 构建镜像，再处理同一份讲稿
 
-本单元预计 **25—35 分钟**，首次下载与安装等待另计。先确认当前目录有 `Dockerfile`、`requirements.txt` 和 `read_docx.py`。
+本单元预计 **25—35 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《把临时安装步骤写进 Dockerfile》](0017-dockerfile.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 构建
+
+
+## 运行并观察
 
 ```bash
 # 将当前目录中的构建说明和程序制成镜像；成功后可按 classics-reader:chapter3 运行。
@@ -86,3 +91,6 @@ docker run --rm \
 ## 资料依据
 
 [部署练习](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md)说明镜像构建与运行；本课用相同输入输出检查环境迁移有没有改变结果。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

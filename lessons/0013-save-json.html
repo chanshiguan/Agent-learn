@@ -1,18 +1,19 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>保存结果，并证明没有读错资料 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0013-save-json">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>保存结果，并证明没有读错资料</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-1">← 返回课程地图</a><p class="rail-label">第 1 章 · 用 Python 读取讲稿</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0011-python-environment.html"><span class="unit-number">1</span><span>给伴读项目准备独立的 Python 环境<small>20—30 分钟</small></span></a></li><li><a href="0012-read-document.html"><span class="unit-number">2</span><span>让 Python 读出第一讲<small>25—35 分钟</small></span></a></li><li><a href="0013-save-json.html" aria-current="page"><span class="unit-number">3</span><span>保存结果，并证明没有读错资料<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先运行完整程序</a></li><li><a href="#section-2">看懂完整实现</a></li><li><a href="#section-3">打开文件核对</a></li><li><a href="#section-4">课末练习</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 1 章 / 单元 3 · 共 3 个</p><h1>保存结果，并证明没有读错资料</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 75—110 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>30—45 分钟</strong>。上一节能看到文字，但终端一关，结果不便比较。现在把正文和来源一起保存，供 Docker 实验重复读取。</p>
-<h2 id="section-1">先运行完整程序</h2>
-<p>附带的 <code>read_docx.py</code> 接受两个位置参数：先输入 DOCX，再指定输出 JSON。在练习目录启用虚拟环境后运行：</p>
-<pre><code class="language-bash"># 读取指定讲稿，将正文与来源保存到第二个参数指定的 JSON；预期显示段落数和字符数。
-python read_docx.py \
-  &quot;data/input/06 《狂人日记》第一讲两种叙述声音.docx&quot; \
-  data/output/first.json
-</code></pre>
-<p>反斜杠表示这条命令还没结束，下一行继续；它后面不要加空格。也可以把整条命令写成一行。输出文件夹会由程序创建。</p>
-<p>课程包附带的第一讲样本，预期得到 <strong>1 个非空正文段落，1,302 个字符</strong>。这是资料本身的检查值，与编写电脑的路径和配置无关；它表示去除段落两端空白后的字符数，不是 token 数。换了讲稿版本，数字可能变化，应回查清单而不是强行改到一样。</p>
-<h2 id="section-2">看懂完整实现</h2>
-<pre><code class="language-python">&quot;&quot;&quot;把一份讲稿的正文段落保存为 JSON，保留回查来源所需的信息。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>保存结果，并证明没有读错资料</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-1">← 返回课程地图</a><p class="rail-label">第 1 章 · 用 Python 读取讲稿</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0011-python-environment.html"><span class="unit-number">1</span><span>给伴读项目准备独立的 Python 环境<small>35—50 分钟</small></span></a></li><li><a href="0012-read-document.html"><span class="unit-number">2</span><span>让 Python 读出第一讲<small>35—50 分钟</small></span></a></li><li><a href="0013-save-json.html" aria-current="page"><span class="unit-number">3</span><span>保存结果，并证明没有读错资料<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">运行刚写出的程序</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">回看数据怎样流动</a></li><li><a href="#section-5">打开文件核对</a></li><li><a href="#section-6">课末练习</a></li><li><a href="#section-7">本单元验收与参考答案</a></li><li><a href="#section-8">资料依据</a></li><li><a href="#section-9">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 1 章 / 单元 3 · 共 3 个</p><h1>保存结果，并证明没有读错资料</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 125—170 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0012-read-document.html">《让 Python 读出第一讲》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<h2 id="section-1">运行刚写出的程序</h2>
+<p>你刚写的 <code>read_docx.py</code> 接受两个位置参数：先输入 DOCX，再指定输出 JSON。在练习目录启用虚拟环境后运行：</p>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：把输入、输出变成终端参数</h3>
+<p>上一节每换一讲都要改代码。现在让运行命令选择文件，并阻止把输出写回 Word。</p>
+<p>**写在哪里：**项目根目录下的 <code>read_docx.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>argparse</code> 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；<code>--help</code> 可以核对参数名。</p>
+<pre><code class="language-python"># 目的：上一节每换一讲都要改代码。现在让运行命令选择文件，并阻止把输出写回 Word。
+# 预期：写完这一步可先运行 python read_docx.py --help，看到两个位置参数；给出错误后缀时会停止。
+&quot;&quot;&quot;把一份讲稿的正文段落保存为 JSON，保留回查来源所需的信息。&quot;&quot;&quot;
 
 import argparse
 import hashlib
@@ -30,7 +31,14 @@ if not args.source.is_file() or args.source.suffix.lower() != &quot;.docx&quot;:
     parser.error(&quot;输入必须是存在的 .docx 文件。先检查路径和引号。&quot;)
 if args.output.suffix.lower() != &quot;.json&quot;:
     parser.error(&quot;输出请使用 .json 扩展名，避免误把原讲稿当成输出覆盖。&quot;)
-
+</code></pre>
+<p>**写完后应当怎样：**写完这一步可先运行 python read_docx.py --help，看到两个位置参数；给出错误后缀时会停止。</p>
+<h3>第 2 步：整理正文，并保留原段落位置</h3>
+<p>跳过空段，但不重新编号，后面引用仍能指回 Word 原来的位置。空正文应失败。</p>
+<p>**写在哪里：**项目根目录下的 <code>read_docx.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：跳过空段，但不重新编号，后面引用仍能指回 Word 原来的位置。空正文应失败。
+# 预期：用本页的 DOCX 与 JSON 两个路径参数运行，先打印已读取的非空段数 1；此时还没有写出 JSON。
 document = Document(args.source)
 paragraphs = []
 for position, paragraph in enumerate(document.paragraphs, start=1):
@@ -42,6 +50,17 @@ for position, paragraph in enumerate(document.paragraphs, start=1):
 if not paragraphs:
     parser.error(&quot;正文没有读出文字。请检查是否为扫描图片或主要内容在表格中。&quot;)
 
+
+# 先观察中间结果，避免到写入后才发现正文没有读到。
+print(&quot;已读取的非空段数：&quot;, len(paragraphs))
+</code></pre>
+<p>**写完后应当怎样：**用本页的 DOCX 与 JSON 两个路径参数运行，先打印已读取的非空段数 1；此时还没有写出 JSON。</p>
+<h3>第 3 步：给结果补上来源卡</h3>
+<p>只保存正文会丢失出处。文件名、指纹、段落数和字符数一起保存，后续能识别换稿。</p>
+<p>**写在哪里：**项目根目录下的 <code>read_docx.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：只保存正文会丢失出处。文件名、指纹、段落数和字符数一起保存，后续能识别换稿。
+# 预期：再次运行，多显示待保存的来源文件名；JSON 仍要等下一步写入。相同输入指纹相同，它不是原著页码。
 result = {
     &quot;source_file&quot;: args.source.name,
     &quot;source_sha256&quot;: hashlib.sha256(args.source.read_bytes()).hexdigest(),
@@ -53,6 +72,17 @@ result = {
     &quot;paragraphs&quot;: paragraphs,
 }
 
+
+# 写入之前先核对来源，防止把另一讲的内容保存成第一讲。
+print(&quot;待保存的来源：&quot;, result[&quot;source_file&quot;])
+</code></pre>
+<p>**写完后应当怎样：**再次运行，多显示待保存的来源文件名；JSON 仍要等下一步写入。相同输入指纹相同，它不是原著页码。</p>
+<h3>第 4 步：写入 JSON，再打印摘要</h3>
+<p>JSON 是后续程序可读取的中间结果；先保留中文和缩进，方便你人工核查。</p>
+<p>**写在哪里：**项目根目录下的 <code>read_docx.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：JSON 是后续程序可读取的中间结果；先保留中文和缩进，方便你人工核查。
+# 预期：第一讲输出 1 段、1302 字，生成 data/output/first.json。
 args.output.parent.mkdir(parents=True, exist_ok=True)
 # 保存为 UTF-8，并直接保留中文，便于用编辑器逐段核对，不必先读转义字符。
 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding=&quot;utf-8&quot;)
@@ -62,12 +92,22 @@ print(f&quot;输出：{args.output}&quot;)
 if document.tables:
     print(&quot;注意：本章程序不读取表格；请在记录里说明这项遗漏。&quot;)
 </code></pre>
+<p>**写完后应当怎样：**第一讲输出 1 段、1302 字，生成 data/output/first.json。</p>
+<h2 id="section-3">运行并观察</h2>
+<pre><code class="language-bash"># 读取指定讲稿，将正文与来源保存到第二个参数指定的 JSON；预期显示段落数和字符数。
+python read_docx.py \
+  &quot;data/input/06 《狂人日记》第一讲两种叙述声音.docx&quot; \
+  data/output/first.json
+</code></pre>
+<p>反斜杠表示这条命令还没结束，下一行继续；它后面不要加空格。也可以把整条命令写成一行。输出文件夹会由程序创建。</p>
+<p>单独下载的第一讲公开样本，预期得到 <strong>1 个非空正文段落，1,302 个字符</strong>。这是资料本身的检查值，与编写电脑的路径和配置无关；它表示去除段落两端空白后的字符数，不是 token 数。换了讲稿版本，数字可能变化，应回查清单而不是强行改到一样。</p>
+<h2 id="section-4">回看数据怎样流动</h2>
 <p>阅读时沿着“接收路径→读取文档→整理段落→保存结果”走一遍。<code>argparse</code> 帮程序接收命令行参数，并生成 <code>--help</code>；<code>json.dumps</code> 将字典和列表变成可以写入文件的文本。<code>parser.error</code> 会说明输入问题并以非零状态结束，后面 Docker 也能观察这个状态。</p>
 <p><code>source_sha256</code> 是原文件的内容指纹，用于比较是否读取了同一份输入。它不表示讲稿已经过事实核查。<code>p0001</code> 是 Word 正文段落的位置，也不能当作原著第一章。</p>
-<h2 id="section-3">打开文件核对</h2>
+<h2 id="section-5">打开文件核对</h2>
 <p>用编辑器打开 <code>data/output/first.json</code>。找到 <code>source_file</code>、<code>paragraph_count</code> 和 <code>paragraphs</code>。<code>paragraphs</code> 是列表，里面每个对象有 <code>id</code> 和 <code>text</code>；你看到的长字符串才是这节读出的正文。</p>
 <p>从 Word 开头、中间、结尾各挑一句，在 JSON 里搜索。能找到这三处，比只看“成功”两个字更能说明读取是否符合预期。仍需记住本章范围：程序只读取正文段落，表格数量另外记录，页眉、脚注、文本框和图片中的文字尚未处理。</p>
-<h2 id="section-4">课末练习</h2>
+<h2 id="section-6">课末练习</h2>
 <p>用第二讲生成 <code>data/output/second.json</code>，不要覆盖第一讲。写下两份文件的字符数，并解释为什么它们各自都可能只有一段。</p>
 <details><summary>提示</summary>
 
@@ -91,7 +131,7 @@ echo $?
 </code></pre>
 <p><code>echo $?</code> 显示紧接着上一条命令的退出状态；预期为 <code>2</code>。中间插入另一条命令后，这个值就不再代表读取脚本。回头检查 <code>missing.json</code>，在原本不存在的情况下，它不应被创建。</p>
 <p>**第 1 章验收：**保留两份 JSON；能对照回源文件；能独立定位一次路径错误；能说明当前读取范围。完成后再进入 Docker，不需要先加向量库。</p>
-<h2 id="section-5">本单元验收与参考答案</h2>
+<h2 id="section-7">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
@@ -101,7 +141,18 @@ echo $?
 <p>**通过证据：**两份输出均可打开，在第一讲中选取的开头、中间、结尾三处文字能在 JSON 找到。当前只读正文段落，表格只记数量，页眉、脚注、图片文字等未处理。</p>
 </details>
 
-<h2 id="section-6">资料依据</h2>
+<h2 id="section-8">资料依据</h2>
 <p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md">Stage 0</a>涵盖 JSON 与文件输出；<a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">Stage 6</a>说明资料处理在 RAG 中的位置。完整代码由本课程提供，其验证范围见课程首页的验证记录。</p>
+<h2 id="section-9">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+import runpy,sys
+sys.argv=[&quot;read_docx.py&quot;,&quot;data/input/06 《狂人日记》第一讲两种叙述声音.docx&quot;,&quot;data/output/first.json&quot;]
+runpy.run_path(&quot;read_docx.py&quot;,run_name=&quot;__main__&quot;)
+PY
+</code></pre>
+<p>**预期：**产生 first.json；原 DOCX 不变。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0013-save-json"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/python-environments.html" data-knowledge-link>Python、pip 与虚拟环境<span>8—10 分钟 · 装的是库，为什么换个终端就找不到？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0012-read-document.html"><small>上一单元</small>让 Python 读出第一讲</a><a href="0014-first-container.html"><small>下一单元</small>先在容器里运行一行 Python →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

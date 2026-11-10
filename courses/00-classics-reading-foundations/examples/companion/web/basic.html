@@ -1,21 +1,115 @@
-<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>名著伴读 · 第一次页面问答</title>
-<style>body{max-width:760px;margin:48px auto;padding:0 20px;font:17px/1.8 system-ui;color:#21324b;background:#f6f8fb}h1{font-size:30px}textarea{box-sizing:border-box;width:100%;min-height:120px;padding:16px;font:inherit;border:1px solid #8192a8;border-radius:8px}button{font:inherit;padding:10px 20px;margin-top:12px;border:0;border-radius:7px;background:#2356c8;color:white;cursor:pointer}button:disabled{background:#526174}pre{white-space:pre-wrap}article{padding:20px;background:white;border:1px solid #dbe2eb;border-radius:10px;margin:20px 0}summary{cursor:pointer}:focus-visible{outline:3px solid #2356c8;outline-offset:3px}</style>
-<h1>一起读《狂人日记》</h1><p>提出一个问题，回答下方可以查看用到的讲稿。</p>
-<form id="form"><label for="question">你想了解什么？</label><textarea id="question" maxlength="800" required>这份讲稿怎样解释文言文序言和白话日记？</textarea><button id="submit">查资料并回答</button></form>
-<p id="status" role="status"></p><article id="result" hidden><p id="answer"></p><div id="sources"></div></article>
-<script>
-document.getElementById('form').addEventListener('submit',async event=>{
- event.preventDefault();const button=document.getElementById('submit');button.disabled=true;
- document.getElementById('result').hidden=true;
- document.getElementById('status').textContent='正在查找资料并组织回答……';
- try{
-  const response=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:document.getElementById('question').value,book:'狂人日记'})});
-  const result=await response.json();if(!response.ok)throw new Error(typeof result.detail==='string'?result.detail:'请求未通过检查');
-  // 用 textContent 显示不可信模型输出；其中即使有 HTML，也不会被浏览器执行。
-  document.getElementById('answer').textContent=result.answer;const list=document.getElementById('sources');list.replaceChildren();
-  for(const source of result.sources||[]){const details=document.createElement('details'),summary=document.createElement('summary'),text=document.createElement('p');summary.textContent=source.file+' · '+source.parent;text.textContent=source.text;details.append(summary,text);list.append(details);}
-  document.getElementById('result').hidden=false;document.getElementById('status').textContent='回答已生成，请对照来源判断。';
- }catch(error){document.getElementById('status').textContent=error.message;}
- finally{button.disabled=false;}
-});
-</script></html>
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>名著伴读 · 第一次页面问答</title>
+  <style>
+    body {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 20px;
+      font: 17px/1.8 system-ui;
+      color: #21324b;
+      background: #f6f8fb;
+    }
+    h1 {
+      font-size: 30px;
+    }
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      font: inherit;
+      border: 1px solid #8192a8;
+      border-radius: 8px;
+    }
+    button {
+      font: inherit;
+      padding: 10px 20px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 7px;
+      background: #2356c8;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #526174;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    article {
+      padding: 20px;
+      background: white;
+      border: 1px solid #dbe2eb;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    summary {
+      cursor: pointer;
+    }
+    :focus-visible {
+      outline: 3px solid #2356c8;
+      outline-offset: 3px;
+    }
+  </style>
+  <h1>一起读《狂人日记》</h1>
+  <p>提出一个问题，回答下方可以查看用到的讲稿。</p>
+  <form id="form">
+    <label for="question">你想了解什么？</label
+    ><textarea id="question" maxlength="800" required>
+这份讲稿怎样解释文言文序言和白话日记？</textarea
+    ><button id="submit">查资料并回答</button>
+  </form>
+  <p id="status" role="status"></p>
+  <article id="result" hidden>
+    <p id="answer"></p>
+    <div id="sources"></div>
+  </article>
+  <script>
+    document.getElementById('form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = document.getElementById('submit');
+      button.disabled = true;
+      document.getElementById('result').hidden = true;
+      document.getElementById('status').textContent = '正在查找资料并组织回答……';
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: document.getElementById('question').value,
+            book: '狂人日记',
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(
+            typeof result.detail === 'string' ? result.detail : '请求未通过检查',
+          );
+        // 用 textContent 显示不可信模型输出；其中即使有 HTML，也不会被浏览器执行。
+        document.getElementById('answer').textContent = result.answer;
+        const list = document.getElementById('sources');
+        list.replaceChildren();
+        for (const source of result.sources || []) {
+          const details = document.createElement('details'),
+            summary = document.createElement('summary'),
+            text = document.createElement('p');
+          summary.textContent = source.file + ' · ' + source.parent;
+          text.textContent = source.text;
+          details.append(summary, text);
+          list.append(details);
+        }
+        document.getElementById('result').hidden = false;
+        document.getElementById('status').textContent = '回答已生成，请对照来源判断。';
+      } catch (error) {
+        document.getElementById('status').textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</html>

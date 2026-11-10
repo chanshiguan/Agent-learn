@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/graph_cli.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/graph_cli.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/graph_cli.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/graph_cli.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：恢复必须使用已显示的具体预览，不能只传一个“同意”就写入。
+# 预期：不同进程的 start/resume 能完成一次批准。
+import argparse
+import json
+from .files import load
+from .graph import run_review
+from .state import Actor,initialize
+
+
+def main():
+    parser=argparse.ArgumentParser(description=&quot;暂停与恢复同一批准&quot;)
+    parser.add_argument(&quot;operation&quot;,choices=[&quot;start&quot;,&quot;resume&quot;])
+    parser.add_argument(&quot;--user&quot;,default=&quot;reader-a&quot;)
+    args=parser.parse_args();initialize();actor=Actor(&quot;demo&quot;,args.user)
+    identity=input(&quot;本人草稿 ID：&quot;).strip()
+    decision=None
+    if args.operation==&quot;resume&quot;:
+        preview=load(&quot;graph-preview.json&quot;)
+        if not preview or preview[&quot;id&quot;]!=identity:raise ValueError(&quot;请先取得匹配预览。&quot;)
+        print(json.dumps(preview,ensure_ascii=False,indent=2))
+        if input(&quot;确认这份预览？输入 YES：&quot;)!=&quot;YES&quot;:
+            print(&quot;没有批准，保持暂停。&quot;)
+            return
+        decision={&quot;revision&quot;:preview[&quot;revision&quot;],&quot;digest&quot;:preview[&quot;digest&quot;],&quot;confirmed&quot;:True}
+    print(json.dumps(run_review(actor,identity,decision),ensure_ascii=False,indent=2))
+</code></pre></div></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

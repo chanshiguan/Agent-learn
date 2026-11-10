@@ -1,0 +1,179 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>两位读者，不共用一段对话（3/5：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0042-reader-sessions-03">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>两位读者，不共用一段对话（3/5：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-14">← 返回课程地图</a><p class="rail-label">第 14 章 · 保存每位读者自己的阅读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0042-reader-sessions.html"><span class="unit-number">1</span><span>两位读者，不共用一段对话（1/5：保存会话状态）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-02.html"><span class="unit-number">2</span><span>两位读者，不共用一段对话（2/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-03.html" aria-current="page"><span class="unit-number">3</span><span>两位读者，不共用一段对话（3/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-04.html"><span class="unit-number">4</span><span>两位读者，不共用一段对话（4/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-05.html"><span class="unit-number">5</span><span>两位读者，不共用一段对话（5/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0043-explicit-progress.html"><span class="unit-number">6</span><span>让记忆可以被查看、修正和删除<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">在这里停一下，检查刚写的部分</a></li><li><a href="#section-3">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 14 章 / 单元 3 · 共 6 个</p><h1>两位读者，不共用一段对话（3/5：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 360—450 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0042-reader-sessions-02.html">《两位读者，不共用一段对话（2/5：连接接口与业务）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：增加 session 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/sessions/{identity}&quot;)
+def session(identity: str, who=Depends(actor)):
+    return state.get_session(who, identity)
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 2 步：增加 remove_session 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.delete(&quot;/api/sessions/{identity}&quot;)
+def remove_session(identity: str, who=Depends(actor)):
+    state.delete_session(who, identity)
+    return {&quot;deleted&quot;: True}
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 3 步：增加 ask 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.post(&quot;/api/ask&quot;)
+def ask(body: Question, request: Request, who=Depends(actor)):
+    request.state.trace_id = body.request_id
+    return service.ask(who, body.session_id, body.question, body.request_id, body.mode, os.environ.get(&quot;RETRIEVAL&quot;, &quot;keyword&quot;))
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 4 步：把新服务接到接下来写出的会话页面</h3>
+<p>页面文件将跟着本章一步步创建，不靠预置模板。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：页面文件将跟着本章一步步创建，不靠预置模板。
+# 预期：完成页面文件后 / 才能显示会话界面。
+@app.get(&quot;/&quot;)
+def index():
+    return FileResponse(web / &quot;index.html&quot;)
+</code></pre>
+<p>**写完后应当怎样：**完成页面文件后 / 才能显示会话界面。</p>
+<h3>第 5 步：先写页面结构和控件名称</h3>
+<p>先约定每个控件的 ID，JavaScript 才知道把事件和结果放在哪里；不引入前端框架。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/index.html</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-html">&lt;!doctype html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot; /&gt;
+    &lt;title&gt;名著伴读 · 阅读与思考&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/reader.css&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;
+    &lt;p id=&quot;lab-notice&quot;&gt;本机练习：只使用虚构读者。&lt;/p&gt;
+    &lt;div id=&quot;lab-picker&quot;&gt;
+      &lt;label for=&quot;reader&quot;&gt;测试读者&lt;/label&gt;
+      &lt;select id=&quot;reader&quot;&gt;
+        &lt;option value=&quot;reader-a&quot;&gt;读者 A&lt;/option&gt;
+        &lt;option value=&quot;reader-b&quot;&gt;读者 B&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;main id=&quot;workspace&quot;&gt;
+      &lt;label for=&quot;book&quot;&gt;作品&lt;/label
+      &gt;&lt;select id=&quot;book&quot;&gt;
+        &lt;option&gt;狂人日记&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;button id=&quot;new-session&quot;&gt;开始一次阅读&lt;/button&gt;
+      &lt;button id=&quot;refresh&quot;&gt;刷新记录&lt;/button&gt;
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-html">      &lt;div id=&quot;sessions&quot;&gt;&lt;/div&gt;
+      &lt;p id=&quot;selected&quot;&gt;先选择或创建一次阅读。&lt;/p&gt;
+      &lt;button id=&quot;delete-session&quot;&gt;删除当前阅读记录&lt;/button&gt;
+      &lt;form id=&quot;ask-form&quot;&gt;
+        &lt;label for=&quot;question&quot;&gt;想问什么？&lt;/label&gt;
+        &lt;textarea id=&quot;question&quot; required maxlength=&quot;800&quot;&gt;&lt;/textarea&gt;
+        &lt;select id=&quot;mode&quot; aria-label=&quot;伴读方式&quot;&gt;
+          &lt;option value=&quot;qa&quot;&gt;直接解答&lt;/option&gt;
+        &lt;/select&gt;
+        &lt;button id=&quot;ask&quot;&gt;查资料并回答&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;article id=&quot;result&quot; hidden&gt;
+        &lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;
+        &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+      &lt;/article&gt;
+    &lt;/main&gt;
+    &lt;p id=&quot;status&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+    &lt;script src=&quot;/static/reader.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>**写完后应当怎样：**此时页面能显示表单，交互要等下面的事件函数写完。</p>
+<h3>第 6 步：用少量样式保证输入与阅读清楚</h3>
+<p>控件有可点面积，长来源可以换行，键盘焦点可见。样式不承担权限校验。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.css</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**选择器指定哪些元素受影响，花括号里是一组显示规则。字号、间距和换行只改变阅读体验，不改变接口行为。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-css">body {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 20px;
+  color: #21324b;
+  background: #f6f8fb;
+  font: 17px/1.8 system-ui;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 10px;
+  margin: 8px 4px;
+}
+button {
+  min-height: 44px;
+  cursor: pointer;
+}
+textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 110px;
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-css">}
+article,
+.draft {
+  background: white;
+  padding: 20px;
+  border: 1px solid #c5cfdf;
+  margin: 16px 0;
+}
+pre,
+.source-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+:focus-visible {
+  outline: 3px solid #2356c8;
+  outline-offset: 3px;
+}
+[hidden] {
+  display: none !important;
+}
+</code></pre>
+<p>**写完后应当怎样：**手机上表单适应宽度，来源保持换行。</p>
+<h2 id="section-2">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/app.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>控件有可点面积，长来源可以换行，键盘焦点可见。样式不承担权限校验。 手机上表单适应宽度，来源保持换行。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
+</details>
+
+<h2 id="section-3">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0042-reader-sessions-03"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0042-reader-sessions-02.html"><small>上一单元</small>两位读者，不共用一段对话（2/5：连接接口与业务）</a><a href="0042-reader-sessions-04.html"><small>下一单元</small>两位读者，不共用一段对话（4/5：连接页面交互） →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,8 +1,10 @@
-"""先固定教学流程，再讨论是否需要 Agent 自主安排教学动作。"""
+# 目的：先写固定三阶段伴读，观察教学效果后再决定是否需要 Agent 自主安排。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 from .rag import answer, retrieve
 from .state import get_session
 
-
+# 目的：先邀请读者表达，再追问证据，最后用已实现的有据回答核对；阶段更新交给服务层保存。
+# 预期：前两步是明确教学话术，不冒充模型思考或文学评分。
 def teach_turn(actor, session_id, text, method="keyword", direct=False):
     session = get_session(actor, session_id)
     if direct:

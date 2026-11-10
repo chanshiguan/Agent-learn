@@ -1,38 +1,221 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小步加负载，检查拒绝与取消 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0067-load-and-limits">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小步加负载，检查拒绝与取消（1/2：保存会话状态） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0067-load-and-limits">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>小步加负载，检查拒绝与取消</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>40—55 分钟</small></span></a></li><li><a href="0067-load-and-limits.html" aria-current="page"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消<small>40—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先用专门的测试账号</a></li><li><a href="#section-2">取消和缓存的边界</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 2 · 共 2 个</p><h1>小步加负载，检查拒绝与取消</h1><div class="lesson-meta"><span>本单元 40—60 分钟</span><span>本章 80—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>40—60 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>小步加负载，检查拒绝与取消（1/2：保存会话状态）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-26">← 返回课程地图</a><p class="rail-label">第 26 章 · 测容量，再选本地或线上</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0066-latency-measure.html"><span class="unit-number">1</span><span>先测一个请求，别急着加并发<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits.html" aria-current="page"><span class="unit-number">2</span><span>小步加负载，检查拒绝与取消（1/2：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0067-load-and-limits-02.html"><span class="unit-number">3</span><span>小步加负载，检查拒绝与取消（2/2：连接接口与业务）<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先用专门的测试账号</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">在这里停一下，检查刚写的部分</a></li><li><a href="#section-4">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 26 章 / 单元 2 · 共 3 个</p><h1>小步加负载，检查拒绝与取消（1/2：保存会话状态）</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 170—215 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0066-latency-measure.html">《先测一个请求，别急着加并发》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">先用专门的测试账号</h2>
 <p>使用 authenticated 模式，不对真实用户账号做压测。下面最多只允许 4 并发、20 请求，目的是学方法。实际容量试验需要独立环境、预算与负责人安排。模型服务可能仍按失败或取消请求计费。</p>
 <p>登录专用账号，在浏览器 Network 的登录响应里取得短期 access_token。只把它输入脚本的隐藏提示，不放进命令历史或报告。测试会创建独立会话，结束后删除这些会话。</p>
-<pre><code class="language-bash"># 单并发、四次请求，建立应用完整耗时基线；提示输入令牌时不回显。
-python -m companion.measure api --concurrency 1 --count 4
-# 提升到两并发；观察 429/503、成功吞吐与耗时，而不是只看完成数量。
-python -m companion.measure api --concurrency 2 --count 4
-</code></pre>
-<p>配合 <code>docker stats --no-stream</code> 或系统活动监视器记录内存峰值。默认 MAX_MODEL_JOBS=1，等待槽位超过约 1 秒会拒绝；DAILY_JOB_LIMIT=40 是每用户每天的业务尝试次数，不是 token 或金额硬预算。失败也可能消耗额度，避免无限重试。</p>
-<h2 id="section-2">取消和缓存的边界</h2>
-<p>正在等待时点击停止，确认不再继续工具和状态提交；已经发出的模型请求可能继续。排队过多时明确拒绝，比无限堆积更可控。当前没有跨进程共享队列，也没有答案缓存；多副本前需要重新设计。</p>
-<p>若以后加缓存，键至少要包含租户、允许资料范围、作品、资料与模型/Prompt 版本、问题；私人会话相关回答还要考虑本人和上下文。失效与删除也要可验证，不能拿另一个学生的答案直接复用。</p>
-<p>小样本的 P95 只用来学习统计，不能写成稳定生产指标。记录错误原因、成功请求分布与质量变化，再逐步扩大经过批准的负载。</p>
-<h2 id="section-3">本单元完成条件</h2>
-<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
-<ol>
-<li>为什么并发越高可能成功吞吐越低？</li>
-<li>每日 40 次是否保证费用不超过某金额？</li>
-</ol>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：创建 quotas 表</h3>
+<p>只在能力需要时增加这张表，已有会话继续保留。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
 
-<p><strong>为什么并发越高可能成功吞吐越低？</strong></p>
-<p>设备竞争、队列、超时与限流会增加失败；不是每个并发请求都能有效推进。</p>
-<p><strong>每日 40 次是否保证费用不超过某金额？</strong></p>
-<p>不保证。每次模型往返和 token 数不同，Agent 也可能调用多轮；还需供应商预算、用量监控与实际费用控制。</p>
-<p>**通过证据：**1/2 并发报告、内存记录、一次取消与额度拒绝结果，说明小样本统计的限制。</p>
+<pre><code class="language-python">          category TEXT NOT NULL, trace_id TEXT NOT NULL, created REAL NOT NULL);
+</code></pre>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<p>**先理解：**建表语句描述需要保存的字段；已有表不会因重复初始化而清空。增加列与修改已有记录是两种操作。</p>
+<pre><code class="language-python">          category TEXT NOT NULL, trace_id TEXT NOT NULL, created REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS quotas(
+          tenant TEXT NOT NULL, owner TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL,
+          PRIMARY KEY(tenant,owner,day));
+</code></pre>
+<p>**写完后应当怎样：**重启服务调用 initialize 后新表存在，重复执行不会清空数据。</p>
+<h3>第 2 步：为并发名额和每日额度准备依赖</h3>
+<p>进程内并发名额与数据库日额度是两种限制；多副本部署时需要共享方案。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">import json
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">import json
+import os
+import time
+from contextlib import contextmanager
+from .state import connect
+</code></pre>
+<p>**写完后应当怎样：**当前只声明单进程能力，不冒称集群限流。</p>
+<h3>第 3 步：创建明确的并发名额和任务表</h3>
+<p>名额满了要拒绝，不无限排队；任务键包含机构、本人和请求ID。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：名额满了要拒绝，不无限排队；任务键包含机构、本人和请求ID。
+# 预期：两个读者不能互相取消对方任务。
+_slots=threading.BoundedSemaphore(int(os.environ.get(&quot;MAX_MODEL_JOBS&quot;,&quot;1&quot;)))
+_jobs={}
+</code></pre>
+<p>**写完后应当怎样：**两个读者不能互相取消对方任务。</p>
+<h3>第 4 步：实现 job 的资源边界</h3>
+<p>在 finally 里释放名额，失败和取消也不能泄漏槽位；日额度在数据库事务中更新。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。<code>with</code> 管理事务，代码抛错时不要把半次更新当作成功。</p>
+<pre><code class="language-python"># 目的：在 finally 里释放名额，失败和取消也不能泄漏槽位；日额度在数据库事务中更新。
+# 预期：取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。
+@contextmanager
+def job(actor, request_id):
+    key = (actor.tenant, actor.user, request_id)
+    with _lock:
+        if key in _jobs:
+            raise ValueError(&quot;请求已经在处理中，请不要重复提交。&quot;)
+        flag = threading.Event()
+        _jobs[key] = flag
+    acquired = False
+    try:
+        acquired = _slots.acquire(timeout=1)
+        if not acquired:
+            raise TimeoutError(&quot;当前请求较多，请稍后再试。&quot;)
+        day = datetime.now(timezone.utc).date().isoformat()
+        with connect() as db:
+            db.execute(&quot;BEGIN IMMEDIATE&quot;)
+            db.execute(&quot;DELETE FROM quotas WHERE day &lt; ?&quot;, (day,))
+            row = db.execute(&quot;SELECT count FROM quotas WHERE tenant=? AND owner=? AND day=?&quot;, (actor.tenant, actor.user, day)).fetchone()
+            count = row[0] if row else 0
+            if count &gt;= int(os.environ.get(&quot;DAILY_JOB_LIMIT&quot;, &quot;40&quot;)):
+                raise PermissionError(&quot;今天的试用请求额度已用完。&quot;)
+            db.execute(&quot;INSERT INTO quotas VALUES(?,?,?,?) ON CONFLICT(tenant,owner,day) DO UPDATE SET count=excluded.count&quot;, (actor.tenant, actor.user, day, count + 1))
+        yield flag
+</code></pre>
+<pre><code class="language-python">    finally:
+        if acquired:
+            _slots.release()
+        with _lock:
+            _jobs.pop(key, None)
+</code></pre>
+<p>**写完后应当怎样：**取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。</p>
+<h3>第 5 步：实现 cancel 的资源边界</h3>
+<p>只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。
+# 预期：取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。
+def cancel(actor, request_id):
+    with _lock:
+        flag = _jobs.get((actor.tenant, actor.user, request_id))
+        if flag is not None:
+            flag.set()
+    return {&quot;cancel_requested&quot;: flag is not None, &quot;message&quot;: &quot;已发送的模型请求可能仍在运行和计费；停止后不会继续调用工具。&quot;}
+</code></pre>
+<p>**写完后应当怎样：**取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。</p>
+<h3>第 6 步：让所有模型工作共享同一名额约束</h3>
+<p>普通问答、伴读、Agent 与草稿都不能各自绕过限制。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .operations import log_event
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .operations import log_event, job
+</code></pre>
+<p>**写完后应当怎样：**每项工作在统一入口取得并归还资源。</p>
+<h3>第 7 步：在完整业务链前后检查取消与额度</h3>
+<p>取得名额后才能调用模型，返回后还要检查取消，再决定是否保存状态；阶段日志分别记录耗时。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    if mode not in {&quot;qa&quot;,&quot;tutor&quot;,&quot;agent&quot;}:
+        raise ValueError(&quot;当前只支持问答和固定伴读。&quot;)
+    started=time.monotonic()
+    log_event(request_id,&quot;request&quot;,method=method,input_chars=len(question))
+    session=get_session(actor,session_id)
+    if mode == &quot;tutor&quot;:
+        result=teach_turn(actor,session_id,question,method)
+        updated=update_session(actor,session,**result.pop(&quot;state_changes&quot;))
+        return {**result,&quot;trace_id&quot;:request_id,&quot;session_revision&quot;:updated[&quot;revision&quot;]}
+    if mode == &quot;agent&quot;:
+        result=run_agent(actor,session_id,question,method)
+    else:
+        hits=retrieve(question,actor.tenant,session[&quot;book&quot;],method,session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+        result=answer(question,hits,[] if session[&quot;strict&quot;] else session[&quot;history&quot;],strict=bool(session[&quot;strict&quot;]))
+    history=[] if session[&quot;strict&quot;] else (session[&quot;history&quot;]+[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:question},{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:result[&quot;answer&quot;]}])[-4:]
+    updated=update_session(actor,session,history=history)
+    log_event(request_id,&quot;answer&quot;,seconds=round(time.monotonic()-started,3),source_count=len(result.get(&quot;sources&quot;,[])))
+    return {**result,&quot;trace_id&quot;:request_id,&quot;session_revision&quot;:updated[&quot;revision&quot;]}
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/2</strong></p>
+<pre><code class="language-python">    started = time.monotonic()
+    session = get_session(actor, session_id)
+    with job(actor, request_id) as flag:
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消。&quot;)
+        if mode == &quot;agent&quot;:
+            result = run_agent(actor, session_id, question, method, cancelled=flag.is_set)
+        elif mode == &quot;tutor&quot;:
+            result = teach_turn(actor, session_id, question, method)
+        else:
+            retrieved_at = time.monotonic()
+            # 防剧透开启时不带旧对话；每次用当前权限重新检索，不复用过去的来源。
+            hits = retrieve(question, actor.tenant, session[&quot;book&quot;], method, session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+            log_event(request_id, &quot;retrieve&quot;, seconds=round(time.monotonic() - retrieved_at, 3), source_count=len(hits), method=method)
+            generated_at = time.monotonic()
+            result = answer(question, hits, [] if session[&quot;strict&quot;] else session[&quot;history&quot;], strict=bool(session[&quot;strict&quot;]))
+            log_event(request_id, &quot;generate&quot;, seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get(&quot;usage&quot;) or {}).get(&quot;total_tokens&quot;), status=&quot;ok&quot;)
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消，本次结果没有写入阅读对话。&quot;)
+        if mode == &quot;tutor&quot;:
+            updated = update_session(actor, session, **result.pop(&quot;state_changes&quot;))
+        if mode != &quot;tutor&quot;:
+            history = [] if session[&quot;strict&quot;] else (session[&quot;history&quot;] + [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: result[&quot;answer&quot;]}])[-4:]
+            updated = update_session(actor, session, history=history)
+    for entry in result.get(&quot;trace&quot;, []):
+</code></pre>
+<p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-python">        log_event(request_id, &quot;tool&quot;, seconds=entry.get(&quot;seconds&quot;), status=entry.get(&quot;status&quot;))
+    usage = result.get(&quot;usage&quot;)
+    total_tokens = (sum(u[&quot;total_tokens&quot;] for u in usage) if usage and all(u and u.get(&quot;total_tokens&quot;) is not None for u in usage) else None) if isinstance(usage, list) else (usage or {}).get(&quot;total_tokens&quot;)
+    log_event(request_id, &quot;answer&quot;, seconds=round(time.monotonic() - started, 3), status=&quot;ok&quot;, method=method,
+              input_chars=len(question), source_count=len(result.get(&quot;sources&quot;, [])), tool_count=len(result.get(&quot;trace&quot;, [])), tokens=total_tokens)
+    # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。
+    return {**result, &quot;trace_id&quot;: request_id, &quot;session_revision&quot;: updated[&quot;revision&quot;]}
+</code></pre>
+<p>**写完后应当怎样：**取消后的迟到回答不会写入历史，成功时返回新 revision。</p>
+<h3>第 8 步：草稿生成也遵守取消结果</h3>
+<p>不能只让聊天支持停止，却让笔记继续在后台写入。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。&quot;}, *session[&quot;history&quot;]])
+    # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
+    body = response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;
+    return actions.draft(actor, kind, body, request_id, session_id=session_id)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    with job(actor, request_id) as flag:
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消。&quot;)
+        response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。&quot;}, *session[&quot;history&quot;]])
+        # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
+        if flag.is_set():
+            raise ValueError(&quot;请求已取消，本次结果没有保存为草稿。&quot;)
+        body = response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;
+        return actions.draft(actor, kind, body, request_id, session_id=session_id)
+</code></pre>
+<p>**写完后应当怎样：**取消后不新增待确认草稿。</p>
+<h2 id="section-3">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/state.py companion/operations.py companion/service.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>不能只让聊天支持停止，却让笔记继续在后台写入。 取消后不新增待确认草稿。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
+</details>
+
+<h2 id="section-4">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0067-load-and-limits"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0066-latency-measure.html"><small>上一单元</small>先测一个请求，别急着加并发</a><a href="0068-release-manifest.html"><small>下一单元</small>把这次能跑的条件记录下来 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0067-load-and-limits"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0066-latency-measure.html"><small>上一单元</small>先测一个请求，别急着加并发</a><a href="0067-load-and-limits-02.html"><small>下一单元</small>小步加负载，检查拒绝与取消（2/2：连接接口与业务） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

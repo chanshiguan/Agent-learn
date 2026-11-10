@@ -1,12 +1,17 @@
 # 冻结题集，用真实模型和人工复核
 
-本单元预计 **40—60 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **40—60 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《自动检查行为，不假装评完文学》](0062-regression-suite.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 不只测两道熟悉的问题
 
 教学题集只有 6 道，用来学方法，不足以代表公司读者。候选发布前扩成明确覆盖表：有据问答、资料不足、多种合理解读、跨作品、受限阅读、启发提示、工具拒绝、重复批准、身份隔离。每类至少设计正例和反例，再按公司场景增加规模。
 
 纯问答题放进 eval JSON；进度、教学和审批属于多步场景，要写操作步骤与预期状态，不能硬塞进只会单轮问答的 evaluate 命令。
+
+
+## 运行并观察
 
 ```bash
 # 在已冻结的问答题集上取得真实结果；选用自己已验证的检索方案，不临时叠加新功能。
@@ -51,3 +56,6 @@ python -m companion evaluate --cases eval/holdout.json --method keyword --genera
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

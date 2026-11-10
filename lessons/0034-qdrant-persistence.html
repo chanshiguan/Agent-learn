@@ -1,9 +1,195 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>启动向量库，重启后继续查 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0034-qdrant-persistence">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>启动向量库，重启后继续查</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-10">← 返回课程地图</a><p class="rail-label">第 10 章 · 把向量放进 Qdrant</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0034-qdrant-persistence.html" aria-current="page"><span class="unit-number">1</span><span>启动向量库，重启后继续查<small>35—50 分钟</small></span></a></li><li><a href="0035-index-versions.html"><span class="unit-number">2</span><span>资料更新后，不让旧索引混进来<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">复用前面学过的 Docker</a></li><li><a href="#section-2">证明数据确实持久化</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 10 章 / 单元 1 · 共 2 个</p><h1>启动向量库，重启后继续查</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>启动向量库，重启后继续查</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-10">← 返回课程地图</a><p class="rail-label">第 10 章 · 把向量放进 Qdrant</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0034-qdrant-persistence.html" aria-current="page"><span class="unit-number">1</span><span>启动向量库，重启后继续查<small>70—85 分钟</small></span></a></li><li><a href="0035-index-versions.html"><span class="unit-number">2</span><span>资料更新后，不让旧索引混进来<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">复用前面学过的 Docker</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">证明数据确实持久化</a></li><li><a href="#section-5">本单元完成条件</a></li><li><a href="#section-6">下次开始前</a></li><li><a href="#section-7">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 10 章 / 单元 1 · 共 2 个</p><h1>启动向量库，重启后继续查</h1><div class="lesson-meta"><span>本单元 70—85 分钟</span><span>本章 100—130 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>70—85 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0033-embedding-comparison.html">《检验向量有没有帮到你的失败题》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">复用前面学过的 Docker</h2>
 <p>Qdrant 保存向量和元数据，并按相似度查询。collection 可以先理解为一份有固定向量维度的索引集合。第 9 章的生成路线不变，这次只把内存里的检索数据搬到服务中。</p>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：准备数据库连接与稳定点 ID</h3>
+<p>连接需要及时关闭，块 ID 转为 Qdrant 接受的 UUID；这些不改变编码器内容。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+import os
+import uuid
+from contextlib import closing
+</code></pre>
+<p>**写完后应当怎样：**同一块可覆盖写入而不会随机生成重复点。</p>
+<h3>第 2 步：让索引读取资料快照</h3>
+<p>索引和语料需要共同的版本信息；查询后仍从当前语料取正文。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .files import data_dir
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .files import data_dir, digest, load, save
+from .corpus import visible
+</code></pre>
+<p>**写完后应当怎样：**旧载荷不会替代当前资料范围规则。</p>
+<h3>第 3 步：写出可关闭的数据库连接</h3>
+<p>默认连接真实 Qdrant 服务；本地 SDK 模式只供作者的离线行为检查，不冒充容器。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：默认连接真实 Qdrant 服务；本地 SDK 模式只供作者的离线行为检查，不冒充容器。
+# 预期：离开 with 后关闭客户端，避免本地库被锁住。
+def connection():
+    from qdrant_client import QdrantClient
+    # 离线单元测试可明确选择 local；课程第 10 章默认连接真实 Qdrant 服务。
+    if os.environ.get(&quot;QDRANT_MODE&quot;) == &quot;local&quot;:
+        return closing(QdrantClient(path=str(data_dir() / &quot;qdrant-local&quot;)))
+    return closing(QdrantClient(url=os.environ.get(&quot;QDRANT_URL&quot;, &quot;http://127.0.0.1:6333&quot;),
+                        api_key=os.environ.get(&quot;QDRANT_API_KEY&quot;) or None, timeout=30))
+</code></pre>
+<p>**写完后应当怎样：**离开 with 后关闭客户端，避免本地库被锁住。</p>
+<h3>第 4 步：把向量与来源一起写入集合</h3>
+<p>先建立集合、分批写入，确认条数后再发布活动索引指针；中途失败不能切到半成品。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：先建立集合、分批写入，确认条数后再发布活动索引指针；中途失败不能切到半成品。
+# 预期：index.json 的 count 等于语料块数，集合内保留来源字段。
+def build_index():
+    from qdrant_client import models
+    corpus = load(&quot;corpus.json&quot;)
+    if not corpus:
+        raise ValueError(&quot;先整理 corpus.json。&quot;)
+    encoder()
+    # 加载时已锁定这个提交；缓存与查询必须使用相同版本，升级需要明确改值并重建。
+    revision = MODEL_REVISION
+    identity = digest([MODEL, revision])[:12]
+    vectors = embed([chunk[&quot;text&quot;] for chunk in corpus[&quot;chunks&quot;]])
+    new_count = len(vectors)
+    name = f&quot;reading_{corpus[&#39;revision&#39;][:12]}_{identity}&quot;
+    with connection() as db:
+        if not db.collection_exists(name):
+            db.create_collection(name, vectors_config=models.VectorParams(size=len(vectors[0]), distance=models.Distance.COSINE))
+        for start in range(0, len(vectors), 32):
+            points = [models.PointStruct(id=str(uuid.uuid5(uuid.NAMESPACE_URL, c[&quot;id&quot;])), vector=v, payload=c)
+                      for c, v in zip(corpus[&quot;chunks&quot;][start:start + 32], vectors[start:start + 32])]
+            db.upsert(name, points=points, wait=True)
+        if db.count(name, exact=True).count != len(vectors):
+            raise ValueError(&quot;索引条数不符，不切换活动版本。&quot;)
+    # 新集合完整后才发布指针。旧集合保留用于回滚；清理需要显式维护操作。
+    index = {&quot;collection&quot;: name, &quot;corpus_revision&quot;: corpus[&quot;revision&quot;], &quot;model&quot;: MODEL,
+</code></pre>
+<pre><code class="language-python">             &quot;model_revision&quot;: revision, &quot;dimension&quot;: len(vectors[0]), &quot;count&quot;: len(vectors), &quot;new_embeddings&quot;: new_count}
+    save(&quot;index.json&quot;, index)
+    return index
+</code></pre>
+<p>**写完后应当怎样：**index.json 的 count 等于语料块数，集合内保留来源字段。</p>
+<h3>第 5 步：查询持久索引并回查当前正文</h3>
+<p>先核对资料与编码器版本，再检索当前机构和作品；不让旧索引混进新资料。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：先核对资料与编码器版本，再检索当前机构和作品；不让旧索引混进新资料。
+# 预期：返回仍有文件名、段落与块 ID，可与词面结果比较。
+def semantic_search(question, tenant, book, progress=None, k=5):
+    from qdrant_client import models
+    index, corpus = load(&quot;index.json&quot;), load(&quot;corpus.json&quot;)
+    if not index or not corpus or index[&quot;corpus_revision&quot;] != corpus[&quot;revision&quot;]:
+        raise ValueError(&quot;活动索引与资料版本不一致，请完成索引构建；不返回旧版证据。&quot;)
+    if index[&quot;model&quot;] != MODEL or index[&quot;model_revision&quot;] != MODEL_REVISION:
+        raise ValueError(&quot;Embedding 版本已变，必须重建索引。&quot;)
+    required = [models.FieldCondition(key=&quot;tenant&quot;, match=models.MatchValue(value=tenant)),
+                models.FieldCondition(key=&quot;book&quot;, match=models.MatchValue(value=book))]
+    with connection() as db:
+        points = db.query_points(index[&quot;collection&quot;], query=embed([question])[0],
+                                 query_filter=models.Filter(must=required), limit=k, with_payload=True).points
+    # 不同存储后端对布尔值和数字的比较可能不同；以当前资料的权限规则再次核对。
+    # 正文也从当前快照取得，避免旧索引载荷绕过已修订的阅读范围。
+    allowed = {c[&quot;id&quot;]: c for c in visible(corpus[&quot;chunks&quot;], tenant, book, progress)}
+    return [{**allowed[p.payload[&quot;id&quot;]], &quot;score&quot;: p.score} for p in points if p.payload.get(&quot;id&quot;) in allowed]
+</code></pre>
+<p>**写完后应当怎样：**返回仍有文件名、段落与块 ID，可与词面结果比较。</p>
+<h3>第 6 步：给检索入口增加语义路线</h3>
+<p>同一个 retrieve 根据 method 选择已经实现的方法；生成侧不需要重写。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/rag.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    if method != &quot;keyword&quot; or expand:
+        raise ValueError(&quot;当前只实现关键词检索，还没有扩展语境。&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    if method not in {&quot;keyword&quot;, &quot;semantic&quot;}:
+        raise ValueError(&quot;未知检索方法。&quot;)
+</code></pre>
+<p><strong>写完后应当怎样：</strong>--method semantic 读持久索引，keyword 继续保持原基线。</p>
+<h3>第 7 步：给检索入口增加语义路线</h3>
+<p>同一个 retrieve 根据 method 选择已经实现的方法；生成侧不需要重写。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/rag.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        raise ValueError(&quot;请先整理讲稿。&quot;)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        raise ValueError(&quot;请先运行 ingest 整理资料。&quot;)
+</code></pre>
+<p><strong>写完后应当怎样：</strong>--method semantic 读持久索引，keyword 继续保持原基线。</p>
+<h3>第 8 步：给检索入口增加语义路线</h3>
+<p>同一个 retrieve 根据 method 选择已经实现的方法；生成侧不需要重写。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/rag.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    return keyword_search(question, allowed)
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">    lexical = keyword_search(question, allowed)
+    if method == &quot;keyword&quot;:
+        hits = lexical
+    else:
+        from .vectors import semantic_search
+        dense = semantic_search(question, tenant, book, progress)
+        hits = dense
+    return hits
+</code></pre>
+<p><strong>写完后应当怎样：</strong>--method semantic 读持久索引，keyword 继续保持原基线。</p>
+<h3>第 9 步：给建索引单独一个命令</h3>
+<p>导入资料与构建向量索引不是同一件事；分开命令便于定位哪一步失败。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/index_cli.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：导入资料与构建向量索引不是同一件事；分开命令便于定位哪一步失败。
+# 预期：index 命令明确完成建索引，查询不偷偷重建。
+import json
+from .vectors import build_index
+
+
+def main():
+    print(json.dumps(build_index(),ensure_ascii=False,indent=2))
+</code></pre>
+<p>**写完后应当怎样：**index 命令明确完成建索引，查询不偷偷重建。</p>
+<h3>第 10 步：给命令入口增加 index</h3>
+<p>这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/__main__.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        main(&#39;direct-vector&#39;)
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">        main(&#39;direct-vector&#39;)
+    elif command == &quot;index&quot;:
+        from .index_cli import main
+        main()
+</code></pre>
+<p>**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。</p>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 创建专用持久卷；容器移除后数据仍留在这个卷中。
 docker volume create classics-qdrant
 # 仅把服务端口开放给本机；首次下载镜像需要网络，已有同名容器时改用 start。
@@ -16,7 +202,7 @@ python -m companion index
 python -m companion search &quot;文言文序言&quot; --method semantic
 </code></pre>
 <p>若 connection refused，先看容器是否运行及端口映射；若提示模型窗口超限，检查是否仍用第 9 章的 80/16 小块。向量维度由编码器决定，不要手填一个猜测的维度。</p>
-<h2 id="section-2">证明数据确实持久化</h2>
+<h2 id="section-4">证明数据确实持久化</h2>
 <pre><code class="language-bash"># 停止再启动同一个练习容器；预期原集合仍在，不需要删除卷或重建资料。
 docker stop classics-qdrant
 docker start classics-qdrant
@@ -24,7 +210,7 @@ docker start classics-qdrant
 python -m companion search &quot;文言文序言&quot; --method semantic
 </code></pre>
 <p>记录重启前后的集合名、条数和一条来源 ID。这证明的是本次恢复可用，不证明公司级可用性。卷损坏或主机丢失仍需备份，第 28 章专门演练。</p>
-<h2 id="section-3">本单元完成条件</h2>
+<h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>容器和卷分别保存什么？</li>
@@ -39,9 +225,10 @@ python -m companion search &quot;文言文序言&quot; --method semantic
 <p>**通过证据：**有真实 Qdrant 容器记录和重启后相同来源的查询结果；未在 Docker 跑过就标待运行。</p>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
+<h2 id="section-6">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0034-qdrant-persistence"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0033-embedding-comparison.html"><small>上一单元</small>检验向量有没有帮到你的失败题</a><a href="0035-index-versions.html"><small>下一单元</small>资料更新后，不让旧索引混进来 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0034-qdrant-persistence"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0033-embedding-comparison.html"><small>上一单元</small>检验向量有没有帮到你的失败题</a><a href="0035-index-versions.html"><small>下一单元</small>资料更新后，不让旧索引混进来 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -1,10 +1,54 @@
 # 真的恢复一次，再谈备份可靠
 
-本单元预计 **45—65 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《审核新资料，再切换活动快照》](0070-corpus-release.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 备份成功只证明写出了文件
 
 本课备份 SQLite 一致快照、corpus、人工范围和索引元数据，逐文件记录 SHA-256。它不含模型权重与 Qdrant 卷，恢复后依据 corpus 重建索引。原始 DOCX 需另行受控保管；仅此备份不足以恢复完整资料来源。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：写一次可重复的数据结构升级
+
+使用事务和 user_version 识别升级状态；升级后旧笔记与新写入都需要回查。
+
+**写在哪里：**项目根目录下的 `companion/migrate.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：使用事务和 user_version 识别升级状态；升级后旧笔记与新写入都需要回查。
+# 预期：重复运行不重复改结构，失败时回滚，不要求删库重来。
+"""第 28 章：只在恢复副本上练习向前兼容迁移，旧程序仍可读取原字段。"""
+from .state import connect, initialize
+
+
+def migrate():
+    initialize()
+    with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        version = db.execute("PRAGMA user_version").fetchone()[0]
+        if version == 1:
+            # 新字段允许为空，使已有笔记不必编造时间或补填不存在的信息。
+            db.execute("ALTER TABLE notes ADD COLUMN archived_at REAL")
+            db.execute("PRAGMA user_version=2")
+        elif version != 2:
+            raise ValueError("未知数据库版本，先准备单独的迁移方案。")
+        return {"schema_version": 2, "note_count": db.execute("SELECT count(*) FROM notes").fetchone()[0]}
+
+
+if __name__ == "__main__":
+    print(migrate())
+```
+
+**写完后应当怎样：**重复运行不重复改结构，失败时回滚，不要求删库重来。
+
+## 运行并观察
 
 ```bash
 # 在已停止写入的窗口创建新备份目录；不要复用已经存在的名字。
@@ -15,7 +59,6 @@ python -m companion restore data/backups/restore-drill-01 data/restored-01
 READING_DATA_DIR=data/restored-01 python -m companion.migrate
 READING_DATA_DIR=data/restored-01 python -m companion.migrate
 # 用临时数据验证备份被篡改时拒绝恢复；不修改真实备份。
-PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_backup_restore_verifies_hash_and_revokes_tokens -v
 ```
 
 在第二个终端设置 READING_DATA_DIR=data/restored-01，启动独立端口 8001 的 authenticated 服务，重新登录。核对本人笔记内容和条数、会话进度、未知范围排除、过期批准不可恢复。keyword 路线可先验证；向量路线按实际运行位置重建 index，再查同一来源。
@@ -28,15 +71,6 @@ RTO 是恢复到可用花了多久；RPO 是最多可能丢失多久的数据。
 
 恢复旧备份还要重放之后的删除清单，避免复活已删除个人内容。备份访问、保留期限和原始资料恢复一起纳入操作手册。
 
-## 对照完整实现
-
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
-
-<details><summary>展开本单元完整源码：companion/maintenance.py</summary>
-
-{{code:companion/maintenance.py}}
-
-</details>
 
 ## 本单元完成条件
 
@@ -66,3 +100,26 @@ RTO 是恢复到可用花了多久；RPO 是最多可能丢失多久的数据。
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+import tempfile
+from pathlib import Path
+from companion.maintenance import backup,restore
+with tempfile.TemporaryDirectory() as d:
+    backup(Path(d)/"backup")
+    r=restore(Path(d)/"backup",Path(d)/"restored")
+    assert r["index_rebuild_required"] and r["login_required"]
+print("独立目录恢复通过；未替换活动库")
+PY
+```
+
+**预期：**备份指纹校验与独立恢复通过；生产恢复仍需按真实环境演练。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

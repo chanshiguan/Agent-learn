@@ -1,176 +1,59 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/__main__.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/__main__.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/__main__.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/__main__.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;课程命令入口；每个子命令只新增一件事，不要求一开始理解整个项目。&quot;&quot;&quot;
-import argparse
-import getpass
-import json
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/__main__.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/__main__.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/__main__.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：python -m companion 先运行 __main__.py；把命令名取走后，剩余参数交给本节解析器。这里只接入已经写好的能力。
+# 预期：本节命令可以识别，尚未实现的命令会明确拒绝。
 import sys
-import uuid
-from pathlib import Path
-
-from .files import load, save
-from .state import Actor, initialize
-
-
-def main():
-    parser = argparse.ArgumentParser(description=&quot;名著伴读课程练习&quot;)
-    sub = parser.add_subparsers(dest=&quot;command&quot;, required=True)
-    manual = sub.add_parser(&quot;manual&quot;, help=&quot;第 5 章：显式选择一段资料&quot;)
-    manual.add_argument(&quot;--file&quot;, default=&quot;data/output/first.json&quot;)
-    manual.add_argument(&quot;--start&quot;, type=int, default=200)
-    manual.add_argument(&quot;--chars&quot;, type=int, default=900)
-    manual.add_argument(&quot;--question&quot;, default=&quot;这份讲稿怎样解释文言文序言与白话日记的关系？&quot;)
-    manual.add_argument(&quot;--no-context&quot;, action=&quot;store_true&quot;)
-    ingest = sub.add_parser(&quot;ingest&quot;, help=&quot;第 6 章：整理讲稿和来源&quot;)
-    ingest.add_argument(&quot;--source&quot;, default=&quot;data/input&quot;)
-    ingest.add_argument(&quot;--strategy&quot;, choices=[&quot;fixed&quot;, &quot;paragraph&quot;, &quot;heading&quot;], default=&quot;fixed&quot;)
-    ingest.add_argument(&quot;--size&quot;, type=int, default=600)
-    ingest.add_argument(&quot;--overlap&quot;, type=int, default=60)
-    ingest.add_argument(&quot;--tenant&quot;, default=&quot;demo&quot;)
-    ingest.add_argument(&quot;--book&quot;, default=&quot;狂人日记&quot;)
-    for command in (&quot;search&quot;, &quot;ask&quot;, &quot;direct-vector&quot;):
-        item = sub.add_parser(command)
-        item.add_argument(&quot;question&quot;)
-        item.add_argument(&quot;--method&quot;, choices=[&quot;keyword&quot;, &quot;semantic&quot;, &quot;hybrid&quot;], default=&quot;keyword&quot;)
-        item.add_argument(&quot;--book&quot;, default=&quot;狂人日记&quot;)
-        item.add_argument(&quot;--tenant&quot;, default=&quot;demo&quot;)
-        item.add_argument(&quot;--expand&quot;, action=&quot;store_true&quot;)
-        item.add_argument(&quot;--rerank&quot;, action=&quot;store_true&quot;)
-        item.add_argument(&quot;--rewrite&quot;, action=&quot;store_true&quot;)
-    sub.add_parser(&quot;index&quot;, help=&quot;第 10 章：构建并切换 Qdrant 索引&quot;)
-    evaluation = sub.add_parser(&quot;evaluate&quot;)
-    evaluation.add_argument(&quot;--cases&quot;, default=&quot;eval/dev.json&quot;)
-    evaluation.add_argument(&quot;--method&quot;, choices=[&quot;keyword&quot;, &quot;semantic&quot;, &quot;hybrid&quot;], default=&quot;keyword&quot;)
-    evaluation.add_argument(&quot;--generate&quot;, action=&quot;store_true&quot;)
-    evaluation.add_argument(&quot;--expand&quot;, action=&quot;store_true&quot;)
-    evaluation.add_argument(&quot;--rerank&quot;, action=&quot;store_true&quot;)
-    evaluation.add_argument(&quot;--rewrite&quot;, action=&quot;store_true&quot;)
-    evaluation.add_argument(&quot;--output&quot;, default=&quot;evaluation.json&quot;)
-    grade = sub.add_parser(&quot;grade&quot;)
-    grade.add_argument(&quot;report&quot;)
-    user = sub.add_parser(&quot;create-user&quot;)
-    user.add_argument(&quot;username&quot;)
-    user.add_argument(&quot;--tenant&quot;, default=&quot;demo&quot;)
-    user.add_argument(&quot;--role&quot;, choices=[&quot;reader&quot;, &quot;parent&quot;, &quot;content_admin&quot;], default=&quot;reader&quot;)
-    family = sub.add_parser(&quot;link-family&quot;)
-    family.add_argument(&quot;parent&quot;); family.add_argument(&quot;child&quot;); family.add_argument(&quot;--tenant&quot;, default=&quot;demo&quot;)
-    action = sub.add_parser(&quot;action&quot;)
-    action.add_argument(&quot;operation&quot;, choices=[&quot;draft&quot;, &quot;list&quot;, &quot;revise&quot;, &quot;approve&quot;, &quot;notes&quot;])
-    action.add_argument(&quot;--user&quot;, default=&quot;reader-a&quot;)
-    action.add_argument(&quot;--text&quot;, default=&quot;我想回查文言文序言和日记之间的关系。&quot;)
-    graph = sub.add_parser(&quot;graph&quot;)
-    graph.add_argument(&quot;operation&quot;, choices=[&quot;start&quot;, &quot;resume&quot;])
-    graph.add_argument(&quot;--user&quot;, default=&quot;reader-a&quot;)
-    backup = sub.add_parser(&quot;backup&quot;); backup.add_argument(&quot;destination&quot;)
-    restore = sub.add_parser(&quot;restore&quot;); restore.add_argument(&quot;source&quot;); restore.add_argument(&quot;destination&quot;)
-    sub.add_parser(&quot;manifest&quot;)
-    args = parser.parse_args()
-    # 前期检索实验不提前创建业务数据库；到账号、审批与维护练习才准备状态表。
-    if args.command in {&quot;create-user&quot;, &quot;link-family&quot;, &quot;action&quot;, &quot;graph&quot;, &quot;backup&quot;, &quot;manifest&quot;}:
-        initialize()
-    if args.command == &quot;manual&quot;:
-        from .models import complete
-        from .rag import answer
-        document = json.loads(Path(args.file).read_text(encoding=&quot;utf-8&quot;))
-        text = document[&quot;paragraphs&quot;][0][&quot;text&quot;][args.start:args.start + args.chars]
-        if args.no_context:
-            result = complete([{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: args.question}])
-            result[&quot;knowledge_base_used&quot;] = False
-        else:
-            if not text:
-                raise ValueError(&quot;选定范围没有文字，请检查起点与长度。&quot;)
-            result = answer(args.question, [{&quot;id&quot;: &quot;manual-01&quot;, &quot;file&quot;: document[&quot;source_file&quot;], &quot;kind&quot;: &quot;讲解稿&quot;, &quot;text&quot;: text, &quot;start&quot;: args.start}])
-        save(&quot;manual-no-context.json&quot; if args.no_context else &quot;manual-context.json&quot;, result)
-    elif args.command == &quot;ingest&quot;:
-        from .corpus import ingest
-        result = ingest(args.source, args.strategy, args.size, args.overlap, args.tenant, args.book)
-    elif args.command in {&quot;search&quot;, &quot;ask&quot;, &quot;direct-vector&quot;}:
-        from .rag import retrieve, answer, rewrite, rerank
-        query = rewrite(args.question) if args.rewrite else args.question
-        if args.command == &quot;direct-vector&quot;:
-            from .corpus import visible
-            from .vectors import embed
-            chunks = visible(load(&quot;corpus.json&quot;)[&quot;chunks&quot;], args.tenant, args.book)
-            if not chunks:
-                raise ValueError(&quot;没有当前范围的资料。&quot;)
-            vectors = embed([c[&quot;text&quot;] for c in chunks]); vector = embed([query])[0]
-            hits = sorted([{**c, &quot;score&quot;: sum(a * b for a, b in zip(v, vector))} for c, v in zip(chunks, vectors)], key=lambda c: -c[&quot;score&quot;])[:5]
-        else:
-            hits = retrieve(query, args.tenant, args.book, args.method, expand=args.expand)
-        if args.rerank:
-            hits = rerank(args.question, hits)
-        result = answer(args.question, hits) if args.command == &quot;ask&quot; else {&quot;question&quot;: args.question, &quot;query&quot;: query, &quot;hits&quot;: hits}
-        save(f&quot;{args.command}.json&quot;, result)
-    elif args.command == &quot;index&quot;:
-        from .vectors import build_index
-        result = build_index()
-    elif args.command == &quot;evaluate&quot;:
-        from .evaluation import evaluate
-        result = evaluate(args.cases, args.method, args.generate, args.expand, args.rerank, args.rewrite, args.output)
-    elif args.command == &quot;grade&quot;:
-        from .evaluation import quality_gate
-        result = quality_gate(args.report)
-    elif args.command == &quot;create-user&quot;:
-        from .auth import create_user
-        password = getpass.getpass(&quot;设置至少 12 字符的口令（不回显）：&quot;)
-        if password != getpass.getpass(&quot;再次输入：&quot;):
-            raise ValueError(&quot;两次口令不同。&quot;)
-        create_user(args.tenant, args.username, password, args.role)
-        result = {&quot;created&quot;: args.username, &quot;role&quot;: args.role}
-    elif args.command == &quot;link-family&quot;:
-        from .auth import link_family
-        link_family(args.tenant, args.parent, args.child)
-        result = {&quot;linked&quot;: True, &quot;scope&quot;: &quot;家长只读显式进度，不读私密对话&quot;}
-    elif args.command in {&quot;action&quot;, &quot;graph&quot;}:
-        from . import actions
-        actor = Actor(&quot;demo&quot;, args.user)
-        if args.command == &quot;action&quot; and args.operation == &quot;draft&quot;:
-            result = actions.draft(actor, &quot;note&quot;, args.text, uuid.uuid4().hex)
-        elif args.command == &quot;action&quot; and args.operation in {&quot;list&quot;, &quot;notes&quot;}:
-            result = actions.pending(actor) if args.operation == &quot;list&quot; else actions.notes(actor)
-        else:
-            identity = input(&quot;输入要操作的本人草稿 ID：&quot;).strip()
-            item = next((x for x in actions.pending(actor) if x[&quot;id&quot;] == identity), None)
-            if not item:
-                raise ValueError(&quot;未找到本人草稿。&quot;)
-            if args.command == &quot;action&quot; and args.operation == &quot;revise&quot;:
-                result = actions.revise(actor, identity, args.text)
-            elif args.command == &quot;graph&quot; and args.operation == &quot;start&quot;:
-                from .graph import run_review
-                result = run_review(actor, identity)
-            else:
-                preview = load(&quot;graph-preview.json&quot;) if args.command == &quot;graph&quot; else item
-                if not preview or preview[&quot;id&quot;] != identity:
-                    raise ValueError(&quot;没有匹配的预览文件，请重新开始。&quot;)
-                print(json.dumps(preview, ensure_ascii=False, indent=2))
-                confirmed = input(&quot;确认保存以上当前预览？输入 YES：&quot;) == &quot;YES&quot;
-                if not confirmed:
-                    result = {&quot;status&quot;: &quot;not_approved&quot;}
-                elif args.command == &quot;graph&quot;:
-                    from .graph import run_review
-                    result = run_review(actor, identity, {&quot;revision&quot;: preview[&quot;revision&quot;], &quot;digest&quot;: preview[&quot;digest&quot;], &quot;confirmed&quot;: True})
-                else:
-                    result = actions.approve(actor, identity, item[&quot;revision&quot;], item[&quot;digest&quot;], True)
-    elif args.command in {&quot;backup&quot;, &quot;restore&quot;, &quot;manifest&quot;}:
-        from . import maintenance
-        if args.command == &quot;backup&quot;: result = maintenance.backup(args.destination)
-        elif args.command == &quot;restore&quot;: result = maintenance.restore(args.source, args.destination)
-        else:
-            result = maintenance.manifest(); save(&quot;release-manifest.json&quot;, result)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    if args.command == &quot;grade&quot; and not result[&quot;passed&quot;]:
-        return 2
-    return 0
-
 
 if __name__ == &quot;__main__&quot;:
-    try:
-        sys.exit(main())
-    except (ValueError, PermissionError, FileNotFoundError) as error:
-        print(f&quot;未完成：{error}&quot;, file=sys.stderr)
-        sys.exit(2)
-    except Exception as error:
-        print(f&quot;运行失败：{type(error).__name__}。先检查对应服务与依赖；不要分享包含凭据的原始错误。&quot;, file=sys.stderr)
-        sys.exit(2)
+    if len(sys.argv) &lt; 2:
+        raise SystemExit(&quot;请在 companion 后写本节子命令。&quot;)
+    command = sys.argv.pop(1)
+    if command == &quot;manual&quot;:
+        from .manual import main
+        main()
+    elif command == &quot;ingest&quot;:
+        from .ingest_cli import main
+        main()
+    elif command == &quot;search&quot;:
+        from .query import main
+        main('search')
+    elif command == &quot;ask&quot;:
+        from .query import main
+        main('ask')
+    elif command == &quot;evaluate&quot;:
+        from .evaluate_cli import main
+        main()
+    elif command == &quot;grade&quot;:
+        from .grade_cli import main
+        main()
+    elif command == &quot;direct-vector&quot;:
+        from .query import main
+        main('direct-vector')
+    elif command == &quot;index&quot;:
+        from .index_cli import main
+        main()
+    elif command == &quot;action&quot;:
+        from .actions_cli import main
+        main()
+    elif command == &quot;graph&quot;:
+        from .graph_cli import main
+        main()
+    elif command == &quot;create-user&quot;:
+        from .accounts_cli import main
+        main('create-user')
+    elif command == &quot;link-family&quot;:
+        from .family_cli import main
+        main()
+    elif command == &quot;manifest&quot;:
+        from .maintenance_cli import main
+        main('manifest')
+    elif command == &quot;backup&quot;:
+        from .maintenance_cli import main
+        main('backup')
+    elif command == &quot;restore&quot;:
+        from .maintenance_cli import main
+        main('restore')
+    else:
+        raise SystemExit(&quot;当前课程还没有这个命令。&quot;)
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

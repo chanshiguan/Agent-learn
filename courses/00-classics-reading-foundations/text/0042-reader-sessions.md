@@ -1,6 +1,8 @@
-# 两位读者，不共用一段对话
+# 两位读者，不共用一段对话（1/5：保存会话状态）
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **60—75 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《让来源和错误都能看见（2/2：把本节能力连起来）》](0041-source-page-02.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 从临时页面走到持久会话
 
@@ -8,59 +10,265 @@
 
 先用 Ctrl+C 停止第 13 章服务，再启动加入会话的版本。
 
-```bash
-# 保持测试身份模式，只在本机练习；章节值用于逐步显示已经学过的页面功能。
-export APP_MODE=lab
-export COURSE_CHAPTER=14
-# 先使用已验证的词面基线；选择 hybrid 时还要保证 Qdrant 与索引就绪。
-export RETRIEVAL=keyword
-# 启动带会话的同源页面；数据写到 data/live/reading.sqlite3。
-python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：先写这个文件需要的导入
+
+先只保存阅读会话；批准、账号、反馈与限额表都留到对应章节创建。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+# 目的：先只保存阅读会话；批准、账号、反馈与限额表都留到对应章节创建。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+import json
+import sqlite3
+import uuid
+from contextlib import contextmanager
+from dataclasses import dataclass
+from .files import data_dir
 ```
 
-选择读者 A，创建《狂人日记》阅读，问一个问题；切到读者 B，应看不到 A 的会话。B 新建记录后，切回 A 检查它仍在。停止并重启服务，再检查持久性。
+**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。
 
-## 身份来自哪里
+### 第 2 步：把调用者身份变成明确的数据
 
-本章 `X-Lab-Reader` 只允许两个测试值，且服务限本机。它方便验证隔离，却不是认证系统：知道测试值的人就能选身份。第 21 章才换真实登录。`COURSE_CHAPTER` 只是页面教学开关，也不是权限控制。
+业务函数不从模型文字里推断读者；本章仅有本机虚构身份。
 
-每次查询会话都带 `tenant` 和 `owner`；仅知道会话 ID 不能越过它们。数据库写入还检查 revision，避免两次并发请求用旧状态互相覆盖。冲突会让你重读状态，不静默丢掉一段对话。
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
-## 对照完整实现
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
 
-先读上面标出的函数，再展开文件。配套包已包含它及依赖文件；不需要把后续章节一起学完。注释重点解释为什么这样处理，以及出错时应发生什么。
+```python
+# 目的：业务函数不从模型文字里推断读者；本章仅有本机虚构身份。
+# 预期：每次数据库操作都明确带 tenant 和 user。
+@dataclass(frozen=True)
+class Actor:
+    tenant: str
+    user: str
+    role: str = "reader"
+```
 
-<details><summary>展开本单元完整源码：companion/state.py</summary>
+**写完后应当怎样：**每次数据库操作都明确带 tenant 和 user。
 
-{{code:companion/state.py}}
+### 第 3 步：用一个连接入口统一提交与回滚
+
+with 内成功才提交；发生错误回滚并关闭连接，避免锁住数据库。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：with 内成功才提交；发生错误回滚并关闭连接，避免锁住数据库。
+# 预期：一次操作失败不会留下半次修改。
+@contextmanager
+def connect():
+    db = sqlite3.connect(data_dir() / "reading.sqlite3", timeout=10)
+    db.row_factory = sqlite3.Row
+    db.execute("PRAGMA foreign_keys=ON")
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+```
+
+**写完后应当怎样：**一次操作失败不会留下半次修改。
+
+### 第 4 步：只创建本章需要的会话表
+
+一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。
+# 预期：此时库中只有 sessions，不会提前出现账号或审批表。
+def initialize():
+    with connect() as db:
+        db.executescript("""
+        CREATE TABLE IF NOT EXISTS sessions(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          book TEXT NOT NULL, history TEXT NOT NULL DEFAULT '[]',
+          revision INTEGER NOT NULL DEFAULT 0);
+        """)
+        if db.execute("PRAGMA user_version").fetchone()[0] == 0:
+            db.execute("PRAGMA user_version=1")
+```
+
+**写完后应当怎样：**此时库中只有 sessions，不会提前出现账号或审批表。
+
+### 第 5 步：实现 get_session()
+
+同时按 id、tenant 和 owner 查询，知道别人的会话 ID 也拿不到正文。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：同时按 id、tenant 和 owner 查询，知道别人的会话 ID 也拿不到正文。
+# 预期：会话操作只影响当前读者。
+def get_session(actor, identity):
+    with connect() as db:
+        row = db.execute("SELECT * FROM sessions WHERE id=? AND tenant=? AND owner=?", (identity, actor.tenant, actor.user)).fetchone()
+    if row is None:
+        raise PermissionError("会话不存在或不属于当前读者。")
+    result = dict(row)
+    result["history"] = json.loads(result["history"])
+    return result
+```
+
+**写完后应当怎样：**会话操作只影响当前读者。
+
+### 第 6 步：实现 create_session()
+
+由程序生成不可猜的会话 ID，并明确写入归属和作品。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：由程序生成不可猜的会话 ID，并明确写入归属和作品。
+# 预期：会话操作只影响当前读者。
+def create_session(actor, book="狂人日记"):
+    identity = uuid.uuid4().hex
+    with connect() as db:
+        db.execute("INSERT INTO sessions(id,tenant,owner,book) VALUES(?,?,?,?)", (identity, actor.tenant, actor.user, book))
+    return get_session(actor, identity)
+```
+
+**写完后应当怎样：**会话操作只影响当前读者。
+
+### 第 7 步：实现 delete_session()
+
+删除同样带本人范围，不能只根据任意 ID 操作。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：删除同样带本人范围，不能只根据任意 ID 操作。
+# 预期：会话操作只影响当前读者。
+def delete_session(actor, identity):
+    with connect() as db:
+        db.execute("DELETE FROM sessions WHERE id=? AND tenant=? AND owner=?", (identity, actor.tenant, actor.user))
+```
+
+**写完后应当怎样：**会话操作只影响当前读者。
+
+### 第 8 步：只列出当前读者自己的会话摘要
+
+列表不需要返回所有对话正文，先少拿数据再展示。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：列表不需要返回所有对话正文，先少拿数据再展示。
+# 预期：切换读者后列表不会混在一起。
+def list_sessions(actor):
+    with connect() as db:
+        return [dict(r) for r in db.execute("SELECT id,book,revision FROM sessions WHERE tenant=? AND owner=?", (actor.tenant,actor.user))]
+```
+
+**写完后应当怎样：**切换读者后列表不会混在一起。
+
+### 第 9 步：用旧版本号防止互相覆盖
+
+两个请求读到相同版本，只允许先完成的一次更新成功；另一次重新读取再决定。
+
+**写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：两个请求读到相同版本，只允许先完成的一次更新成功；另一次重新读取再决定。
+# 预期：旧版本写入抛出 ValueError，而不静默覆盖新对话。
+def update_session(actor, session, history=None):
+    with connect() as db:
+        cursor=db.execute("UPDATE sessions SET history=?,revision=revision+1 WHERE id=? AND tenant=? AND owner=? AND revision=?",
+                          (json.dumps(session["history"] if history is None else history,ensure_ascii=False),session["id"],actor.tenant,actor.user,session["revision"]))
+        if cursor.rowcount != 1:
+            raise ValueError("会话已改变，请重新读取。")
+    return get_session(actor,session["id"])
+```
+
+**写完后应当怎样：**旧版本写入抛出 ValueError，而不静默覆盖新对话。
+
+### 第 10 步：先写这个文件需要的导入
+
+让 API 与会话问答共用一条业务路径；本节只处理普通问答。
+
+**写在哪里：**项目根目录下的 `companion/service.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+# 目的：让 API 与会话问答共用一条业务路径；本节只处理普通问答。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+from .rag import retrieve, answer
+from .state import get_session, update_session
+```
+
+**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。
+
+### 第 11 步：把当前会话的最近对话带入回答
+
+先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。
+
+**写在哪里：**项目根目录下的 `companion/service.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。
+
+```python
+# 目的：先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。
+# 预期：回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。
+def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
+    if mode != "qa":
+        raise ValueError("本阶段只实现普通问答。")
+    session=get_session(actor,session_id)
+    hits=retrieve(question,actor.tenant,session["book"],method)
+    result=answer(question,hits,session["history"])
+    history=(session["history"]+[{"role":"user","content":question},{"role":"assistant","content":result["answer"]}])[-4:]
+    updated=update_session(actor,session,history=history)
+    return {**result,"trace_id":request_id,"session_revision":updated["revision"]}
+```
+
+**写完后应当怎样：**回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。
+
+## 在这里停一下，检查刚写的部分
+
+```bash
+# 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/state.py companion/service.py
+```
+
+先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。
+
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。 回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。 这次停点只检查当前文件；整条链路会在本组最后一节运行。
 
 </details>
-
-## 本单元完成条件
-
-先遮住答案，回答下面的问题，再核对自己的运行记录。
-
-1. 用不同 UUID 是否就实现了权限？
-2. 测试身份模式为什么不能上线？
-
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
-
-**用不同 UUID 是否就实现了权限？**
-
-没有。ID 不容易猜也不能替代服务端的所属人和租户检查。
-
-**测试身份模式为什么不能上线？**
-
-客户端能够选择身份，没有证明“你是谁”。本章只检验归属逻辑，真实认证在第 21 章接入。
-
-**通过证据：**A/B 两个独立会话和重启后的保留记录；能说明测试身份的限制。
-
-</details>
-
-## 下次开始前
-
-隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。
 
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

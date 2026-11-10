@@ -1,37 +1,151 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让来源和错误都能看见 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0041-source-page">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让来源和错误都能看见（1/2：把本节能力连起来） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0041-source-page">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让来源和错误都能看见</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-13">← 返回课程地图</a><p class="rail-label">第 13 章 · 把问答放进一个页面</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0040-first-api.html"><span class="unit-number">1</span><span>用一个 API 接住读者的问题<small>35—50 分钟</small></span></a></li><li><a href="0041-source-page.html" aria-current="page"><span class="unit-number">2</span><span>让来源和错误都能看见<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">页面不是把 JSON 原样贴出来</a></li><li><a href="#section-2">做三种真实操作</a></li><li><a href="#section-3">为下一章留一个问题</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 13 章 / 单元 2 · 共 2 个</p><h1>让来源和错误都能看见</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>30—45 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
-<h2 id="section-1">页面不是把 JSON 原样贴出来</h2>
-<p>学生想知道答案，家长想核对依据。因此先展示回答，再把来源作为可展开内容。来源显示文件名、段落和片段，不用内部服务地址来增加读者负担。复杂调试信息留给开发记录。</p>
-<p>打开 <code>companion/web/basic.html</code>，看提交事件如何改变按钮与状态文字。页面用 <code>textContent</code> 显示讲稿和模型输出，不把未知文本当 HTML 执行。这既保留原文，也避免把一段带标签的回答变成页面脚本。</p>
-<h2 id="section-2">做三种真实操作</h2>
-<ol>
-<li>提交一个有依据的问题，展开来源，在 DOCX 找到同一段。</li>
-<li>提交版本页码问题，检查不足提示是否清楚，并避免显示上一题来源。</li>
-<li>连续点击提交，观察等待期间按钮是否阻止重复请求。浏览器开发工具的 Network 中应能看到一次 POST 和对应状态。</li>
-</ol>
-<p>用窄窗口再看一次：输入、按钮、来源能否按顺序阅读，长文件名是否挤出屏幕。用 Tab 移动焦点，不使用鼠标完成一次提交。这些检查也是后面真实产品验收的一部分。</p>
-<h2 id="section-3">为下一章留一个问题</h2>
-<p>现在刷新页面会失去这次阅读上下文；两位读者也没有独立身份。第 14 章把会话落到 SQLite。先保留当前最小版本作为参照：新增状态后，已有问答和来源不能被破坏。</p>
-<h2 id="section-4">本单元完成条件</h2>
-<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
-<ol>
-<li>为什么不直接 innerHTML 显示答案？</li>
-<li>来源区至少应让读者完成什么？</li>
-</ol>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让来源和错误都能看见（1/2：把本节能力连起来）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-13">← 返回课程地图</a><p class="rail-label">第 13 章 · 把问答放进一个页面</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0040-first-api.html"><span class="unit-number">1</span><span>用一个 API 接住读者的问题<small>45—60 分钟</small></span></a></li><li><a href="0041-source-page.html" aria-current="page"><span class="unit-number">2</span><span>让来源和错误都能看见（1/2：把本节能力连起来）<small>55—70 分钟</small></span></a></li><li><a href="0041-source-page-02.html"><span class="unit-number">3</span><span>让来源和错误都能看见（2/2：把本节能力连起来）<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">在这里停一下，检查刚写的部分</a></li><li><a href="#section-3">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 13 章 / 单元 2 · 共 3 个</p><h1>让来源和错误都能看见（1/2：把本节能力连起来）</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 130—175 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0040-first-api.html">《用一个 API 接住读者的问题》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：从表单开始接一条完整页面请求</h3>
+<p>页面收集问题，fetch 发给自己的 API；先清旧结果，返回后用 textContent 显示，避免执行模型里的 HTML。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/basic.html</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<p>下面 5 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
+<p><strong>连续代码 1/5</strong></p>
+<pre><code class="language-html">&lt;!doctype html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+  &lt;meta charset=&quot;utf-8&quot; /&gt;&lt;meta
+    name=&quot;viewport&quot;
+    content=&quot;width=device-width,initial-scale=1&quot;
+  /&gt;&lt;title&gt;名著伴读 · 第一次页面问答&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 20px;
+      font: 17px/1.8 system-ui;
+      color: #21324b;
+      background: #f6f8fb;
+    }
+    h1 {
+      font-size: 30px;
+    }
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      font: inherit;
+      border: 1px solid #8192a8;
+</code></pre>
+<p><strong>连续代码 2/5</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-html">      border-radius: 8px;
+    }
+    button {
+      font: inherit;
+      padding: 10px 20px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 7px;
+      background: #2356c8;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #526174;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    article {
+      padding: 20px;
+      background: white;
+      border: 1px solid #dbe2eb;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+</code></pre>
+<p><strong>连续代码 3/5</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-html">    summary {
+      cursor: pointer;
+    }
+    :focus-visible {
+      outline: 3px solid #2356c8;
+      outline-offset: 3px;
+    }
+  &lt;/style&gt;
+  &lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;
+  &lt;p&gt;提出一个问题，回答下方可以查看用到的讲稿。&lt;/p&gt;
+  &lt;form id=&quot;form&quot;&gt;
+    &lt;label for=&quot;question&quot;&gt;你想了解什么？&lt;/label
+    &gt;&lt;textarea id=&quot;question&quot; maxlength=&quot;800&quot; required&gt;
+这份讲稿怎样解释文言文序言和白话日记？&lt;/textarea
+    &gt;&lt;button id=&quot;submit&quot;&gt;查资料并回答&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;p id=&quot;status&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+  &lt;article id=&quot;result&quot; hidden&gt;
+    &lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;
+    &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+  &lt;/article&gt;
+  &lt;script&gt;
+    document.getElementById(&#39;form&#39;).addEventListener(&#39;submit&#39;, async (event) =&gt; {
+      event.preventDefault();
+      const button = document.getElementById(&#39;submit&#39;);
+</code></pre>
+<p><strong>连续代码 4/5</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-html">      button.disabled = true;
+      document.getElementById(&#39;result&#39;).hidden = true;
+      document.getElementById(&#39;status&#39;).textContent = &#39;正在查找资料并组织回答……&#39;;
+      try {
+        const response = await fetch(&#39;/api/ask&#39;, {
+          method: &#39;POST&#39;,
+          headers: { &#39;Content-Type&#39;: &#39;application/json&#39; },
+          body: JSON.stringify({
+            question: document.getElementById(&#39;question&#39;).value,
+            book: &#39;狂人日记&#39;,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(
+            typeof result.detail === &#39;string&#39; ? result.detail : &#39;请求未通过检查&#39;,
+          );
+        // 用 textContent 显示不可信模型输出；其中即使有 HTML，也不会被浏览器执行。
+        document.getElementById(&#39;answer&#39;).textContent = result.answer;
+        const list = document.getElementById(&#39;sources&#39;);
+        list.replaceChildren();
+        for (const source of result.sources || []) {
+          const details = document.createElement(&#39;details&#39;),
+            summary = document.createElement(&#39;summary&#39;),
+            text = document.createElement(&#39;p&#39;);
+</code></pre>
+<p><strong>连续代码 5/5</strong>（接在上一段后，不额外增加缩进）</p>
+<pre><code class="language-html">          summary.textContent = source.file + &#39; · &#39; + source.parent;
+          text.textContent = source.text;
+          details.append(summary, text);
+          list.append(details);
+        }
+        document.getElementById(&#39;result&#39;).hidden = false;
+        document.getElementById(&#39;status&#39;).textContent = &#39;回答已生成，请对照来源判断。&#39;;
+      } catch (error) {
+        document.getElementById(&#39;status&#39;).textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  &lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
+<p>**写完后应当怎样：**页面可以提问并展开来源；模型出错时显示错误，不残留上一次答案。</p>
+<h2 id="section-2">在这里停一下，检查刚写的部分</h2>
+<p>保存文件，逐段核对标签、括号和元素 ID。网页尚未全部接通，完整交互检查放在本组最后一个小节。</p>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
 
-<p><strong>为什么不直接 innerHTML 显示答案？</strong></p>
-<p>模型和讲稿文本都不是可信页面代码。textContent 按文字显示，避免意外执行标签或脚本。</p>
-<p><strong>来源区至少应让读者完成什么？</strong></p>
-<p>知道答案用了哪份资料，并能回查具体文字；只有一个无法打开的编号还不够。</p>
-<p>**通过证据：**一份界面检查记录，覆盖有据、无答案、失败、窄屏与键盘操作。</p>
+<p>页面收集问题，fetch 发给自己的 API；先清旧结果，返回后用 textContent 显示，避免执行模型里的 HTML。 页面可以提问并展开来源；模型出错时显示错误，不残留上一次答案。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-3">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0041-source-page"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0040-first-api.html"><small>上一单元</small>用一个 API 接住读者的问题</a><a href="0042-reader-sessions.html"><small>下一单元</small>两位读者，不共用一段对话 →</a></nav></main></div>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0041-source-page"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0040-first-api.html"><small>上一单元</small>用一个 API 接住读者的问题</a><a href="0041-source-page-02.html"><small>下一单元</small>让来源和错误都能看见（2/2：把本节能力连起来） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

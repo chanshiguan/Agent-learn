@@ -1,7 +1,11 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>验证范围 · 名著伴读实战</title><link rel="stylesheet" href="../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="index.html">课程地图</a><a href="knowledge/index.html">知识拓展 · 选读</a><a href="resources.html" aria-current="page">资料与工具</a></nav></div></header>
 <div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>验证范围</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><h1>公开课程验证记录</h1>
-<p>审查日期：2026-11-10。对象是导学、第 1—29 章、66 个短单元、16 篇选读和配套程序。保留原题，使用五份新编讲解稿。修复列表见<a href="review.html">课程审查记录</a>。</p>
+<p>审查日期：2026-11-10。对象是导学、第 1—29 章、80 个连续练习单元、16 篇选读和配套程序。保留原题，使用五份新编讲解稿。修复列表见<a href="review.html">课程审查记录</a>。</p>
+<h2>本次带写改版增加的验证</h2>
+<p>本轮不再以“完整项目能启动”代替教学可操作性。维护者从空临时目录开始，只放入五份公开 DOCX，严格按网页可见的 335 次编辑创建 59 个文件。每个单元检查 Python 语法及当前已写模块的导入，并执行 35 组离线行为检查；最终文件与课后参考代码逐字节比较。页面上的新代码也和复演记录核对，避免另有未展示的实现。</p>
+<p>80 个单元保留七阶段与原题。模型封装、会话、页面、批准和恢复拆成多个停点。部分停点只证明文件可导入，整条交互在该组最后一节检查，教材明确区分两者。中途数据库升级保留旧记录，没有通过每章删库重来掩盖迁移问题。</p>
+<p>后半另有 8 个阶段的浏览器交互检查，模型接口使用明确夹具，覆盖创建会话、进度、草稿修改批准、登录和家长进度。修复了本机测量客户端继承 SOCKS 代理导致启动失败的问题。本次从编辑记录重建的项目已真实调用本地 gemma4:e4b：有据问答、缺少页码时标记资料不足、Agent 调用 search_lectures、生成草稿后以测试确认请求写入一条笔记均完成。见<a href="evidence/guided-real-model.json">本次真实调用记录</a>。这几题仍不能代表稳定的文学质量。容器结果以本轮发布工作流日志为准；以下旧实验保留原有范围。</p>
 <h2>能证明什么</h2>
 <p>主要路径已在隔离环境跑通：读取 Word → 整理资料 → 检索 → 真实模型问答 → 工具调用 → HTTP 服务 → 生成草稿 → 人工确认保存。真实 Embedding 的编码、持久索引、缓存复用和跨进程查询也已执行。</p>
 <p>这证明配套项目具备可运行的主要链路；它不等于所有模型、每台电脑、全部阅读问题都已通过验收。公司上线仍需要实际身份系统、业务题库和目标部署环境的验收。</p>
@@ -34,7 +38,7 @@
 <p>在 80/16 快照上，真实向量检索与混合检索也命中这三道开发题的目标讲次及短句，见<a href="evidence/real-retrieval-comparison.json">逐题结果</a>。无答案题没有目标来源，记为不适用，不凑进命中率。保留题没有用于调参。</p>
 <p>额外同义问法“开头古雅的文字和后面的记录有什么关系”，向量检索前五条没有命中第一讲。这次实验没有证明向量比词面更好，见<a href="evidence/real-embedding-run.json">实际向量结果</a>。</p>
 <h2>真实模型实验</h2>
-<p>本轮使用已有的本地 <code>gemma4:e4b</code>，输出预算 1800 token，未指定推理强度。在编写设备的隔离副本中实际运行，不是对 M1 16 GB 或课程示例 Qwen 模型的性能背书。线上路线只检查配置、请求结构和错误处理，没有调用收费模型。</p>
+<p>前一版完整工程验证使用已有的本地 <code>gemma4:e4b</code>，输出预算 1800 token，未指定推理强度。在编写设备的隔离副本中实际运行，不是对 M1 16 GB 或课程示例 Qwen 模型的性能背书。线上路线只检查配置、请求结构和错误处理，没有调用收费模型。</p>
 <p>实测第一题能够引用第一讲解释两种叙述声音；Agent 真实调用 <code>search_lectures</code> 后给出引用；实际启动的 Uvicorn 接口完成第五讲问答、草稿生成、确认保存，笔记数为 1，就绪接口返回 200。可查看<a href="evidence/real-model-run.json">原始结果与观察</a>。</p>
 <p>同时保留失败：默认 900 token 预算曾截断答案；一次指定关闭推理的实验出现 Agent JSON 结构失败；初次页码回答虽承认资料缺失，却把 <code>insufficient</code> 标成 <code>false</code>；普通模型调用也没有遵守“两句话”的长度要求。这些不能算回答质量通过。程序已明确报告截断，提示词补清证据不足的含义，讲义增加预算及字段核对练习。修订后的两题复测见<a href="evidence/evidence-flag-recheck.json">字段复测</a>，少量复测不能替代稳定性评测。</p>
 <h2>真实向量实验</h2>
@@ -43,17 +47,18 @@
 <h2>自动检查与容器发布门槛</h2>
 <p>33 个 Python 测试和 4 个页面异步回归覆盖来源校验、范围过滤、身份隔离、旧版本冲突、取消、确认幂等、跨进程删除及迟到响应。浏览器还检查草稿编辑确认、输出作为文本显示、失败后清除旧答案、读者切换和响应式布局。测试替身只用于验证程序行为。</p>
 <p>发布工作流在 Linux Runner 上重新运行测试，实际构建读取镜像和完整应用镜像，再启动 Compose，检查挂载、登录、RAG 接口与 Qdrant 服务。容器里的生成模型是明确标注的协议夹具；真实生成实验是上面单独记录的本地模型。Docker 现场日志见<a href="https://github.com/chanshiguan/Agent-learn/actions/workflows/course-pages.yml?query=branch%3Acodex%2Fpublic-course">发布工作流</a>，只有验证任务成功才会部署 Pages。</p>
-<p>页面、链接、命令语法和包内容的机器检查记录见 <a href="evidence/release-checks.json">release-checks.json</a>。维护者可在课程目录执行以下命令，依赖按相应章节安装：</p>
+<p>本次带写、页面与真实向量命令检查见 <a href="evidence/guided-checks.json">guided-checks.json</a>。原版页面与公开文件记录保留在 <a href="evidence/release-checks.json">release-checks.json</a>，不把旧统计当作本次结果。维护者可在课程目录执行以下命令，依赖按相应章节安装：</p>
 <pre><code class="language-bash"># 验证业务和公开样本保护；不会调用真实生成模型。
 python -m unittest discover -s tests -v
 # 人为打乱响应顺序，检查旧读者和旧登录结果不会覆盖当前页面。
 node tests/reader-races.cjs
-# 按明确白名单重新打包，随后核对文件、样本、页面链接和命令语法。
-python tooling/package.py
+# 从仅含五份输入的空目录复演每节编辑、导入与行为检查。
+python tooling/replay_writing.py
+# 核对文件、样本、页面链接和命令语法，不生成代码包。
 python tooling/verify_public.py
 </code></pre>
 <h2>公开范围与剩余验收</h2>
-<p>公开 Git 分支独立于私人工作区的历史，只包含课程文件和新编五讲。DOCX 必须与公开 Markdown 的生成结果逐字节一致；压缩包按白名单生成，排除私人原稿、个人学习记录、密钥、模型缓存、数据库和运行输出。</p>
+<p>公开 Git 分支独立于私人工作区的历史，只包含课程文件和新编五讲。DOCX 必须与公开 Markdown 的生成结果逐字节一致；网站按白名单发布，排除私人原稿、个人学习记录、密钥、模型缓存、数据库和运行输出。</p>
 <p>尚未证明：目标 M1 的速度与并发容量、各线上模型兼容性、完整文学答案质量、适龄表达、实际公司身份接入、生产 HTTPS 与备份恢复演练结果。教材有对应练习与交付要求，不能以发布静态网站代替这些验收。</p>
 </div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="sources.html">资料来源</a><a href="verification.html">验证范围</a><a href="index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../assets/classics.js"></script></body></html>

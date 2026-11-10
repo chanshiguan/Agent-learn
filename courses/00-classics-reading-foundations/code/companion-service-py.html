@@ -1,18 +1,20 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/service.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/service.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/service.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/service.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;应用层连接资料、会话与模型；页面和命令行可以共用这些行为。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/service.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/service.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/service.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：让 API 与会话问答共用一条业务路径；本节只处理普通问答。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import time
-from . import actions
-from .agent import run_agent
 from .corpus import visible
 from .files import load
-from .models import complete
-from .operations import job, log_event
-from .rag import answer, retrieve
-from .state import get_session, update_session
+from .rag import retrieve, answer
 from .tutor import teach_turn
+from .agent import run_agent
+from . import actions
+from .models import complete
+from .operations import log_event, job
+from .state import get_session, update_session
 
-
+# 目的：先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。
+# 预期：回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。
 def ask(actor, session_id, question, request_id, mode=&quot;qa&quot;, method=&quot;keyword&quot;):
     started = time.monotonic()
     session = get_session(actor, session_id)
@@ -47,7 +49,8 @@ def ask(actor, session_id, question, request_id, mode=&quot;qa&quot;, method=&qu
     # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。
     return {**result, &quot;trace_id&quot;: request_id, &quot;session_revision&quot;: updated[&quot;revision&quot;]}
 
-
+# 目的：读取 ID 仍需带本人会话和当前进度，不能把引用链接当成访问凭证。
+# 预期：已失去可见范围的旧引用会被拒绝。
 def source(actor, session_id, source_id):
     session = get_session(actor, session_id)
     corpus = load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})
@@ -57,7 +60,8 @@ def source(actor, session_id, source_id):
         raise PermissionError(&quot;当前阅读范围内没有此来源。&quot;)
     return hit
 
-
+# 目的：生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。
+# 预期：得到的是待确认草稿，不会自动变成正式笔记。
 def make_draft(actor, session_id, kind, request_id):
     existing = next((a for a in actions.pending(actor) if a[&quot;request_key&quot;] == request_id), None)
     if existing:

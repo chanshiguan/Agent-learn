@@ -1,5 +1,49 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/web/reader.css · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/reader.css</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/reader.css</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/reader.css" download>下载此文件</a></p><pre><code class="language-text">:root{--ink:#23364a;--muted:#52667b;--line:#d3dfe5;--accent:#17675f;--paper:#f4f8f7}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.85 system-ui,&quot;PingFang SC&quot;,sans-serif}header{background:white;border-bottom:1px solid var(--line);padding:20px max(24px,calc((100vw - 1120px)/2));display:flex;align-items:center;gap:24px}.brand{font-size:21px;font-weight:750;color:var(--accent)}header&gt;span:nth-child(2){font-size:13px;color:var(--muted)}header button{margin-left:auto}main{max-width:1120px;padding:32px 24px;margin:auto}h1{font-size:32px;line-height:1.4;margin:12px 0}h2{font-size:20px;margin:28px 0 12px}h3{font-size:16px}p{margin:12px 0}label{display:block;font-size:14px;margin:14px 0 6px}input,select,textarea{font:inherit;border:1px solid #829b9a;border-radius:7px;padding:10px 12px;width:100%;background:white;color:var(--ink)}textarea{min-height:120px;resize:vertical}button{font:600 14px/1.5 system-ui;min-height:44px;border-radius:7px;border:1px solid var(--accent);padding:10px 16px;background:var(--accent);color:white;cursor:pointer;margin:12px 0 0}button:hover{filter:brightness(.92)}button:disabled{opacity:.65;cursor:wait}.secondary{background:white;color:var(--accent)}.danger{background:white;color:#9b2738;border-color:#9b2738}.workspace{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;align-items:start}.workspace aside{padding-right:24px;border-right:1px solid var(--line)}.workspace aside button{width:100%}.workspace aside h2{font-size:16px}.reading{min-width:0;background:white;padding:28px;border:1px solid var(--line);border-radius:12px}.intro{margin-bottom:28px}.intro&gt;p{color:var(--muted)}.notice{padding:12px 18px;background:#e3f0eb;border-left:3px solid var(--accent);font-size:13px}.check{display:flex;gap:10px;align-items:flex-start}.check input{width:18px;flex-shrink:0;margin-top:8px}.hint,footer{font-size:12px;color:var(--muted)}.actions{display:flex;gap:12px;flex-wrap:wrap}#sessions button{text-align:left;font-size:12px;background:white;color:var(--accent)}#selected{font-size:13px;color:var(--muted)}#answer{white-space:pre-wrap}#result{border-top:1px solid var(--line);margin-top:28px;padding-top:12px}details{border:1px solid var(--line);padding:12px 16px;border-radius:8px;margin:12px 0}summary{cursor:pointer;min-height:36px;color:var(--accent);font-size:14px}.source-text{white-space:pre-wrap;font-size:14px}.feedback{padding-top:18px;border-top:1px solid var(--line);margin-top:20px}.draft{background:#f1f6f4;border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}.draft pre{white-space:pre-wrap;font:14px/1.8 system-ui}#status{background:#e3eee9;padding:12px 16px;border-radius:8px;min-height:48px}#login-panel{max-width:480px;margin:40px auto;padding:30px;background:white;border:1px solid var(--line);border-radius:12px}footer{max-width:1120px;margin:24px auto;padding:20px 24px;border-top:1px solid var(--line)}:focus-visible{outline:3px solid #2356c8;outline-offset:3px}[hidden]{display:none!important}@media(max-width:750px){header{padding:16px 20px;flex-wrap:wrap;gap:10px}.workspace{display:block}.workspace aside{border-right:0;border-bottom:1px solid var(--line);padding:0 0 24px;margin-bottom:24px}.reading{padding:20px}main{padding:24px 16px}h1{font-size:28px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/reader.css</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/reader.css</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/reader.css" download>下载此文件</a></p><pre><code class="language-text">body {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 20px;
+  color: #21324b;
+  background: #f6f8fb;
+  font: 17px/1.8 system-ui;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 10px;
+  margin: 8px 4px;
+}
+button {
+  min-height: 44px;
+  cursor: pointer;
+}
+textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 110px;
+}
+article,
+.draft {
+  background: white;
+  padding: 20px;
+  border: 1px solid #c5cfdf;
+  margin: 16px 0;
+}
+pre,
+.source-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+:focus-visible {
+  outline: 3px solid #2356c8;
+  outline-offset: 3px;
+}
+[hidden] {
+  display: none !important;
+}
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

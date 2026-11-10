@@ -1,9 +1,30 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用副本练习去重与更新 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0027-corpus-dedup">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用副本练习去重与更新</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-6">← 返回课程地图</a><p class="rail-label">第 6 章 · 把五份讲稿整理成可检索资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0026-corpus-metadata.html"><span class="unit-number">1</span><span>给每个片段一张来源卡<small>35—50 分钟</small></span></a></li><li><a href="0027-corpus-dedup.html" aria-current="page"><span class="unit-number">2</span><span>用副本练习去重与更新<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先保护原文件</a></li><li><a href="#section-2">更新与删除也要有明确含义</a></li><li><a href="#section-3">排错与交付</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 6 章 / 单元 2 · 共 2 个</p><h1>用副本练习去重与更新</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>30—45 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>用副本练习去重与更新</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-6">← 返回课程地图</a><p class="rail-label">第 6 章 · 把五份讲稿整理成可检索资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0026-corpus-metadata.html"><span class="unit-number">1</span><span>给每个片段一张来源卡<small>65—80 分钟</small></span></a></li><li><a href="0027-corpus-dedup.html" aria-current="page"><span class="unit-number">2</span><span>用副本练习去重与更新<small>30—45 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先保护原文件</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">更新与删除也要有明确含义</a></li><li><a href="#section-5">排错与交付</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li><li><a href="#section-9">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 6 章 / 单元 2 · 共 2 个</p><h1>用副本练习去重与更新</h1><div class="lesson-meta"><span>本单元 30—45 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>30—45 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0026-corpus-metadata.html">《给每个片段一张来源卡》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">先保护原文件</h2>
 <p>去重是识别相同内容，不是自动删除原资料。本实验用副本，结束后恢复已知输入。文件字节相同可以确认重复；措辞相近或文件名带“修改”不能据此决定哪个版本正确。</p>
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：用内容指纹阻止重复导入</h3>
+<p>改文件名不等于换正文；先查本批指纹，再决定是否读取并加入快照。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/corpus.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">        version = hashlib.sha256(file.read_bytes()).hexdigest()
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">        version = hashlib.sha256(file.read_bytes()).hexdigest()
+        if version in seen:
+            duplicates.append({&quot;file&quot;: file.name, &quot;same_as&quot;: seen[version]})
+            continue
+        seen[version] = file.name
+</code></pre>
+<p>**写完后应当怎样：**副本进入 duplicates，不产生第二份相同正文的块；更新原稿会生成新版本。</p>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 建一个独立实验目录；只复制五份样本，不移动原件。
 mkdir -p data/ingest-lab
 cp data/input/*.docx data/ingest-lab/
@@ -15,12 +36,12 @@ python -m companion ingest --source data/ingest-lab
 python -m companion ingest --source data/input
 </code></pre>
 <p>记录两次输出中的 documents、duplicates 和 revision。这里的去重只覆盖当前这次导入，同一作品跨版本的内容取舍仍要审核。revision 是整份资料快照的指纹，不是“质量得分”。</p>
-<h2 id="section-2">更新与删除也要有明确含义</h2>
+<h2 id="section-4">更新与删除也要有明确含义</h2>
 <p>在实验目录里移走一份副本，再导入，表示当前作品的新快照不再包含它；原件和其他作品不会被删除。空目录会报错，不会清空整个知识库。正式撤下整部作品属于管理操作，需要单独审核流程。</p>
 <p>把副本的一句话改掉并保存，再导入，观察 version 与片段 ID 变化。修改工具也可能改变 DOCX 字节，即使可见文字没变；指纹变化只能证明文件变了，不能证明文学内容发生了怎样的变化。</p>
-<h2 id="section-3">排错与交付</h2>
+<h2 id="section-5">排错与交付</h2>
 <p>若重复数为 0，比较两份文件的字节是否真相同；若出现很多片段，不要把它误读为很多文档。记录文档数、片段数、跳过表格数三项。整理完恢复 <code>data/input</code> 快照，保持第 7 章输入一致。</p>
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>重复副本应该删掉吗？</li>
@@ -35,9 +56,22 @@ python -m companion ingest --source data/input
 <p>**通过证据：**保存去重前后计数及一次修改后的版本变化，并确认主线已恢复五份原样本。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/06-memory-rag.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0027-corpus-dedup"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0026-corpus-metadata.html"><small>上一单元</small>给每个片段一张来源卡</a><a href="0028-keyword-retrieval.html"><small>下一单元</small>先让程序找到相关文字 →</a></nav></main></div>
+<h2 id="section-9">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion.corpus import ingest
+from companion.files import load
+a=ingest(); b=ingest()
+assert a[&quot;revision&quot;]==b[&quot;revision&quot;]
+print(&quot;相同输入重复整理，版本不变&quot;)
+PY
+</code></pre>
+<p>**预期：**重复导入不会凭空增加资料，版本保持一致。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0027-corpus-dedup"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-basic.html" data-knowledge-link>基础 RAG：先找资料，再组织回答<span>6—8 分钟 · 走一遍文档、切块、检索、生成与引用。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0026-corpus-metadata.html"><small>上一单元</small>给每个片段一张来源卡</a><a href="0028-keyword-retrieval.html"><small>下一单元</small>先让程序找到相关文字 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

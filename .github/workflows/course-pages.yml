@@ -28,13 +28,13 @@ jobs:
         run: |
           python -m unittest discover -s tests -v
           node tests/reader-races.cjs
+          python tooling/replay_writing.py
       - name: 真实构建 Docker 并验证 Compose
         run: python courses/00-classics-reading-foundations/tooling/container_smoke.py
       - name: 重新生成教材
         run: |
           npm ci --ignore-scripts
           npm run build
-          python courses/00-classics-reading-foundations/tooling/package.py
           python courses/00-classics-reading-foundations/tooling/verify_public.py
       - name: 仅将公开清单复制到网站目录
         run: |
@@ -43,7 +43,7 @@ jobs:
           from pathlib import Path
           root=Path.cwd(); site=root/'_site'; site.mkdir()
           files=json.loads((root/'publication-files.json').read_text())['files']
-          files+=['publication-files.json','courses/00-classics-reading-foundations/classics-companion-course.zip']
+          files+=['publication-files.json']
           for name in files:
               target=site/name; target.parent.mkdir(parents=True,exist_ok=True)
               shutil.copy2(root/name,target)

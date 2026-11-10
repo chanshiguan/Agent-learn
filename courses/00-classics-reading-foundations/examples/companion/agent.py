@@ -1,4 +1,5 @@
-"""真实 tool_calls 驱动的有界循环；轨迹记录动作，不记录模型私有思考。"""
+# 目的：复用已经验证的工具；循环只解释模型请求，不执行模型生成的代码。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 from time import monotonic
 from .models import complete, object_answer
@@ -6,7 +7,8 @@ from .tools import ReaderTools, SCHEMAS
 from .state import get_session
 from .rag import answer, retrieve
 
-
+# 目的：每轮检查步数、时间与上下文；模型要工具时由程序验证后执行，没有工具时检查最终引用。
+# 预期：结果包含工具动作轨迹与用量；预算耗尽时明确未完成，不伪造答案。
 def run_agent(actor, session_id, question, method="keyword", max_rounds=4, deadline_seconds=120, cancelled=None):
     session = get_session(actor, session_id)
     if session["strict"]:

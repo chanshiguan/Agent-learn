@@ -1,6 +1,8 @@
 # 审核新资料，再切换活动快照
 
-本单元预计 **40—55 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **55—70 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《先小范围验证，再练一次撤回》](0069-release-rollback.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 新资料先进入候选目录
 
@@ -9,6 +11,183 @@
 ## 本课使用维护窗口发布
 
 当前 corpus 和 index 分别是文件，不是多文件原子事务。发布时先停止应用接流量和写入，再导入、构建、检查，成功后重启。这样会短暂停用，应提前告知试用者；不把它称作零停机更新。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：实现 backup 的边界
+
+业务数据库用 SQLite 一致快照 API；先停止写入以保持多文件版本一致。
+
+**写在哪里：**项目根目录下的 `companion/maintenance.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。
+
+```python
+# 目的：业务数据库用 SQLite 一致快照 API；先停止写入以保持多文件版本一致。
+# 预期：恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
+def backup(destination):
+    target = Path(destination)
+    target.mkdir(parents=True, exist_ok=False)
+    original = data_dir()
+    # SQLite backup API 取得一致快照。完整系统备份仍需先停止写入和索引任务，保证多文件版本一致。
+    for name in ("reading.sqlite3", "checkpoints.sqlite3"):
+        if (original / name).exists():
+            with sqlite3.connect(original / name) as source, sqlite3.connect(target / name) as copy:
+                source.backup(copy)
+    for name in ("corpus.json", "ranges.json", "index.json"):
+        if (original / name).exists():
+            shutil.copy2(original / name, target / name)
+    hashes = {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in target.iterdir() if file.is_file()}
+    (target / "manifest.json").write_text(json.dumps({"files": hashes, "strategy": "索引可由 corpus 重建；此包不含 Qdrant 卷与模型权重"}, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"backup": str(target), "files": list(hashes)}
+```
+
+**写完后应当怎样：**恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
+
+### 第 2 步：实现 restore 的边界
+
+先核对备份文件白名单与指纹，再恢复到新目录；撤销旧令牌，索引明确重建。
+
+**写在哪里：**项目根目录下的 `companion/maintenance.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。`with` 管理事务，代码抛错时不要把半次更新当作成功。
+
+```python
+# 目的：先核对备份文件白名单与指纹，再恢复到新目录；撤销旧令牌，索引明确重建。
+# 预期：恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
+def restore(source, destination):
+    source, target = Path(source), Path(destination)
+    manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
+    allowed = {"reading.sqlite3", "checkpoints.sqlite3", "corpus.json", "ranges.json", "index.json"}
+    if not set(manifest["files"]).issubset(allowed):
+        raise ValueError("备份包含未约定的文件名。")
+    for name, expected in manifest["files"].items():
+        if hashlib.sha256((source / name).read_bytes()).hexdigest() != expected:
+            raise ValueError(f"备份指纹不符：{name}")
+    target.mkdir(parents=True, exist_ok=False)
+    for name in manifest["files"]:
+        if name != "index.json":
+            shutil.copy2(source / name, target / name)
+    if (target / "reading.sqlite3").exists():
+        with sqlite3.connect(target / "reading.sqlite3") as db:
+            if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                raise ValueError("数据库完整性检查失败。")
+            # 恢复后重新登录，避免把备份里的旧访问令牌重新激活。
+            db.execute("DELETE FROM tokens")
+            db.execute("UPDATE actions SET expires=0 WHERE status='pending'")
+    return {"restored": str(target), "index_rebuild_required": True, "login_required": True}
+```
+
+**写完后应当怎样：**恢复失败不覆盖现用目录；备份不是只复制一个文件就宣称可靠。
+
+### 第 3 步：接入已经写出的备份和恢复函数
+
+命令入口不另造一套文件复制逻辑。
+
+**写在哪里：**项目根目录下的 `companion/maintenance_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+from .maintenance import manifest
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+from .maintenance import manifest, backup, restore
+```
+
+**写完后应当怎样：**不同动作复用同一套校验。
+
+### 第 4 步：把恢复目录显式交给调用者
+
+不默认覆盖活动数据，先在新目录验证成功再安排切换。
+
+**写在哪里：**项目根目录下的 `companion/maintenance_cli.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+    initialize()
+    result=manifest()
+    save("release-manifest.json",result)
+```
+
+</details>
+
+**先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
+
+```python
+    parser=argparse.ArgumentParser(description="记录、备份与恢复")
+    if kind=="backup":parser.add_argument("destination")
+    elif kind=="restore":
+        parser.add_argument("source");parser.add_argument("destination")
+    args=parser.parse_args();initialize()
+    if kind=="backup":result=backup(args.destination)
+    elif kind=="restore":result=restore(args.source,args.destination)
+    else:
+        result=manifest();save("release-manifest.json",result)
+```
+
+**写完后应当怎样：**恢复后重新登录并重建向量索引。
+
+### 第 5 步：给命令入口增加 backup
+
+这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。
+
+**写在哪里：**项目根目录下的 `companion/__main__.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        main('manifest')
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+        main('manifest')
+    elif command == "backup":
+        from .maintenance_cli import main
+        main('backup')
+```
+
+**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+### 第 6 步：给命令入口增加 restore
+
+这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。
+
+**写在哪里：**项目根目录下的 `companion/__main__.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        main('backup')
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+        main('backup')
+    elif command == "restore":
+        from .maintenance_cli import main
+        main('restore')
+```
+
+**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+## 运行并观察
 
 ```bash
 # 停止应用接收请求，Qdrant 仍保持运行；等待正在处理的请求结束后再继续维护。
@@ -56,3 +235,6 @@ curl --fail http://127.0.0.1:8000/readyz
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

@@ -1,18 +1,191 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让反馈与删除都有明确范围 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0059-privacy-feedback">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让反馈与删除都有明确范围</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-22">← 返回课程地图</a><p class="rail-label">第 22 章 · 面对不可信输入与个人数据</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0058-untrusted-input.html"><span class="unit-number">1</span><span>讲稿里的命令不能控制助手<small>35—50 分钟</small></span></a></li><li><a href="0059-privacy-feedback.html" aria-current="page"><span class="unit-number">2</span><span>让反馈与删除都有明确范围<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先少收，再谈怎样保护</a></li><li><a href="#section-2">给公司准备一张待确认清单</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 22 章 / 单元 2 · 共 2 个</p><h1>让反馈与删除都有明确范围</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
-<h2 id="section-1">先少收，再谈怎样保护</h2>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让反馈与删除都有明确范围</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-22">← 返回课程地图</a><p class="rail-label">第 22 章 · 面对不可信输入与个人数据</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0058-untrusted-input.html"><span class="unit-number">1</span><span>讲稿里的命令不能控制助手<small>40—55 分钟</small></span></a></li><li><a href="0059-privacy-feedback.html" aria-current="page"><span class="unit-number">2</span><span>让反馈与删除都有明确范围<small>70—85 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">先少收，再谈怎样保护</a></li><li><a href="#section-3">给公司准备一张待确认清单</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li><li><a href="#section-7">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 22 章 / 单元 2 · 共 2 个</p><h1>让反馈与删除都有明确范围</h1><div class="lesson-meta"><span>本单元 70—85 分钟</span><span>本章 110—140 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>70—85 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0058-untrusted-input.html">《讲稿里的命令不能控制助手》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：创建 feedback 表</h3>
+<p>只在能力需要时增加这张表，已有会话继续保留。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">          PRIMARY KEY(tenant,parent,child));
+</code></pre>
+</details>
+
+<p>**先理解：**建表语句描述需要保存的字段；已有表不会因重复初始化而清空。增加列与修改已有记录是两种操作。</p>
+<pre><code class="language-python">          PRIMARY KEY(tenant,parent,child));
+        CREATE TABLE IF NOT EXISTS feedback(
+          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,
+          category TEXT NOT NULL, trace_id TEXT NOT NULL, created REAL NOT NULL);
+</code></pre>
+<p>**写完后应当怎样：**重启服务调用 initialize 后新表存在，重复执行不会清空数据。</p>
+<h3>第 2 步：删除时同时核对保存的预览</h3>
+<p>待确认正文可能存在业务表与图检查点两个位置，删除不能遗漏副本。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">from .files import data_dir
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python">from .files import data_dir, load
+</code></pre>
+<p>**写完后应当怎样：**预览只在属于本人时移除。</p>
+<h3>第 3 步：在同一锁内清理本人内容与检查点</h3>
+<p>删除与图写入竞争时必须串行，避免刚报告删除成功就由迟到任务写回。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/state.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。<code>with</code> 管理事务，代码抛错时不要把半次更新当作成功。</p>
+<pre><code class="language-python"># 目的：删除与图写入竞争时必须串行，避免刚报告删除成功就由迟到任务写回。
+# 预期：当前业务库内容与令牌清除；账号、备份与额度留存范围明确说明。
+def erase_personal_data(actor):
+    # 同一锁内清除检查点和业务行，防止另一个进程在删除后又写回旧草稿预览。
+    with personal_data_lock():
+        if (data_dir() / &quot;checkpoints.sqlite3&quot;).exists():
+            from .graph import erase_threads
+            erase_threads(actor)
+        with connect() as db:
+            db.execute(&quot;BEGIN IMMEDIATE&quot;)
+            preview = load(&quot;graph-preview.json&quot;)
+            if preview and db.execute(&quot;SELECT 1 FROM actions WHERE id=? AND tenant=? AND owner=?&quot;, (preview.get(&quot;id&quot;), actor.tenant, actor.user)).fetchone():
+                (data_dir() / &quot;graph-preview.json&quot;).unlink()
+            # 当日额度不随内容删除重置，避免反复删除绕过限制；下次请求时清理过期计数。
+            for table in (&quot;sessions&quot;, &quot;actions&quot;, &quot;notes&quot;, &quot;feedback&quot;):
+                db.execute(f&quot;DELETE FROM {table} WHERE tenant=? AND owner=?&quot;, (actor.tenant, actor.user))
+            db.execute(&quot;DELETE FROM tokens WHERE tenant=? AND username=?&quot;, (actor.tenant, actor.user))
+    return {&quot;deleted&quot;: True, &quot;scope&quot;: &quot;已删除当前业务库个人内容与会话令牌；账号和当日限额计数保留，备份按留存流程另行处理&quot;}
+</code></pre>
+<p>**写完后应当怎样：**当前业务库内容与令牌清除；账号、备份与额度留存范围明确说明。</p>
+<h3>第 4 步：记录反馈的接收时间</h3>
+<p>反馈只保存分类、追踪编号和接收时间，不默认复制问题全文。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">import os
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">import os
+import time
+</code></pre>
+<p>**写完后应当怎样：**可以回查反馈发生时间而不扩散私人内容。</p>
+<h3>第 5 步：增加 Feedback 接口</h3>
+<p>所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+class Feedback(Input):
+    category: Literal[&quot;答非所问&quot;, &quot;证据不符&quot;, &quot;内容不适合&quot;, &quot;其他&quot;]
+    trace_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+</code></pre>
+<p>**写完后应当怎样：**反馈返回回执，删除撤销令牌并清空当前个人内容。</p>
+<h3>第 6 步：增加 feedback 接口</h3>
+<p>所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**SQL 语句处理持久记录；问号占位符把值作为数据传入。<code>with</code> 管理事务，代码抛错时不要把半次更新当作成功。</p>
+<pre><code class="language-python"># 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+@app.post(&quot;/api/feedback&quot;)
+def feedback(body: Feedback, who=Depends(actor)):
+    identity = uuid.uuid4().hex
+    with state.connect() as db:
+        db.execute(&quot;INSERT INTO feedback VALUES(?,?,?,?,?,?)&quot;, (identity, who.tenant, who.user, body.category, body.trace_id, time.time()))
+    return {&quot;receipt&quot;: identity}
+</code></pre>
+<p>**写完后应当怎样：**反馈返回回执，删除撤销令牌并清空当前个人内容。</p>
+<h3>第 7 步：增加 erase 接口</h3>
+<p>所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。
+# 预期：反馈返回回执，删除撤销令牌并清空当前个人内容。
+@app.delete(&quot;/api/personal-data&quot;)
+def erase(who=Depends(actor)):
+    return state.erase_personal_data(who)
+</code></pre>
+<p>**写完后应当怎样：**反馈返回回执，删除撤销令牌并清空当前个人内容。</p>
+<h3>第 8 步：让反馈有分类，不默认收集全文</h3>
+<p>先提交最少信息，必要的人工调查再按明确授权取得上下文。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/index.html</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-html">        &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+</code></pre>
+</details>
+
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<pre><code class="language-html">        &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+        &lt;label for=&quot;category&quot;&gt;反馈类型&lt;/label
+        &gt;&lt;select id=&quot;category&quot;&gt;
+          &lt;option&gt;答非所问&lt;/option&gt;
+          &lt;option&gt;证据不符&lt;/option&gt;
+          &lt;option&gt;内容不适合&lt;/option&gt;
+          &lt;option&gt;其他&lt;/option&gt;&lt;/select
+        &gt;&lt;button id=&quot;feedback&quot;&gt;提交反馈&lt;/button&gt;
+</code></pre>
+<p>**写完后应当怎样：**每次反馈得到回执，不把用户问题塞进 URL。</p>
+<h3>第 9 步：让删除范围在动作前可见</h3>
+<p>危险动作先确认，服务器完成后清理页面身份。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/index.html</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-html">      &lt;/section&gt;
+</code></pre>
+</details>
+
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<pre><code class="language-html">      &lt;/section&gt;
+      &lt;button id=&quot;erase&quot;&gt;删除我的个人阅读内容&lt;/button&gt;
+</code></pre>
+<p>**写完后应当怎样：**删除后退出，后续访问需重新登录。</p>
+<h3>第 10 步：连接 feedback 动作</h3>
+<p>操作前后检查当前视图，读者切换后丢弃旧结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">on(&#39;feedback&#39;, async () =&gt; {
+  if (!lastTrace) throw new Error(&#39;请先获得一次回答。&#39;);
+  const expectedView = viewVersion;
+  const result = await api(&#39;/api/feedback&#39;, &#39;POST&#39;, {
+    category: $(&#39;category&#39;).value,
+    trace_id: lastTrace,
+  });
+  if (viewVersion === expectedView)
+    status(&#39;反馈已记录，回执 &#39; + result.receipt.slice(0, 8));
+});
+</code></pre>
+<p>**写完后应当怎样：**页面提示真实结果，不残留旧身份数据。</p>
+<h3>第 11 步：连接 erase 动作</h3>
+<p>操作前后检查当前视图，读者切换后丢弃旧结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">on(&#39;erase&#39;, async () =&gt; {
+  if (!confirm(&#39;删除当前业务库中自己的阅读记录、笔记和待确认草稿，并退出登录？&#39;))
+    return;
+  const expectedView = viewVersion;
+  const result = await api(&#39;/api/personal-data&#39;, &#39;DELETE&#39;);
+  if (viewVersion !== expectedView) return;
+  token = &#39;&#39;;
+  reset();
+  $(&#39;workspace&#39;).hidden = true;
+  $(&#39;login-panel&#39;).hidden = false;
+  $(&#39;logout&#39;).hidden = true;
+  status(result.scope);
+});
+</code></pre>
+<p>**写完后应当怎样：**页面提示真实结果，不残留旧身份数据。</p>
+<h2 id="section-2">先少收，再谈怎样保护</h2>
 <p>当前账号用虚构标识；反馈只保存类别、请求 trace_id 与归属，不自动收集学生姓名、学校或整段对话。反馈用于人工处理，不能一收到就让模型自动改知识库。</p>
 <p>在 authenticated 模式用测试账号提交一次“证据不符”反馈，记下回执。再生成一条测试笔记与一份待确认草稿，最后点“删除我的个人阅读内容”。预期会话、笔记、动作、反馈与令牌被删除，流程检查点中本人的草稿也清除。</p>
 <p>账号本身与当日限额计数仍保留，防止反复删除绕过请求额度；旧日期计数在后续请求时清理。删除入口不是完整注销账号；共享讲稿不会删除。重新登录后个人内容应为空。备份里的旧内容不会因在线库删除自动消失，留存与恢复后重放删除清单在第 28 章处理。</p>
-<pre><code class="language-bash"># 验证检查点删除后不能再恢复旧动作；使用临时数据库，不动实际学习笔记。
-PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_graph_restart_resume_and_erase -v
-</code></pre>
-<h2 id="section-2">给公司准备一张待确认清单</h2>
+<p>验证检查点删除后不能再恢复旧动作；使用临时数据库，不动实际学习笔记。</p>
+<h2 id="section-3">给公司准备一张待确认清单</h2>
 <p>写清谁负责资料授权、适龄内容审核、家长关联核实、隐私告知、保留时长、删除请求和人工反馈处理。这里是产品与组织决策，不由教程替公司认定法律适用性。</p>
 <p>对“吃人”等作品讨论，测试表达是否在文学语境中、是否不必要地渲染、是否提示适当共同讨论。不要简单屏蔽一个词就让整部作品无法学习，也不要声称自动审核已经替代老师或内容负责人。</p>
-<h2 id="section-3">本单元完成条件</h2>
+<h2 id="section-4">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>删除个人阅读内容等于删除账号吗？</li>
@@ -27,9 +200,23 @@ PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_graph_
 <p>**通过证据：**反馈回执、删除前后内容对照与检查点不可恢复结果；公司待确认项有负责角色。</p>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
+<h2 id="section-5">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<h2 id="section-6">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0059-privacy-feedback"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0058-untrusted-input.html"><small>上一单元</small>讲稿里的命令不能控制助手</a><a href="0060-request-trace.html"><small>下一单元</small>给一次提问一个可以追踪的编号 →</a></nav></main></div>
+<h2 id="section-7">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion import state,actions
+state.initialize();a=state.Actor(&quot;demo&quot;,&quot;erase-test&quot;)
+s=state.create_session(a);actions.draft(a,&quot;note&quot;,&quot;待删除内容&quot;,&quot;erase-test&quot;)
+state.erase_personal_data(a)
+assert not state.list_sessions(a) and not actions.pending(a)
+print(&quot;当前个人内容已删除；备份不在本测试范围&quot;)
+PY
+</code></pre>
+<p>**预期：**业务内容删除完成，未把账号和备份一并宣称删除。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0059-privacy-feedback"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0058-untrusted-input.html"><small>上一单元</small>讲稿里的命令不能控制助手</a><a href="0060-request-trace.html"><small>下一单元</small>给一次提问一个可以追踪的编号 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

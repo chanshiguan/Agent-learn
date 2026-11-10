@@ -1,6 +1,8 @@
 # 先在容器里运行一行 Python
 
-本单元预计 **20—30 分钟**，Docker 安装和镜像下载另计。第 2 章共 **65—95 分钟**。第一章已经把资料读出来，现在保持程序不变，只更换运行环境。
+本单元预计 **20—30 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《保存结果，并证明没有读错资料》](0013-save-json.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 这次为什么用 Docker
 
@@ -15,6 +17,9 @@
 还没有安装时，可以使用 Docker Desktop 的 Mac Apple Silicon 安装包：打开安装包，将 Docker 拖入“应用程序”，启动 Docker，按安装向导完成必要设置，等待界面显示引擎已运行。请核对安装器支持你的 macOS 版本，不要选 Intel 包。
 
 如果电脑已有 Homebrew，也可以用下面的安装命令；两种方式选一种即可：
+
+
+## 运行并观察
 
 ```bash
 # 通过已有的 Homebrew 安装 Docker Desktop；安装完成后还需要启动应用。
@@ -88,3 +93,6 @@ docker run --rm python:3.12-slim python -c "import sys; print(sys.executable)"
 ## 资料依据
 
 [awesome-agentic-ai-zh 部署练习](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md)提供 Docker 构建与运行的应用背景。本单元先把它拆成一次单独运行，降低同时学习服务和容器的负担。容器操作须在你的实际学习环境验收；课程编写时的验证范围另列于验证记录。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

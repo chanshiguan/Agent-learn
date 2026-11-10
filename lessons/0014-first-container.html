@@ -1,7 +1,8 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先在容器里运行一行 Python · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0014-first-container">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先在容器里运行一行 Python</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-2">← 返回课程地图</a><p class="rail-label">第 2 章 · 第一次运行 Docker</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0014-first-container.html" aria-current="page"><span class="unit-number">1</span><span>先在容器里运行一行 Python<small>20—30 分钟</small></span></a></li><li><a href="0015-mount-files.html"><span class="unit-number">2</span><span>把讲稿交给容器，把结果带回来<small>25—35 分钟</small></span></a></li><li><a href="0016-container-lifecycle.html"><span class="unit-number">3</span><span>程序退出后，容器和文件分别去哪了<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">这次为什么用 Docker</a></li><li><a href="#section-2">在 M1 Mac 上准备 Docker Desktop</a></li><li><a href="#section-3">第一条容器命令</a></li><li><a href="#section-4">对照主机与容器</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 2 章 / 单元 1 · 共 3 个</p><h1>先在容器里运行一行 Python</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>20—30 分钟</strong>，Docker 安装和镜像下载另计。第 2 章共 <strong>65—95 分钟</strong>。第一章已经把资料读出来，现在保持程序不变，只更换运行环境。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先在容器里运行一行 Python</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-2">← 返回课程地图</a><p class="rail-label">第 2 章 · 第一次运行 Docker</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0014-first-container.html" aria-current="page"><span class="unit-number">1</span><span>先在容器里运行一行 Python<small>20—30 分钟</small></span></a></li><li><a href="0015-mount-files.html"><span class="unit-number">2</span><span>把讲稿交给容器，把结果带回来<small>25—35 分钟</small></span></a></li><li><a href="0016-container-lifecycle.html"><span class="unit-number">3</span><span>程序退出后，容器和文件分别去哪了<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">这次为什么用 Docker</a></li><li><a href="#section-2">在 M1 Mac 上准备 Docker Desktop</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">第一条容器命令</a></li><li><a href="#section-5">对照主机与容器</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 2 章 / 单元 1 · 共 3 个</p><h1>先在容器里运行一行 Python</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 65—95 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—30 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0013-save-json.html">《保存结果，并证明没有读错资料》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">这次为什么用 Docker</h2>
 <p>第一章能运行，依赖于你选的 Python 和安装的读取库。把脚本发到另一台机器，对方未必有同样的环境。Docker 镜像可以包含一套运行所需的文件；从镜像创建的容器，才是执行程序的实例。</p>
 <p>可以先记住这三个关系：Dockerfile 是构建说明，镜像是构建出的环境，容器是用这个环境运行程序的一次实例。一个镜像可以创建多个容器。容器也有自己的文件位置，宿主机上的讲稿不会自动出现在里面。</p>
@@ -9,6 +10,7 @@
 <p>先运行 <code>docker --version</code>。如果已经有客户端，再运行 <code>docker info</code>；后者能检查后台服务是否可用。只有版本号并不能证明容器已经能启动。</p>
 <p>还没有安装时，可以使用 Docker Desktop 的 Mac Apple Silicon 安装包：打开安装包，将 Docker 拖入“应用程序”，启动 Docker，按安装向导完成必要设置，等待界面显示引擎已运行。请核对安装器支持你的 macOS 版本，不要选 Intel 包。</p>
 <p>如果电脑已有 Homebrew，也可以用下面的安装命令；两种方式选一种即可：</p>
+<h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 通过已有的 Homebrew 安装 Docker Desktop；安装完成后还需要启动应用。
 brew install --cask docker
 # 启动 Docker Desktop 的后台容器服务；等引擎就绪后再做 docker info 检查。
@@ -22,7 +24,7 @@ docker info
 </code></pre>
 <p>前者找不到命令时，检查安装和终端路径；后者提示连接不上 daemon 时，先看 Docker Desktop 是否启动。daemon 是负责创建和运行容器的后台服务。它和你输入的 <code>docker</code> 客户端不是同一个进程。</p>
 <p>软件可从指定资料中的 Docker 入口获取；本课程的概念与练习均在本地讲解，不要求先读完整 Docker 官方手册。</p>
-<h2 id="section-3">第一条容器命令</h2>
+<h2 id="section-4">第一条容器命令</h2>
 <pre><code class="language-bash"># 创建临时容器运行一句 Python；预期打印启动提示，退出后只删除容器，保留镜像。
 docker run --rm python:3.12-slim python -c &quot;print(&#39;容器里的 Python 已启动&#39;)&quot;
 </code></pre>
@@ -52,7 +54,7 @@ docker run --rm python:3.12-slim python -c &quot;print(&#39;容器里的 Python 
 </tr>
 </tbody></table>
 <p>预期看到一行“容器里的 Python 已启动”。程序打印完就退出，容器随之结束。没有窗口一直开着，是这次任务完成后的正常现象。</p>
-<h2 id="section-4">对照主机与容器</h2>
+<h2 id="section-5">对照主机与容器</h2>
 <p>分别运行：</p>
 <pre><code class="language-bash"># 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
 python -c &quot;import sys; print(sys.executable)&quot;
@@ -61,7 +63,7 @@ docker run --rm python:3.12-slim python -c &quot;import sys; print(sys.executabl
 </code></pre>
 <p>两次路径通常不同。第一条来自当前主机环境，第二条来自镜像。主机启用了 <code>.venv</code>，不代表容器也会使用它。下一单元会显式把程序和资料交给容器。</p>
 <p>**本单元完成条件：**运行成功，并解释为何容器执行完会退出。若安装仍未完成，就把 Docker 状态记为待完成，不用跳到第三章假装已经跑过。</p>
-<h2 id="section-5">本单元验收与参考答案</h2>
+<h2 id="section-6">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
@@ -71,7 +73,8 @@ docker run --rm python:3.12-slim python -c &quot;import sys; print(sys.executabl
 <p><strong>通过证据：</strong><code>docker info</code> 能连接引擎；临时容器打印“容器里的 Python 已启动”；能保留并说明两次解释器路径。仅看到客户端版本号还不够。</p>
 </details>
 
-<h2 id="section-6">资料依据</h2>
+<h2 id="section-7">资料依据</h2>
 <p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">awesome-agentic-ai-zh 部署练习</a>提供 Docker 构建与运行的应用背景。本单元先把它拆成一次单独运行，降低同时学习服务和容器的负担。容器操作须在你的实际学习环境验收；课程编写时的验证范围另列于验证记录。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0014-first-container"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0013-save-json.html"><small>上一单元</small>保存结果，并证明没有读错资料</a><a href="0015-mount-files.html"><small>下一单元</small>把讲稿交给容器，把结果带回来 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

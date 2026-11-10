@@ -1,15 +1,164 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>把进度限制贯穿检索和回答 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0045-spoiler-safe-mode">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把进度限制贯穿检索和回答</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-15">← 返回课程地图</a><p class="rail-label">第 15 章 · 做一个保守的防剧透模式</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0044-reviewed-ranges.html"><span class="unit-number">1</span><span>先核对片段属于哪个阅读范围<small>35—50 分钟</small></span></a></li><li><a href="0045-spoiler-safe-mode.html" aria-current="page"><span class="unit-number">2</span><span>把进度限制贯穿检索和回答<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么不只加一句“别剧透”</a></li><li><a href="#section-2">做四个边界检查</a></li><li><a href="#section-3">产品取舍写清楚</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 15 章 / 单元 2 · 共 2 个</p><h1>把进度限制贯穿检索和回答</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>35—50 分钟</strong>。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>把进度限制贯穿检索和回答</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-15">← 返回课程地图</a><p class="rail-label">第 15 章 · 做一个保守的防剧透模式</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0044-reviewed-ranges.html"><span class="unit-number">1</span><span>先核对片段属于哪个阅读范围<small>35—50 分钟</small></span></a></li><li><a href="0045-spoiler-safe-mode.html" aria-current="page"><span class="unit-number">2</span><span>把进度限制贯穿检索和回答<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">为什么不只加一句“别剧透”</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">做四个边界检查</a></li><li><a href="#section-5">产品取舍写清楚</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li><li><a href="#section-9">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 15 章 / 单元 2 · 共 2 个</p><h1>把进度限制贯穿检索和回答</h1><div class="lesson-meta"><span>本单元 55—70 分钟</span><span>本章 90—120 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>55—70 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0044-reviewed-ranges.html">《先核对片段属于哪个阅读范围》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">为什么不只加一句“别剧透”</h2>
 <p>生成模型本身可能知道结尾，即使只喂前文，也可能从预训练记忆补出后文。为了给初学项目一个可检查的边界，本课受限模式只展示人工审核范围内的片段，不调用生成模型自由解释。它依赖人工审核质量，仍不能保证绝对无剧透。</p>
-<pre><code class="language-bash"># 停止上一服务后设置章节，再用同一命令重启；预期页面出现进度和受限阅读选项。
-export COURSE_CHAPTER=15
+<h2 id="section-2">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：在排序前排除未核对或越界片段</h3>
+<p>讲次不等于剧情进度。只有人工核对且范围不超过当前进度的块才能进入候选。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/corpus.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    return [c for c in chunks if c[&quot;tenant&quot;] == tenant and c[&quot;book&quot;] == book]
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    # 先限制可见范围再排序，避免先检索出其他租户资料，再让模型自己过滤。
+    result = [c for c in chunks if c[&quot;tenant&quot;] == tenant and c[&quot;book&quot;] == book]
+    if progress is not None:
+        result = [c for c in result if c.get(&quot;range_reviewed&quot;) is True
+                  and type(c.get(&quot;range_end&quot;)) is int and 0 &lt;= c[&quot;range_end&quot;] &lt;= progress]
+    return result
+</code></pre>
+<p>**写完后应当怎样：**布尔值不能伪装成数字进度，未知片段被排除。</p>
+<h3>第 2 步：给向量路线加同样的范围规则</h3>
+<p>先让数据库过滤，再与当前语料允许集合相交，避免不同后端的类型比较语义造成越界。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/vectors.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">                models.FieldCondition(key=&quot;book&quot;, match=models.MatchValue(value=book))]
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">                models.FieldCondition(key=&quot;book&quot;, match=models.MatchValue(value=book))]
+    if progress is not None:
+        required += [models.FieldCondition(key=&quot;range_reviewed&quot;, match=models.MatchValue(value=True)),
+                     models.FieldCondition(key=&quot;range_end&quot;, range=models.Range(lte=progress))]
+</code></pre>
+<p>**写完后应当怎样：**关键词和向量两条路线遵守同一阅读范围。</p>
+<h3>第 3 步：受限阅读只展示已核对证据</h3>
+<p>即使检索范围正确，生成模型仍可能凭训练知识补后文。受限模式直接返回片段。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/rag.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">                &quot;citations&quot;: [], &quot;insufficient&quot;: True, &quot;sources&quot;: [], &quot;usage&quot;: None}
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">                &quot;citations&quot;: [], &quot;insufficient&quot;: True, &quot;sources&quot;: [], &quot;usage&quot;: None}
+    if strict:
+        # 防剧透模式只展示人工核对范围内的资料，不让生成模型凭已有知识补出后文。
+        return {&quot;answer&quot;: &quot;已开启受限阅读：本次仅展示下方已核对范围的讲稿片段，请结合片段讨论。&quot;,
+                &quot;citations&quot;: [c[&quot;id&quot;] for c in selected], &quot;insufficient&quot;: False,
+                &quot;sources&quot;: selected, &quot;usage&quot;: None, &quot;mode&quot;: &quot;reviewed-excerpts&quot;}
+</code></pre>
+<p>**写完后应当怎样：**strict=True 不调用生成模型，明确说明展示的是受限资料。</p>
+<h3>第 4 步：让来源回查使用同一范围规则</h3>
+<p>不能只限制搜索列表，却允许读者拿任意来源 ID 直接读正文。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+</code></pre>
+</details>
+
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+from .corpus import visible
+from .files import load
+</code></pre>
+<p>**写完后应当怎样：**来源接口与问答接口共享当前会话范围。</p>
+<h3>第 5 步：把会话范围传入检索</h3>
+<p>范围从已验证归属的会话读取，不接受模型临时改写。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    hits=retrieve(question,actor.tenant,session[&quot;book&quot;],method)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    hits=retrieve(question,actor.tenant,session[&quot;book&quot;],method,session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+</code></pre>
+<p>**写完后应当怎样：**打开受限模式后，只选允许范围的资料。</p>
+<h3>第 6 步：受限模式丢弃旧上下文</h3>
+<p>旧聊天可能包含后文，不能仅过滤新检索结果。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    result=answer(question,hits,session[&quot;history&quot;])
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    result=answer(question,hits,[] if session[&quot;strict&quot;] else session[&quot;history&quot;],strict=bool(session[&quot;strict&quot;]))
+</code></pre>
+<p>**写完后应当怎样：**受限请求不会把过去的普通对话送给模型。</p>
+<h3>第 7 步：不把受限展示混进普通对话</h3>
+<p>明确保存什么、清除什么，后续恢复也能遵守相同规则。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">    history=(session[&quot;history&quot;]+[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:question},{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:result[&quot;answer&quot;]}])[-4:]
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">    history=[] if session[&quot;strict&quot;] else (session[&quot;history&quot;]+[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:question},{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:result[&quot;answer&quot;]}])[-4:]
+</code></pre>
+<p>**写完后应当怎样：**受限阅读历史为空，切换范围不残留旧答案。</p>
+<h3>第 8 步：写来源回查函数</h3>
+<p>读取 ID 仍需带本人会话和当前进度，不能把引用链接当成访问凭证。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：读取 ID 仍需带本人会话和当前进度，不能把引用链接当成访问凭证。
+# 预期：已失去可见范围的旧引用会被拒绝。
+def source(actor, session_id, source_id):
+    session = get_session(actor, session_id)
+    corpus = load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})
+    allowed = visible(corpus[&quot;chunks&quot;], actor.tenant, session[&quot;book&quot;], session[&quot;progress&quot;] if session[&quot;strict&quot;] else None)
+    hit = next((c for c in allowed if c[&quot;id&quot;] == source_id), None)
+    if hit is None:
+        raise PermissionError(&quot;当前阅读范围内没有此来源。&quot;)
+    return hit
+</code></pre>
+<p>**写完后应当怎样：**已失去可见范围的旧引用会被拒绝。</p>
+<h3>第 9 步：给来源回查加 API</h3>
+<p>接口复用 service.source，不再写一套可能遗漏条件的 SQL 或检索。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：接口复用 service.source，不再写一套可能遗漏条件的 SQL 或检索。
+# 预期：越界返回403，允许的来源返回正文。
+@app.get(&quot;/api/sources/{source_id}&quot;)
+def source(source_id: str, session_id: str, who=Depends(actor)):
+    return service.source(who, session_id, source_id)
+</code></pre>
+<p>**写完后应当怎样：**越界返回403，允许的来源返回正文。</p>
+<h3>第 10 步：更新页面对受限模式的说明</h3>
+<p>过滤与回答限制已在本节接通，页面可以准确说明实际行为。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/index.html</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-html">      &lt;label&gt;&lt;input id=&quot;strict&quot; type=&quot;checkbox&quot; /&gt;只看核对范围（下一章接入过滤）&lt;/label&gt;
+</code></pre>
+</details>
+
+<p>**先理解：**标签确定页面结构，id 让后面的 JavaScript 找到同一个控件。label 关联输入框；hidden 只是隐藏显示，不负责服务端权限。</p>
+<pre><code class="language-html">      &lt;label&gt;&lt;input id=&quot;strict&quot; type=&quot;checkbox&quot; /&gt;只看已核对范围的片段&lt;/label&gt;
+</code></pre>
+<p>**写完后应当怎样：**选中后只展示受限证据。</p>
+<h2 id="section-3">运行并观察</h2>
+<pre><code class="language-bash"># 保存本单元代码并停止上一服务，再用同一命令重启；预期页面出现进度和受限阅读选项。
 python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 </code></pre>
 <p>先在普通模式问一个涉及后文的问题，然后把进度设为 1 并开启受限阅读。保存范围时旧 history 清空，页面旧结果消失。再次问后文，应该只看到允许片段或不足提示，而不是重复上一轮答案。</p>
-<h2 id="section-2">做四个边界检查</h2>
+<h2 id="section-4">做四个边界检查</h2>
 <ul>
 <li>进度 0：没有任何已核对且 range_end≤0 的片段时，返回不足。</li>
 <li>进度 1：只出现你确实标为允许的片段。</li>
@@ -17,9 +166,9 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 <li>退回较早进度：旧历史和旧展示不继续带入；以后缓存也必须考虑范围。</li>
 </ul>
 <p>检查 <code>mode=reviewed-excerpts</code> 与 <code>usage=null</code>，确认本次没有调用生成。不是把“模型答得保守”误认为过滤已生效。</p>
-<h2 id="section-3">产品取舍写清楚</h2>
+<h2 id="section-5">产品取舍写清楚</h2>
 <p>受限模式暂时牺牲自然对话能力，换来更容易核验的行为。后续若恢复生成，需要独立的剧情标注、泄露题集和人工审核；本课程不把一句 Prompt 当成可靠保证。</p>
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么限制证据仍可能被模型剧透？</li>
@@ -34,9 +183,24 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 <p>**通过证据：**四项边界结果与本次无生成调用的记录，明确人工标注仍是风险来源。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
-<p class="reading-note">运行位置：课程包中的 <code>courses/00-classics-reading-foundations/examples/</code>。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0045-spoiler-safe-mode"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0044-reviewed-ranges.html"><small>上一单元</small>先核对片段属于哪个阅读范围</a><a href="0046-tutor-states.html"><small>下一单元</small>让读者先说理解，再给提示 →</a></nav></main></div>
+<h2 id="section-9">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion.corpus import visible
+from companion.rag import answer
+base={&quot;id&quot;:&quot;x&quot;,&quot;tenant&quot;:&quot;demo&quot;,&quot;book&quot;:&quot;狂人日记&quot;,&quot;text&quot;:&quot;已核对的一小段&quot;,&quot;range_reviewed&quot;:True}
+assert visible([{**base,&quot;range_end&quot;:True}],&quot;demo&quot;,&quot;狂人日记&quot;,1)==[]
+hits=visible([{**base,&quot;range_end&quot;:1}],&quot;demo&quot;,&quot;狂人日记&quot;,1)
+assert answer(&quot;继续&quot;,hits,strict=True)[&quot;mode&quot;]==&quot;reviewed-excerpts&quot;
+print(&quot;范围类型与受限展示通过，没有生成调用&quot;)
+PY
+</code></pre>
+<p>**预期：**true 不作为1，合法范围片段可展示。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0045-spoiler-safe-mode"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-context.html" data-knowledge-link>上下文增强：切块后别丢掉来龙去脉<span>8—10 分钟 · 区分父子块和 Contextual Retrieval。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0044-reviewed-ranges.html"><small>上一单元</small>先核对片段属于哪个阅读范围</a><a href="0046-tutor-states.html"><small>下一单元</small>让读者先说理解，再给提示 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

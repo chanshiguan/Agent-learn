@@ -1,0 +1,119 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先预览一份笔记，确认后再保存（3/3：连接页面交互） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0052-write-drafts-03">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先预览一份笔记，确认后再保存（3/3：连接页面交互）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-19">← 返回课程地图</a><p class="rail-label">第 19 章 · 写入之前确认具体内容</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0052-write-drafts.html"><span class="unit-number">1</span><span>先预览一份笔记，确认后再保存（1/3：保存会话状态）<small>55—70 分钟</small></span></a></li><li><a href="0052-write-drafts-02.html"><span class="unit-number">2</span><span>先预览一份笔记，确认后再保存（2/3：连接接口与业务）<small>55—70 分钟</small></span></a></li><li><a href="0052-write-drafts-03.html" aria-current="page"><span class="unit-number">3</span><span>先预览一份笔记，确认后再保存（3/3：连接页面交互）<small>40—55 分钟</small></span></a></li><li><a href="0053-approval-replays.html"><span class="unit-number">4</span><span>重复点击、过期与换人都要试<small>45—60 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li><li><a href="#section-6">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 19 章 / 单元 3 · 共 4 个</p><h1>先预览一份笔记，确认后再保存（3/3：连接页面交互）</h1><div class="lesson-meta"><span>本单元 40—55 分钟</span><span>本章 195—255 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>40—55 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0052-write-drafts-02.html">《先预览一份笔记，确认后再保存（2/3：连接接口与业务）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/web/reader.js</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：刷新会话时也刷新本人笔记</h3>
+<p>先完成列表，再读取草稿；每次 await 后都确认视图没有切换。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-javascript">    $(&#39;sessions&#39;).append(button);
+  }
+</code></pre>
+</details>
+
+<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
+<pre><code class="language-javascript">    $(&#39;sessions&#39;).append(button);
+  }
+  if (config.chapter &gt;= 19) await refreshNotes();
+</code></pre>
+<p>**写完后应当怎样：**切换读者后没有旧笔记残留。</p>
+<h3>第 2 步：切换身份时清空草稿和笔记</h3>
+<p>即使服务器权限正确，页面也需要立即清掉上一位读者的内容。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-javascript">  $(&#39;selected&#39;).textContent = &#39;先选择或创建一次阅读。&#39;;
+  $(&#39;result&#39;).hidden = true;
+</code></pre>
+</details>
+
+<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
+<pre><code class="language-javascript">  $(&#39;selected&#39;).textContent = &#39;先选择或创建一次阅读。&#39;;
+  $(&#39;result&#39;).hidden = true;
+  $(&#39;drafts&#39;).replaceChildren();
+  $(&#39;notes&#39;).replaceChildren();
+</code></pre>
+<p>**写完后应当怎样：**新读者的数据返回前页面保持空白。</p>
+<h3>第 3 步：记录目前已经写出的页面能力</h3>
+<p>该数字只供界面了解已实现功能，不代替后端权限。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">CHAPTER = 14
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">CHAPTER = 19
+</code></pre>
+<p>**写完后应当怎样：**本节刷新可以加载草稿。</p>
+<h3>第 4 步：连接生成笔记与复习计划按钮</h3>
+<p>两种草稿共用同一预览与批准流程，不在模型返回后立即保存为正式记录。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-javascript">for (const [button, kind] of [
+  [&#39;draft-note&#39;, &#39;note&#39;],
+  [&#39;draft-plan&#39;, &#39;review_plan&#39;],
+])
+  on(button, async () =&gt; {
+    requireSession();
+    const expectedView = viewVersion;
+    status(&#39;正在整理草稿，尚未保存……&#39;);
+    await api(&#39;/api/drafts&#39;, &#39;POST&#39;, {
+      session_id: selected.id,
+      kind,
+      request_id: id(),
+    });
+    if (viewVersion !== expectedView) return;
+    await refreshNotes();
+    if (viewVersion === expectedView) status(&#39;草稿已生成，请检查后决定是否保存。&#39;);
+  });
+</code></pre>
+<p>**写完后应当怎样：**按钮先生成草稿，再等待读者确认。</p>
+<h2 id="section-2">运行并观察</h2>
+<pre><code class="language-bash"># 停止旧服务后重启，让新路由和页面生效；仍使用原会话与资料。
+python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>先完成一次普通问答，再点“生成笔记草稿”。核对正文，未确认时正式笔记区不应增加记录；点击确认后才增加一条。重复点击同一批准，应返回同一条笔记。受限模式不从旧对话生成草稿，避免引入范围外内容。</p>
+<p>本节先做不可编辑的预览；下一单元才增加“修改后重新确认”。终端操作入口在跨进程恢复单元亲手实现。下面的小检查可以先验证写入协议，不依赖模型是否生成好文章。</p>
+<h2 id="section-3">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为什么修改后必须重新预览？</li>
+<li>确认复习计划会自动修改进度吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为什么修改后必须重新预览？</strong></p>
+<p>旧批准针对旧内容。修改改变了语义和摘要，新版本需要新的明确确认。</p>
+<p><strong>确认复习计划会自动修改进度吗？</strong></p>
+<p>不会。本课程只把确认后的计划作为本人笔记保存，进度由读者单独明确设置。</p>
+<p>**通过证据：**一份真实模型草稿、一份修改后确认的笔记和未批准时没有写入的记录。</p>
+</details>
+
+<h2 id="section-4">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-5">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<h2 id="section-6">用小检查核对自己的实现</h2>
+<p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
+<pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - &lt;&lt;&#39;PY&#39;
+from companion import state,actions
+state.initialize();a=state.Actor(&quot;demo&quot;,&quot;reader-a&quot;)
+d=actions.draft(a,&quot;note&quot;,&quot;这是需要本人确认的测试笔记&quot;,&quot;guided-test&quot;)
+assert not actions.notes(a)
+actions.approve(a,d[&quot;id&quot;],d[&quot;revision&quot;],d[&quot;digest&quot;],True)
+assert len(actions.notes(a))==1
+print(&quot;批准前无正式笔记，批准后1条&quot;)
+PY
+</code></pre>
+<p>**预期：**只检查事务与确认边界；测试正文不是模型生成质量证据。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0052-write-drafts-03"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0052-write-drafts-02.html"><small>上一单元</small>先预览一份笔记，确认后再保存（2/3：连接接口与业务）</a><a href="0053-approval-replays.html"><small>下一单元</small>重复点击、过期与换人都要试 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

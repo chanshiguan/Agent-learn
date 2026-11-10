@@ -2,7 +2,7 @@
 
 从五份新编《狂人日记》讲解稿开始，学习 Python、Docker、本地或线上模型，再逐步完成 RAG、启发式伴读、可控 Agent，以及上线评审所需的权限、评测和运维练习。
 
-**开始学习：**下载后打开根目录 `index.html`，从导学开始。全课为导学加 29 章、66 个短单元和 16 篇选读，主线约 35—51 小时；安装、下载和公司审核另计。每章有时间估计，每个单元有操作、预期结果和参考答案。
+**开始学习：**打开[课程网站](https://chanshiguan.github.io/Agent-learn/)，从导学创建空目录开始。全课为导学加 29 章、80 个连续练习单元和 16 篇选读，主线约 57—77 小时；安装、下载和公司审核另计。所有程序、依赖清单和部署文件都在单元中逐步带写，说明目的、位置、运行方式和预期结果；验收题附折叠答案。只有五份讲稿需要单独下载。
 
 这是一套通用课程，不依赖编写者的电脑环境。命令以 macOS 的 Bash/Zsh 为主；M1 16 GB 是本地路线的参考设备，性能须自行测量。线上与本地生成路线共用项目代码。课程网站是静态教材，实际 Python 伴读服务在学习环境中运行。
 
@@ -10,7 +10,7 @@
 
 [公开样本及来源](courses/00-classics-reading-foundations/public-materials/README.md)包含五篇新编正文、Word 文件的生成说明和人工参考答案。素材明确区分原著短引句与课程解释，不提供未经核对的纸质页码。
 
-课程的原有题目与章节结构保留；样本换成新稿后，证据短句、来源文件名和预期计数已经同步更新。真实模型、向量索引、API 与 Agent 的运行结果和失败记录见[验证范围](courses/00-classics-reading-foundations/VERIFICATION.md)，问题与修复见[审查记录](courses/00-classics-reading-foundations/REVIEW.md)。目标设备性能和公司上线仍需按课程自行验收。
+课程保留原题与七阶段目标，较大的带写任务拆成连续小节；样本换成新稿后，证据短句、来源文件名和预期计数已经同步更新。真实模型、向量索引、API 与 Agent 的运行结果和失败记录见[验证范围](courses/00-classics-reading-foundations/VERIFICATION.md)，问题与修复见[审查记录](courses/00-classics-reading-foundations/REVIEW.md)。目标设备性能和公司上线仍需按课程自行验收。
 
 ## 放到 GitHub 时使用哪个目录
 
@@ -31,18 +31,20 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-如果修改五篇公开正文，在已按第 1 章准备好 Python 的练习目录运行：
+以下仅供维护者：修改五篇公开正文后，在仓库的 `courses/00-classics-reading-foundations/examples/` 中运行：
 
 ```bash
 # 将修改后的公开材料生成为新的空目录，避免覆盖已有练习数据；核对后再替换输入。
 python prepare_samples.py --output data/review-input
 ```
 
-维护者确认新输入后，需要重新运行评测并更新讲义中的字符数、切块数和证据说明。不要继续引用本版旧成绩。`publication-files.json` 是课程包白名单；新增公开文件时显式添加相对路径，再在课程目录运行：
+维护者确认新输入后，需要重新运行评测并更新讲义中的字符数、切块数和证据说明。不要继续引用本版旧成绩。`publication-files.json` 是公开文件白名单；新增公开文件时显式添加相对路径，再在课程目录运行：
 
 ```bash
-# 只打包发布清单列出的文件；遇到缺失路径或样本指纹变化会停止。
-python tooling/package.py
+# 只检查公开清单、样本来源、页面链接和命令语法；不生成代码包。
+python tooling/verify_public.py
+# 从五份输入开始，复演页面的全部代码编辑及当前模块导入，核对中途和最终状态。
+python tooling/replay_writing.py
 ```
 
 测试命令在课程目录执行，先安装各章节所需依赖：

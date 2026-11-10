@@ -1,0 +1,191 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>两位读者，不共用一段对话（2/5：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0042-reader-sessions-02">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>两位读者，不共用一段对话（2/5：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-14">← 返回课程地图</a><p class="rail-label">第 14 章 · 保存每位读者自己的阅读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0042-reader-sessions.html"><span class="unit-number">1</span><span>两位读者，不共用一段对话（1/5：保存会话状态）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-02.html" aria-current="page"><span class="unit-number">2</span><span>两位读者，不共用一段对话（2/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-03.html"><span class="unit-number">3</span><span>两位读者，不共用一段对话（3/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-04.html"><span class="unit-number">4</span><span>两位读者，不共用一段对话（4/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-05.html"><span class="unit-number">5</span><span>两位读者，不共用一段对话（5/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0043-explicit-progress.html"><span class="unit-number">6</span><span>让记忆可以被查看、修正和删除<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">在这里停一下，检查刚写的部分</a></li><li><a href="#section-3">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 14 章 / 单元 2 · 共 6 个</p><h1>两位读者，不共用一段对话（2/5：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 360—450 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0042-reader-sessions.html">《两位读者，不共用一段对话（1/5：保存会话状态）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：先写这个文件需要的导入</h3>
+<p>在最小 API 的基础上增加会话路由，继续只监听本机；没有账号验证时不得对外开放。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
+<p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
+<pre><code class="language-python"># 目的：在最小 API 的基础上增加会话路由，继续只监听本机；没有账号验证时不得对外开放。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
+import os
+import uuid
+from pathlib import Path
+from typing import Literal
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, ConfigDict, Field
+from . import service, state
+from .files import load
+
+MODE = &quot;lab&quot;
+CHAPTER = 14
+state.initialize()
+app = FastAPI(title=&quot;名著伴读助手&quot;,docs_url=None,redoc_url=None)
+web = Path(__file__).with_name(&quot;web&quot;)
+app.mount(&quot;/static&quot;,StaticFiles(directory=web),name=&quot;static&quot;)
+</code></pre>
+<p>**写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。</p>
+<h3>第 2 步：定义 Input 输入约定</h3>
+<p>拒绝未约定字段，作品名由服务端检查是否存在。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：拒绝未约定字段，作品名由服务端检查是否存在。
+# 预期：请求不能随意追加身份参数。
+class Input(BaseModel):
+    model_config = ConfigDict(extra=&quot;forbid&quot;)
+</code></pre>
+<p>**写完后应当怎样：**请求不能随意追加身份参数。</p>
+<h3>第 3 步：定义 NewSession 输入约定</h3>
+<p>拒绝未约定字段，作品名由服务端检查是否存在。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：拒绝未约定字段，作品名由服务端检查是否存在。
+# 预期：请求不能随意追加身份参数。
+class NewSession(Input):
+    book: str = Field(default=&quot;狂人日记&quot;, min_length=1, max_length=80)
+</code></pre>
+<p>**写完后应当怎样：**请求不能随意追加身份参数。</p>
+<h3>第 4 步：为一次会话提问规定输入</h3>
+<p>会话 ID、请求 ID 和问题分别校验；本阶段不接受尚未实现的模式。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python"># 目的：会话 ID、请求 ID 和问题分别校验；本阶段不接受尚未实现的模式。
+# 预期：错误格式在业务代码之前被拒绝。
+class Question(Input):
+    session_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    question: str = Field(min_length=1, max_length=800)
+    request_id: str = Field(pattern=r&quot;^[a-f0-9]{32}$&quot;)
+    mode: Literal[&quot;qa&quot;] = &quot;qa&quot;
+</code></pre>
+<p>**写完后应当怎样：**错误格式在业务代码之前被拒绝。</p>
+<h3>第 5 步：只允许本机选择两个虚构读者</h3>
+<p>这是观察数据隔离的练习入口，不能把任意请求头当成真实账号登录。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
+<pre><code class="language-python"># 目的：这是观察数据隔离的练习入口，不能把任意请求头当成真实账号登录。
+# 预期：非本机请求被拒绝，读者只能是 reader-a 或 reader-b。
+def actor(request: Request):
+    if MODE == &quot;lab&quot;:
+        if request.client and request.client.host not in {&quot;127.0.0.1&quot;, &quot;::1&quot;, &quot;testclient&quot;}:
+            raise HTTPException(403, &quot;测试身份仅允许本机练习。&quot;)
+        reader = request.headers.get(&quot;X-Lab-Reader&quot;, &quot;reader-a&quot;)
+        if reader not in {&quot;reader-a&quot;, &quot;reader-b&quot;}:
+            raise HTTPException(400, &quot;无效的测试读者。&quot;)
+        return state.Actor(&quot;demo&quot;, reader)
+    raise HTTPException(403,&quot;当前只支持本机测试身份。&quot;)
+</code></pre>
+<p>**写完后应当怎样：**非本机请求被拒绝，读者只能是 reader-a 或 reader-b。</p>
+<h3>第 6 步：增加 denied 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.exception_handler(PermissionError)
+def denied(request, error):
+    return JSONResponse(status_code=403, content={&quot;detail&quot;: str(error)})
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 7 步：增加 invalid 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.exception_handler(ValueError)
+def invalid(request, error):
+    return JSONResponse(status_code=409, content={&quot;detail&quot;: str(error)})
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 8 步：增加 bad_input 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.exception_handler(RequestValidationError)
+def bad_input(request, error):
+    # 默认校验结果可能带回原始输入；这里只返回位置，避免回显口令和私人问题。
+    return JSONResponse(status_code=422, content={&quot;detail&quot;: &quot;输入格式不合要求。&quot;, &quot;fields&quot;: [list(e[&quot;loc&quot;]) for e in error.errors()]})
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 9 步：增加 health 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/healthz&quot;)
+def health():
+    return {&quot;status&quot;: &quot;alive&quot;}
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 10 步：增加 config 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/config&quot;)
+def config():
+    return {&quot;mode&quot;: MODE, &quot;chapter&quot;: CHAPTER}
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 11 步：增加 books 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/books&quot;)
+def books(who=Depends(actor)):
+    return sorted({c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant})
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 12 步：增加 sessions 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.get(&quot;/api/sessions&quot;)
+def sessions(who=Depends(actor)):
+    return state.list_sessions(who)
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h3>第 13 步：增加 new_session 这个接口或错误出口</h3>
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>@app</code> 装饰器把函数登记为接口。路径决定请求去哪，函数参数决定请求怎样验证；只定义函数不会向模型发请求。</p>
+<pre><code class="language-python"># 目的：沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。
+# 预期：路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。
+@app.post(&quot;/api/sessions&quot;)
+def new_session(body: NewSession, who=Depends(actor)):
+    books = {c[&quot;book&quot;] for c in load(&quot;corpus.json&quot;, {&quot;chunks&quot;: []})[&quot;chunks&quot;] if c[&quot;tenant&quot;] == who.tenant}
+    if body.book not in books:
+        raise HTTPException(404, &quot;没有可用的这部作品资料。&quot;)
+    return state.create_session(who, body.book)
+</code></pre>
+<p>**写完后应当怎样：**路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。</p>
+<h2 id="section-2">在这里停一下，检查刚写的部分</h2>
+<pre><code class="language-bash"># 只检查本节已写文件的语法；成功通常没有输出，不代表模型或完整页面已经运行。
+python -m py_compile companion/app.py
+</code></pre>
+<p>先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。</p>
+<details class="answer-key"><summary>参考答案与下一步</summary>
+
+<p>沿用刚写出的状态和服务函数；接口只做输入、身份与输出的连接。 路径对应一个已经存在的业务行为，不导入后面的审批或账号模块。 这次停点只检查当前文件；整条链路会在本组最后一节运行。</p>
+</details>
+
+<h2 id="section-3">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0042-reader-sessions-02"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/state-and-memory.html" data-knowledge-link>对话、记忆与流程状态有什么区别<span>8—10 分钟 · 别把所有需要保存的内容都塞进聊天历史。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0042-reader-sessions.html"><small>上一单元</small>两位读者，不共用一段对话（1/5：保存会话状态）</a><a href="0042-reader-sessions-03.html"><small>下一单元</small>两位读者，不共用一段对话（3/5：连接接口与业务） →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

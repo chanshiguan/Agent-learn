@@ -1,6 +1,8 @@
 # 本地路线 先让模型服务准备好
 
-本单元预计 **25—40 分钟**，软件和模型下载另计。第 4 章本地路线共 **75—115 分钟**。如果选择线上路线，可以直接进入下一单元，再回到两条路线共用的调用程序。
+本单元预计 **25—40 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《确认程序和资料没有绑死在一起》](0019-image-boundaries.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 先认识这三个角色
 
@@ -11,6 +13,9 @@
 ## 安装并启动 Ollama
 
 在实际学习的 Mac 上安装 Ollama 的 macOS 应用，启动后新开一个终端。如果使用 Homebrew，可以选择下面的方式；不要重复安装多个版本：
+
+
+## 运行并观察
 
 ```bash
 # 通过已有的 Homebrew 安装本地模型服务应用；此步骤还不会下载模型权重。
@@ -92,3 +97,6 @@ curl --fail --max-time 10 http://127.0.0.1:11434/v1/models
 ## 资料依据
 
 [awesome-agentic-ai-zh Stage 1](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md)提供 Ollama 本地调用路线；[Hello-Agents 第七章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7)说明本地服务与统一客户端。模型候选来自指定材料，实际机器上的可用性以你的运行记录为准。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

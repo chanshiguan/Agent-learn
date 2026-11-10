@@ -1,12 +1,13 @@
-"""复用第 4 章的连接配置；模型只生成内容，不决定资料访问权限。"""
+# 目的：把上一章的客户端配置和响应检查提成函数；调用者只需要传入 messages。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import json
 import os
 from time import perf_counter
 from urllib.parse import urlparse
-
 from openai import OpenAI, DefaultHttpxClient
 
-
+# 目的：只负责验证配置并创建连接，返回客户端和模型名。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def client(timeout=60):
     mode = os.environ.get("LLM_MODE", "local")
     base = os.environ.get("LLM_BASE_URL", "http://127.0.0.1:11434/v1")
@@ -25,7 +26,8 @@ def client(timeout=60):
     return OpenAI(base_url=base, api_key=key, timeout=timeout, max_retries=0,
                   http_client=DefaultHttpxClient(trust_env=mode != "local")), model
 
-
+# 目的：负责一次调用、预算、结束原因与用量；不负责挑选讲稿。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def complete(messages, tools=None, timeout=60):
     maximum = int(os.environ.get("LLM_MAX_TOKENS", "900"))
     if not 128 <= maximum <= 4096:
@@ -54,7 +56,8 @@ def complete(messages, tools=None, timeout=60):
         "elapsed_seconds": round(perf_counter() - started, 3), "model": model,
     }
 
-
+# 目的：把模型文本解析为 JSON 对象；不偷偷补全损坏的 JSON。
+# 预期：导入模块不会调用模型；只有 complete(messages) 才发送请求。
 def object_answer(text):
     # 允许模型用 Markdown 围栏包住 JSON，但不猜测或修补不完整的结构。
     cleaned = (text or "").strip()

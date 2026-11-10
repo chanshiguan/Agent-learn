@@ -1,10 +1,90 @@
 # 关闭程序后，接着处理同一草稿
 
-本单元预计 **35—50 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **40—55 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《重复点击、过期与换人都要试》](0053-approval-replays.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 恢复的对象是业务状态
 
 前一章 actions 表保存草稿、版本、状态和期限。进程退出不会抹掉它。恢复不是重新执行整个对话，也不是把上次所有工具再跑一次；先读当前动作状态，判断还允许做什么。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：用新进程读回旧草稿
+
+状态保存在 SQLite 而非 Python 变量；重新启动后仍从数据库确认本人动作。
+
+**写在哪里：**项目根目录下的 `companion/actions_cli.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
+
+```python
+# 目的：状态保存在 SQLite 而非 Python 变量；重新启动后仍从数据库确认本人动作。
+# 预期：关闭程序再运行 list，旧草稿仍在；批准仍要求当前预览。
+import argparse
+import json
+import uuid
+from . import actions
+from .state import Actor, initialize
+
+
+def main():
+    parser=argparse.ArgumentParser(description="跨进程检查待确认动作")
+    parser.add_argument("operation",choices=["draft","list","notes","revise","approve"])
+    parser.add_argument("--user",default="reader-a")
+    parser.add_argument("--text",default="我想回查文言文序言和日记之间的关系。")
+    args=parser.parse_args();initialize();actor=Actor("demo",args.user)
+    if args.operation=="draft":result=actions.draft(actor,"note",args.text,uuid.uuid4().hex)
+    elif args.operation=="list":result=actions.pending(actor)
+    elif args.operation=="notes":result=actions.notes(actor)
+    else:
+        identity=input("本人草稿 ID：").strip()
+        item=next((x for x in actions.pending(actor) if x["id"]==identity),None)
+        if not item:raise ValueError("没有找到本人草稿。")
+        if args.operation=="revise":result=actions.revise(actor,identity,args.text)
+        else:
+            print(json.dumps(item,ensure_ascii=False,indent=2))
+```
+
+```python
+            confirmed=input("确认当前预览？输入 YES：")=="YES"
+            result=actions.approve(actor,identity,item["revision"],item["digest"],confirmed)
+    print(json.dumps(result,ensure_ascii=False,indent=2))
+```
+
+**写完后应当怎样：**关闭程序再运行 list，旧草稿仍在；批准仍要求当前预览。
+
+### 第 2 步：给命令入口增加 action
+
+这里只增加一个分支，并在选中时导入对应模块；前期命令不会提前加载后期功能。
+
+**写在哪里：**项目根目录下的 `companion/__main__.py`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+
+<details><summary>定位：本步骤要替换的原文</summary>
+
+```python
+        from .index_cli import main
+        main()
+```
+
+</details>
+
+**先理解：**`from ... import ...` 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。
+
+```python
+        from .index_cli import main
+        main()
+    elif command == "action":
+        from .actions_cli import main
+        main()
+```
+
+**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。
+
+## 运行并观察
 
 ```bash
 # 创建尚未批准的新草稿，记录输出 ID；命令结束后进程已经退出。
@@ -58,3 +138,6 @@ python -m companion action approve
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/04-agent-frameworks.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

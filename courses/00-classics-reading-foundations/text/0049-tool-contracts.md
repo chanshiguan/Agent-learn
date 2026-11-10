@@ -1,19 +1,44 @@
 # 让越界请求有可重复的失败结果
 
-本单元预计 **30—45 分钟**。本章总用时见课程地图；首次安装、模型下载和等待他人审核另计。
+本单元预计 **30—45 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《先由程序员调用工具，再交给模型》](0048-readonly-tools.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：为模型描述工具名与参数形状
+
+JSON Schema 只说明能请求什么；真正的执行权限仍由 ReaderTools 检查。
+
+**写在哪里：**项目根目录下的 `companion/tools.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 目的：JSON Schema 只说明能请求什么；真正的执行权限仍由 ReaderTools 检查。
+# 预期：工具参数中没有 tenant 和 user，未知字段禁止。
+SCHEMAS = [
+    {"type": "function", "function": {"name": "search_lectures", "description": "在当前读者允许范围内查询讲稿。", "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"], "additionalProperties": False}}},
+    {"type": "function", "function": {"name": "read_source", "description": "读取本次已经检索到的一条来源。", "parameters": {"type": "object", "properties": {"source_id": {"type": "string"}}, "required": ["source_id"], "additionalProperties": False}}},
+    {"type": "function", "function": {"name": "get_progress", "description": "查看当前会话的显式阅读进度。", "parameters": {"type": "object", "properties": {}, "additionalProperties": False}}},
+]
+```
+
+**写完后应当怎样：**工具参数中没有 tenant 和 user，未知字段禁止。
 
 ## 先把失败当作预期行为
 
 工具拒绝越权参数不是系统坏了，是边界生效。把它变成测试，以后改 Prompt、模型或框架时都能重跑。
 
-```bash
-# 仅运行工具边界测试；PYTHONPATH 让 Python 找到课程 tests 目录，不改变已安装依赖。
-PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_tools_reject_identity_override -v
-# 再验证来源和未知进度过滤；这两项不调用真实模型，也不等于模型质量测试。
-PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_source_scope_and_unknown_range -v
-```
 
-打开 `../tests/test_companion.py` 对应方法。测试使用临时目录、虚构片段和虚构读者，不访问真实学生数据。断言的是“发生了预期拒绝”，不是文字输出恰好与实现完全一样。
+仅运行工具边界测试；PYTHONPATH 让 Python 找到课程 tests 目录，不改变已安装依赖。
+再验证来源和未知进度过滤；这两项不调用真实模型，也不等于模型质量测试。
+
+
+本页末尾直接调用你已经写出的工具，检查越界请求是否被拒绝。第 22 章再把这些边界写成自己的 unittest。
 
 ## 补一个自己的反例
 
@@ -51,3 +76,26 @@ PYTHONPATH=../tests python -m unittest test_companion.CompanionTests.test_source
 ## 资料依据与选读
 
 主线概念依据 [awesome-agentic-ai-zh 对应章节](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md) 和 [Hello-Agents 对应章节](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4)。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。
+
+## 用小检查核对自己的实现
+
+下面的 Python 在当前项目中检查已经写过的行为。终端中的 `python -` 从随后的文本读取临时检查代码，结束标记 `PY` 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。
+
+```bash
+# 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
+python - <<'PY'
+from companion import state
+from companion.tools import ReaderTools
+a=state.Actor("demo","reader-a");s=state.create_session(a);t=ReaderTools(a,s["id"])
+for name,args in [("get_progress",{"user":"reader-b"}),("run_shell",{"command":"pwd"})]:
+    try:
+        t.execute(name,args);raise AssertionError("越界不应成功")
+    except ValueError:pass
+print("改身份与未知工具均被拒绝")
+PY
+```
+
+**预期：**模型请求不会直接变成任意 Python 或终端执行。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

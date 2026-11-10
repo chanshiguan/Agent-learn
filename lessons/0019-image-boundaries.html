@@ -1,8 +1,10 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>确认程序和资料没有绑死在一起 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0019-image-boundaries">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>确认程序和资料没有绑死在一起</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-3">← 返回课程地图</a><p class="rail-label">第 3 章 · 制作自己的镜像</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0017-dockerfile.html"><span class="unit-number">1</span><span>把临时安装步骤写进 Dockerfile<small>25—35 分钟</small></span></a></li><li><a href="0018-build-image.html"><span class="unit-number">2</span><span>构建镜像，再处理同一份讲稿<small>25—35 分钟</small></span></a></li><li><a href="0019-image-boundaries.html" aria-current="page"><span class="unit-number">3</span><span>确认程序和资料没有绑死在一起<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">检查镜像里没有资料目录</a></li><li><a href="#section-2">把结果写进实验记录</a></li><li><a href="#section-3">第 3 章验收</a></li><li><a href="#section-4">本单元验收与参考答案</a></li><li><a href="#section-5">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 3 章 / 单元 3 · 共 3 个</p><h1>确认程序和资料没有绑死在一起</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 70—100 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>20—30 分钟</strong>。第三章的最后一步，是验证镜像真的只负责程序，而资料通过运行时输入提供。</p>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>确认程序和资料没有绑死在一起</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-3">← 返回课程地图</a><p class="rail-label">第 3 章 · 制作自己的镜像</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0017-dockerfile.html"><span class="unit-number">1</span><span>把临时安装步骤写进 Dockerfile<small>35—50 分钟</small></span></a></li><li><a href="0018-build-image.html"><span class="unit-number">2</span><span>构建镜像，再处理同一份讲稿<small>25—35 分钟</small></span></a></li><li><a href="0019-image-boundaries.html" aria-current="page"><span class="unit-number">3</span><span>确认程序和资料没有绑死在一起<small>20—30 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">检查镜像里没有资料目录</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">把结果写进实验记录</a></li><li><a href="#section-4">第 3 章验收</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 3 章 / 单元 3 · 共 3 个</p><h1>确认程序和资料没有绑死在一起</h1><div class="lesson-meta"><span>本单元 20—30 分钟</span><span>本章 80—115 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—30 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0018-build-image.html">《构建镜像，再处理同一份讲稿》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">检查镜像里没有资料目录</h2>
+<h2 id="section-2">运行并观察</h2>
 <pre><code class="language-bash"># 临时改用 Python 检查镜像内是否已有资料目录；没有挂载时预期为 False。
 docker run --rm --entrypoint python classics-reader:chapter3 \
   -c &quot;from pathlib import Path; print(&#39;镜像内存在 /input：&#39;, Path(&#39;/input&#39;).exists())&quot;
@@ -15,10 +17,10 @@ docker run --rm classics-reader:chapter3 /input/not-found.docx /tmp/result.json
 echo $?
 </code></pre>
 <p>预期出现输入路径错误，退出码为 <code>2</code>。这说明程序需要你明确提供资料，没有偷偷从主机目录读取。</p>
-<h2 id="section-2">把结果写进实验记录</h2>
+<h2 id="section-3">把结果写进实验记录</h2>
 <p>在 <code>project-card.md</code> 补上镜像名称、实际构建日期、输入文件、主机与镜像结果是否一致。没有实际运行的命令标为“待运行”。</p>
 <p>这份镜像目前用于单人学习。它没有账号、访问控制或完整的部署配置，不能因为能启动就直接对外提供伴读服务。课程后面的发布阶段会继续补这些能力。</p>
-<h2 id="section-3">第 3 章验收</h2>
+<h2 id="section-4">第 3 章验收</h2>
 <p>请独立回答并演示：换讲稿时怎样运行；改程序时怎样更新镜像；容器删除后到哪里找结果。然后关掉终端，重新打开，从 <code>cd</code> 到生成 <code>image.json</code> 完整做一次。</p>
 <details><summary>如果想检查自己是否只是在背命令</summary>
 
@@ -26,7 +28,7 @@ echo $?
 </details>
 
 <p>**下一章的起点：**程序已经可以在容器中运行。接下来它要访问一个模型服务，我们会用地址和端口解释“服务在主机，客户端在容器”时怎样连接。</p>
-<h2 id="section-4">本单元验收与参考答案</h2>
+<h2 id="section-5">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
@@ -36,7 +38,8 @@ echo $?
 <p>**通过证据：**重开终端后能重新生成 <code>image.json</code>；记录输入指纹与对照结果。这个镜像还没有账号、权限或完整上线配置。</p>
 </details>
 
-<h2 id="section-5">资料依据</h2>
+<h2 id="section-6">资料依据</h2>
 <p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">Stage 7 部署练习</a>区分运行设置与完整生产要求。本课的验收只覆盖读稿程序和数据边界。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0019-image-boundaries"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0018-build-image.html"><small>上一单元</small>构建镜像，再处理同一份讲稿</a><a href="0020-local-model.html"><small>下一单元</small>本地路线 先让模型服务准备好 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

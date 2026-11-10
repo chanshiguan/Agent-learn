@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从单个容器走到一组服务（2/2：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0064-compose-deployment-02">
+<a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从单个容器走到一组服务（2/2：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-25">← 返回课程地图</a><p class="rail-label">第 25 章 · 把应用按同一方式部署</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0064-compose-deployment.html"><span class="unit-number">1</span><span>从单个容器走到一组服务（1/2：把本节能力连起来）<small>50—65 分钟</small></span></a></li><li><a href="0064-compose-deployment-02.html" aria-current="page"><span class="unit-number">2</span><span>从单个容器走到一组服务（2/2：连接接口与业务）<small>35—50 分钟</small></span></a></li><li><a href="0065-readiness-failures.html"><span class="unit-number">3</span><span>活着不等于已经能接待读者<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 25 章 / 单元 2 · 共 3 个</p><h1>从单个容器走到一组服务（2/2：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 120—165 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
+<p>接着上一单元<a href="0064-compose-deployment.html">《从单个容器走到一组服务（1/2：把本节能力连起来）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
+<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
+<h2 id="section-1">现在动手写</h2>
+<p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
+<h3>第 1 步：只接受配置的主机名</h3>
+<p>不要在生产环境随意用通配符掩盖路由配置错误。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<details><summary>定位：本步骤要替换的原文</summary>
+
+<pre><code class="language-python">app = FastAPI(title=&quot;名著伴读助手&quot;,docs_url=None,redoc_url=None)
+</code></pre>
+</details>
+
+<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<pre><code class="language-python">app = FastAPI(title=&quot;名著伴读助手&quot;,docs_url=None,redoc_url=None)
+app.add_middleware(TrustedHostMiddleware,allowed_hosts=os.environ.get(&quot;ALLOWED_HOSTS&quot;,&quot;localhost,127.0.0.1,testserver&quot;).split(&quot;,&quot;))
+</code></pre>
+<p>**写完后应当怎样：**本机和测试客户端仍可访问，其他 Host 需明确配置。</p>
+<h3>第 2 步：让浏览器按文本与同源边界处理内容</h3>
+<p>no-store 避免私人响应进入缓存，CSP 限制页面脚本和资源来源。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
+<p><strong>先理解：</strong><code>async</code> 函数在等待网络时可以暂停；<code>await</code> 后面完成了，才继续处理返回值。页面还要核对当前读者，等待期间换人会使旧结果失效。</p>
+<pre><code class="language-python"># 目的：no-store 避免私人响应进入缓存，CSP 限制页面脚本和资源来源。
+# 预期：页面脚本来自自己服务，不能执行模型返回的脚本标签。
+@app.middleware(&quot;http&quot;)
+async def response_headers(request, call_next):
+    response = await call_next(request)
+    response.headers[&quot;X-Content-Type-Options&quot;] = &quot;nosniff&quot;
+    response.headers[&quot;Cache-Control&quot;] = &quot;no-store&quot;
+    response.headers[&quot;Content-Security-Policy&quot;] = &quot;default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; frame-ancestors &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;self&#39;&quot;
+    return response
+</code></pre>
+<p>**写完后应当怎样：**页面脚本来自自己服务，不能执行模型返回的脚本标签。</p>
+<h2 id="section-2">运行并观察</h2>
+<pre><code class="language-bash"># 复制无凭据的配置样例；只在 .env 尚不存在时执行，避免覆盖自己的配置。
+cp -n deploy/env.example .env
+# 创建持久数据目录；容器将挂载它，原始资料与状态不会打进镜像。
+mkdir -p data/live
+# 查看当前宿主用户与组的数字 ID；将两个结果分别填入 .env 的 APP_UID、APP_GID。
+id -u
+id -g
+# 在编辑器填完 .env 的真实模型 ID、地址和路线后构建；本命令不把 .env COPY 进镜像。
+docker compose --env-file .env -f deploy/compose.yaml build
+# 启动应用和向量库，先测试 keyword 路线，减少首次排错变量。
+docker compose --env-file .env -f deploy/compose.yaml up -d
+# 查看服务状态，检查应用进程是否存活。
+docker compose --env-file .env -f deploy/compose.yaml ps
+</code></pre>
+<p>运行前在编辑器完成 <code>.env</code>，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。</p>
+<p>这些命令都在 <code>classics-reader/</code> 中执行。<code>--env-file .env</code> 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 <code>env_file: ../.env</code> 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 <a href="https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/">Docker 官方说明</a>。</p>
+<p>Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：</p>
+<pre><code class="language-bash"># 在同一挂载数据与 Compose 网络内构建索引；首次可能下载 CPU 编码器权重。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
+</code></pre>
+<p>成功后再把 <code>.env</code> 的 RETRIEVAL 改为 hybrid，重新执行上面的 <code>up -d</code> 命令使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，按下面的命令创建测试读者，账号已存在时跳过：</p>
+<pre><code class="language-bash"># 在相同挂载数据库中创建测试读者；交互输入两次至少 12 字符的口令，口令不放进命令历史。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user student-a
+</code></pre>
+<p>Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 <code>.env</code> 中的 <code>APP_UID</code>、<code>APP_GID</code> 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。</p>
+<p>镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。</p>
+<h2 id="section-3">本单元完成条件</h2>
+<p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
+<ol>
+<li>为什么 Dockerfile 不 COPY data 和 .env？</li>
+<li>容器里的 localhost 指宿主机吗？</li>
+</ol>
+<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+
+<p><strong>为什么 Dockerfile 不 COPY data 和 .env？</strong></p>
+<p>资料、运行状态和凭据不属于不可变程序镜像；通过受控挂载或环境注入，才能独立更新与保护。</p>
+<p><strong>容器里的 localhost 指宿主机吗？</strong></p>
+<p>通常指容器自己。访问 Compose 服务用服务名，访问宿主模型需要已验证的宿主地址。</p>
+<p>**通过证据：**Compose 状态、实际登录和一次有据问答；所选向量路线有新服务上的索引验证。</p>
+</details>
+
+<h2 id="section-4">下次开始前</h2>
+<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<h2 id="section-5">资料依据与选读</h2>
+<p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
+<p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0064-compose-deployment-02"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0064-compose-deployment.html"><small>上一单元</small>从单个容器走到一组服务（1/2：把本节能力连起来）</a><a href="0065-readiness-failures.html"><small>下一单元</small>活着不等于已经能接待读者 →</a></nav></main></div>
+<footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

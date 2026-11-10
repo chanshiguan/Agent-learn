@@ -1,12 +1,98 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/web/index.html · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/index.html</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/index.html</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/index.html" download>下载此文件</a></p><pre><code class="language-text">&lt;!doctype html&gt;&lt;html lang=&quot;zh-CN&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;名著伴读 · 阅读与思考&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;/static/reader.css&quot;&gt;&lt;/head&gt;&lt;body&gt;
-&lt;header&gt;&lt;span class=&quot;brand&quot;&gt;名著伴读&lt;/span&gt;&lt;span&gt;读一段，想一想，再找依据。&lt;/span&gt;&lt;button id=&quot;logout&quot; hidden&gt;退出登录&lt;/button&gt;&lt;/header&gt;
-&lt;main&gt;&lt;section id=&quot;login-panel&quot; hidden&gt;&lt;h1&gt;回到你的阅读&lt;/h1&gt;&lt;p&gt;用已创建的账号登录，继续之前的阅读记录。&lt;/p&gt;&lt;form id=&quot;login-form&quot;&gt;&lt;label&gt;机构标识&lt;input name=&quot;tenant&quot; value=&quot;demo&quot; required maxlength=&quot;40&quot;&gt;&lt;/label&gt;&lt;label&gt;账号&lt;input name=&quot;username&quot; autocomplete=&quot;username&quot; required maxlength=&quot;40&quot;&gt;&lt;/label&gt;&lt;label&gt;口令&lt;input name=&quot;password&quot; type=&quot;password&quot; autocomplete=&quot;current-password&quot; required maxlength=&quot;128&quot;&gt;&lt;/label&gt;&lt;button&gt;登录&lt;/button&gt;&lt;/form&gt;&lt;/section&gt;
-&lt;section id=&quot;workspace&quot; hidden&gt;&lt;div class=&quot;intro&quot;&gt;&lt;p id=&quot;lab-notice&quot; class=&quot;notice&quot; hidden&gt;本机练习模式：使用虚构读者，不录入真实学生信息。&lt;/p&gt;&lt;h1&gt;今天，想读懂哪一处？&lt;/h1&gt;&lt;p&gt;可以直接提问，也可以先说说你的理解。讲解有依据，观点可以讨论。&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&quot;workspace&quot;&gt;&lt;aside&gt;&lt;div id=&quot;lab-picker&quot; hidden&gt;&lt;label for=&quot;reader&quot;&gt;切换测试读者&lt;/label&gt;&lt;select id=&quot;reader&quot;&gt;&lt;option value=&quot;reader-a&quot;&gt;测试读者 A&lt;/option&gt;&lt;option value=&quot;reader-b&quot;&gt;测试读者 B&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;label for=&quot;book&quot;&gt;作品&lt;/label&gt;&lt;select id=&quot;book&quot;&gt;&lt;option&gt;狂人日记&lt;/option&gt;&lt;/select&gt;&lt;button id=&quot;new-session&quot;&gt;开始一次阅读&lt;/button&gt;&lt;h2&gt;我的阅读记录&lt;/h2&gt;&lt;div id=&quot;sessions&quot;&gt;&lt;/div&gt;&lt;button class=&quot;secondary&quot; id=&quot;refresh&quot;&gt;刷新记录&lt;/button&gt;&lt;div data-chapter=&quot;15&quot;&gt;&lt;h2&gt;阅读范围&lt;/h2&gt;&lt;label for=&quot;progress&quot;&gt;已核对的阅读进度编号&lt;/label&gt;&lt;input id=&quot;progress&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;10000&quot; value=&quot;0&quot;&gt;&lt;label class=&quot;check&quot;&gt;&lt;input id=&quot;strict&quot; type=&quot;checkbox&quot;&gt;只看已核对范围的片段&lt;/label&gt;&lt;button class=&quot;secondary&quot; id=&quot;save-progress&quot;&gt;保存范围&lt;/button&gt;&lt;p class=&quot;hint&quot;&gt;范围变化后，旧对话上下文会清空。&lt;/p&gt;&lt;/div&gt;&lt;button class=&quot;danger&quot; id=&quot;delete-session&quot;&gt;删除当前阅读记录&lt;/button&gt;&lt;div data-chapter=&quot;21&quot;&gt;&lt;h2&gt;个人资料&lt;/h2&gt;&lt;button class=&quot;danger&quot; id=&quot;erase&quot;&gt;删除我的个人阅读内容&lt;/button&gt;&lt;/div&gt;&lt;/aside&gt;
-&lt;section class=&quot;reading&quot;&gt;&lt;p id=&quot;selected&quot;&gt;先选择或创建一次阅读。&lt;/p&gt;&lt;form id=&quot;ask-form&quot;&gt;&lt;label for=&quot;question&quot;&gt;你想问什么？&lt;/label&gt;&lt;textarea id=&quot;question&quot; maxlength=&quot;800&quot; required placeholder=&quot;例如：文言文序言和白话日记有什么关系？&quot;&gt;&lt;/textarea&gt;&lt;label for=&quot;mode&quot;&gt;怎样一起读&lt;/label&gt;&lt;select id=&quot;mode&quot;&gt;&lt;option value=&quot;qa&quot;&gt;直接解答&lt;/option&gt;&lt;option value=&quot;tutor&quot; data-chapter=&quot;16&quot;&gt;先引导我思考&lt;/option&gt;&lt;option value=&quot;agent&quot; data-chapter=&quot;18&quot;&gt;需要时多查几处资料&lt;/option&gt;&lt;/select&gt;&lt;div class=&quot;actions&quot;&gt;&lt;button id=&quot;ask&quot;&gt;查资料并回答&lt;/button&gt;&lt;button type=&quot;button&quot; class=&quot;secondary&quot; id=&quot;cancel&quot; hidden&gt;停止等待后续结果&lt;/button&gt;&lt;/div&gt;&lt;/form&gt;&lt;article id=&quot;result&quot; hidden&gt;&lt;h2&gt;一起看看&lt;/h2&gt;&lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;&lt;h3&gt;回答依据&lt;/h3&gt;&lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;&lt;div class=&quot;feedback&quot;&gt;&lt;label for=&quot;category&quot;&gt;这个回答哪里需要改进？&lt;/label&gt;&lt;select id=&quot;category&quot;&gt;&lt;option&gt;答非所问&lt;/option&gt;&lt;option&gt;证据不符&lt;/option&gt;&lt;option&gt;内容不适合&lt;/option&gt;&lt;option&gt;其他&lt;/option&gt;&lt;/select&gt;&lt;button class=&quot;secondary&quot; id=&quot;feedback&quot;&gt;提交反馈&lt;/button&gt;&lt;/div&gt;&lt;/article&gt;
-&lt;section data-chapter=&quot;19&quot;&gt;&lt;h2&gt;留下阅读收获&lt;/h2&gt;&lt;p&gt;先生成草稿，你确认后才会保存。&lt;/p&gt;&lt;div class=&quot;actions&quot;&gt;&lt;button class=&quot;secondary&quot; id=&quot;draft-note&quot;&gt;生成笔记草稿&lt;/button&gt;&lt;button class=&quot;secondary&quot; id=&quot;draft-plan&quot;&gt;生成复习计划草稿&lt;/button&gt;&lt;/div&gt;&lt;div id=&quot;drafts&quot;&gt;&lt;/div&gt;&lt;h3&gt;已保存的笔记&lt;/h3&gt;&lt;div id=&quot;notes&quot;&gt;&lt;/div&gt;&lt;/section&gt;
-&lt;section id=&quot;family-panel&quot; hidden&gt;&lt;h2&gt;孩子明确记录的进度&lt;/h2&gt;&lt;label for=&quot;child&quot;&gt;已关联的读者账号&lt;/label&gt;&lt;input id=&quot;child&quot;&gt;&lt;button class=&quot;secondary&quot; id=&quot;family&quot;&gt;查看进度&lt;/button&gt;&lt;pre id=&quot;family-result&quot;&gt;&lt;/pre&gt;&lt;p class=&quot;hint&quot;&gt;这里不展示孩子的私密对话或笔记。&lt;/p&gt;&lt;/section&gt;&lt;/section&gt;&lt;/div&gt;&lt;/section&gt;&lt;p id=&quot;status&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;&lt;/main&gt;&lt;footer&gt;讲稿中的解释可以讨论。引用用于回查，不代表每个观点都是唯一答案。&lt;/footer&gt;&lt;script src=&quot;/static/reader.js&quot;&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/web/index.html</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/web/index.html</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/web/index.html" download>下载此文件</a></p><pre><code class="language-text">&lt;!doctype html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot; /&gt;
+    &lt;title&gt;名著伴读 · 阅读与思考&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/reader.css&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;
+    &lt;p id=&quot;lab-notice&quot;&gt;本机练习：只使用虚构读者。&lt;/p&gt;
+    &lt;div id=&quot;lab-picker&quot;&gt;
+      &lt;label for=&quot;reader&quot;&gt;测试读者&lt;/label&gt;
+      &lt;select id=&quot;reader&quot;&gt;
+        &lt;option value=&quot;reader-a&quot;&gt;读者 A&lt;/option&gt;
+        &lt;option value=&quot;reader-b&quot;&gt;读者 B&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;section id=&quot;login-panel&quot; hidden&gt;
+      &lt;h1&gt;登录你的阅读账号&lt;/h1&gt;
+      &lt;form id=&quot;login-form&quot;&gt;
+        &lt;label&gt;机构&lt;input name=&quot;tenant&quot; value=&quot;demo&quot; required maxlength=&quot;40&quot; /&gt;&lt;/label&gt;
+        &lt;label
+          &gt;账号&lt;input name=&quot;username&quot; autocomplete=&quot;username&quot; required maxlength=&quot;40&quot;
+        /&gt;&lt;/label&gt;
+        &lt;label
+          &gt;口令&lt;input
+            name=&quot;password&quot;
+            type=&quot;password&quot;
+            autocomplete=&quot;current-password&quot;
+            required
+            maxlength=&quot;128&quot;
+        /&gt;&lt;/label&gt;
+        &lt;button&gt;登录&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/section&gt;
+    &lt;button id=&quot;logout&quot; hidden&gt;退出登录&lt;/button&gt;
+    &lt;section id=&quot;family-panel&quot; hidden&gt;
+      &lt;h2&gt;孩子明确记录的进度&lt;/h2&gt;
+      &lt;label for=&quot;child&quot;&gt;已关联账号&lt;/label&gt;&lt;input id=&quot;child&quot; /&gt;&lt;button id=&quot;family&quot;&gt;
+        查看进度
+      &lt;/button&gt;
+      &lt;pre id=&quot;family-result&quot;&gt;&lt;/pre&gt;
+    &lt;/section&gt;
+    &lt;main id=&quot;workspace&quot;&gt;
+      &lt;label for=&quot;book&quot;&gt;作品&lt;/label
+      &gt;&lt;select id=&quot;book&quot;&gt;
+        &lt;option&gt;狂人日记&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;button id=&quot;new-session&quot;&gt;开始一次阅读&lt;/button&gt;
+      &lt;button id=&quot;refresh&quot;&gt;刷新记录&lt;/button&gt;
+      &lt;div id=&quot;sessions&quot;&gt;&lt;/div&gt;
+      &lt;p id=&quot;selected&quot;&gt;先选择或创建一次阅读。&lt;/p&gt;
+      &lt;label for=&quot;progress&quot;&gt;已核对的阅读进度编号&lt;/label&gt;
+      &lt;input id=&quot;progress&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;10000&quot; value=&quot;0&quot; /&gt;
+      &lt;label&gt;&lt;input id=&quot;strict&quot; type=&quot;checkbox&quot; /&gt;只看已核对范围的片段&lt;/label&gt;
+      &lt;button id=&quot;save-progress&quot;&gt;保存范围&lt;/button&gt;
+      &lt;button id=&quot;delete-session&quot;&gt;删除当前阅读记录&lt;/button&gt;
+      &lt;form id=&quot;ask-form&quot;&gt;
+        &lt;label for=&quot;question&quot;&gt;想问什么？&lt;/label&gt;
+        &lt;textarea id=&quot;question&quot; required maxlength=&quot;800&quot;&gt;&lt;/textarea&gt;
+        &lt;select id=&quot;mode&quot; aria-label=&quot;伴读方式&quot;&gt;
+          &lt;option value=&quot;qa&quot;&gt;直接解答&lt;/option&gt;
+          &lt;option value=&quot;tutor&quot;&gt;先说理解，再看提示&lt;/option&gt;
+          &lt;option value=&quot;agent&quot;&gt;需要时调用工具&lt;/option&gt;
+        &lt;/select&gt;
+        &lt;button id=&quot;ask&quot;&gt;查资料并回答&lt;/button
+        &gt;&lt;button type=&quot;button&quot; id=&quot;cancel&quot; hidden&gt;停止后续处理&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;article id=&quot;result&quot; hidden&gt;
+        &lt;p id=&quot;answer&quot;&gt;&lt;/p&gt;
+        &lt;div id=&quot;sources&quot;&gt;&lt;/div&gt;
+        &lt;label for=&quot;category&quot;&gt;反馈类型&lt;/label
+        &gt;&lt;select id=&quot;category&quot;&gt;
+          &lt;option&gt;答非所问&lt;/option&gt;
+          &lt;option&gt;证据不符&lt;/option&gt;
+          &lt;option&gt;内容不适合&lt;/option&gt;
+          &lt;option&gt;其他&lt;/option&gt;&lt;/select
+        &gt;&lt;button id=&quot;feedback&quot;&gt;提交反馈&lt;/button&gt;
+      &lt;/article&gt;
+      &lt;section&gt;
+        &lt;h2&gt;阅读笔记&lt;/h2&gt;
+        &lt;button id=&quot;draft-note&quot;&gt;生成笔记草稿&lt;/button
+        &gt;&lt;button id=&quot;draft-plan&quot;&gt;生成复习计划草稿&lt;/button&gt;
+        &lt;div id=&quot;drafts&quot;&gt;&lt;/div&gt;
+        &lt;h3&gt;已确认的笔记&lt;/h3&gt;
+        &lt;div id=&quot;notes&quot;&gt;&lt;/div&gt;
+      &lt;/section&gt;
+      &lt;button id=&quot;erase&quot;&gt;删除我的个人阅读内容&lt;/button&gt;
+    &lt;/main&gt;
+    &lt;p id=&quot;status&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+    &lt;script src=&quot;/static/reader.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 </code></pre></div></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../sources.html">资料来源</a><a href="../verification.html">验证范围</a><a href="../index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../../../assets/classics.js"></script></body></html>

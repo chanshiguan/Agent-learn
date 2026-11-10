@@ -1,8 +1,218 @@
 # 用同一个程序获得回答
 
-本单元预计 **30—45 分钟**。先完成本地或线上配置，两条路线从这里汇合。你应在练习目录、已启用 Python 虚拟环境，并在同一终端设置好模型变量。
+本单元预计 **70—85 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+
+接着上一单元[《线上路线 把服务地址和凭据配置清楚》](0021-cloud-model.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
 ## 安装客户端，先看清请求
+
+
+## 现在动手写
+
+先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。
+
+### 第 1 步：只增加模型客户端依赖
+
+继续使用同一个虚拟环境，先保存依赖清单，再安装；本地与线上路线共用客户端。
+
+**写在哪里：**项目根目录下的 `requirements-model.txt`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```text
+# 第 4 章新增的兼容接口客户端；读取讲稿的依赖仍在 requirements.txt 中。
+openai==3.37.0
+```
+
+**写完后应当怎样：**安装后可以导入 openai，但还没有发送请求。
+
+```bash
+# 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
+python -m pip install -r requirements-model.txt
+```
+
+### 第 2 步：先读取配置并检查地址
+
+凭据留在环境变量；本地和线上只换配置。先拒绝缺少模型名或云端 HTTPS/密钥的配置。
+
+**写在哪里：**项目根目录下的 `first_chat.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
+
+下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
+
+**连续代码 1/2**
+
+```python
+# 目的：凭据留在环境变量；本地和线上只换配置。先拒绝缺少模型名或云端 HTTPS/密钥的配置。
+# 预期：配置不全时在发请求前停止。
+"""验证一次真实模型调用；本章不读取或上传讲稿。"""
+
+import argparse
+import json
+import os
+from pathlib import Path
+from time import perf_counter
+from urllib.parse import urlparse
+
+from openai import APIConnectionError, APIStatusError, APITimeoutError, OpenAI, DefaultHttpxClient
+
+
+parser = argparse.ArgumentParser(description="用相同程序连接本地或兼容接口的线上模型")
+parser.add_argument("--question", default="请用两句话说明阅读《狂人日记》时可以留意什么。")
+parser.add_argument("--output", type=Path, default=Path("data/output/model-run.json"))
+args = parser.parse_args()
+mode = os.environ.get("LLM_MODE", "local")
+model = os.environ.get("LLM_MODEL", "").strip()
+base_url = os.environ.get("LLM_BASE_URL", "http://127.0.0.1:11434/v1").strip()
+key = os.environ.get("LLM_API_KEY", "")
+if mode not in {"local", "cloud"} or not model:
+    parser.error("请设置 LLM_MODE 为 local 或 cloud，并用 LLM_MODEL 指定真实模型名。")
+address = urlparse(base_url)
+```
+
+**连续代码 2/2**（接在上一段后，不额外增加缩进）
+
+```python
+if mode == "cloud" and (address.scheme != "https" or not key):
+    parser.error("线上路线需要 HTTPS 服务地址和 LLM_API_KEY。")
+if mode == "local":
+    if address.hostname not in {"127.0.0.1", "localhost", "host.docker.internal"}:
+        parser.error("本章本地路线只连接本机或 Docker 宿主地址。远程服务器连接留到部署阶段。")
+    key = "ollama"
+```
+
+**写完后应当怎样：**配置不全时在发请求前停止。
+
+### 第 3 步：组装一份明确的模型请求
+
+客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。
+
+**写在哪里：**项目根目录下的 `first_chat.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 目的：客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。
+# 预期：这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。
+# 本地请求不经过环境中的联网代理，避免把回环地址交给代理或触发额外 SOCKS 依赖。
+client = OpenAI(base_url=base_url, api_key=key, timeout=90.0, max_retries=0,
+                http_client=DefaultHttpxClient(trust_env=mode != "local"))
+# 初次实验不自动重试：一次运行对应一次请求，出错时先定位，也便于记录实际用量。
+request = {
+    "model": model,
+    "messages": [
+        {"role": "system", "content": "请用清楚的中文回答。这次没有提供讲稿，不要声称读过用户的资料。"},
+        {"role": "user", "content": args.question},
+    ],
+    "max_tokens": 256,
+}
+# 仅在已经核对模型能力后设置此项；基础练习不要求模型支持推理参数。
+# 其他模型未必支持同一参数；留空时不发送，避免把本地选项误带到云端。
+reasoning_effort = os.environ.get("LLM_REASONING_EFFORT", "").strip()
+if reasoning_effort:
+    request["reasoning_effort"] = reasoning_effort
+```
+
+**写完后应当怎样：**这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。
+
+### 第 4 步：发送请求，并区分三类网络错误
+
+地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。
+
+**写在哪里：**项目根目录下的 `first_chat.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 目的：地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。
+# 预期：能根据错误类型回到地址、负载或服务配置排查。
+started = perf_counter()
+try:
+    response = client.chat.completions.create(**request)
+except APITimeoutError:
+    parser.exit(2, "请求超时。先检查服务和模型负载，不要连续重复发送。\n")
+except APIConnectionError:
+    parser.exit(2, "无法连接服务。检查模型是否启动，以及地址、端口和网络。\n")
+except APIStatusError as error:
+    # 不打印原始响应或凭据；先用状态码区分认证、模型名、额度等问题。
+    parser.exit(2, f"服务返回 HTTP {error.status_code}。按教材排错表检查配置。\n")
+```
+
+**写完后应当怎样：**能根据错误类型回到地址、负载或服务配置排查。
+
+### 第 5 步：检查模型是否真的完成
+
+返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。
+
+**写在哪里：**项目根目录下的 `first_chat.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 目的：返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。
+# 预期：空内容或截断会记为未完成，不伪造成功。
+if not response.choices:
+    parser.exit(2, "接口没有返回候选答案。请检查该服务是否支持本章使用的接口。\n")
+choice = response.choices[0]
+answer = (choice.message.content or "").strip()
+complete = bool(answer) and choice.finish_reason == "stop"
+record = {
+    "mode": mode, "model": model, "question": args.question,
+    "answer": answer, "finish_reason": choice.finish_reason, "complete": complete,
+    "elapsed_seconds": round(perf_counter() - started, 3),
+    "usage": response.usage.model_dump() if response.usage else None,
+    "knowledge_base_used": False,
+}
+```
+
+**写完后应当怎样：**空内容或截断会记为未完成，不伪造成功。
+
+### 第 6 步：保存这次调用的证据
+
+把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。
+
+**写在哪里：**项目根目录下的 `first_chat.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```python
+# 目的：把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。
+# 预期：data/output/model-run.json 有本次真实答案、用量和完成状态。
+args.output.parent.mkdir(parents=True, exist_ok=True)
+# 只记实验结果，不保存密钥；这份记录能证明调用过程，不能证明文学解读正确。
+args.output.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+print(answer or "本次没有返回可见文字。")
+print(f"完整响应：{complete}；耗时：{record['elapsed_seconds']} 秒；记录：{args.output}")
+if not complete:
+    parser.exit(2, "响应为空或未正常结束，保留记录排查，不将本次标为通过。\n")
+```
+
+**写完后应当怎样：**data/output/model-run.json 有本次真实答案、用量和完成状态。
+
+### 第 7 步：复用容器知识封装模型客户端
+
+读取容器的 ENTRYPOINT 与模型程序不同；单独配方让程序职责清楚，环境变量在运行时传入。
+
+**写在哪里：**项目根目录下的 `Dockerfile.model`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
+
+**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+
+```dockerfile
+# 这是第 4 章的模型客户端镜像，不包含模型权重或讲稿。
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY requirements-model.txt ./
+RUN python -m pip install --no-cache-dir -r requirements-model.txt
+COPY first_chat.py ./
+# 模型地址和凭据在运行时传入，避免它们随镜像分发。
+ENTRYPOINT ["python", "first_chat.py"]
+```
+
+**写完后应当怎样：**模型地址指向实际服务，不把密钥写进镜像。
+
+## 运行并观察
 
 ```bash
 # 把模型接口客户端安装到当前 Python 环境；成功后 first_chat.py 才能导入所需 SDK。
@@ -26,7 +236,7 @@ python first_chat.py --output data/output/model-run.json
 
 ## 完整程序
 
-{{code:first_chat.py}}
+
 
 这段代码稍长，可以分三次阅读。先读配置检查，弄清参数从哪里来；再读 `request` 和模型调用，找出真正发送的消息；最后读异常处理和记录保存，理解怎样判断这次是否正常完成。
 
@@ -92,3 +302,6 @@ docker run --rm \
 ## 资料依据
 
 [Hello-Agents 第七章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7)提供统一客户端的思路；[部署示例](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md)展示宿主模型与容器应用的连接方式。本课程代码保持模型调用和资料读取分开。
+
+
+遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

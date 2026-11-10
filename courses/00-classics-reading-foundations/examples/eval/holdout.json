@@ -2,12 +2,8 @@
   {
     "id": "holdout-01",
     "question": "第五讲为什么追问流传下来的做法是否就是对的？",
-    "expected_document_prefixes": [
-      "10 "
-    ],
-    "expected_quotes": [
-      "延续时间只能说明它存在过，不能单独证明它合理"
-    ],
+    "expected_document_prefixes": ["10 "],
+    "expected_quotes": ["延续时间只能说明它存在过，不能单独证明它合理"],
     "expected_insufficient": false
   },
   {

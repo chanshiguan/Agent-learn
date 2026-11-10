@@ -6,7 +6,6 @@ import re
 import subprocess
 import sys
 from urllib.parse import unquote, urlsplit
-from zipfile import ZipFile
 
 course = Path(__file__).resolve().parents[1]
 root = course.parents[1]
@@ -71,13 +70,5 @@ for file in [*(course / "text").glob("*.md"), course / "reference.md"]:
         assert block.startswith("# "), file.name
         subprocess.run(["bash", "-n"], input=block, text=True, check=True)
         blocks += 1
-with ZipFile(course / "classics-companion-course.zip") as archive:
-    actual = {name for name in archive.namelist() if name.endswith(".docx")}
-    expected = {f"classics-companion-course/courses/{course.name}/examples/data/input/{name}" for name in sample_bytes}
-    assert actual == expected
-    for name in actual:
-        assert archive.read(name) == sample_bytes[Path(name).name]
-    allowed = {"classics-companion-course/" + name for name in manifest["files"]} | {"classics-companion-course/publication-files.json"}
-    assert set(archive.namelist()) == allowed, "压缩包内容与发布白名单不同。"
 print(json.dumps({"public_files": len(files), "public_docx": len(sample_bytes), "static_pages": len(pages),
-                  "shell_blocks": blocks, "package_allowlist": "passed"}, ensure_ascii=False))
+                  "shell_blocks": blocks, "publication_allowlist": "passed"}, ensure_ascii=False))

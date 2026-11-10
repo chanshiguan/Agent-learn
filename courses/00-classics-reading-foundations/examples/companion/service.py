@@ -1,16 +1,18 @@
-"""应用层连接资料、会话与模型；页面和命令行可以共用这些行为。"""
+# 目的：让 API 与会话问答共用一条业务路径；本节只处理普通问答。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import time
-from . import actions
-from .agent import run_agent
 from .corpus import visible
 from .files import load
-from .models import complete
-from .operations import job, log_event
-from .rag import answer, retrieve
-from .state import get_session, update_session
+from .rag import retrieve, answer
 from .tutor import teach_turn
+from .agent import run_agent
+from . import actions
+from .models import complete
+from .operations import log_event, job
+from .state import get_session, update_session
 
-
+# 目的：先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。
+# 预期：回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。
 def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
     started = time.monotonic()
     session = get_session(actor, session_id)
@@ -45,7 +47,8 @@ def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
     # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。
     return {**result, "trace_id": request_id, "session_revision": updated["revision"]}
 
-
+# 目的：读取 ID 仍需带本人会话和当前进度，不能把引用链接当成访问凭证。
+# 预期：已失去可见范围的旧引用会被拒绝。
 def source(actor, session_id, source_id):
     session = get_session(actor, session_id)
     corpus = load("corpus.json", {"chunks": []})
@@ -55,7 +58,8 @@ def source(actor, session_id, source_id):
         raise PermissionError("当前阅读范围内没有此来源。")
     return hit
 
-
+# 目的：生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。
+# 预期：得到的是待确认草稿，不会自动变成正式笔记。
 def make_draft(actor, session_id, kind, request_id):
     existing = next((a for a in actions.pending(actor) if a["request_key"] == request_id), None)
     if existing:

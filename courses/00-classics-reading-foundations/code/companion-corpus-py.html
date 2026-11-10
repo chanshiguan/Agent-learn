@@ -1,14 +1,15 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>companion/corpus.py · 名著伴读实战</title><link rel="stylesheet" href="../../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../index.html">课程地图</a><a href="../knowledge/index.html">知识拓展 · 选读</a><a href="../resources.html" aria-current="page">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/corpus.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/corpus.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/corpus.py" download>下载此文件</a></p><pre><code class="language-python">&quot;&quot;&quot;读取、去重、切分并保留来源；讲次不自动推断成原著章节。&quot;&quot;&quot;
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>companion/corpus.py</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><p class="eyebrow">资料与工具 / 完整源码</p><h1>companion/corpus.py</h1><p><a href="../code.html">← 返回文件索引</a> · <a href="../examples/companion/corpus.py" download>下载此文件</a></p><pre><code class="language-python"># 目的：把读取一讲扩成整理多讲，仍保留可回查的文件名和段落位置。
+# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 import hashlib
 import re
 from pathlib import Path
-
 from docx import Document
 from .files import digest, load, save
 
-
+# 目的：模型窗口有限，先用可计算的长度和重叠建立基线，后面才能比较其他切法。
+# 预期：600 字块、60 字重叠的下一起点是 540；非法重叠会报错。
 def split_text(text, strategy=&quot;fixed&quot;, size=600, overlap=60):
     if not 0 &lt;= overlap &lt; size or size &lt; 20:
         raise ValueError(&quot;需要 size &gt;= 20 且 0 &lt;= overlap &lt; size。&quot;)
@@ -17,7 +18,8 @@ def split_text(text, strategy=&quot;fixed&quot;, size=600, overlap=60):
         return [(0, text)]
     return [(start, text[start:start + size]) for start in range(0, len(text), size - overlap)]
 
-
+# 目的：外层循环负责文件，内层负责段落与块；一次全部成功后才替换 corpus.json。
+# 预期：五份原始讲稿不改动；600/60 应得到 15 块，空正文会拒绝。
 def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, overlap=60, tenant=&quot;demo&quot;, book=&quot;狂人日记&quot;):
     source = Path(source)
     documents, chunks, duplicates, seen = [], [], [], {}
@@ -71,7 +73,8 @@ def ingest(source=&quot;data/input&quot;, strategy=&quot;fixed&quot;, size=600, 
     return {&quot;documents&quot;: len(documents), &quot;chunks&quot;: len(chunks), &quot;duplicates&quot;: duplicates,
             &quot;revision&quot;: result[&quot;revision&quot;], &quot;tables_skipped&quot;: sum(d[&quot;tables_skipped&quot;] for d in documents)}
 
-
+# 目的：先限制机构和作品，避免排完名才发现搜索了别人的资料。
+# 预期：不同作品的块在评分前就被排除。
 def visible(chunks, tenant, book, progress=None):
     # 先限制可见范围再排序，避免先检索出其他租户资料，再让模型自己过滤。
     result = [c for c in chunks if c[&quot;tenant&quot;] == tenant and c[&quot;book&quot;] == book]
@@ -80,7 +83,8 @@ def visible(chunks, tenant, book, progress=None):
                   and type(c.get(&quot;range_end&quot;)) is int and 0 &lt;= c[&quot;range_end&quot;] &lt;= progress]
     return result
 
-
+# 目的：用中文相邻双字片段和英文数字词建立可解释基线，不把它叫作完整分词器。
+# 预期：命中只表示词面相关；没有资料的事实不会因此出现。
 def terms(text):
     # 中文双字片段是可解释的入门词面基线，不冒称完整分词器或 BM25。
     lower = text.lower()
@@ -89,7 +93,8 @@ def terms(text):
         words.update(run[i:i + 2] for i in range(len(run) - 1))
     return words
 
-
+# 目的：计算问题与每块文字的词面交集，按分数排序并保留前五条。
+# 预期：命中只表示词面相关；没有资料的事实不会因此出现。
 def keyword_search(question, chunks, k=5):
     query = terms(question)
     ranked = []
@@ -99,7 +104,8 @@ def keyword_search(question, chunks, k=5):
             ranked.append({**chunk, &quot;score&quot;: len(matches) / max(1, len(query))})
     return sorted(ranked, key=lambda c: (-c[&quot;score&quot;], c[&quot;id&quot;]))[:k]
 
-
+# 目的：检索小块容易缺少前因；只补同一父段落附近内容，避免把不相关文档拼在一起。
+# 预期：每个块只出现一次，范围过滤在扩展前已经完成。
 def neighbors(hits, chunks):
     selected = {c[&quot;id&quot;]: c for c in hits}
     for hit in hits:
