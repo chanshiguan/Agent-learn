@@ -6,21 +6,59 @@
 
 ## 发布前先知道怎样退回来
 
-给当前候选镜像一个不会覆盖旧版本的标签。选一份已验证旧版本与当前候选，不在运行中随意改源文件。程序和资料若不兼容，单换镜像无法完成回滚，数据库恢复要按下一章演练。
+上一节已经构建并验证了 `classics-companion:candidate`。现在保存它，再做一个只改页面标题的新版本；用肉眼可见的变化判断实际运行的是哪一版。演练不修改数据结构，因此回退不需要恢复数据库。
 
-
-## 运行并观察
+## 保存并验证第一版
 
 ```bash
-# 将当前 candidate 镜像标记为一个明确的练习版本；它不推送到任何远程仓库。
+# 把刚验证的候选保留为第一版；后面构建新版本时不会覆盖这个标签。
 docker tag classics-companion:candidate classics-companion:trial-v1
-# 使用该版本启动受控试用，仍只开放本机端口；不要加 --build 覆盖选定旧产物。
-RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build
-# 检查依赖就绪后，再人工做登录、问答、来源和笔记批准的冒烟检查。
+# 启动指定版本；--no-build 保证使用保存的产物，不根据当前源码偷偷重建。
+RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 等应用启动后检查就绪，再打开网页核对标题、登录、问答和来源。
 curl --fail http://127.0.0.1:8000/readyz
+# 记录第一版实际镜像 ID，后面用它判断是否真的回到原产物。
+docker image inspect classics-companion:trial-v1 --format '{{.Id}}'
 ```
 
-新版本出问题时，停止接入新请求，保存失败 trace 和版本，切回上一已验证标签，再检查相同四条业务路径。当前还只有一个版本时，先制作并验证第二个候选，再练撤回；不要捏造一个不存在的“上个版本”。
+在页面确认标题是“一起读《狂人日记》”，完成登录、问答、查看来源、批准一条测试笔记，并记录结果。这里保存的笔记也用于观察切换版本后数据是否仍在。
+
+## 做一个可识别的第二版
+
+在编辑器打开 `companion/web/index.html`，将唯一一行 `<h1>一起读《狂人日记》</h1>` 改成 `<h1>一起读《狂人日记》 · 版本演练</h1>`，其他内容保留。标题变化只是这次练习的版本标记，不改变问答逻辑。
+
+```bash
+# 将改过标题的源码构建为第二版；保留 trial-v1，也不覆盖 candidate。
+docker build -f deploy/Dockerfile -t classics-companion:trial-v2 .
+# 切换到第二版；数据仍来自原来的挂载目录。
+RELEASE_TAG=trial-v2 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 第二版就绪后再检查页面，不用启动瞬间的连接失败判断发布失败。
+curl --fail http://127.0.0.1:8000/readyz
+# 第二版 ID 应与第一版不同；保存记录供撤回时对照。
+docker image inspect classics-companion:trial-v2 --format '{{.Id}}'
+```
+
+刷新浏览器，应看到“版本演练”；重做前面的四项业务检查。随后在编辑器把标题还原为原来那一行并保存。此时**不要构建**，再次刷新：正在运行的第二版标题仍有“版本演练”，因为容器使用已构建的镜像，不会自动读取宿主源码修改。
+
+## 实际撤回第一版
+
+```bash
+# 撤回已验证的第一版，不从当前源码重建；这是产物切换，不只是重启同一容器。
+RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 等待就绪后刷新网页，预期标题恢复，之前的测试笔记仍可读取。
+curl --fail http://127.0.0.1:8000/readyz
+# 查看当前应用所用镜像标签，预期为 classics-companion:trial-v1。
+docker compose --env-file .env -f deploy/compose.yaml ps --format json app
+```
+
+再做四项业务检查，把前后镜像 ID、标题、笔记是否保留和开始结束时间写在项目记录中。这次证明的是同一数据结构下的镜像切换；若新版本改变资料字段或数据库结构，不能据此认定旧程序也能读取，需要第28章的迁移与恢复验证。
+
+结束时先确认源码标题已经还原，再回到后续章节使用的 candidate：
+
+```bash
+# 恢复本次练习前的候选；下一节会继续在它的基础上构建资料发布功能。
+RELEASE_TAG=candidate docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+```
 
 ## 小范围试用看什么
 

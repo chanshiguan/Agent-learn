@@ -42,7 +42,7 @@
 <td>用来识别输入变化，不证明资料事实正确</td>
 </tr>
 </tbody></table>
-<pre><code class="language-bash"># 确认终端当前目录；预期路径末尾是 examples，避免在其他目录运行练习。
+<pre><code class="language-bash"># 确认终端当前目录；预期路径末尾是 classics-reader，避免在其他目录运行练习。
 pwd
 # 让当前终端优先使用项目环境的 Python 和依赖；随后检查解释器路径。
 source .venv/bin/activate
@@ -218,7 +218,7 @@ docker logs reading-lifecycle
 <td>哈希检查、恢复后重新登录</td>
 </tr>
 </tbody></table>
-<p>这些是入口速查，不是一段可以整体粘贴的脚本。运行目录为 examples，具体参数、环境和预期失败按对应章节操作。</p>
+<p>这些是入口速查，不是一段可以整体粘贴的脚本。运行目录是你从导学开始自建的 <code>classics-reader/</code>，具体参数、环境和预期失败按对应章节操作。网站的 examples 是课后代码对照，不是需要下载或进入的练习目录。</p>
 <h2>后半程的几个边界</h2>
 <p>RAG 找到资料再回答；Agent 决定是否再请求工具。Embedding 模型编码资料，生成模型组织语言；两条生成路线共用检索与业务。</p>
 <p>认证证明身份，授权限制可读写范围，批准绑定某份具体内容。事务防止一次操作写一半，幂等防止同一操作重复产生副作用。检查点保存流程位置，不替代这几层规则。</p>

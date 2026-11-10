@@ -1,80 +1,96 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从五份讲稿开始做伴读助手 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0008-mission">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从五份讲稿开始做伴读助手</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-0">← 返回课程地图</a><p class="rail-label">导学 · 认识项目与资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0008-mission.html" aria-current="page"><span class="unit-number">1</span><span>从五份讲稿开始做伴读助手<small>20—25 分钟</small></span></a></li><li><a href="0009-samples.html"><span class="unit-number">2</span><span>看清这五份文件究竟是什么<small>20—30 分钟</small></span></a></li><li><a href="0010-baseline.html"><span class="unit-number">3</span><span>先留下问题，后面才能判断有没有进步<small>15—20 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先看一个真实使用场景</a></li><li><a href="#section-2">这几章怎样接起来</a></li><li><a href="#section-3">写一张项目卡</a></li><li><a href="#section-4">写入项目卡</a></li><li><a href="#section-5">先预测，再看解释</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 导学 / 单元 1 · 共 3 个</p><h1>从五份讲稿开始做伴读助手</h1><div class="lesson-meta"><span>本单元 20—25 分钟</span><span>本章 55—75 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
-<p>本单元预计 <strong>20—25 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
-<p>你最后要做的是一个能给学生和家长使用的名著伴读助手。它要能找到相关资料，说明回答依据，逐渐学会引导读者思考。眼下先把目标缩小：让电脑读懂你已有的五份讲稿，并让同一个程序在本机和 Docker 中运行。</p>
-<h2 id="section-1">先看一个真实使用场景</h2>
-<p>学生正在读《狂人日记》，问：“开头为什么用文言文，后面又变成白话文？”家长可能接着问：“怎样提示孩子自己发现这两部分的区别？”</p>
-<p>后来的助手需要先找出相关讲解，再组织回答。它还要分清哪些是作品原文，哪些是讲解者的理解。现在只靠模型直接回答，无法证明它读过你的讲稿。我们会先让资料处理过程清楚可见，再接检索和生成。</p>
-<p>这一阶段会留下三样东西：五份输入讲稿、程序提取的 JSON、一次真实模型调用记录。这里的 JSON 是用文本保存结构化数据的格式，后面会亲手打开来看。</p>
-<h2 id="section-2">这几章怎样接起来</h2>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从五份讲稿开始做伴读助手</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-0">← 返回课程地图</a><p class="rail-label">导学 · 认识项目与资料</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0008-mission.html" aria-current="page"><span class="unit-number">1</span><span>从五份讲稿开始做伴读助手<small>20—25 分钟</small></span></a></li><li><a href="0009-samples.html"><span class="unit-number">2</span><span>看清这五份文件究竟是什么<small>20—30 分钟</small></span></a></li><li><a href="0010-baseline.html"><span class="unit-number">3</span><span>先留下问题，后面才能判断有没有进步<small>15—20 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">先判断：你会接受哪一种回答</a></li><li><a href="#section-2">建立项目，并留下两条验收约定</a></li><li><a href="#section-3">写完之后怎样用</a></li><li><a href="#section-4">第一阶段的路径</a></li><li><a href="#section-5">本单元验收与参考答案</a></li><li><a href="#section-6">资料依据</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 导学 / 单元 1 · 共 3 个</p><h1>从五份讲稿开始做伴读助手</h1><div class="lesson-meta"><span>本单元 20—25 分钟</span><span>本章 55—75 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<p>本单元预计 <strong>20—25 分钟</strong>，包括阅读、判断两个回答，以及建立项目记录。本节不需要安装软件。</p>
+<p>我们要做一个供学生和家长使用的名著伴读助手。先从一个具体问题开始：“第一讲怎样解释《狂人日记》的文言序言与白话日记？”如果助手答得很流畅，却说不出依据是哪一份讲稿，你仍然无法核对它有没有读过资料。</p>
+<p>本节先确定怎样判断这个功能是否做好。这个判断会决定下一节准备什么材料，以及以后用什么问题检查程序。</p>
+<h2 id="section-1">先判断：你会接受哪一种回答</h2>
+<p>下面是教师拟写的两个回答，不是模型运行结果。</p>
+<ul>
+<li>回答甲：“文言文庄重，白话文亲切，因此作者这样安排。”</li>
+<li>回答乙：“第一讲把两者区分为外部叙述和内部感受：序言由访友者整理，日记呈现当事人的观察。这是讲稿提供的一种解释，可以回到第一讲相关段落核对。”</li>
+</ul>
+<p>先选一个更适合作为伴读回答的版本，并说出理由。</p>
+<details><summary>核对你的判断</summary>
+
+<p>乙更接近我们要做的功能：指出资料出处，区分讲稿解释与作品事实，也告诉读者从哪里核对。甲只凭语言形式下结论，没有说明依据。乙仍不是最终产品：现在没有可点击的原文，也还没有程序替读者找到这段话。</p>
+<p>因此，后面的开发要解决三个实际问题：电脑怎样读出讲稿、怎样找到相关内容、怎样让回答带着出处。我们会依次完成它们。</p>
+</details>
+
+<p>再想一种情况：读者问“这句话在某个纸质版本的第几页”，资料却没有版次和页码。合格的助手应说明缺少这些资料，而不是补一个看似精确的数字。这个反例会在后面的模型实验和评测中反复使用。</p>
+<h2 id="section-2">建立项目，并留下两条验收约定</h2>
+<p>在你实际练习的电脑上，用文件管理器新建一个空文件夹，命名为 <code>classics-reader</code>。记住保存位置，后面的程序和材料都放在这里。此时可以完全不用终端。</p>
+<p>用文本编辑器在这个文件夹内新建 <code>project-card.md</code>。<code>.md</code> 是 Markdown 文本文件，普通文本编辑器就能打开。保存为纯文本，不要保存成 Word 或富文本格式；确认文件名末尾没有额外的 <code>.txt</code>。</p>
+<p>写入下面的内容。这里不要求你换一种说法抄写目标；要留下的是以后能逐项检查的约定。</p>
+<pre><code class="language-markdown"># 我的名著伴读项目
+
+读者：学生和家长。
+作品：《狂人日记》。
+要解决的问题：回答讲稿中的阅读疑问，并让读者能核对出处。
+
+## 验收约定
+- 有资料的问题：回答需要指出讲稿，并能找到支持它的文字。
+- 缺资料的问题：说明缺少什么，不编造版本、页码或情节。
+
+## 实际记录
+| 检查什么 | 当前结果 | 证据在哪里 |
+|---|---|---|
+| 阅读材料是否齐全、可以打开 | 待做 | 下一节准备材料后填写 |
+| 程序能否读出并保存文字 | 待做 | 第1章运行后填写 |
+| 换到容器中是否仍得到相同文字 | 待做 | 第3章对照后填写 |
+| 模型能否连接，是否按要求回答 | 待做 | 第4章运行后填写 |
+</code></pre>
+<p>保存后，关掉编辑器，再从 <code>classics-reader</code> 中打开这张卡，确认能找到刚写的内容。这一步只验证你已经有了可以继续工作的项目位置。</p>
+<h2 id="section-3">写完之后怎样用</h2>
+<p>下一节先完成表格第一行：下载阅读材料、打开核对，把文件位置写回来。第一章读出文字后，再用材料原文核对程序结果；只看程序没有报错，不能把第二行改成“通过”。</p>
+<p>每到一个检查点，就用实际结果更新相应行。如果失败，写具体报错或差异，保留“待解决”。<a href="0023-stage-checkpoint.html">第一阶段结束时</a>，我们会打开这张卡检查哪些环节已经做成，哪些还不能进入下一阶段。它相当于这个小项目的实验记录，不是额外提交给谁的报告。</p>
+<h2 id="section-4">第一阶段的路径</h2>
 <table>
 <thead>
 <tr>
 <th>章节</th>
 <th>预计完成时间</th>
-<th>你会亲手做什么</th>
+<th>做完会得到什么</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>导学</td>
 <td>55—75 分钟</td>
-<td>定目标、看资料、写首批问题</td>
+<td>阅读材料、用来检查助手的问题和项目记录</td>
 </tr>
 <tr>
-<td>第 1 章</td>
+<td>第1章</td>
 <td>125—170 分钟</td>
-<td>用 Python 读 Word，保存并核对 JSON</td>
+<td>能读 Word 的 Python 程序，以及保存下来的文字</td>
 </tr>
 <tr>
-<td>第 2 章</td>
+<td>第2章</td>
 <td>65—95 分钟</td>
-<td>用现成镜像运行同一程序，观察文件和日志</td>
+<td>同一段读取代码在 Docker 容器中的运行结果</td>
 </tr>
 <tr>
-<td>第 3 章</td>
+<td>第3章</td>
 <td>80—115 分钟</td>
-<td>把依赖和程序做成自己的镜像</td>
+<td>包含读取程序和依赖的镜像，可重复运行</td>
 </tr>
 <tr>
-<td>第 4 章</td>
-<td>110—155 分钟（模型路线二选一）</td>
-<td>连接模型，保存响应，排查地址或配置错误</td>
+<td>第4章</td>
+<td>110—155 分钟，模型路线二选一</td>
+<td>一次真实模型调用，以及对成功和失败的区分</td>
 </tr>
 </tbody></table>
-<p>第 4 章的本地与线上配置任选其一，随后都进入同一个调用程序。按这张表分几次练习；用时包括亲手输入和排错，安装下载与模型等待另计。</p>
-<h2 id="section-3">写一张项目卡</h2>
-<p>在实际学习电脑上新建一个空文件夹，命名为 <code>classics-reader</code>。这就是整个课程唯一的练习项目目录。如果暂时不熟悉终端，就用 Finder 和文本编辑器创建文件。第一章会解释进入目录和运行脚本的方法。</p>
-<p>在这个目录创建 <code>project-card.md</code>。先按下面的内容填写，再用自己的话改两句。它不是商业计划书，只要能提醒你当前在解决什么问题。</p>
-<h2 id="section-4">写入项目卡</h2>
-<pre><code class="language-markdown"># 我的名著伴读项目
+<p>本地模型与线上模型任选一种，随后使用同一个调用程序。先读出资料、再接通模型，下一阶段才把两条流程连起来；目前无需掌握后面的框架。时间包括动手和一次排错，软件安装、下载与模型等待另计。</p>
+<h2 id="section-5">本单元验收与参考答案</h2>
+<details class="answer-key"><summary>先回答，再展开核对</summary>
 
-使用者：学生和家长。
-第一本作品：《狂人日记》。
-第一批资料：五份讲解稿，不将它们当作已核对的原著全文。
-这一阶段的目标：读出资料，运行容器，接通一种真实模型。
-成功证据：来源清单、提取结果、本机与容器对照、模型调用记录。
-下一阶段：让模型根据提供的资料回答，并逐步加入检索。
-</code></pre>
-<h2 id="section-5">先预测，再看解释</h2>
-<p>“模型回答得很好”是否足以证明我们已经接好了知识库？先说出你的判断，再展开。</p>
-<details><summary>展开解释</summary>
-
-<p>还不够。模型可能根据训练时学到的内容作答。要证明用了知识库，需要看到找回了哪些资料、它们怎样进入请求，以及答案是否由这些资料支持。第 4 章只验证模型连接，第 5—7 章才逐步接上资料与检索。</p>
+<p><strong>模型答得通顺，能证明它用了讲稿吗？</strong> 不能。还要核对找到了什么资料、资料是否进入请求、回答是否有依据。</p>
+<p><strong>为什么先写这两条验收约定？</strong> 它们决定后面既要测“有依据时能答”，也要测“缺依据时知道停下”。否则只展示一个成功回答，看不出助手会不会编造。</p>
+<p><strong>项目卡下一次什么时候打开？</strong> 下一节核对材料后，更新“阅读材料”一行；第一阶段末逐行核对证据，定位没有完成的环节。</p>
+<p>**完成证据：**能重新打开项目卡，并用自己的话判断上面的两个回答；表格保留实际状态。现在没有运行程序，不应提前填写“通过”。</p>
 </details>
 
-<p>**本单元完成条件：**你能用一句话说明这阶段的成果，并能区分“模型有回答”和“回答来自我的资料”。不需要现在解释向量数据库或 Agent 框架。</p>
-<h2 id="section-6">本单元验收与参考答案</h2>
-<p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
-
-<p><strong>这阶段做出什么？</strong> 用 Python 读出五份讲稿中的样本，将结果保存为带来源的 JSON；把读取程序放进容器；接通一种真实模型并留下调用记录。</p>
-<p><strong>怎样区分“模型有回答”和“回答用了资料”？</strong> 前者只说明模型请求成功。后者还要检查程序找回了哪些资料、这些资料是否进入请求、答案能否由资料支持。本阶段尚未实现后一项。</p>
-<p>**通过证据：**项目卡写明学生和家长是产品读者、输入是讲解稿，并列出这阶段与下一阶段的不同目标。表述不必逐字一致。</p>
-</details>
-
-<h2 id="section-7">资料依据</h2>
-<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh">awesome-agentic-ai-zh 学习路线</a>把调用、工具、资料与可靠性分开推进。本课程据此组织能力顺序，伴读场景和小样本任务由你的项目目标确定。链接用于查阅，完成本单元不需要另外读完仓库。</p>
+<h2 id="section-6">资料依据</h2>
+<p><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh">awesome-agentic-ai-zh 学习路线</a>把模型调用、工具、资料与可靠性分步推进。本课程把这些能力安排在同一个伴读项目里。链接供查阅，完成本节不必先读完仓库。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <label class="study-check"><input type="checkbox" data-study-check="0008-mission"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/rag-map.html" data-knowledge-link>RAG 技术地图：先选问题，再选方法<span>12—15 分钟 · 对比常见做法，了解为什么不能只换一个更大的模型。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a><a href="0009-samples.html"><small>下一单元</small>看清这五份文件究竟是什么 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

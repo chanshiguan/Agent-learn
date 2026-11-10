@@ -1,9 +1,11 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>让 Python 读出第一讲 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0012-read-document">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让 Python 读出第一讲</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-1">← 返回课程地图</a><p class="rail-label">第 1 章 · 用 Python 读取讲稿</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0011-python-environment.html"><span class="unit-number">1</span><span>给伴读项目准备独立的 Python 环境<small>35—50 分钟</small></span></a></li><li><a href="0012-read-document.html" aria-current="page"><span class="unit-number">2</span><span>让 Python 读出第一讲<small>35—50 分钟</small></span></a></li><li><a href="0013-save-json.html"><span class="unit-number">3</span><span>保存结果，并证明没有读错资料<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">运行刚写的预览程序</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">把语法和这次任务对上</a></li><li><a href="#section-5">自己改一个条件</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 1 章 / 单元 2 · 共 3 个</p><h1>让 Python 读出第一讲</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 125—170 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>让 Python 读出第一讲</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-1">← 返回课程地图</a><p class="rail-label">第 1 章 · 用 Python 读取讲稿</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0011-python-environment.html"><span class="unit-number">1</span><span>给伴读项目准备独立的 Python 环境<small>35—50 分钟</small></span></a></li><li><a href="0012-read-document.html" aria-current="page"><span class="unit-number">2</span><span>让 Python 读出第一讲<small>35—50 分钟</small></span></a></li><li><a href="0013-save-json.html"><span class="unit-number">3</span><span>保存结果，并证明没有读错资料<small>55—70 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">从能导入库，到真正读到文字</a></li><li><a href="#section-2">现在动手写</a></li><li><a href="#section-3">运行并观察</a></li><li><a href="#section-4">把语法和这次任务对上</a></li><li><a href="#section-5">自己改一个条件</a></li><li><a href="#section-6">本单元验收与参考答案</a></li><li><a href="#section-7">资料依据</a></li><li><a href="#section-8">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 1 章 / 单元 2 · 共 3 个</p><h1>让 Python 读出第一讲</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 125—170 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0011-python-environment.html">《给伴读项目准备独立的 Python 环境》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
-<h2 id="section-1">运行刚写的预览程序</h2>
+<h2 id="section-1">从能导入库，到真正读到文字</h2>
+<p>上一节已经建好 <code>.venv</code>，并确认可以导入 DOCX 读取库。现在打开 <code>data/input/</code> 中的第一讲，看一眼开头；如果导学时用的是公开样本网页，就仍用对应网页核对文字。接下来新建 <code>peek_docx.py</code>，让程序读同一份文件并显示少量文字；这样才能判断它有没有选错文件。</p>
+<p>继续在 <code>classics-reader/</code> 里操作。<code>peek_docx.py</code> 是本节才创建的文件，下面两步分别增加“段落数量”和“文字预览”。</p>
 <h2 id="section-2">现在动手写</h2>
 <p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
 <h3>第 1 步：先只确认文件与段落数</h3>
@@ -38,7 +40,8 @@ for position, paragraph in enumerate(document.paragraphs, start=1):
 <pre><code class="language-bash"># 运行你刚写的预览程序；本课程第一、第二讲都应显示 1 个正文段落。
 python peek_docx.py
 </code></pre>
-<p>对于本课程选中的第一讲，预期正文段落数量为 <code>1</code>。开头文字应该能在 Word 中找到。显示 80 个字符只限制终端预览，没有截短 <code>document</code> 中的内容。</p>
+<p>对于本课程选中的第一讲，预期正文段落数量为 <code>1</code>。先核对打印的文件名和开头文字，确认它们与刚打开的第一讲一致。显示 80 个字符只限制终端预览，没有截短 <code>document</code> 中的内容。</p>
+<p>看到一整页文字却只读出一段，不一定是程序漏读。Word 的屏幕行数、段内换行和真正的段落是三回事：这五份公开样本把每讲正文放在一个段落里，内部仍有换行，所以 <code>document.paragraphs</code> 只有一个元素。这里数的是文件结构，不是句子、屏幕行或文学上的一个意思。下一节保存全文后，还会从开头、中间和结尾核对，不能只凭数字 <code>1</code> 就宣布读取正确。</p>
 <h2 id="section-4">把语法和这次任务对上</h2>
 <table>
 <thead>
@@ -82,6 +85,9 @@ python peek_docx.py
 </details>
 
 <p>**本单元完成条件：**你能读取第一讲和第二讲，找到打印文字在源文件中的位置，并解释预览长度为什么不等于全文长度。</p>
+<p>现在文字只显示在终端，换文件还要改程序中的文件名。下一节保留这个预览脚本，另写一个能从命令接收文件名、把结果保存下来的程序。</p>
+<p>现在文字只显示在终端，换文件还要改程序中的文件名。下一节保留这个预览脚本，另写一个能从命令接收文件名、把结果保存下来的程序。</p>
+<p>现在文字只显示在终端，换文件还要改程序中的文件名。下一节保留这个预览脚本，另写一个能从命令接收文件名、把结果保存下来的程序。</p>
 <h2 id="section-6">本单元验收与参考答案</h2>
 <p>先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。</p>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>

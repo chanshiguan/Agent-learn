@@ -125,9 +125,9 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 <li>“我觉得文言文听起来离读者更远，因为它像别人替他写的介绍。”预期得到找关键词、考虑另一种解释的提示。</li>
 <li>“讲稿怎样说明序言与日记的关系？”预期检索讲稿后解释，并回到 question 状态。</li>
 </ol>
-<p>前两步是固定教师提示，不假装模型已经精确诊断学生能力。第三步才调用生成；受限阅读开启时仍只展示允许证据。阶段变化和对话写入在请求成功且未取消后才提交。</p>
+<p>前两步是固定教师提示，不假装模型已经精确诊断学生能力。第三步才调用生成；受限阅读开启时仍只展示允许证据。当前流程先计算回答，再由服务层检查会话版本并保存。网页取消还没有实现，第 26 章会在保存前补上取消检查。</p>
 <h2 id="section-4">读一小段代码</h2>
-<p>看 <code>teach_turn()</code> 的 phase 分支。它返回 <code>state_changes</code>，由服务层在检查请求后保存。把计算与提交分开，是为了防止“读者取消了，教学状态却偷偷前进”。下一章的工具动作也会遇到这个问题。</p>
+<p>看 <code>teach_turn()</code> 的 phase 分支。它返回 <code>state_changes</code>，没有自己写数据库；服务层再用会话版本号决定能否保存。这样，两个人同时改同一会话时，旧结果不会直接覆盖新状态。第 26 章接入取消时，也会在这处提交之前检查；现在先把这两个职责分开。</p>
 <h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
@@ -144,7 +144,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 </details>
 
 <h2 id="section-6">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<p>下次先不看实现，画出 question → hint → explain → question，并说明每一步保存哪些状态。再新建一条阅读，用三轮输入走完；观察第三轮来源是否支持解释，把对话记录留给下一单元比较提示效果。</p>
 <h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <h2 id="section-8">用小检查核对自己的实现</h2>

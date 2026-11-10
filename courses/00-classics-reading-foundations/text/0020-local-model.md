@@ -4,6 +4,8 @@
 
 接着上一单元[《确认程序和资料没有绑死在一起》](0019-image-boundaries.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
+按当前 [Ollama macOS 要求](https://docs.ollama.com/macos)，应用需要 macOS 14 或更新版本，Apple M 系列可使用 CPU 和 GPU。先在实际练习电脑的“关于本机”确认系统；这不是针对课程编写电脑的检查。还要为模型权重、Python 环境与 Docker 镜像留出磁盘空间，下载前按各项显示的大小估算。
+
 ## 先认识这三个角色
 
 模型权重是需要加载的数据；Ollama 是负责加载并运行模型的服务；下一节的 Python 程序是向服务发送请求的客户端。装好 Ollama 不等于已经有模型，下载模型也不等于 Python 已经能连接服务。

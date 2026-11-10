@@ -15,15 +15,15 @@
 
 ### 第 1 步：写一份小规模请求测量程序
 
-使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
+沿用已经验证的模型参数，分别测首个内容片段与正常结束；截断回答不能记成完整响应。
 
 **写在哪里：**项目根目录下的 `companion/measure.py`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
 
 **先理解：**`argparse` 把终端参数转成有名字的值。先看默认值，再看当前命令是否覆盖它；`--help` 可以核对参数名。
 
-下面 3 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
+下面 4 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
 
-**连续代码 1/3**
+**连续代码 1/4**
 
 ```python
 # 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。
@@ -33,6 +33,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import getpass
 import json
+import os
 import time
 import uuid
 import httpx
@@ -42,22 +43,36 @@ from .models import client
 
 def stream_probe():
     sdk, model = client(timeout=60)
+    maximum = int(os.environ.get("LLM_MAX_TOKENS", "900"))
+    if not 128 <= maximum <= 4096:
+        raise ValueError("LLM_MAX_TOKENS 需要在 128—4096 之间。")
+    request = {"model": model, "messages": [{"role": "user", "content": "用一句话解释什么是阅读笔记。"}], "max_tokens": maximum, "temperature": 0, "stream": True}
+    effort = os.environ.get("LLM_REASONING_EFFORT", "").strip()
+    if effort:
+        request["reasoning_effort"] = effort
     start = time.monotonic()
-    first, size = None, 0
+```
+
+**连续代码 2/4**（接在上一段后，不额外增加缩进）
+
+```python
+    first, size, finish_reason = None, 0, None
     with sdk:
-        with sdk.chat.completions.create(model=model, messages=[{"role": "user", "content": "用一句话解释什么是阅读笔记。"}], max_tokens=80, stream=True) as stream:
+        with sdk.chat.completions.create(**request) as stream:
             for chunk in stream:
-                content = chunk.choices[0].delta.content if chunk.choices else None
+                if not chunk.choices:
+                    continue
+                choice = chunk.choices[0]
+                finish_reason = choice.finish_reason or finish_reason
+                content = choice.delta.content
                 if content:
                     if first is None: first = time.monotonic() - start
                     size += len(content)
-```
-
-**连续代码 2/3**（接在上一段后，不额外增加缩进）
-
-```python
     if first is None: raise ValueError("没有收到实际内容片段，不能报告首字延迟。")
-    result = {"model": model, "first_content_seconds": first, "full_seconds": time.monotonic() - start, "characters": size, "scope": "模型流式接口；课程网页目前等完整回答后显示"}
+    # 有首字不代表完整回答；截断和中断必须失败，不能作为完整耗时样本。
+    if finish_reason != "stop":
+        raise ValueError(f"流式回答未正常完成（{finish_reason}），不记录为完整响应。")
+    result = {"model": model, "first_content_seconds": first, "full_seconds": time.monotonic() - start, "characters": size, "finish_reason": finish_reason, "max_tokens": maximum, "reasoning_effort": effort or None, "scope": "模型流式接口；课程网页目前等完整回答后显示"}
     save("stream-measure.json", result)
     return result
 
@@ -66,6 +81,11 @@ def api_probe(url, concurrency, count):
     if not (url.startswith("http://127.0.0.1:") or url.startswith("https://")):
         raise ValueError("仅测试本机 HTTP 或受保护的 HTTPS 地址。")
     token = getpass.getpass("输入专用测试账号的访问令牌（不回显、不保存）：")
+```
+
+**连续代码 3/4**（接在上一段后，不额外增加缩进）
+
+```python
     # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。
     with httpx.Client(trust_env=url.startswith("https://"), base_url=url, headers={"Authorization": "Bearer " + token}, timeout=130) as client:
         sessions = []
@@ -81,11 +101,6 @@ def api_probe(url, concurrency, count):
                     return {"status": response.status_code, "seconds": time.monotonic() - started}
                 except httpx.HTTPError as error:
                     return {"status": type(error).__name__, "seconds": time.monotonic() - started}
-```
-
-**连续代码 3/3**（接在上一段后，不额外增加缩进）
-
-```python
             started = time.monotonic()
             with ThreadPoolExecutor(max_workers=concurrency) as pool: records = list(pool.map(one, sessions))
             elapsed = time.monotonic() - started
@@ -96,6 +111,11 @@ def api_probe(url, concurrency, count):
               "successes_per_second": len(successful) / elapsed, "error_ratio": 1 - len(successful) / count,
               "p95_success_seconds": successful[min(len(successful) - 1, int(len(successful) * .95))] if successful else None,
               "scope": "仅此次小样本，不能当作稳定生产 P95"}
+```
+
+**连续代码 4/4**（接在上一段后，不额外增加缩进）
+
+```python
     save(f"load-{concurrency}.json", result)
     return result
 
@@ -110,7 +130,7 @@ if __name__ == "__main__":
     print(json.dumps(stream_probe() if args.mode == "stream" else api_probe(args.url, args.concurrency, args.count), ensure_ascii=False, indent=2))
 ```
 
-**写完后应当怎样：**报告区分成功、拒绝和失败，不能只看平均速度。
+**写完后应当怎样：**只有正常 stop 的流写入完整测量报告；length 或缺少结束原因时明确失败。
 
 ## 运行并观察
 
@@ -120,6 +140,8 @@ python -m companion.measure stream
 ```
 
 记录 `data/live/stream-measure.json`。至少在模型刚启动和已经预热后各测一次，另存报告。首次加载模型、下载权重与实际推理是不同开销。某些服务只在最后一次性返回内容，首字接近完整耗时也可能是实际行为。
+
+本次测量沿用 `LLM_MAX_TOKENS` 与已经验证的 `LLM_REASONING_EFFORT`，报告会记录实际值。先收到文字、随后因为输出预算用完而截断，不能算完整回答；程序只在 `finish_reason=stop` 时保存成功报告。遇到 `length`、缺少结束标记或连接中断，保留报错并单独记为失败。以前的成功报告可能仍在磁盘上，不要把旧文件当成本次测量结果。
 
 再在网页测同题完整请求，包含检索、上下文组织和生成。记录机器、内存、模型名称、量化版本、检索模式、输入与输出大小。没有这些条件，单独一个“每秒多少字”无法比较。
 

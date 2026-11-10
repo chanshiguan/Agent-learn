@@ -10,7 +10,7 @@
 <h3>第 1 步：现在才安装状态图与磁盘检查点</h3>
 <p>先理解手写批准和持久状态，再观察框架如何组织同一个流程。</p>
 <p>**写在哪里：**项目根目录下的 <code>requirements-graph.txt</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**langgraph 组织状态流转，sqlite 检查点包保存暂停位置。它们接在已有批准事务之上；安装框架不会自动提供身份隔离或确认权限。</p>
 <pre><code class="language-text"># 第 20 章新增：磁盘检查点使暂停流程可以跨进程恢复。
 langgraph==1.2.20
 langgraph-checkpoint-sqlite==3.1.3
@@ -70,7 +70,7 @@ from .state import personal_data_lock
 <h3>第 5 步：写 ReviewState 的状态边界</h3>
 <p>明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/graph.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**TypedDict 说明图状态有哪些键，total=False 允许结果尚未产生时缺少 result。它不是运行时权限检查；恢复时仍须用 action_id 查询当前动作并复查归属。</p>
 <pre><code class="language-python"># 目的：明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。
 # 预期：重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。
 class ReviewState(TypedDict, total=False):

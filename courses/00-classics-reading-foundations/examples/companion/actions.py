@@ -7,15 +7,19 @@ from .state import connect
 
 # 目的：生成草稿不等于保存笔记；请求键防止重复生成同一动作。
 # 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
-def draft(actor, kind, body, request_key, session_id=None):
+def draft(actor, kind, body, request_key, session_id=None, session_revision=None):
     if kind not in {"note", "review_plan"} or not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:
         raise ValueError("只接受非空笔记或复习计划，最多 6000 字符。")
     hashed = digest([kind, body])
     with connect() as db:
         db.execute("BEGIN IMMEDIATE")
-        # 草稿生成期间读者可能删除阅读；在同一写事务里复核，避免删除后又留下新草稿。
-        if session_id is not None and not db.execute("SELECT 1 FROM sessions WHERE id=? AND tenant=? AND owner=?", (session_id, actor.tenant, actor.user)).fetchone():
-            raise PermissionError("阅读记录已删除，不再保存这份草稿。")
+        # 在写入事务里复核生成依据；删除、改进度或新增对话后，旧结果不能悄悄落库。
+        if session_id is not None:
+            session = db.execute("SELECT revision,strict FROM sessions WHERE id=? AND tenant=? AND owner=?", (session_id, actor.tenant, actor.user)).fetchone()
+            if session is None:
+                raise PermissionError("阅读记录已删除，不再保存这份草稿。")
+            if session["strict"] or session["revision"] != session_revision:
+                raise ValueError("阅读记录已改变，请重新打开后再生成草稿。")
         existing = db.execute("SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?", (actor.tenant, actor.user, request_key)).fetchone()
         if existing:
             if existing["digest"] != hashed:

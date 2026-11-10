@@ -5,6 +5,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import getpass
 import json
+import os
 import time
 import uuid
 import httpx
@@ -14,17 +15,31 @@ from .models import client
 
 def stream_probe():
     sdk, model = client(timeout=60)
+    maximum = int(os.environ.get("LLM_MAX_TOKENS", "900"))
+    if not 128 <= maximum <= 4096:
+        raise ValueError("LLM_MAX_TOKENS 需要在 128—4096 之间。")
+    request = {"model": model, "messages": [{"role": "user", "content": "用一句话解释什么是阅读笔记。"}], "max_tokens": maximum, "temperature": 0, "stream": True}
+    effort = os.environ.get("LLM_REASONING_EFFORT", "").strip()
+    if effort:
+        request["reasoning_effort"] = effort
     start = time.monotonic()
-    first, size = None, 0
+    first, size, finish_reason = None, 0, None
     with sdk:
-        with sdk.chat.completions.create(model=model, messages=[{"role": "user", "content": "用一句话解释什么是阅读笔记。"}], max_tokens=80, stream=True) as stream:
+        with sdk.chat.completions.create(**request) as stream:
             for chunk in stream:
-                content = chunk.choices[0].delta.content if chunk.choices else None
+                if not chunk.choices:
+                    continue
+                choice = chunk.choices[0]
+                finish_reason = choice.finish_reason or finish_reason
+                content = choice.delta.content
                 if content:
                     if first is None: first = time.monotonic() - start
                     size += len(content)
     if first is None: raise ValueError("没有收到实际内容片段，不能报告首字延迟。")
-    result = {"model": model, "first_content_seconds": first, "full_seconds": time.monotonic() - start, "characters": size, "scope": "模型流式接口；课程网页目前等完整回答后显示"}
+    # 有首字不代表完整回答；截断和中断必须失败，不能作为完整耗时样本。
+    if finish_reason != "stop":
+        raise ValueError(f"流式回答未正常完成（{finish_reason}），不记录为完整响应。")
+    result = {"model": model, "first_content_seconds": first, "full_seconds": time.monotonic() - start, "characters": size, "finish_reason": finish_reason, "max_tokens": maximum, "reasoning_effort": effort or None, "scope": "模型流式接口；课程网页目前等完整回答后显示"}
     save("stream-measure.json", result)
     return result
 

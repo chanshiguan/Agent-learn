@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>从单个容器走到一组服务（2/2：连接接口与业务） · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0064-compose-deployment-02">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从单个容器走到一组服务（2/2：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-25">← 返回课程地图</a><p class="rail-label">第 25 章 · 把应用按同一方式部署</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0064-compose-deployment.html"><span class="unit-number">1</span><span>从单个容器走到一组服务（1/2：把本节能力连起来）<small>50—65 分钟</small></span></a></li><li><a href="0064-compose-deployment-02.html" aria-current="page"><span class="unit-number">2</span><span>从单个容器走到一组服务（2/2：连接接口与业务）<small>35—50 分钟</small></span></a></li><li><a href="0065-readiness-failures.html"><span class="unit-number">3</span><span>活着不等于已经能接待读者<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">本单元完成条件</a></li><li><a href="#section-4">下次开始前</a></li><li><a href="#section-5">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 25 章 / 单元 2 · 共 3 个</p><h1>从单个容器走到一组服务（2/2：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 120—165 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>从单个容器走到一组服务（2/2：连接接口与业务）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-25">← 返回课程地图</a><p class="rail-label">第 25 章 · 把应用按同一方式部署</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0064-compose-deployment.html"><span class="unit-number">1</span><span>从单个容器走到一组服务（1/2：把本节能力连起来）<small>50—65 分钟</small></span></a></li><li><a href="0064-compose-deployment-02.html" aria-current="page"><span class="unit-number">2</span><span>从单个容器走到一组服务（2/2：连接接口与业务）<small>35—50 分钟</small></span></a></li><li><a href="0065-readiness-failures.html"><span class="unit-number">3</span><span>活着不等于已经能接待读者<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">对外代理是另一项需要验证的部署工作</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 25 章 / 单元 2 · 共 3 个</p><h1>从单个容器走到一组服务（2/2：连接接口与业务）</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 120—165 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0064-compose-deployment.html">《从单个容器走到一组服务（1/2：把本节能力连起来）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/app.py</code>；先回想它接收什么、交给谁，再往下写。</p>
@@ -50,7 +50,12 @@ docker compose --env-file .env -f deploy/compose.yaml up -d
 # 查看服务状态，检查应用进程是否存活。
 docker compose --env-file .env -f deploy/compose.yaml ps
 </code></pre>
-<p>运行前在编辑器完成 <code>.env</code>，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。</p>
+<p>运行前在编辑器完成 <code>.env</code>，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。在 Docker Desktop for Mac 中，先用下面的检查确认容器能否访问该地址。Linux 的 host-gateway 只提供宿主地址，并不保证绑定在回环地址上的服务可达；本课没有提供远程模型服务器的网络配置步骤。若检查失败，保留主机上的本地调用结果，先用已经验证的线上路线完成本章。需要坚持本地路线时，应先完成仅允许应用宿主访问的模型服务网络配置，再回来重试；不要把这项尚未完成的工作记成部署通过。</p>
+<p>模型地址有问题时，先在项目根目录运行下面这条诊断。它只读取模型列表，不生成回答，也不打印密钥。线上路线不需要执行它。</p>
+<pre><code class="language-bash"># 从应用容器检查到宿主 Ollama 的实际连通性；预期返回 HTTP 200。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -c &#39;import httpx; r=httpx.get(&quot;http://host.docker.internal:11434/api/tags&quot;, timeout=10, trust_env=False); r.raise_for_status(); print(&quot;宿主模型列表可达：&quot;, r.status_code)&#39;
+</code></pre>
+<p>如果主机调用成功而这里失败，故障在容器到宿主的网络路径；重复安装 Python 库不能解决。Mac 安装与宿主访问机制可按 <a href="https://docs.docker.com/desktop/features/networking/">Docker 官方说明</a>核对。</p>
 <p>这些命令都在 <code>classics-reader/</code> 中执行。<code>--env-file .env</code> 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 <code>env_file: ../.env</code> 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 <a href="https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/">Docker 官方说明</a>。</p>
 <p>Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：</p>
 <pre><code class="language-bash"># 在同一挂载数据与 Compose 网络内构建索引；首次可能下载 CPU 编码器权重。
@@ -62,7 +67,11 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m com
 </code></pre>
 <p>Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 <code>.env</code> 中的 <code>APP_UID</code>、<code>APP_GID</code> 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。</p>
 <p>镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。</p>
-<h2 id="section-3">本单元完成条件</h2>
+<h2 id="section-3">对外代理是另一项需要验证的部署工作</h2>
+<p>到这里应用仍只在本机端口可用，<code>Caddyfile.example</code> 只是给部署负责人看的样例。真正接入域名时还要配置 DNS、TLS、访问范围和可信代理，不能把保存样例当成已经完成 HTTPS 部署。</p>
+<p>第21章的登录保护按账号和来源地址计数。经过 Docker 与反向代理后，应用看到的来源可能只是代理地址；同一校园网络的读者也可能共享地址。当前阈值是每个来源5分钟10次登录尝试，成功登录同样计数，不适合直接假定为公司容量。</p>
+<p>上线前需要部署负责人验证：从两个独立网络登录时，应用能否区分来源；可信代理只包含实际代理地址；伪造的转发头不能冒充其他来源；同一网络多账号正常登录不会被错误阻断。若尚未完成，在第29章 <code>known_blockers</code> 中记录“代理来源与登录限额未验证”。不要用信任任意来源的设置来跳过这一检查。</p>
+<h2 id="section-4">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么 Dockerfile 不 COPY data 和 .env？</li>
@@ -77,9 +86,9 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m com
 <p>**通过证据：**Compose 状态、实际登录和一次有据问答；所选向量路线有新服务上的索引验证。</p>
 </details>
 
-<h2 id="section-4">下次开始前</h2>
+<h2 id="section-5">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-5">资料依据与选读</h2>
+<h2 id="section-6">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0064-compose-deployment-02"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/docker-boundaries.html" data-knowledge-link>镜像、容器与文件挂载<span>8—10 分钟 · 程序搬进容器后，文件和结果分别在哪里？</span></a><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0064-compose-deployment.html"><small>上一单元</small>从单个容器走到一组服务（1/2：把本节能力连起来）</a><a href="0065-readiness-failures.html"><small>下一单元</small>活着不等于已经能接待读者 →</a></nav></main></div>

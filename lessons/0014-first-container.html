@@ -10,6 +10,7 @@
 <p>先运行 <code>docker --version</code>。如果已经有客户端，再运行 <code>docker info</code>；后者能检查后台服务是否可用。只有版本号并不能证明容器已经能启动。</p>
 <p>还没有安装时，可以使用 Docker Desktop 的 Mac Apple Silicon 安装包：打开安装包，将 Docker 拖入“应用程序”，启动 Docker，按安装向导完成必要设置，等待界面显示引擎已运行。请核对安装器支持你的 macOS 版本，不要选 Intel 包。</p>
 <p>如果电脑已有 Homebrew，也可以用下面的安装命令；两种方式选一种即可：</p>
+<p>使用 Mac 时，安装前核对 <a href="https://docs.docker.com/desktop/setup/install/mac-install/">Docker 的系统要求</a>：当前支持最新及前两个主要 macOS 版本，M1 选择 Apple silicon 安装包。能安装 Docker 不代表所有模型都能同时装入内存；模型容量到第4章再逐项观察。</p>
 <h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 通过已有的 Homebrew 安装 Docker Desktop；安装完成后还需要启动应用。
 brew install --cask docker
@@ -55,8 +56,12 @@ docker run --rm python:3.12-slim python -c &quot;print(&#39;容器里的 Python 
 </tbody></table>
 <p>预期看到一行“容器里的 Python 已启动”。程序打印完就退出，容器随之结束。没有窗口一直开着，是这次任务完成后的正常现象。</p>
 <h2 id="section-5">对照主机与容器</h2>
-<p>分别运行：</p>
-<pre><code class="language-bash"># 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
+<p>安装 Docker 时如果重新开过终端，原来的项目目录和虚拟环境不会自动恢复。先进入项目并启用 <code>.venv</code>，再比较两边的 Python：</p>
+<pre><code class="language-bash"># 回到第一章的项目；若当时放在别处，把这一行换成自己的项目路径。
+cd &quot;$HOME/classics-reader&quot;
+# 恢复主机的项目环境；容器不会因此使用这份环境，下面会观察这个区别。
+source .venv/bin/activate
+# 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
 python -c &quot;import sys; print(sys.executable)&quot;
 # 观察容器内的 Python 路径；它来自镜像，通常不同于主机的 .venv 路径。
 docker run --rm python:3.12-slim python -c &quot;import sys; print(sys.executable)&quot;

@@ -89,7 +89,7 @@ from .state import connect
 
 ### 第 4 步：写 draft() 的边界
 
-生成草稿不等于保存笔记；请求键防止重复生成同一动作。
+生成草稿不等于保存笔记；请求键防止重复动作，写入时还要核对生成所依据的会话版本。
 
 **写在哪里：**项目根目录下的 `companion/actions.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
@@ -98,15 +98,19 @@ from .state import connect
 ```python
 # 目的：生成草稿不等于保存笔记；请求键防止重复生成同一动作。
 # 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。
-def draft(actor, kind, body, request_key, session_id=None):
+def draft(actor, kind, body, request_key, session_id=None, session_revision=None):
     if kind not in {"note", "review_plan"} or not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:
         raise ValueError("只接受非空笔记或复习计划，最多 6000 字符。")
     hashed = digest([kind, body])
     with connect() as db:
         db.execute("BEGIN IMMEDIATE")
-        # 草稿生成期间读者可能删除阅读；在同一写事务里复核，避免删除后又留下新草稿。
-        if session_id is not None and not db.execute("SELECT 1 FROM sessions WHERE id=? AND tenant=? AND owner=?", (session_id, actor.tenant, actor.user)).fetchone():
-            raise PermissionError("阅读记录已删除，不再保存这份草稿。")
+        # 在写入事务里复核生成依据；删除、改进度或新增对话后，旧结果不能悄悄落库。
+        if session_id is not None:
+            session = db.execute("SELECT revision,strict FROM sessions WHERE id=? AND tenant=? AND owner=?", (session_id, actor.tenant, actor.user)).fetchone()
+            if session is None:
+                raise PermissionError("阅读记录已删除，不再保存这份草稿。")
+            if session["strict"] or session["revision"] != session_revision:
+                raise ValueError("阅读记录已改变，请重新打开后再生成草稿。")
         existing = db.execute("SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?", (actor.tenant, actor.user, request_key)).fetchone()
         if existing:
             if existing["digest"] != hashed:
@@ -215,14 +219,16 @@ from .models import complete
 
 ### 第 9 步：根据当前对话整理待确认内容
 
-生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。
+保存时核对本人会话和生成时版本，避免阅读范围改变后又留下旧内容。
+
+这里有两个不同的版本：草稿的 `revision` 用来确认“保存的是我看过的这一版”；`session_revision` 用来确认“草稿仍依据当前阅读记录”。模型生成可能需要几秒钟。这期间读者如果删掉记录、切换受限阅读或继续了新的讨论，程序应请他重新生成，不能把旧讨论整理出的内容悄悄放回待确认区。
 
 **写在哪里：**项目根目录下的 `companion/service.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
 **先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。
 
 ```python
-# 目的：生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。
+# 目的：保存时核对本人会话和生成时版本，避免阅读范围改变后又留下旧内容。
 # 预期：得到的是待确认草稿，不会自动变成正式笔记。
 def make_draft(actor, session_id, kind, request_id):
     existing = next((a for a in actions.pending(actor) if a["request_key"] == request_id), None)
@@ -233,12 +239,12 @@ def make_draft(actor, session_id, kind, request_id):
         raise ValueError("当前没有可整理的普通阅读对话；受限模式下请手动写笔记。")
     task = "一份简短阅读笔记" if kind == "note" else "一份三次复习计划草稿，日期由读者确认"
     response = complete([{"role": "system", "content": f"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。"}, *session["history"]])
-    # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
+    # 生成期间会话可能改变；保存函数会在事务内核对最初读取的版本。
     body = response["message"].get("content") or ""
-    return actions.draft(actor, kind, body, request_id, session_id=session_id)
+    return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session["revision"])
 ```
 
-**写完后应当怎样：**得到的是待确认草稿，不会自动变成正式笔记。
+**写完后应当怎样：**得到待确认草稿；生成中若删除阅读、改进度或新增对话，本次旧结果会被拒绝。
 
 ### 第 10 步：接入草稿存储模块
 

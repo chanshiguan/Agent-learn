@@ -8,13 +8,14 @@ from .tutor import teach_turn
 from .agent import run_agent
 from . import actions
 from .models import complete
-from .operations import log_event, job
+from .operations import log_event, job, commit_job
 from .state import get_session, update_session
 
 # 目的：先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。
 # 预期：回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。
 def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
     started = time.monotonic()
+    log_event(request_id, "request", method=method, input_chars=len(question))
     session = get_session(actor, session_id)
     with job(actor, request_id) as flag:
         if flag.is_set():
@@ -31,13 +32,12 @@ def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
             generated_at = time.monotonic()
             result = answer(question, hits, [] if session["strict"] else session["history"], strict=bool(session["strict"]))
             log_event(request_id, "generate", seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get("usage") or {}).get("total_tokens"), status="ok")
-        if flag.is_set():
-            raise ValueError("请求已取消，本次结果没有写入阅读对话。")
-        if mode == "tutor":
-            updated = update_session(actor, session, **result.pop("state_changes"))
-        if mode != "tutor":
-            history = [] if session["strict"] else (session["history"] + [{"role": "user", "content": question}, {"role": "assistant", "content": result["answer"]}])[-4:]
-            updated = update_session(actor, session, history=history)
+        with commit_job(actor, request_id):
+            if mode == "tutor":
+                updated = update_session(actor, session, **result.pop("state_changes"))
+            if mode != "tutor":
+                history = [] if session["strict"] else (session["history"] + [{"role": "user", "content": question}, {"role": "assistant", "content": result["answer"]}])[-4:]
+                updated = update_session(actor, session, history=history)
     for entry in result.get("trace", []):
         log_event(request_id, "tool", seconds=entry.get("seconds"), status=entry.get("status"))
     usage = result.get("usage")
@@ -58,7 +58,7 @@ def source(actor, session_id, source_id):
         raise PermissionError("当前阅读范围内没有此来源。")
     return hit
 
-# 目的：生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。
+# 目的：保存时核对本人会话和生成时版本，避免阅读范围改变后又留下旧内容。
 # 预期：得到的是待确认草稿，不会自动变成正式笔记。
 def make_draft(actor, session_id, kind, request_id):
     existing = next((a for a in actions.pending(actor) if a["request_key"] == request_id), None)
@@ -72,8 +72,7 @@ def make_draft(actor, session_id, kind, request_id):
         if flag.is_set():
             raise ValueError("请求已取消。")
         response = complete([{"role": "system", "content": f"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。"}, *session["history"]])
-        # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
-        if flag.is_set():
-            raise ValueError("请求已取消，本次结果没有保存为草稿。")
         body = response["message"].get("content") or ""
-        return actions.draft(actor, kind, body, request_id, session_id=session_id)
+        # 取消和落库竞争时只允许一个先完成；随后还会在事务内复核会话版本。
+        with commit_job(actor, request_id):
+            return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session["revision"])

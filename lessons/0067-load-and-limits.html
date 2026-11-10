@@ -44,7 +44,7 @@ from .state import connect
 <h3>第 3 步：创建明确的并发名额和任务表</h3>
 <p>名额满了要拒绝，不无限排队；任务键包含机构、本人和请求ID。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**BoundedSemaphore 限制这个 Python 进程同时运行的任务数；_jobs 把具体请求与取消状态关联。多个进程各有自己的名额，因此本课部署固定一个 worker。</p>
 <pre><code class="language-python"># 目的：名额满了要拒绝，不无限排队；任务键包含机构、本人和请求ID。
 # 预期：两个读者不能互相取消对方任务。
 _slots=threading.BoundedSemaphore(int(os.environ.get(&quot;MAX_MODEL_JOBS&quot;,&quot;1&quot;)))
@@ -87,8 +87,9 @@ def job(actor, request_id):
             _jobs.pop(key, None)
 </code></pre>
 <p>**写完后应当怎样：**取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。</p>
-<h3>第 5 步：实现 cancel 的资源边界</h3>
-<p>只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。</p>
+<h3>第 5 步：让取消与最终提交有明确先后</h3>
+<p>取消和落库必须共用同一把锁：先取消就不保存，先进入提交则不能再声称已取消。锁里只放短数据库操作。</p>
+<p>只写一句 <code>if flag.is_set()</code> 还不够：刚检查完，另一个请求可能发来取消，而当前请求已经准备保存。<code>commit_job</code> 把“再检查一次”和“保存结果”放进同一个不能被取消插入的短步骤。<code>yield</code> 暂时交给 <code>with commit_job(...)</code> 里面的代码；里面保存成功后，把任务标为已提交，请求键保留到整个任务退出。这样旧任务还没退出时，同一请求键不能被新任务抢用。取消请求晚到时会明确得到 <code>false</code>，而不是收到一个实际上无法兑现的取消成功回执。调用模型仍放在锁外。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/operations.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
 <p>**先理解：**函数定义先保存一项能力，不会立刻执行函数体。沿着参数、判断、返回值读一遍，再用本单元的调用观察它。</p>
 <pre><code class="language-python"># 目的：只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。
@@ -98,9 +99,24 @@ def cancel(actor, request_id):
         flag = _jobs.get((actor.tenant, actor.user, request_id))
         if flag is not None:
             flag.set()
-    return {&quot;cancel_requested&quot;: flag is not None, &quot;message&quot;: &quot;已发送的模型请求可能仍在运行和计费；停止后不会继续调用工具。&quot;}
+    message = &quot;已请求取消；已发送的模型请求仍可能运行和计费，未提交的结果不会保存。&quot; if flag is not None else &quot;任务已提交或不存在，本次没有取消结果。&quot;
+    return {&quot;cancel_requested&quot;: flag is not None, &quot;message&quot;: message}
+
+# 目的：让取消与最终写入有明确先后；检查标记和提交必须是同一个短操作。
+# 预期：先取消就不落库；先提交则取消返回 false，不谎称能撤回已保存的结果。
+@contextmanager
+def commit_job(actor, request_id):
+    key = (actor.tenant, actor.user, request_id)
+    # 锁内只放数据库提交，不放模型调用；其他请求不必陪着模型等待。
+    with _lock:
+        flag = _jobs.get(key)
+        if flag is None or flag.is_set():
+            raise ValueError(&quot;请求已取消，本次结果没有保存。&quot;)
+        yield
+        # 保留请求键到 job 退出，避免旧任务清理时误删刚复用同一键的新任务。
+        _jobs[key] = None
 </code></pre>
-<p>**写完后应当怎样：**取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。</p>
+<p>**写完后应当怎样：**取消成功的结果不会落库；已提交或不存在的任务明确返回 cancel_requested=false。</p>
 <h3>第 6 步：让所有模型工作共享同一名额约束</h3>
 <p>普通问答、伴读、Agent 与草稿都不能各自绕过限制。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
@@ -111,11 +127,11 @@ def cancel(actor, request_id):
 </details>
 
 <p><strong>先理解：</strong><code>from ... import ...</code> 只引入本步骤要用的名字。以点开头的路径指向 companion 包里的文件；先确认那个文件已在前面的步骤创建。</p>
-<pre><code class="language-python">from .operations import log_event, job
+<pre><code class="language-python">from .operations import log_event, job, commit_job
 </code></pre>
 <p>**写完后应当怎样：**每项工作在统一入口取得并归还资源。</p>
 <h3>第 7 步：在完整业务链前后检查取消与额度</h3>
-<p>取得名额后才能调用模型，返回后还要检查取消，再决定是否保存状态；阶段日志分别记录耗时。</p>
+<p>模型调用占用任务名额；最终版本检查与保存由 commit_job 保护，避免取消确认后仍写入。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
@@ -144,6 +160,7 @@ def cancel(actor, request_id):
 <p>下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。</p>
 <p><strong>连续代码 1/2</strong></p>
 <pre><code class="language-python">    started = time.monotonic()
+    log_event(request_id, &quot;request&quot;, method=method, input_chars=len(question))
     session = get_session(actor, session_id)
     with job(actor, request_id) as flag:
         if flag.is_set():
@@ -160,18 +177,17 @@ def cancel(actor, request_id):
             generated_at = time.monotonic()
             result = answer(question, hits, [] if session[&quot;strict&quot;] else session[&quot;history&quot;], strict=bool(session[&quot;strict&quot;]))
             log_event(request_id, &quot;generate&quot;, seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get(&quot;usage&quot;) or {}).get(&quot;total_tokens&quot;), status=&quot;ok&quot;)
-        if flag.is_set():
-            raise ValueError(&quot;请求已取消，本次结果没有写入阅读对话。&quot;)
-        if mode == &quot;tutor&quot;:
-            updated = update_session(actor, session, **result.pop(&quot;state_changes&quot;))
-        if mode != &quot;tutor&quot;:
-            history = [] if session[&quot;strict&quot;] else (session[&quot;history&quot;] + [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: result[&quot;answer&quot;]}])[-4:]
-            updated = update_session(actor, session, history=history)
+        with commit_job(actor, request_id):
+            if mode == &quot;tutor&quot;:
+                updated = update_session(actor, session, **result.pop(&quot;state_changes&quot;))
+            if mode != &quot;tutor&quot;:
+                history = [] if session[&quot;strict&quot;] else (session[&quot;history&quot;] + [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: result[&quot;answer&quot;]}])[-4:]
+                updated = update_session(actor, session, history=history)
     for entry in result.get(&quot;trace&quot;, []):
+        log_event(request_id, &quot;tool&quot;, seconds=entry.get(&quot;seconds&quot;), status=entry.get(&quot;status&quot;))
 </code></pre>
 <p><strong>连续代码 2/2</strong>（接在上一段后，不额外增加缩进）</p>
-<pre><code class="language-python">        log_event(request_id, &quot;tool&quot;, seconds=entry.get(&quot;seconds&quot;), status=entry.get(&quot;status&quot;))
-    usage = result.get(&quot;usage&quot;)
+<pre><code class="language-python">    usage = result.get(&quot;usage&quot;)
     total_tokens = (sum(u[&quot;total_tokens&quot;] for u in usage) if usage and all(u and u.get(&quot;total_tokens&quot;) is not None for u in usage) else None) if isinstance(usage, list) else (usage or {}).get(&quot;total_tokens&quot;)
     log_event(request_id, &quot;answer&quot;, seconds=round(time.monotonic() - started, 3), status=&quot;ok&quot;, method=method,
               input_chars=len(question), source_count=len(result.get(&quot;sources&quot;, [])), tool_count=len(result.get(&quot;trace&quot;, [])), tokens=total_tokens)
@@ -180,14 +196,14 @@ def cancel(actor, request_id):
 </code></pre>
 <p>**写完后应当怎样：**取消后的迟到回答不会写入历史，成功时返回新 revision。</p>
 <h3>第 8 步：草稿生成也遵守取消结果</h3>
-<p>不能只让聊天支持停止，却让笔记继续在后台写入。</p>
+<p>草稿和问答共用取消与提交边界；进入短提交后再由数据库核对生成时的会话版本。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/service.py</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
 <pre><code class="language-python">    response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。&quot;}, *session[&quot;history&quot;]])
-    # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
+    # 生成期间会话可能改变；保存函数会在事务内核对最初读取的版本。
     body = response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;
-    return actions.draft(actor, kind, body, request_id, session_id=session_id)
+    return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session[&quot;revision&quot;])
 </code></pre>
 </details>
 
@@ -196,11 +212,10 @@ def cancel(actor, request_id):
         if flag.is_set():
             raise ValueError(&quot;请求已取消。&quot;)
         response = complete([{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。&quot;}, *session[&quot;history&quot;]])
-        # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。
-        if flag.is_set():
-            raise ValueError(&quot;请求已取消，本次结果没有保存为草稿。&quot;)
         body = response[&quot;message&quot;].get(&quot;content&quot;) or &quot;&quot;
-        return actions.draft(actor, kind, body, request_id, session_id=session_id)
+        # 取消和落库竞争时只允许一个先完成；随后还会在事务内复核会话版本。
+        with commit_job(actor, request_id):
+            return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session[&quot;revision&quot;])
 </code></pre>
 <p>**写完后应当怎样：**取消后不新增待确认草稿。</p>
 <h2 id="section-3">在这里停一下，检查刚写的部分</h2>

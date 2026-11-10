@@ -72,13 +72,30 @@ if __name__=="__main__":
 ## 运行并观察
 
 ```bash
-# 安装到当前阶段需要的依赖，确保图检查点与网页测试都可运行。
+# 安装固定版本清单中的项目依赖，让当前虚拟环境能导入测试涉及的模块。
 python -m pip install -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
-# 运行课程的行为回归，临时数据不会覆盖学习库；其中模型替身只验证协议，不能算真实模型成绩。
-python -m unittest discover -s tests -v
+# 在全新临时库中运行自己写的测试，结束后清理，避免污染主线会话。
+python - <<'PY'
+import os
+import subprocess
+import sys
+import tempfile
+
+# 每次回归使用全新数据库，避免测试读者和笔记混进正在练习的阅读记录。
+with tempfile.TemporaryDirectory(prefix="reading-regression-") as directory:
+    environment = dict(os.environ, READING_DATA_DIR=directory)
+    subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
+        check=True,
+        env=environment,
+    )
+# 子进程失败会在上面报错；成功后临时数据库自动清理，主线 data/live 不变。
+PY
 ```
 
-读测试名称，逐个对应到产品风险：他人会话不可读、未知范围排除、伪造引用拒绝、过期批准失败、重复恢复不重复写入、恢复包指纹不符拒绝。Qdrant 本地 SDK 测试验证存储契约，真实 Docker 服务还要用第 10 章实测。
+现在应运行到两份文件里的六条测试：0058 的无证据不生成、工具参数不能改身份、布尔值不能冒充审核范围，以及本节的旧进度拒绝、重复确认单条笔记、修改草稿后拒绝旧确认。逐条对照测试名称与断言；它们都不调用真实模型。
+
+这六条还没有自动覆盖登录 API 的全部越权入口、过期批准、图恢复、Qdrant 网络服务或备份篡改。保留第 21 章的手工权限矩阵；后面做恢复演练时，再补相应证据。不能把作者的其他验证算成自己已经编写的测试。
 
 ## 添一条有意义的回归
 
@@ -90,26 +107,26 @@ python -m unittest discover -s tests -v
 
 先遮住答案，回答下面的问题，再核对自己的运行记录。
 
-1. 替身模型在测试里能做什么？
-2. 为什么还要真实 Docker 验证？
+1. 这六条测试通过，能证明模型会正确回答文学问题吗？
+2. 为什么回归要使用临时数据库？
 
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
-**替身模型在测试里能做什么？**
+**这六条测试通过，能证明模型会正确回答文学问题吗？**
 
-稳定制造合法或非法协议响应，检查程序是否正确处理；不能证明真实模型的理解、工具选择或文学质量。
+不能。它们核对程序可确定的边界，没有调用真实模型，也没有评阅文学解释。下一单元才用真实问答和人工复核补这一层证据。
 
-**为什么还要真实 Docker 验证？**
+**为什么回归要使用临时数据库？**
 
-SDK 本地模式与网络服务的部署、持久卷和连接故障不同，不能相互冒充。
+测试会创建虚构会话、草稿和笔记。独立临时目录让每次从已知空状态开始，结束后清理，不把测试记录混进正在学习的阅读内容。
 
-**通过证据：**完整行为测试报告及一个来自真实失败的新增断言，说明仍未覆盖的范围。
+**通过证据：**临时目录中运行的已有六条测试报告，以及从自己的失败记录新增的一条断言与重跑结果。逐项写清自动覆盖了什么，仍需手工或真实服务验证什么。
 
 </details>
 
 ## 下次开始前
 
-隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。
+下次先不看实现，说出“旧 revision”“重复批准”“旧内容摘要”各自会触发哪条测试，再用本页的临时目录命令重跑。保留测试名称、结果和未覆盖清单；下一单元的真实模型评阅会补不同证据，不把两种成绩合成一句“全部正确”。
 
 ## 资料依据与选读
 
@@ -122,12 +139,24 @@ SDK 本地模式与网络服务的部署、持久卷和连接故障不同，不�
 ```bash
 # 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - <<'PY'
-import subprocess,sys
-subprocess.run([sys.executable,"-m","unittest","discover","-s","tests","-v"],check=True)
+import os
+import subprocess
+import sys
+import tempfile
+
+# 每次回归使用全新数据库，避免测试读者和笔记混进正在练习的阅读记录。
+with tempfile.TemporaryDirectory(prefix="reading-regression-") as directory:
+    environment = dict(os.environ, READING_DATA_DIR=directory)
+    subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
+        check=True,
+        env=environment,
+    )
+# 子进程失败会在上面报错；成功后临时数据库自动清理，主线 data/live 不变。
 PY
 ```
 
-**预期：**当前六条自己编写的测试通过；它们不评价文学答案质量。
+**预期：**已写的六条测试和你新增的断言通过；失败时根据具体测试名定位，测试数据不写入主线学习库。它们不评价文学答案质量。
 
 
 遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

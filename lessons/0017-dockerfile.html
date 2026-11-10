@@ -8,7 +8,7 @@
 <h3>第 1 步：先划清镜像的输入边界</h3>
 <p>Docker 构建只需要程序和依赖；不要把资料、虚拟环境与密钥交给镜像构建上下文。</p>
 <p>**写在哪里：**项目根目录下的 <code>.dockerignore</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p><strong>先理解：</strong>.dockerignore 决定构建时哪些文件不送入 Docker 的构建上下文；.gitignore 决定 Git 忽略什么，两者不能互相代替。data/ 仍留在主机，运行容器时再挂载。</p>
 <pre><code class="language-text">.venv/
 __pycache__/
 data/
@@ -20,7 +20,7 @@ data/
 <h3>第 2 步：把已做过的安装与运行写成配方</h3>
 <p>每次临时容器都安装库很难复现。先固定 Python 系列，再复制依赖和自己写出的读取程序。</p>
 <p>**写在哪里：**项目根目录下的 <code>Dockerfile</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**FROM 选择起始环境；COPY 和 RUN 在构建镜像时执行，ENTRYPOINT 在启动容器时执行。因此讲稿路径属于运行参数，不应写死在镜像里。</p>
 <pre><code class="language-dockerfile"># 同一 Python 大版本便于比较主机和容器；标签仍会更新，生产锁定留到发布阶段。
 FROM python:3.12-slim
 WORKDIR /app
@@ -38,16 +38,16 @@ ENTRYPOINT [&quot;python&quot;, &quot;read_docx.py&quot;]
 <p>**写完后应当怎样：**构建时安装依赖；启动时仍由你选择输入与输出路径。</p>
 <h2 id="section-2">先区分两段时间</h2>
 <p>构建镜像时，准备 Python、安装读取库、放入程序。运行容器时，提供本次讲稿路径，执行读取，保存输出。换一份输入资料，通常只需要重新运行；修改镜像里的程序，才需要重新构建。</p>
-<p>打开练习目录已有的 <code>Dockerfile</code>：</p>
+<p>回看你刚写的 <code>Dockerfile</code>，按下面的说明把构建时和运行时的指令分开。</p>
 <h2 id="section-3">每一层在解决什么问题</h2>
 <p><code>FROM</code> 选择基础环境。<code>WORKDIR</code> 规定后续命令和运行时默认在哪个目录。<code>COPY</code> 从构建目录取文件，放入镜像；它与上一章运行时的挂载不同。</p>
 <p><code>RUN</code> 在构建过程中执行安装，结果成为镜像的一部分。<code>ENTRYPOINT</code> 规定容器启动时执行读取程序；运行镜像时再追加的两个参数，会交给 <code>read_docx.py</code>。</p>
 <p><code>PYTHONUNBUFFERED=1</code> 让输出更及时地进入日志，方便观察执行进展。<code>PYTHONDONTWRITEBYTECODE=1</code> 避免本次练习额外生成 Python 字节码文件。它们不会提高模型回答质量，也不负责保存业务数据。</p>
-<p>依赖清单是：</p>
+<p>打开第一章的 <code>requirements.txt</code>，应仍只有注释和 <code>python-docx==1.2.0</code>。Docker 构建时读取的就是这份清单。</p>
 <p>固定直接依赖版本有助于对照实验；基础镜像标签和间接依赖仍可能更新。本章不宣称环境已经做到逐字节完全锁定，发布阶段再处理更严格的版本控制。</p>
 <h2 id="section-4">哪些内容不应进入镜像</h2>
-<p><code>COPY read_docx.py ./</code> 只复制程序，没有复制讲稿。旁边的 <code>.dockerignore</code> 进一步排除个人数据、虚拟环境和配置文件：</p>
-<p>这能让镜像专注于程序。以后换知识库时，不用重新发布包含整套资料的镜像。当前两个 Dockerfile 都没有把 API key 写进去。</p>
+<p><code>COPY read_docx.py ./</code> 只复制程序，没有复制讲稿。再回看本节第 1 步的 <code>.dockerignore</code>：<code>data/</code> 排除资料与输出，<code>.venv/</code> 排除主机环境，<code>.env</code> 与 <code>.env.*</code> 排除之后可能使用的个人配置。</p>
+<p>这能让镜像专注于程序。以后换知识库时，不用重新发布包含整套资料的镜像。目前你只写了一份 <code>Dockerfile</code>，它封装的是读取程序。下一节先构建并运行它；模型客户端镜像到第 4 章再创建。</p>
 <h2 id="section-5">做一次判断练习</h2>
 <p>你只把输入从第一讲改成第二讲，需要重建镜像吗？如果修改了 <code>read_docx.py</code> 的输出字段呢？</p>
 <details><summary>展开解释</summary>

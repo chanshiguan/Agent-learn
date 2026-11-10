@@ -28,17 +28,23 @@
 # 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 from .rag import retrieve, budget
 from .state import get_session
+from .corpus import visible
+from .files import load
 ```
 
 **写完后应当怎样：**保存后只有导入和定义；导入它不会自动运行整个业务。
 
 ### 第 2 步：把三项只读能力收进一个工具入口
 
-先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
+先验证参数，再按工具名分派；read_source 既要确认本轮见过，也要按当前进度和资料快照重新核对。
 
 **写在哪里：**项目根目录下的 `companion/tools.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
 **先理解：**self.actor 和 self.session_id 把一组工具绑定到已验证的本人会话。模型只能选择允许的工具与参数，不能通过参数换成别人的身份。
+
+下面 2 段按顺序组成同一处代码。每段最多 25 行；保留空行和缩进，全部写完并保存后再检查。
+
+**连续代码 1/2**
 
 ```python
 # 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
@@ -66,14 +72,27 @@ class ReaderTools:
         if name == "read_source":
             if set(arguments) != {"source_id"} or not isinstance(arguments["source_id"], str):
                 raise ValueError("读取来源只接受 source_id。")
-            source = self.seen.get(arguments["source_id"])
-            if source is None:
+```
+
+**连续代码 2/2**（接在上一段后，不额外增加缩进）
+
+```python
+            source_id = arguments["source_id"]
+            if source_id not in self.seen:
                 raise PermissionError("不能读取本次未检索到的来源。")
+            # 已见过不等于现在仍可见；进度或资料更新后，不能把旧缓存再交给模型。
+            corpus = load("corpus.json", {"chunks": []})
+            allowed = visible(corpus["chunks"], self.actor.tenant, session["book"],
+                              session["progress"] if session["strict"] else None)
+            source = next((item for item in allowed if item["id"] == source_id), None)
+            if source is None:
+                raise PermissionError("当前阅读范围内没有此来源，请重新检索。")
+            self.seen[source_id] = source
             return source
         raise ValueError("没有登记这个工具；不会执行模型提供的代码或命令。")
 ```
 
-**写完后应当怎样：**程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。
+**写完后应当怎样：**合法工具可用；未见、已越过当前范围或已撤下的来源都被拒绝。
 
 
 ## 让刚写的代码生效
@@ -98,6 +117,8 @@ python -c 'from companion.state import Actor,initialize,create_session; from com
 ## 动手改一个参数
 
 将 query 改成空字符串，应该被拒绝；添加 tenant=other 字段，也应该被拒绝。新建一个工具实例后直接读一个从未检索过的来源，应失败。这样来源工具不能变成“知道 ID 就能随便读”的入口。
+
+还有一个容易漏掉的情况：工具刚刚查到后文，读者却在另一个窗口降低了阅读进度。`seen` 只能说明“本轮查到过”，不能说明“现在仍有权读取”。因此回查时重新读取当前会话与资料快照。用同一工具实例先查询，再开启受限阅读并把进度调到该片段之前；再次读取旧来源应被拒绝。重新检索能得到什么，由新的阅读范围决定。
 
 只读工具仍可能泄露资料，因此权限检查不能等到写操作才开始。下一单元把这组边界写成可重复测试。
 

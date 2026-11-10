@@ -8,10 +8,20 @@
 <h2 id="section-2">运行并观察</h2>
 <pre><code class="language-bash"># 在相同小块上重跑词面基线；先保存输出，再做向量对照。
 python -m companion search &quot;徐锡麟&quot;
+# 保留当前80/16快照下的词面结果，不能拿旧600字块的结果代替。
+cp data/live/search.json data/live/keyword-name-small.json
 # 编码同一个问题；观察精确人名是否仍然容易找到，不预设向量一定更好。
 python -m companion direct-vector &quot;徐锡麟&quot;
+# 留下精确人名的向量结果，下一次向量查询会覆盖工作文件。
+cp data/live/direct-vector.json data/live/vector-name-small.json
 # 再运行上一章记录的同义问法，检验它是否真的改善。
 python -m companion direct-vector &quot;开头古雅的文字和后面的记录有什么关系&quot;
+# 记录同义问法的向量结果，后续混合检索继续比较这个问题。
+cp data/live/direct-vector.json data/live/vector-paraphrase-small.json
+# 也在当前小块上查询同义问法，补齐同一问题、同一资料下的词面对照。
+python -m companion search &quot;开头古雅的文字和后面的记录有什么关系&quot;
+# 单独保存这份小块词面结果，与刚才的向量结果逐条比较。
+cp data/live/search.json data/live/keyword-paraphrase-small.json
 </code></pre>
 <p>建一张四列表：问题、词面命中关键句、向量命中关键句、理由。至少放精确人名、同义问法和无答案三题。最后一题即使得到很高相似度，也不表示资料能回答出版社页码。</p>
 <h2 id="section-3">做一次手工核查</h2>

@@ -1,23 +1,50 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>先小范围验证，再练一次撤回 · 名著伴读实战</title><link rel="stylesheet" href="../assets/classics.css"></head><body class="page-lesson" data-current-unit="0069-release-rollback">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="../courses/00-classics-reading-foundations/index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="../courses/00-classics-reading-foundations/index.html">课程地图</a><a href="../courses/00-classics-reading-foundations/knowledge/index.html">知识拓展 · 选读</a><a href="../courses/00-classics-reading-foundations/resources.html">资料与工具</a></nav></div></header>
-<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先小范围验证，再练一次撤回</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-27">← 返回课程地图</a><p class="rail-label">第 27 章 · 让发布可以检查和撤回</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0068-release-manifest.html"><span class="unit-number">1</span><span>把这次能跑的条件记录下来<small>60—75 分钟</small></span></a></li><li><a href="0069-release-rollback.html" aria-current="page"><span class="unit-number">2</span><span>先小范围验证，再练一次撤回<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">发布前先知道怎样退回来</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">小范围试用看什么</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 27 章 / 单元 2 · 共 2 个</p><h1>先小范围验证，再练一次撤回</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
+<div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>先小范围验证，再练一次撤回</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-27">← 返回课程地图</a><p class="rail-label">第 27 章 · 让发布可以检查和撤回</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0068-release-manifest.html"><span class="unit-number">1</span><span>把这次能跑的条件记录下来<small>60—75 分钟</small></span></a></li><li><a href="0069-release-rollback.html" aria-current="page"><span class="unit-number">2</span><span>先小范围验证，再练一次撤回<small>35—50 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">发布前先知道怎样退回来</a></li><li><a href="#section-2">保存并验证第一版</a></li><li><a href="#section-3">做一个可识别的第二版</a></li><li><a href="#section-4">实际撤回第一版</a></li><li><a href="#section-5">小范围试用看什么</a></li><li><a href="#section-6">本单元完成条件</a></li><li><a href="#section-7">下次开始前</a></li><li><a href="#section-8">资料依据与选读</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 27 章 / 单元 2 · 共 2 个</p><h1>先小范围验证，再练一次撤回</h1><div class="lesson-meta"><span>本单元 35—50 分钟</span><span>本章 95—125 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>35—50 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0068-release-manifest.html">《把这次能跑的条件记录下来》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
 <h2 id="section-1">发布前先知道怎样退回来</h2>
-<p>给当前候选镜像一个不会覆盖旧版本的标签。选一份已验证旧版本与当前候选，不在运行中随意改源文件。程序和资料若不兼容，单换镜像无法完成回滚，数据库恢复要按下一章演练。</p>
-<h2 id="section-2">运行并观察</h2>
-<pre><code class="language-bash"># 将当前 candidate 镜像标记为一个明确的练习版本；它不推送到任何远程仓库。
+<p>上一节已经构建并验证了 <code>classics-companion:candidate</code>。现在保存它，再做一个只改页面标题的新版本；用肉眼可见的变化判断实际运行的是哪一版。演练不修改数据结构，因此回退不需要恢复数据库。</p>
+<h2 id="section-2">保存并验证第一版</h2>
+<pre><code class="language-bash"># 把刚验证的候选保留为第一版；后面构建新版本时不会覆盖这个标签。
 docker tag classics-companion:candidate classics-companion:trial-v1
-# 使用该版本启动受控试用，仍只开放本机端口；不要加 --build 覆盖选定旧产物。
-RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build
-# 检查依赖就绪后，再人工做登录、问答、来源和笔记批准的冒烟检查。
+# 启动指定版本；--no-build 保证使用保存的产物，不根据当前源码偷偷重建。
+RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 等应用启动后检查就绪，再打开网页核对标题、登录、问答和来源。
 curl --fail http://127.0.0.1:8000/readyz
+# 记录第一版实际镜像 ID，后面用它判断是否真的回到原产物。
+docker image inspect classics-companion:trial-v1 --format &#39;{{.Id}}&#39;
 </code></pre>
-<p>新版本出问题时，停止接入新请求，保存失败 trace 和版本，切回上一已验证标签，再检查相同四条业务路径。当前还只有一个版本时，先制作并验证第二个候选，再练撤回；不要捏造一个不存在的“上个版本”。</p>
-<h2 id="section-3">小范围试用看什么</h2>
+<p>在页面确认标题是“一起读《狂人日记》”，完成登录、问答、查看来源、批准一条测试笔记，并记录结果。这里保存的笔记也用于观察切换版本后数据是否仍在。</p>
+<h2 id="section-3">做一个可识别的第二版</h2>
+<p>在编辑器打开 <code>companion/web/index.html</code>，将唯一一行 <code>&lt;h1&gt;一起读《狂人日记》&lt;/h1&gt;</code> 改成 <code>&lt;h1&gt;一起读《狂人日记》 · 版本演练&lt;/h1&gt;</code>，其他内容保留。标题变化只是这次练习的版本标记，不改变问答逻辑。</p>
+<pre><code class="language-bash"># 将改过标题的源码构建为第二版；保留 trial-v1，也不覆盖 candidate。
+docker build -f deploy/Dockerfile -t classics-companion:trial-v2 .
+# 切换到第二版；数据仍来自原来的挂载目录。
+RELEASE_TAG=trial-v2 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 第二版就绪后再检查页面，不用启动瞬间的连接失败判断发布失败。
+curl --fail http://127.0.0.1:8000/readyz
+# 第二版 ID 应与第一版不同；保存记录供撤回时对照。
+docker image inspect classics-companion:trial-v2 --format &#39;{{.Id}}&#39;
+</code></pre>
+<p>刷新浏览器，应看到“版本演练”；重做前面的四项业务检查。随后在编辑器把标题还原为原来那一行并保存。此时<strong>不要构建</strong>，再次刷新：正在运行的第二版标题仍有“版本演练”，因为容器使用已构建的镜像，不会自动读取宿主源码修改。</p>
+<h2 id="section-4">实际撤回第一版</h2>
+<pre><code class="language-bash"># 撤回已验证的第一版，不从当前源码重建；这是产物切换，不只是重启同一容器。
+RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+# 等待就绪后刷新网页，预期标题恢复，之前的测试笔记仍可读取。
+curl --fail http://127.0.0.1:8000/readyz
+# 查看当前应用所用镜像标签，预期为 classics-companion:trial-v1。
+docker compose --env-file .env -f deploy/compose.yaml ps --format json app
+</code></pre>
+<p>再做四项业务检查，把前后镜像 ID、标题、笔记是否保留和开始结束时间写在项目记录中。这次证明的是同一数据结构下的镜像切换；若新版本改变资料字段或数据库结构，不能据此认定旧程序也能读取，需要第28章的迁移与恢复验证。</p>
+<p>结束时先确认源码标题已经还原，再回到后续章节使用的 candidate：</p>
+<pre><code class="language-bash"># 恢复本次练习前的候选；下一节会继续在它的基础上构建资料发布功能。
+RELEASE_TAG=candidate docker compose --env-file .env -f deploy/compose.yaml up -d --no-build app
+</code></pre>
+<h2 id="section-5">小范围试用看什么</h2>
 <p>限制试用账号、资料与时间窗口，确认告警和联系人。收集问题后按严重程度处理：越权、错误副作用和无法恢复的数据问题先阻止扩大范围；普通表达改进可进入待办，但要有负责人。</p>
 <p>回滚记录写原因、前后版本、开始结束时间、数据是否变化、复测结果。仅把容器重新启动不等于回滚。</p>
-<h2 id="section-4">本单元完成条件</h2>
+<h2 id="section-6">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
 <li>为什么回滚可能还涉及资料与数据库？</li>
@@ -32,9 +59,9 @@ curl --fail http://127.0.0.1:8000/readyz
 <p>**通过证据：**两份真实版本的切换与回退记录，以及四条业务冒烟检查。</p>
 </details>
 
-<h2 id="section-5">下次开始前</h2>
+<h2 id="section-7">下次开始前</h2>
 <p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
-<h2 id="section-6">资料依据与选读</h2>
+<h2 id="section-8">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0069-release-rollback"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/delivery-and-recovery.html" data-knowledge-link>候选发布、回滚与恢复<span>8—10 分钟 · 把能运行的 Demo 变成可以交接的服务，需要哪些证据。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0068-release-manifest.html"><small>上一单元</small>把这次能跑的条件记录下来</a><a href="0070-corpus-release.html"><small>下一单元</small>审核新资料，再切换活动快照 →</a></nav></main></div>

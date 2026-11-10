@@ -1,0 +1,725 @@
+{
+  "date": "2026-11-11",
+  "baseline": "2118739d1821a09ee77762a531331b0ffa9246fe",
+  "pedagogical_review": {
+    "units_read": 80,
+    "criteria": [
+      "当前起点",
+      "任务目的",
+      "先创建再使用",
+      "可观察结果",
+      "后续回用",
+      "实验收尾",
+      "验收与实现一致"
+    ],
+    "private_source_read": false
+  },
+  "replay": {
+    "units": 80,
+    "visible_edits": 340,
+    "created_program_files": 59,
+    "classroom_checks": 36,
+    "additional_learner_question_check": 1,
+    "total_checks": 37,
+    "result": "passed"
+  },
+  "python_regression": {
+    "tests": 41,
+    "result": "passed"
+  },
+  "javascript_races": {
+    "tests": 4,
+    "result": "passed"
+  },
+  "browser": {
+    "mobilePages": 173,
+    "viewports": [
+      375,
+      768,
+      812,
+      1024,
+      1440
+    ],
+    "checks": [
+      "navigation",
+      "answers",
+      "copy and fallback",
+      "progress and resume",
+      "optional return",
+      "route choice",
+      "keyboard"
+    ],
+    "errors": []
+  },
+  "fresh_environment": {
+    "python": "3.12.14",
+    "all_course_requirements_installed": true,
+    "pip_check": "passed",
+    "scope": "编写设备上的全新隔离环境，不是目标M1或全部系统实测"
+  },
+  "real_generation": {
+    "evidence": "comprehensive-real-model.json",
+    "qa": "completed",
+    "missing_evidence_flag": true,
+    "agent_tool": "search_lectures",
+    "draft_approval_note_count": 1,
+    "scope": "已有本地gemma4:e4b，未调用付费线上模型；少量成功不代表稳定质量"
+  },
+  "container": {
+    "source": "tooling/container_smoke.py",
+    "evidence": "GitHub Actions发布工作流日志",
+    "model": "explicit_protocol_fixture",
+    "scope": "Linux Docker构建、Compose、挂载、鉴权、Qdrant服务及两个镜像切换；通过工作流才发布"
+  },
+  "unverified_or_launch_blockers": [
+    "目标M1容量和默认Qwen模型",
+    "各线上模型真实调用与兼容性",
+    "完整文学质量和适龄内容",
+    "实际公司的身份、HTTPS和代理来源设置",
+    "共享网络登录限额策略",
+    "独立删除账本与恢复重放",
+    "生产恢复指标与责任人批准"
+  ],
+  "real_embedding": {
+    "scope": "CPU真实编码器，固定公开权重，Qdrant SDK本地持久模式；不是Docker向量服务",
+    "runs": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "companion",
+          "ingest",
+          "--size",
+          "80",
+          "--overlap",
+          "16"
+        ],
+        "result": {
+          "documents": 5,
+          "chunks": 106,
+          "duplicates": [],
+          "revision": "dd1304eb0ea75ebb777066c9cac8f387ed0972bc4399d7f8021c07e6e1180792",
+          "tables_skipped": 0
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "companion",
+          "index"
+        ],
+        "result": {
+          "collection": "reading_dd1304eb0ea7_61ba7bd229e7",
+          "corpus_revision": "dd1304eb0ea75ebb777066c9cac8f387ed0972bc4399d7f8021c07e6e1180792",
+          "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+          "model_revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+          "dimension": 384,
+          "count": 106,
+          "new_embeddings": 106
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "companion",
+          "index"
+        ],
+        "result": {
+          "collection": "reading_dd1304eb0ea7_61ba7bd229e7",
+          "corpus_revision": "dd1304eb0ea75ebb777066c9cac8f387ed0972bc4399d7f8021c07e6e1180792",
+          "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+          "model_revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+          "dimension": 384,
+          "count": 106,
+          "new_embeddings": 0
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "companion",
+          "search",
+          "文言文序言",
+          "--method",
+          "semantic"
+        ],
+        "result": {
+          "question": "文言文序言",
+          "query": "文言文序言",
+          "hits": [
+            {
+              "id": "22c7d69b2999ebc45d55430b",
+              "doc_id": "92131575b344f79a",
+              "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+              "tenant": "demo",
+              "book": "狂人日记",
+              "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+              "kind": "讲解稿",
+              "lecture": "一",
+              "edition": null,
+              "parent": "p0001",
+              "start": 896,
+              "end": 976,
+              "text": "言表达都代表压迫，所有白话表达都天然正确。需要结合具体语句判断，而不是只看文体贴标签。\n\n“好了”是不是一个圆满结局\n\n一种读法认为，人物重新进入既有生活秩序，",
+              "range_end": null,
+              "range_reviewed": false,
+              "score": 0.606982136588951
+            },
+            {
+              "id": "1b1aa39891389bd1f05f5757",
+              "doc_id": "92131575b344f79a",
+              "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+              "tenant": "demo",
+              "book": "狂人日记",
+              "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+              "kind": "讲解稿",
+              "lecture": "一",
+              "edition": null,
+              "parent": "p0001",
+              "start": 576,
+              "end": 656,
+              "text": "一个跳步：把“候补”直接说成已经正式担任某个官职，或给出小说没有写明的地点与职务。较稳妥的表达是，序言交代他去某地候补，但没有展开后续生活。我们可以讨论这一安排",
+              "range_end": null,
+              "range_reviewed": false,
+              "score": 0.5843054995562125
+            },
+            {
+              "id": "87dd6042bd8f96b4b1b22463",
+              "doc_id": "82c63116a11bbe4b",
+              "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+              "tenant": "demo",
+              "book": "狂人日记",
+              "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+              "kind": "讲解稿",
+              "lecture": "三",
+              "edition": null,
+              "parent": "p0001",
+              "start": 128,
+              "end": 208,
+              "text": "文字。\n\n不把意象当作词语替换题\n\n日记第三节里，叙述者把周围的话语、眼神和听来的故事联系在一起，最后从历史书的字缝里读出“吃人”。书面上令人信服的道德说辞，与",
+              "range_end": null,
+              "range_reviewed": false,
+              "score": 0.5619355317025433
+            },
+            {
+              "id": "f2fcf0eb35cfceeea18f9b79",
+              "doc_id": "82c63116a11bbe4b",
+              "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+              "tenant": "demo",
+              "book": "狂人日记",
+              "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+              "kind": "讲解稿",
+              "lecture": "三",
+              "edition": null,
+              "parent": "p0001",
+              "start": 512,
+              "end": 592,
+              "text": "问：为什么这种事情仍会被接受？\n\n需要保留一个文字差异：课程题目写“徐锡麟”，本次核对的小说文本写“徐锡林”。这里将两个写法关联起来，帮助读者定位题目所指的段落",
+              "range_end": null,
+              "range_reviewed": false,
+              "score": 0.5602837865070864
+            },
+            {
+              "id": "1b17ef5598646aef644d4615",
+              "doc_id": "92131575b344f79a",
+              "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+              "tenant": "demo",
+              "book": "狂人日记",
+              "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+              "kind": "讲解稿",
+              "lecture": "一",
+              "edition": null,
+              "parent": "p0001",
+              "start": 0,
+              "end": 80,
+              "text": "第一讲：先分清谁在讲故事\n\n本文是为名著伴读开发课程新编的阅读材料，适合学生与家长共同讨论。它不是鲁迅的作品全文，也不是某位教师授课的逐字记录。这里的“第一讲”",
+              "range_end": null,
+              "range_reviewed": false,
+              "score": 0.5445521357079721
+            }
+          ]
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "companion",
+          "evaluate",
+          "--method",
+          "hybrid",
+          "--output",
+          "guided-retrieval.json"
+        ],
+        "result": {
+          "corpus_revision": "dd1304eb0ea75ebb777066c9cac8f387ed0972bc4399d7f8021c07e6e1180792",
+          "method": "hybrid",
+          "generated": false,
+          "options": {
+            "expand": false,
+            "rerank": false,
+            "rewrite": false
+          },
+          "records": [
+            {
+              "id": "dev-01",
+              "question": "第一讲怎样解释文言文序言和白话日记的关系？",
+              "query": "第一讲怎样解释文言文序言和白话日记的关系？",
+              "source_ids": [
+                "945dc2c1ef0dd67e942c37fc",
+                "301788b02f662ec4bc9071b4",
+                "bd7ecd1528c5146a8dba5425",
+                "1b17ef5598646aef644d4615",
+                "09b2feceb4ca8b03b0fbcab1"
+              ],
+              "sources": [
+                {
+                  "id": "945dc2c1ef0dd67e942c37fc",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 256,
+                  "end": 336,
+                  "text": "帮助我们理解小说为什么不直接从日记写起。\n\n文言文序言提供外部叙述，白话日记呈现人物的内部感受。序言中的“余”是故事里的访友者和日记整理者；进入白话部分后，叙述",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03278688524590164
+                },
+                {
+                  "id": "301788b02f662ec4bc9071b4",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 64,
+                  "end": 144,
+                  "text": "授课的逐字记录。这里的“第一讲”是课程编号，与小说的日记节号不同。阅读时请把小说中的叙述、本文的解释和自己的判断分开；遇到不确定的地方，保留问题比补出一个确定答",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03200204813108039
+                },
+                {
+                  "id": "bd7ecd1528c5146a8dba5425",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 768,
+                  "end": 848,
+                  "text": "的态度。小说没有用一位全知的解说员替读者消除所有矛盾，而是让我们面对这种落差。\n\n从语言形式看，文言序言较为简洁、克制，白话日记则充满感叹、追问和突然转向的联想",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.016129032258064516
+                },
+                {
+                  "id": "1b17ef5598646aef644d4615",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 0,
+                  "end": 80,
+                  "text": "第一讲：先分清谁在讲故事\n\n本文是为名著伴读开发课程新编的阅读材料，适合学生与家长共同讨论。它不是鲁迅的作品全文，也不是某位教师授课的逐字记录。这里的“第一讲”",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.015873015873015872
+                },
+                {
+                  "id": "09b2feceb4ca8b03b0fbcab1",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1152,
+                  "end": 1232,
+                  "text": "围、相互质疑，而不是两个可以随意互换的摘要。回答关于两者关系的问题时，应同时说明叙述者、文体和视角，最后再给出自己的理解。\n\n本文据鲁迅《狂人日记》的序言及日记",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.015625
+                }
+              ],
+              "document_recall": 1.0,
+              "quote_hit": true,
+              "expected_insufficient": false,
+              "manual": {
+                "answer_supported": null,
+                "citation_supported": null,
+                "age_appropriate": null
+              },
+              "seconds": 2.62
+            },
+            {
+              "id": "dev-02",
+              "question": "第三讲谈到吃人时，为什么提到徐锡麟？",
+              "query": "第三讲谈到吃人时，为什么提到徐锡麟？",
+              "source_ids": [
+                "3e9bbbe97562b763025c9c75",
+                "82f1513112df360df2861f60",
+                "f2fcf0eb35cfceeea18f9b79",
+                "29359fe489b2f74877698c1b",
+                "87dd6042bd8f96b4b1b22463"
+              ],
+              "sources": [
+                {
+                  "id": "3e9bbbe97562b763025c9c75",
+                  "doc_id": "82c63116a11bbe4b",
+                  "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+                  "kind": "讲解稿",
+                  "lecture": "三",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 384,
+                  "end": 464,
+                  "text": "\n徐锡麟这个名字起了什么作用\n\n第三讲提到徐锡麟，是为了说明叙述者如何把古代故事、较近的名字和眼前听闻连成一条线。在小说第十节，叙述者连续列举不同时间的事件与人",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03278688524590164
+                },
+                {
+                  "id": "82f1513112df360df2861f60",
+                  "doc_id": "82c63116a11bbe4b",
+                  "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+                  "kind": "讲解稿",
+                  "lecture": "三",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 0,
+                  "end": 80,
+                  "text": "第三讲：为什么“吃人”会从眼前延伸到历史\n\n本文是课程新编的文学讲解。讨论涉及小说中的暴力意象，重点放在叙述与人的处境，不展开伤害细节。第三讲同时参考小说第三节",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03225806451612903
+                },
+                {
+                  "id": "f2fcf0eb35cfceeea18f9b79",
+                  "doc_id": "82c63116a11bbe4b",
+                  "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+                  "kind": "讲解稿",
+                  "lecture": "三",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 512,
+                  "end": 592,
+                  "text": "问：为什么这种事情仍会被接受？\n\n需要保留一个文字差异：课程题目写“徐锡麟”，本次核对的小说文本写“徐锡林”。这里将两个写法关联起来，帮助读者定位题目所指的段落",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03149801587301587
+                },
+                {
+                  "id": "29359fe489b2f74877698c1b",
+                  "doc_id": "82c63116a11bbe4b",
+                  "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+                  "kind": "讲解稿",
+                  "lecture": "三",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1024,
+                  "end": 1104,
+                  "text": "相取消。\n\n为一个解释补齐依据\n\n如果学生说“提到徐锡麟，是因为作者要批评不合理的习惯”，家长可以接着请他补两步：这个名字位于哪一段列举里？列举之前和之后，叙述",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03125763125763126
+                },
+                {
+                  "id": "87dd6042bd8f96b4b1b22463",
+                  "doc_id": "82c63116a11bbe4b",
+                  "version": "8120943875090ad08bc26609ff163934b620985ec4fbf8dbcc348b4ec64d9225",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "08 《狂人日记》第三讲吃人的历史联想.docx",
+                  "kind": "讲解稿",
+                  "lecture": "三",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 128,
+                  "end": 208,
+                  "text": "文字。\n\n不把意象当作词语替换题\n\n日记第三节里，叙述者把周围的话语、眼神和听来的故事联系在一起，最后从历史书的字缝里读出“吃人”。书面上令人信服的道德说辞，与",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.015625
+                }
+              ],
+              "document_recall": 1.0,
+              "quote_hit": true,
+              "expected_insufficient": false,
+              "manual": {
+                "answer_supported": null,
+                "citation_supported": null,
+                "age_appropriate": null
+              },
+              "seconds": 0.014
+            },
+            {
+              "id": "dev-03",
+              "question": "第二讲借月亮怎样讲平等？",
+              "query": "第二讲借月亮怎样讲平等？",
+              "source_ids": [
+                "cba157b9d16b4ae3098c2268",
+                "47357b78e7230e64e7cb624d",
+                "87e873d0ab922a9ca15124a8",
+                "61f7152c8a0a24085e1b34f4",
+                "687b27e94b4babae806b0da2"
+              ],
+              "sources": [
+                {
+                  "id": "cba157b9d16b4ae3098c2268",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 320,
+                  "end": 400,
+                  "text": "重新认识了熟悉的世界？这个问题来自前后文字的对照，但仍然属于解释。原著并没有在旁边附上一张“月亮等于什么”的答案表。\n\n怎样把月亮与平等联系起来\n\n第二讲借月亮",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03252247488101534
+                },
+                {
+                  "id": "47357b78e7230e64e7cb624d",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 640,
+                  "end": 720,
+                  "text": "行。\n\n这种解读需要两道限制。第一，小说没有直接宣布月亮就是平等，所以回答应说“本讲把月光理解为……”，而不是“鲁迅唯一想表达的是……”。第二，不能为了支持这个",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.032266458495966696
+                },
+                {
+                  "id": "87e873d0ab922a9ca15124a8",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 384,
+                  "end": 464,
+                  "text": "亮与平等联系起来\n\n第二讲借月亮讨论平等，是把“重新看见”理解为重新审视习惯中的高低关系。一个人过去可能习惯接受别人规定的位置，如今开始追问：某种身份为什么天然",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03200204813108039
+                },
+                {
+                  "id": "61f7152c8a0a24085e1b34f4",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 512,
+                  "end": 592,
+                  "text": "价值的体验。\n\n平等在这里指每个人都值得被尊重，不能因为身份不同就任意剥夺他表达和判断的机会。这是本讲使用的讨论角度，不是从月亮的物理性质推出来的结论。它也不是",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.031009615384615385
+                },
+                {
+                  "id": "687b27e94b4babae806b0da2",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 0,
+                  "end": 80,
+                  "text": "第二讲：从月光谈到平等，要经过哪些步骤\n\n本文为课程新编讲解稿。“第二讲”指这份材料的顺序，不是原著第二节的同义词。我们从小说开头的月光出发，练习把看见的文字、",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.031009615384615385
+                }
+              ],
+              "document_recall": 1.0,
+              "quote_hit": true,
+              "expected_insufficient": false,
+              "manual": {
+                "answer_supported": null,
+                "citation_supported": null,
+                "age_appropriate": null
+              },
+              "seconds": 0.013
+            },
+            {
+              "id": "dev-04",
+              "question": "这五份讲稿使用的原著版本的准确页码是多少？",
+              "query": "这五份讲稿使用的原著版本的准确页码是多少？",
+              "source_ids": [
+                "ad00b2026b9e0eb2aa1cbf15",
+                "3d1c3bbb724bb6296b7b3906",
+                "bae0e6c2bf671813fc5e825a",
+                "74d8698e080f37d61e5196c1",
+                "900acfbb910305b2c1cedc41"
+              ],
+              "sources": [
+                {
+                  "id": "ad00b2026b9e0eb2aa1cbf15",
+                  "doc_id": "cf35d0af632ba41e",
+                  "version": "d28e00afe3065369fd99a38b09bd9a018ad74c562116f5ecc70b4e8dd118bbb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "10 《狂人日记》第五讲传统与未来.docx",
+                  "kind": "讲解稿",
+                  "lecture": "五",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1344,
+                  "end": 1359,
+                  "text": "对应纸质书的出版社与准确页码。",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.032018442622950824
+                },
+                {
+                  "id": "3d1c3bbb724bb6296b7b3906",
+                  "doc_id": "f52f37d685c0a0aa",
+                  "version": "26715e9d3892093a870e6c39a9355b1b6d3e7de95ba8a45c6f8119be8121b9c8",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "09 《狂人日记》第四讲不可靠叙述.docx",
+                  "kind": "讲解稿",
+                  "lecture": "四",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1216,
+                  "end": 1296,
+                  "text": "。\n\n本讲参考鲁迅《狂人日记》第四、五、十一、十二节，原文入口见维基文库《狂人日记》。本文没有诊断现实人物，也没有提供纸质版本的页码。解释可以修订，回查依据应保",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03200204813108039
+                },
+                {
+                  "id": "bae0e6c2bf671813fc5e825a",
+                  "doc_id": "cf35d0af632ba41e",
+                  "version": "d28e00afe3065369fd99a38b09bd9a018ad74c562116f5ecc70b4e8dd118bbb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "10 《狂人日记》第五讲传统与未来.docx",
+                  "kind": "讲解稿",
+                  "lecture": "五",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1280,
+                  "end": 1359,
+                  "text": "迅《狂人日记》第八、十二、十三节及序言，入口见维基文库《狂人日记》。引句按简体转写；本文的讲次与段落编号只用于课程定位，没有提供对应纸质书的出版社与准确页码。",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.03076923076923077
+                },
+                {
+                  "id": "74d8698e080f37d61e5196c1",
+                  "doc_id": "036d118829961e4d",
+                  "version": "a52a49dbc03594257c43ab3156f5de99db76ec2a54e18d58eaed04192f0dadb5",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "07 《狂人日记》第二讲月光与平等.docx",
+                  "kind": "讲解稿",
+                  "lecture": "二",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1280,
+                  "end": 1306,
+                  "text": "不对应某个纸质版本的页码，不把教学类比写成原著引文。",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.01639344262295082
+                },
+                {
+                  "id": "900acfbb910305b2c1cedc41",
+                  "doc_id": "92131575b344f79a",
+                  "version": "94297e735559ee967b2477d9e0a4086f28ea465418dd8babb93c6ad4b928ba9a",
+                  "tenant": "demo",
+                  "book": "狂人日记",
+                  "file": "06 《狂人日记》第一讲两种叙述声音.docx",
+                  "kind": "讲解稿",
+                  "lecture": "一",
+                  "edition": null,
+                  "parent": "p0001",
+                  "start": 1280,
+                  "end": 1302,
+                  "text": "版社和页码。本文的解释可供讨论，不代替原著。",
+                  "range_end": null,
+                  "range_reviewed": false,
+                  "score": 0.016129032258064516
+                }
+              ],
+              "document_recall": null,
+              "quote_hit": null,
+              "expected_insufficient": true,
+              "manual": {
+                "answer_supported": null,
+                "citation_supported": null,
+                "age_appropriate": null
+              },
+              "seconds": 0.013
+            }
+          ],
+          "quality_passed": null
+        }
+      }
+    ]
+  }
+}

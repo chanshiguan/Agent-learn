@@ -71,4 +71,19 @@ def cancel(actor, request_id):
         flag = _jobs.get((actor.tenant, actor.user, request_id))
         if flag is not None:
             flag.set()
-    return {"cancel_requested": flag is not None, "message": "已发送的模型请求可能仍在运行和计费；停止后不会继续调用工具。"}
+    message = "已请求取消；已发送的模型请求仍可能运行和计费，未提交的结果不会保存。" if flag is not None else "任务已提交或不存在，本次没有取消结果。"
+    return {"cancel_requested": flag is not None, "message": message}
+
+# 目的：让取消与最终写入有明确先后；检查标记和提交必须是同一个短操作。
+# 预期：先取消就不落库；先提交则取消返回 false，不谎称能撤回已保存的结果。
+@contextmanager
+def commit_job(actor, request_id):
+    key = (actor.tenant, actor.user, request_id)
+    # 锁内只放数据库提交，不放模型调用；其他请求不必陪着模型等待。
+    with _lock:
+        flag = _jobs.get(key)
+        if flag is None or flag.is_set():
+            raise ValueError("请求已取消，本次结果没有保存。")
+        yield
+        # 保留请求键到 job 退出，避免旧任务清理时误删刚复用同一键的新任务。
+        _jobs[key] = None

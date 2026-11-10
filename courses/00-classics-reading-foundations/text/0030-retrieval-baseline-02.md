@@ -48,7 +48,16 @@ python -m companion evaluate --output keyword-baseline.json
 
 挑一题，检查候选是否完整保留论据和限定条件。若失败，可写“相关词不重合”“关键句被切开”或“前五条混入重复内容”，并贴出证据；若当前题全部命中，就如实记录命中情况与上下文观察，不需要编造失败。若无法归因，就写待确认，不要用一个笼统的准确率掩盖问题。
 
-在 dev.json 追加你自己的一个问题，人工找到对应讲稿及短句；只用当前有权限的样本，不把别人的私人问题复制进去。确认 JSON 仍可解析，再重跑。资料 revision、算法与题集一起保存。
+打开导学的 `reading-questions.md`，取出你当时自拟的第 5 题。先在讲稿里人工找到它的依据，再仿照示例追加到 `eval/dev.json`，使用未重复的 ID，例如 `dev-05`。填入对应文件前缀和能支持回答的短句；如果资料本来就没有答案，两个列表留空，并将 `expected_insufficient` 写成 `true`。若原题太宽、暂时无法按这个规则核对，先把它拆成一个能明确找依据的小问题，同时在题单里保留原题。
+
+新增题只使用当前样本，不复制他人的私人问题。保存后用不同文件名再跑一次，保留最初四题的基线：
+
+```bash
+# 将导学自拟题纳入同一检索流程；此报告应比原四题基线多出你的新题。
+python -m companion evaluate --output keyword-with-my-question.json
+```
+
+打开新报告，按 ID 找到新增题，核对它的实际来源和预期短句。之后的检索优化继续用这份已扩充的 `eval/dev.json`，不要为使结果好看而删掉失败题。
 
 
 ## 本单元完成条件
@@ -87,14 +96,18 @@ python -m companion evaluate --output keyword-baseline.json
 ```bash
 # 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - <<'PY'
+import json
+from pathlib import Path
 from companion.evaluation import evaluate
+cases=json.loads(Path("eval/dev.json").read_text(encoding="utf-8"))
 r=evaluate("eval/dev.json")
-assert len(r["records"])==4 and r["quality_passed"] is None
+assert [item["id"] for item in r["records"]]==[case["id"] for case in cases]
+assert r["quality_passed"] is None
 print([(x["id"],x["quote_hit"]) for x in r["records"]])
 PY
 ```
 
-**预期：**有答案开发题命中短句；无答案题为 None，质量尚未人工确认。
+**预期：**报告包含当前题单的每道题，包括你新增的问题；短句是否命中看各题实际结果，无目标短句的题为 None。这个检查只确认没有漏跑题目，质量尚未人工确认。
 
 
 遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。

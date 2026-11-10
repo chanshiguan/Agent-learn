@@ -188,13 +188,19 @@ def main(kind="search"):
 ```bash
 # 关键词接近讲稿原词时，观察第一讲相关片段是否靠前；不消耗生成模型 token。
 python -m companion search "文言文序言和白话日记"
+# 保存原词查询结果；下一次 search 会覆盖工作文件 search.json。
+cp data/live/search.json data/live/keyword-literal.json
 # 换成同义问法，检查结果是否变差；后面用它判断向量检索有没有帮助。
 python -m companion search "开头古雅的文字和后面的记录有什么关系"
+# 留下同义问法的候选，后面加向量检索时要用同一道问题比较。
+cp data/live/search.json data/live/keyword-paraphrase.json
 # 刻意选择当前没有导入的作品；预期 hits 为空，而不是串入另一部书。
 python -m companion search "文言文序言" --book "三国演义"
+# 留下作品过滤结果，与前两次实验分开核对。
+cp data/live/search.json data/live/keyword-wrong-book.json
 ```
 
-每条命令会覆盖 `data/live/search.json`。把有用的失败结果另存为 `keyword-failure.json`，同时记下原问题。不要只保留最漂亮的一次结果。
+上面三次调用分别留下了原词、同义问法和错误作品的记录。打开它们，先核对 `question`，再看 `hits` 中的文件名和文字。第 9 章比较向量检索时会重用同义问法；不要因为这次没找到理想结果就换题。
 
 ## 先过滤，还是先排序
 

@@ -119,6 +119,24 @@ actions.approve(a,d["id"],d["revision"],d["digest"],True)
             response = subprocess.run([sys.executable, '-B', '-c', check['code']], cwd=work, env=env, text=True, capture_output=True)
             assert response.returncode == 0, (unit, response.stdout, response.stderr)
             checks += 1
+        if unit == '0030-retrieval-baseline-02':
+            # The prose explicitly asks for one learner-authored case. Preserve the original sample
+            # after checking this state, so the reference-file comparison remains meaningful.
+            case_file = work / 'eval/dev.json'
+            original_cases = case_file.read_text()
+            cases = json.loads(original_cases)
+            cases.append({"id": "learner-extra", "question": "第一讲怎样区分两种叙述声音？",
+                "expected_document_prefixes": ["06 "],
+                "expected_quotes": ["文言文序言提供外部叙述"], "expected_insufficient": False})
+            try:
+                case_file.write_text(json.dumps(cases, ensure_ascii=False))
+                for check in part['checks']:
+                    response = subprocess.run([sys.executable, '-B', '-c', check['code']],
+                        cwd=work, env=env, text=True, capture_output=True)
+                    assert response.returncode == 0, (unit, '新增题后的检查', response.stderr)
+                    checks += 1
+            finally:
+                case_file.write_text(original_cases)
         if part['original'] == '0052-write-drafts' and part['checks']:
             subprocess.run([sys.executable, '-B', '-c',
                 'from companion import state,actions; assert len(actions.notes(state.Actor("demo","reader-a")))==1'],

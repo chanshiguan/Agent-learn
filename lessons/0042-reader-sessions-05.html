@@ -3,7 +3,7 @@
 <div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="../courses/00-classics-reading-foundations/index.html">课程首页</a><span>/</span><span>主线学习</span><span>/</span><span>两位读者，不共用一段对话（5/5：连接页面交互）</span></nav><div class="reading-layout"><aside class="reading-rail"><details class="rail-menu" open><summary>本章导航与本页目录</summary><a class="back-link" href="../courses/00-classics-reading-foundations/index.html#chapter-14">← 返回课程地图</a><p class="rail-label">第 14 章 · 保存每位读者自己的阅读</p><nav aria-label="本章单元"><ol class="unit-list"><li><a href="0042-reader-sessions.html"><span class="unit-number">1</span><span>两位读者，不共用一段对话（1/5：保存会话状态）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-02.html"><span class="unit-number">2</span><span>两位读者，不共用一段对话（2/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-03.html"><span class="unit-number">3</span><span>两位读者，不共用一段对话（3/5：连接接口与业务）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-04.html"><span class="unit-number">4</span><span>两位读者，不共用一段对话（4/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0042-reader-sessions-05.html" aria-current="page"><span class="unit-number">5</span><span>两位读者，不共用一段对话（5/5：连接页面交互）<small>60—75 分钟</small></span></a></li><li><a href="0043-explicit-progress.html"><span class="unit-number">6</span><span>让记忆可以被查看、修正和删除<small>60—75 分钟</small></span></a></li></ol></nav><nav class="page-toc" aria-label="本页目录"><p class="rail-label">本页目录</p><ol><li><a href="#section-1">现在动手写</a></li><li><a href="#section-2">运行并观察</a></li><li><a href="#section-3">身份来自哪里</a></li><li><a href="#section-4">本单元完成条件</a></li><li><a href="#section-5">下次开始前</a></li><li><a href="#section-6">资料依据与选读</a></li><li><a href="#section-7">用小检查核对自己的实现</a></li></ol></nav></details></aside><main id="main-content" tabindex="-1"><p class="eyebrow">主线学习 / 第 14 章 / 单元 5 · 共 6 个</p><h1>两位读者，不共用一段对话（5/5：连接页面交互）</h1><div class="lesson-meta"><span>本单元 60—75 分钟</span><span>本章 360—450 分钟</span><span>安装与下载等待另计</span><span>选读不计入用时</span></div>
 <p>本单元预计 <strong>60—75 分钟</strong>。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。</p>
 <p>接着上一单元<a href="0042-reader-sessions-04.html">《两位读者，不共用一段对话（4/5：连接页面交互）》</a>继续。使用同一个 <code>classics-reader/</code> 项目，保留此前文件与输入资料。</p>
-<p>上一小节已经把前一部分写进项目。这一节继续处理 <code>companion/web/reader.js</code>；先回想它接收什么、交给谁，再往下写。</p>
+<p>现在页面已经有控件，<code>reader.js</code> 也能请求接口和展示数据，只差“什么时候调用”。本节把新建、选择、删除、提问和切换读者接到事件，最后启动 <code>companion.app:app</code>。完成后用 A/B 两位虚构读者验证隔离与重启留存；下一单元会在同一会话上增加显式阅读进度。</p>
 <h2 id="section-1">现在动手写</h2>
 <p>先读每步的目的，再输入代码。代码块里的缩进属于程序；若同一处拆成多个连续块，写完这些块再检查。不要用课后完整参考文件覆盖自己的进度。</p>
 <h3>第 1 步：写页面函数 on</h3>
@@ -139,7 +139,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 </details>
 
 <h2 id="section-5">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<p>下次先画出“点击创建阅读 → POST /api/sessions → state.create_session → SQLite → 页面列表”这条路径，再重启服务，分别选 A/B 检查原会话。若 A 的记录出现在 B 列表中，先停在这里核对身份与列表查询；隔离通过后，再进入阅读进度单元。</p>
 <h2 id="section-6">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <h2 id="section-7">用小检查核对自己的实现</h2>

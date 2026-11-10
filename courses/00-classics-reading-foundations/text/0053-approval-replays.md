@@ -41,7 +41,7 @@ def revise(actor, identity, body):
 
 **写在哪里：**项目根目录下的 `companion/app.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
-**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+**先理解：**这个入口只接收新正文，不让页面自行指定批准状态。修改成功后服务端更新版本和摘要，原来的确认条件随之失效。
 
 ```python
 # 目的：只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。
@@ -74,7 +74,7 @@ def revise(identity: str, body: Revision, who=Depends(actor)):
 
 页面文本变了但还没保存时不能点确认；保存后重新取得服务端版本与摘要。
 
-**写在哪里：**项目根目录下的 `companion/web/reader.js`。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。
+**写在哪里：**项目根目录下的 `companion/web/reader.js`。 找到下面这两行并完整删除，不新增替换代码，周围代码保留。
 
 <details><summary>定位：本步骤要替换的原文</summary>
 
@@ -85,9 +85,9 @@ def revise(identity: str, body: Revision, who=Depends(actor)):
 
 </details>
 
-**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。
+第一行原来隐藏“保存修改”按钮，第二行原来把正文设为只读；删除后，读者可以修改草稿，下一步再为按钮接上保存动作。周围的控件创建和批准逻辑继续保留。
 
-**写完后应当怎样：**修改草稿后只能确认当前版本。
+**写完后应当怎样：**正文不再是只读，保存修改按钮不再隐藏；接完下一步后才能把修改传到服务端。
 
 ### 第 5 步：开放编辑并要求先保存修改
 
@@ -139,7 +139,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 草稿还带 revision、内容 digest 和 15 分钟有效期。它们分别防止用旧版本批准、确认内容被替换、长期挂起的批准被误用。内容摘要不是签名，也不替代身份认证。
 
 
-用临时数据重复验证旧版批准、越权批准、重复提交和过期；不写入你的实际笔记库。
+本页末尾的小检查在临时数据库里验证旧预览拒绝和重复提交单条笔记，可以重复运行。越权和过期还要按下面的操作观察，分别保存结果，不把两条自动检查说成覆盖所有边界。
 
 
 手动再做一次：批准同一草稿两次，notes 应只多一条。创建新草稿后不确认，等过期或在独立测试数据里调整 expires，再批准应失败。不要修改真实业务库时间来做实验。
@@ -174,7 +174,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 
 ## 下次开始前
 
-隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。
+下次先不看代码，解释正文改变后 revision 和 digest 为什么都要更新，再重复末尾临时库检查。保留一份尚未确认的测试草稿及其 ID，下一单元会用新进程读取它；不要提前确认这份用来练恢复的草稿。
 
 ## 资料依据与选读
 
@@ -187,16 +187,28 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 ```bash
 # 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - <<'PY'
-from companion import state,actions
-a=state.Actor("demo","reader-a")
-d=actions.draft(a,"note","旧正文","revision-test")
-n=actions.revise(a,d["id"],"新正文")
-try:
-    actions.approve(a,d["id"],d["revision"],d["digest"],True);raise AssertionError("旧预览不应通过")
-except ValueError:pass
-r=actions.approve(a,n["id"],n["revision"],n["digest"],True)
-assert actions.approve(a,n["id"],n["revision"],n["digest"],True)["replayed"] is True
-print("旧预览拒绝，重复批准不重复写入")
+import os
+import tempfile
+from companion import state, actions
+
+# 每次从独立空库开始，重复练习不会碰到上次已提交的草稿或修改自己的笔记。
+with tempfile.TemporaryDirectory(prefix="reading-approval-check-") as directory:
+    os.environ["READING_DATA_DIR"] = directory
+    state.initialize()
+    actor = state.Actor("demo", "practice-a")
+    old = actions.draft(actor, "note", "旧正文", "revision-test")
+    revised = actions.revise(actor, old["id"], "新正文")
+    # 故意提交修改前的版本，预期明确拒绝，而不是批准页面没看过的新内容。
+    try:
+        actions.approve(actor, old["id"], old["revision"], old["digest"], True)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("旧预览不应通过")
+    actions.approve(actor, revised["id"], revised["revision"], revised["digest"], True)
+    repeated = actions.approve(actor, revised["id"], revised["revision"], revised["digest"], True)
+    assert repeated["replayed"] is True and len(actions.notes(actor)) == 1
+    print("旧预览拒绝，重复批准只保存一条笔记；临时库将自动清理。")
 PY
 ```
 

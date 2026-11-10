@@ -2,6 +2,8 @@
 # 预期：保存后只有导入和定义；导入它不会自动运行整个业务。
 from .rag import retrieve, budget
 from .state import get_session
+from .corpus import visible
+from .files import load
 
 # 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。
 # 预期：程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。
@@ -28,9 +30,17 @@ class ReaderTools:
         if name == "read_source":
             if set(arguments) != {"source_id"} or not isinstance(arguments["source_id"], str):
                 raise ValueError("读取来源只接受 source_id。")
-            source = self.seen.get(arguments["source_id"])
-            if source is None:
+            source_id = arguments["source_id"]
+            if source_id not in self.seen:
                 raise PermissionError("不能读取本次未检索到的来源。")
+            # 已见过不等于现在仍可见；进度或资料更新后，不能把旧缓存再交给模型。
+            corpus = load("corpus.json", {"chunks": []})
+            allowed = visible(corpus["chunks"], self.actor.tenant, session["book"],
+                              session["progress"] if session["strict"] else None)
+            source = next((item for item in allowed if item["id"] == source_id), None)
+            if source is None:
+                raise PermissionError("当前阅读范围内没有此来源，请重新检索。")
+            self.seen[source_id] = source
             return source
         raise ValueError("没有登记这个工具；不会执行模型提供的代码或命令。")
 

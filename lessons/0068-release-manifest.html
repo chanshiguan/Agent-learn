@@ -117,14 +117,20 @@ docker compose --env-file .env -f deploy/compose.yaml build app
 docker compose --env-file .env -f deploy/compose.yaml up -d --no-deps --force-recreate app
 </code></pre>
 <h2 id="section-4">运行并观察</h2>
-<pre><code class="language-bash"># 执行自动行为检查，先挡住确定的回归。
-python -m unittest discover -s tests -v
+<pre><code class="language-bash"># 在独立测试目录执行自动行为检查，避免向阅读状态库写入合成会话。
+READING_DATA_DIR=data/test-state python -m unittest discover -s tests -v
 # 记录当前依赖与资料/索引指纹；输出不包含模型密钥。
 python -m companion manifest
+# 在容器记录覆盖默认文件之前另存主机清单，以便比较两种环境。
+cp data/live/release-manifest.json data/live/release-manifest-host.json
 # 若候选运行在 Compose 中，再记录容器里的实际依赖；它可能与主机环境不同。
 docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion manifest
-# 保存实际解析后的依赖版本，便于在相同平台重建；跨平台仍要重新安装验证。
-python -m pip freeze &gt; data/live/requirements-resolved.txt
+# 保存真正候选容器的清单；不会覆盖刚才的主机副本。
+cp data/live/release-manifest.json data/live/release-manifest-container.json
+# 保存主机解析后的依赖版本，便于在相同平台重建；跨平台仍要重新安装验证。
+python -m pip freeze &gt; data/live/requirements-resolved-host.txt
+# 另存容器解析版本，避免用主机依赖冒充候选环境。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m pip freeze &gt; data/live/requirements-resolved-container.txt
 # 记录候选镜像的实际标识，不只写容易被覆盖的 candidate 标签。
 docker image inspect classics-companion:candidate --format &#39;{{.Id}}&#39;
 </code></pre>

@@ -87,11 +87,15 @@ from .rag import retrieve, answer
 ```bash
 # 使用刚才的词面检索，再把候选证据交给真实模型；预期回答含可回查的引用。
 python -m companion ask "讲稿怎样解释文言文序言与白话日记的关系？"
+# 第一份回答保留作对照；下一条 ask 会覆盖工作文件 ask.json。
+cp data/live/ask.json data/live/ask-supported.json
 # 提问资料未提供的精确信息；预期明确不足，不借常识编造版本页码。
 python -m companion ask "这五讲采用哪家出版社哪一版原著？请给出每讲的准确页码。"
+# 单独留下不足回答，下一章建立评分规则时回看这两个案例。
+cp data/live/ask.json data/live/ask-insufficient.json
 ```
 
-第一条结果保存为 `data/live/ask.json`。运行第二条前另存第一条。逐条核对 `citations` 和 `sources`：合法编号只是起点，还要检查对应片段是否真的支持回答。允许文学解读有差异，但不允许凭空添加证据。
+打开 `data/live/ask-supported.json` 和 `data/live/ask-insufficient.json`，逐条核对 `citations` 和 `sources`：合法编号只是起点，还要检查对应片段是否真的支持回答。允许文学解读有差异，但不允许凭空添加证据。
 
 ## 亲手拆开一条回答
 

@@ -8,7 +8,9 @@
 
 会话是一次连续阅读的容器，保存作品、最近对话和进度。它不是知识库，也不是模型重新训练。SQLite 是一个本地数据库文件；适合本课单实例练习，多副本和高并发另需设计。
 
-先用 Ctrl+C 停止第 13 章服务，再启动加入会话的版本。
+上一章的页面每次只处理一个问题，还没有保存“谁在读哪本书”。本节先写 `state.py` 保存会话，再写 `service.py` 把一次问答和这条会话连起来。你会先在临时数据库中创建、更新、读回一条会话，马上看到版本号怎样变化，不必等网页完成。
+
+第 13 章的 `basic_app.py` 是单次问答的对照版本，保留它。本组接下来会新建 `app.py`：第 2—3 小节接会话接口和页面结构，第 4—5 小节接页面事件，最后启动新入口。先用 Ctrl+C 停止旧服务；完成整组后再启动网页。
 
 
 ## 现在动手写
@@ -42,7 +44,7 @@ from .files import data_dir
 
 **写在哪里：**项目根目录下的 `companion/state.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
-**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+**先理解：**Actor 把机构、账号和角色放在一个对象中传递。frozen=True 防止代码中途改身份；这不是登录认证，目前的身份只用于本机练习。
 
 ```python
 # 目的：业务函数不从模型文字里推断读者；本章仅有本机虚构身份。
@@ -94,7 +96,7 @@ def connect():
 
 ```python
 # 目的：一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。
-# 预期：此时库中只有 sessions，不会提前出现账号或审批表。
+# 预期：数据库中能查询到本节创建的 sessions 表，重复初始化不会清除已有会话。
 def initialize():
     with connect() as db:
         db.executescript("""
@@ -107,7 +109,7 @@ def initialize():
             db.execute("PRAGMA user_version=1")
 ```
 
-**写完后应当怎样：**此时库中只有 sessions，不会提前出现账号或审批表。
+**写完后应当怎样：**数据库中能查询到本节创建的 sessions 表，重复初始化不会清除已有会话。
 
 ### 第 5 步：实现 get_session()
 
@@ -258,11 +260,45 @@ def ask(actor, session_id, question, request_id, mode="qa", method="keyword"):
 python -m py_compile companion/state.py companion/service.py
 ```
 
-先不看说明，说出本节最后一步为什么要做、写完以后哪件事应当发生。
+语法通过后，运行下面的独立状态实验。`python -` 让终端读取随后的 Python；结束标记 `PY` 单独顶格写。它不调用模型，也不需要网页。
+
+```bash
+# 在一次性目录中观察会话存取和版本冲突；预期主线 data/live 不增加实验记录。
+python - <<'PY'
+import os
+import tempfile
+from companion import state
+
+# 临时目录让这次状态实验不留下学习会话；退出 with 后目录会自动清理。
+with tempfile.TemporaryDirectory(prefix="reading-session-check-") as directory:
+    os.environ["READING_DATA_DIR"] = directory
+    state.initialize()
+    actor = state.Actor("demo", "practice-a")
+    before = state.create_session(actor)
+    assert before["revision"] == 0 and before["history"] == []
+    # 这是一段明确虚构的对话，只验证存取，不冒充真实模型回答。
+    history = [{"role": "user", "content": "我想讨论序言。"}]
+    saved = state.update_session(actor, before, history=history)
+    reread = state.get_session(actor, before["id"])
+    assert saved["revision"] == reread["revision"] == 1
+    assert reread["history"] == history
+    # 再拿旧版本写入应失败；否则较慢请求可能覆盖新对话。
+    try:
+        state.update_session(actor, before, history=[])
+    except ValueError:
+        print("旧版本被拒绝；重新读取仍有刚保存的对话。")
+    else:
+        raise AssertionError("旧版本不应覆盖新对话")
+    assert state.get_session(actor, before["id"])["history"] == history
+    print("会话已保存并读回，revision 从 0 变为 1。")
+PY
+```
+
+应看到“旧版本被拒绝”和“revision 从 0 变为 1”。再不看代码解释：为什么重新读取能看到内容，而拿旧版本更新会失败？
 
 <details class="answer-key"><summary>参考答案与下一步</summary>
 
-先查归属，再检索当前作品，最后使用版本号保存；身份不能交给模型决定。 回答后 history 最多保留两轮，返回新 revision 供下一次更新使用。 这次停点只检查当前文件；整条链路会在本组最后一节运行。
+内容已经写入 SQLite，重新打开连接仍能读回；更新时必须匹配读取到的 revision，所以旧版本不会覆盖新状态。下一小节将新建 `app.py`，把创建与列出会话的函数变成 HTTP 接口；保留刚写的 state.py 和 service.py，不重新复制一份数据库逻辑。
 
 </details>
 

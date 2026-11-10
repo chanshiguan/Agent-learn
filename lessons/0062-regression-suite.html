@@ -51,43 +51,71 @@ if __name__==&quot;__main__&quot;:
 </code></pre>
 <p>**写完后应当怎样：**一旦以后改坏事务或版本检查，测试会失败。</p>
 <h2 id="section-3">运行并观察</h2>
-<pre><code class="language-bash"># 安装到当前阶段需要的依赖，确保图检查点与网页测试都可运行。
+<pre><code class="language-bash"># 安装固定版本清单中的项目依赖，让当前虚拟环境能导入测试涉及的模块。
 python -m pip install -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
-# 运行课程的行为回归，临时数据不会覆盖学习库；其中模型替身只验证协议，不能算真实模型成绩。
-python -m unittest discover -s tests -v
+# 在全新临时库中运行自己写的测试，结束后清理，避免污染主线会话。
+python - &lt;&lt;&#39;PY&#39;
+import os
+import subprocess
+import sys
+import tempfile
+
+# 每次回归使用全新数据库，避免测试读者和笔记混进正在练习的阅读记录。
+with tempfile.TemporaryDirectory(prefix=&quot;reading-regression-&quot;) as directory:
+    environment = dict(os.environ, READING_DATA_DIR=directory)
+    subprocess.run(
+        [sys.executable, &quot;-m&quot;, &quot;unittest&quot;, &quot;discover&quot;, &quot;-s&quot;, &quot;tests&quot;, &quot;-v&quot;],
+        check=True,
+        env=environment,
+    )
+# 子进程失败会在上面报错；成功后临时数据库自动清理，主线 data/live 不变。
+PY
 </code></pre>
-<p>读测试名称，逐个对应到产品风险：他人会话不可读、未知范围排除、伪造引用拒绝、过期批准失败、重复恢复不重复写入、恢复包指纹不符拒绝。Qdrant 本地 SDK 测试验证存储契约，真实 Docker 服务还要用第 10 章实测。</p>
+<p>现在应运行到两份文件里的六条测试：0058 的无证据不生成、工具参数不能改身份、布尔值不能冒充审核范围，以及本节的旧进度拒绝、重复确认单条笔记、修改草稿后拒绝旧确认。逐条对照测试名称与断言；它们都不调用真实模型。</p>
+<p>这六条还没有自动覆盖登录 API 的全部越权入口、过期批准、图恢复、Qdrant 网络服务或备份篡改。保留第 21 章的手工权限矩阵；后面做恢复演练时，再补相应证据。不能把作者的其他验证算成自己已经编写的测试。</p>
 <h2 id="section-4">添一条有意义的回归</h2>
 <p>从你自己的失败记录中选一条能确定判断的边界，例如未检索过的 source_id。先确认现有行为是否符合预期，再添加测试。不要写只把函数输出复制一遍的测试，那只会把当前错误固定下来。</p>
 <p>每次运行记录程序版本、依赖版本、资料版本和测试范围。测试全绿不意味着未覆盖的风险也安全。</p>
 <h2 id="section-5">本单元完成条件</h2>
 <p>先遮住答案，回答下面的问题，再核对自己的运行记录。</p>
 <ol>
-<li>替身模型在测试里能做什么？</li>
-<li>为什么还要真实 Docker 验证？</li>
+<li>这六条测试通过，能证明模型会正确回答文学问题吗？</li>
+<li>为什么回归要使用临时数据库？</li>
 </ol>
 <details class="answer-key"><summary>查看参考答案与通过标准</summary>
 
-<p><strong>替身模型在测试里能做什么？</strong></p>
-<p>稳定制造合法或非法协议响应，检查程序是否正确处理；不能证明真实模型的理解、工具选择或文学质量。</p>
-<p><strong>为什么还要真实 Docker 验证？</strong></p>
-<p>SDK 本地模式与网络服务的部署、持久卷和连接故障不同，不能相互冒充。</p>
-<p>**通过证据：**完整行为测试报告及一个来自真实失败的新增断言，说明仍未覆盖的范围。</p>
+<p><strong>这六条测试通过，能证明模型会正确回答文学问题吗？</strong></p>
+<p>不能。它们核对程序可确定的边界，没有调用真实模型，也没有评阅文学解释。下一单元才用真实问答和人工复核补这一层证据。</p>
+<p><strong>为什么回归要使用临时数据库？</strong></p>
+<p>测试会创建虚构会话、草稿和笔记。独立临时目录让每次从已知空状态开始，结束后清理，不把测试记录混进正在学习的阅读内容。</p>
+<p>**通过证据：**临时目录中运行的已有六条测试报告，以及从自己的失败记录新增的一条断言与重跑结果。逐项写清自动覆盖了什么，仍需手工或真实服务验证什么。</p>
 </details>
 
 <h2 id="section-6">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<p>下次先不看实现，说出“旧 revision”“重复批准”“旧内容摘要”各自会触发哪条测试，再用本页的临时目录命令重跑。保留测试名称、结果和未覆盖清单；下一单元的真实模型评阅会补不同证据，不把两种成绩合成一句“全部正确”。</p>
 <h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/07-multi-agent-production.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <h2 id="section-8">用小检查核对自己的实现</h2>
 <p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
 <pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - &lt;&lt;&#39;PY&#39;
-import subprocess,sys
-subprocess.run([sys.executable,&quot;-m&quot;,&quot;unittest&quot;,&quot;discover&quot;,&quot;-s&quot;,&quot;tests&quot;,&quot;-v&quot;],check=True)
+import os
+import subprocess
+import sys
+import tempfile
+
+# 每次回归使用全新数据库，避免测试读者和笔记混进正在练习的阅读记录。
+with tempfile.TemporaryDirectory(prefix=&quot;reading-regression-&quot;) as directory:
+    environment = dict(os.environ, READING_DATA_DIR=directory)
+    subprocess.run(
+        [sys.executable, &quot;-m&quot;, &quot;unittest&quot;, &quot;discover&quot;, &quot;-s&quot;, &quot;tests&quot;, &quot;-v&quot;],
+        check=True,
+        env=environment,
+    )
+# 子进程失败会在上面报错；成功后临时数据库自动清理，主线 data/live 不变。
 PY
 </code></pre>
-<p>**预期：**当前六条自己编写的测试通过；它们不评价文学答案质量。</p>
+<p>**预期：**已写的六条测试和你新增的断言通过；失败时根据具体测试名定位，测试数据不写入主线学习库。它们不评价文学答案质量。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
 <p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0062-regression-suite"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0061-latency-cost.html"><small>上一单元</small>把一次模型调用拆成时间和用量</a><a href="0063-release-quality.html"><small>下一单元</small>冻结题集，用真实模型和人工复核 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

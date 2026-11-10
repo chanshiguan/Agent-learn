@@ -27,7 +27,7 @@ def revise(actor, identity, body):
 <h3>第 2 步：接入草稿修改接口</h3>
 <p>只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/app.py</code>。 在文件末尾另起一行，接着写下面这一段；已有内容保留。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**这个入口只接收新正文，不让页面自行指定批准状态。修改成功后服务端更新版本和摘要，原来的确认条件随之失效。</p>
 <pre><code class="language-python"># 目的：只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。
 # 预期：编辑后需要重新预览。
 class Revision(Input):
@@ -47,7 +47,7 @@ def revise(identity: str, body: Revision, who=Depends(actor)):
 <p>**写完后应当怎样：**编辑后需要重新预览。</p>
 <h3>第 4 步：开放编辑并要求先保存修改</h3>
 <p>页面文本变了但还没保存时不能点确认；保存后重新取得服务端版本与摘要。</p>
-<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
+<p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这两行并完整删除，不新增替换代码，周围代码保留。</p>
 <details><summary>定位：本步骤要替换的原文</summary>
 
 <pre><code class="language-javascript">    edit.hidden = true;
@@ -55,8 +55,8 @@ def revise(identity: str, body: Revision, who=Depends(actor)):
 </code></pre>
 </details>
 
-<p>**先理解：**这里用元素 ID 找到控件，再设置文字、状态或事件。函数名后带括号才是调用；注册事件后，要等点击或提交时才运行。</p>
-<p>**写完后应当怎样：**修改草稿后只能确认当前版本。</p>
+<p>第一行原来隐藏“保存修改”按钮，第二行原来把正文设为只读；删除后，读者可以修改草稿，下一步再为按钮接上保存动作。周围的控件创建和批准逻辑继续保留。</p>
+<p>**写完后应当怎样：**正文不再是只读，保存修改按钮不再隐藏；接完下一步后才能把修改传到服务端。</p>
 <h3>第 5 步：开放编辑并要求先保存修改</h3>
 <p>页面文本变了但还没保存时不能点确认；保存后重新取得服务端版本与摘要。</p>
 <p>**写在哪里：**项目根目录下的 <code>companion/web/reader.js</code>。 找到下面这段原文，把它完整替换成新内容。上下文行也包含在替换范围内，不要重复留下。</p>
@@ -89,7 +89,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 <h2 id="section-3">先理解幂等</h2>
 <p>同一个已确认动作提交两次，结果应与提交一次相同。这里把动作 ID 也作为笔记 ID，写笔记与标记 committed 放进同一个 SQLite 事务；中途失败一起回滚，不留下“状态说成功，内容却没保存”的半成品。</p>
 <p>草稿还带 revision、内容 digest 和 15 分钟有效期。它们分别防止用旧版本批准、确认内容被替换、长期挂起的批准被误用。内容摘要不是签名，也不替代身份认证。</p>
-<p>用临时数据重复验证旧版批准、越权批准、重复提交和过期；不写入你的实际笔记库。</p>
+<p>本页末尾的小检查在临时数据库里验证旧预览拒绝和重复提交单条笔记，可以重复运行。越权和过期还要按下面的操作观察，分别保存结果，不把两条自动检查说成覆盖所有边界。</p>
 <p>手动再做一次：批准同一草稿两次，notes 应只多一条。创建新草稿后不确认，等过期或在独立测试数据里调整 expires，再批准应失败。不要修改真实业务库时间来做实验。</p>
 <h2 id="section-4">分清本章保证的范围</h2>
 <p>同一 SQLite 事务能保护本地两次写入；如果未来动作变为外部发送消息或支付，数据库事务不能撤回已发生的外部副作用。那时需要外部幂等键、投递状态与补偿设计，不能直接照搬一句“失败就重试”。</p>
@@ -110,23 +110,35 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 </details>
 
 <h2 id="section-6">下次开始前</h2>
-<p>隔一天，先不看命令，解释本单元解决了什么问题，以及哪种情况仍会失败。再用你自己的一个阅读问题重跑关键步骤。若卡住，带上单元名称、预期结果和去掉凭据的错误信息继续讨论。</p>
+<p>下次先不看代码，解释正文改变后 revision 和 digest 为什么都要更新，再重复末尾临时库检查。保留一份尚未确认的测试草稿及其 ID，下一单元会用新进程读取它；不要提前确认这份用来练恢复的草稿。</p>
 <h2 id="section-7">资料依据与选读</h2>
 <p>主线概念依据 <a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/03-tool-use-and-hello-agent.zh-Hans.md">awesome-agentic-ai-zh 对应章节</a> 和 <a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter13">Hello-Agents 对应章节</a>。名著例子、练习顺序和本页程序是本课程的场景化编排，不是上游仓库的逐字转载。下方拓展可随时跳过。</p>
 <h2 id="section-8">用小检查核对自己的实现</h2>
 <p>下面的 Python 在当前项目中检查已经写过的行为。终端中的 <code>python -</code> 从随后的文本读取临时检查代码，结束标记 <code>PY</code> 要单独顶格写。它不会替你创建项目。涉及资料输出或虚构会话的检查只在本课程练习库执行。</p>
 <pre><code class="language-bash"># 验证本单元已经实现的行为；assert 不成立会报错，不把检查通过当成真实模型质量评分。
 python - &lt;&lt;&#39;PY&#39;
-from companion import state,actions
-a=state.Actor(&quot;demo&quot;,&quot;reader-a&quot;)
-d=actions.draft(a,&quot;note&quot;,&quot;旧正文&quot;,&quot;revision-test&quot;)
-n=actions.revise(a,d[&quot;id&quot;],&quot;新正文&quot;)
-try:
-    actions.approve(a,d[&quot;id&quot;],d[&quot;revision&quot;],d[&quot;digest&quot;],True);raise AssertionError(&quot;旧预览不应通过&quot;)
-except ValueError:pass
-r=actions.approve(a,n[&quot;id&quot;],n[&quot;revision&quot;],n[&quot;digest&quot;],True)
-assert actions.approve(a,n[&quot;id&quot;],n[&quot;revision&quot;],n[&quot;digest&quot;],True)[&quot;replayed&quot;] is True
-print(&quot;旧预览拒绝，重复批准不重复写入&quot;)
+import os
+import tempfile
+from companion import state, actions
+
+# 每次从独立空库开始，重复练习不会碰到上次已提交的草稿或修改自己的笔记。
+with tempfile.TemporaryDirectory(prefix=&quot;reading-approval-check-&quot;) as directory:
+    os.environ[&quot;READING_DATA_DIR&quot;] = directory
+    state.initialize()
+    actor = state.Actor(&quot;demo&quot;, &quot;practice-a&quot;)
+    old = actions.draft(actor, &quot;note&quot;, &quot;旧正文&quot;, &quot;revision-test&quot;)
+    revised = actions.revise(actor, old[&quot;id&quot;], &quot;新正文&quot;)
+    # 故意提交修改前的版本，预期明确拒绝，而不是批准页面没看过的新内容。
+    try:
+        actions.approve(actor, old[&quot;id&quot;], old[&quot;revision&quot;], old[&quot;digest&quot;], True)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&quot;旧预览不应通过&quot;)
+    actions.approve(actor, revised[&quot;id&quot;], revised[&quot;revision&quot;], revised[&quot;digest&quot;], True)
+    repeated = actions.approve(actor, revised[&quot;id&quot;], revised[&quot;revision&quot;], revised[&quot;digest&quot;], True)
+    assert repeated[&quot;replayed&quot;] is True and len(actions.notes(actor)) == 1
+    print(&quot;旧预览拒绝，重复批准只保存一条笔记；临时库将自动清理。&quot;)
 PY
 </code></pre>
 <p>**预期：**确认内容与版本绑定，重放不会产生重复笔记。</p>

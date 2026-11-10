@@ -33,7 +33,7 @@ def connect():
         db.close()
 
 # 目的：一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。
-# 预期：此时库中只有 sessions，不会提前出现账号或审批表。
+# 预期：数据库中能查询到本节创建的 sessions 表，重复初始化不会清除已有会话。
 def initialize():
     with connect() as db:
         db.executescript("""

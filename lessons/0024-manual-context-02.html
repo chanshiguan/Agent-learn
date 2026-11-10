@@ -102,7 +102,15 @@ python -m companion manual --start 200 --chars 900
 <p>用编辑器并排打开 <code>data/live/manual-no-context.json</code> 与 <code>manual-context.json</code>。再打开第一讲核对这段是否确实讨论序言；字符位置只是样本定位方法，不是原著页码。若你的 first.json 来自别的文件，先用第一章方法重新读取第一讲。</p>
 <p>线上路线的第二条命令会把选定讲稿片段发给所配模型服务；本地路线发给本地服务。两条路线用相同程序，资料能否发送由你的实际使用安排决定。仅做连接测试时不要顺手发送全文。</p>
 <h2 id="section-3">改一个条件，再观察</h2>
-<p>保持问题不变，把 <code>--start</code> 改为 <code>0</code>、<code>--chars</code> 改为 <code>120</code>。这段可能只介绍背景，未必足以支持关系解释。预期不是“答案字数变少”，而是系统应承认依据不够，或只回答可证实的部分。若模型仍自信补全，把原回答与片段一起保留，下一单元处理它。</p>
+<p>这个命令每次都会覆盖 <code>manual-context.json</code>。先保存刚才 900 字符的结果，再改用 120 字符，才能把两次结果放在一起比较：</p>
+<pre><code class="language-bash"># 留下较长片段的真实回答；后面的同名输出不会覆盖这份对照记录。
+cp data/live/manual-context.json data/live/manual-context-900.json
+# 保持问题不变，只缩短提供的资料；预期暴露选材不足时的行为。
+python -m companion manual --start 0 --chars 120
+# 给短片段结果单独命名，下一单元再用 manual-context.json 运行其他问题。
+cp data/live/manual-context.json data/live/manual-context-120.json
+</code></pre>
+<p>现在并排查看 <code>manual-no-context.json</code>、<code>manual-context-900.json</code> 和 <code>manual-context-120.json</code>。120 字符可能只介绍背景，未必足以支持关系解释。预期不是“答案字数变少”，而是系统应承认依据不够，或只回答可证实的部分。若模型仍自信补全，把回答与对应片段一起保留，下一单元就用它检查证据边界。</p>
 <p>若提示没有文字，核对 JSON 路径与范围；若连接失败，回到第 4 章地址检查；若报 JSON 结构不符，说明模型没有遵守输出约定，不能把这类错误当作成功答案。</p>
 <p>若提示输出被截断，先看所用模型是否把推理也计入输出预算。本程序默认最多输出 900 token，继续沿用第 4 章已验证的 <code>LLM_REASONING_EFFORT</code>；没有验证过该参数就保持未设置。需要扩大输出预算时，可在同一终端明确调整，再重跑同一道题：</p>
 <pre><code class="language-bash"># 给本次模型响应更多输出空间；可能增加耗时和费用，必须重新核对答案完整性与用量。

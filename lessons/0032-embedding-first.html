@@ -11,7 +11,7 @@
 <h3>第 1 步：记录真实编码器和向量客户端的依赖</h3>
 <p>先写清单再安装，权重首次下载另外耗时；库安装成功不代表权重已可用。</p>
 <p>**写在哪里：**项目根目录下的 <code>requirements-rag.txt</code>。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。</p>
-<p>**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。</p>
+<p>**先理解：**sentence-transformers 负责将文本编码成向量，qdrant-client 负责读写向量存储。pip 安装库与首次加载时下载模型权重是两个步骤；安装结束不代表权重已经可用。</p>
 <pre><code class="language-text"># 第 9—10 章新增：真实多语言 Embedding 与 Qdrant 客户端。
 sentence-transformers==6.2.0
 qdrant-client==1.15.1

@@ -148,7 +148,7 @@ def update_session(actor, session, history=None, progress=None, strict=None, pha
 
 **写在哪里：**项目根目录下的 `companion/app.py`。 在文件末尾另起一行，接着写下面这一段；已有内容保留。
 
-**先理解：**对照旧段和新段，看本次增加了哪个条件或配置值。它应当只改变上面说明的行为；其余输入与输出继续沿用。
+**先理解：**revision 是页面上次读到的会话版本。将它连同新的 progress 和 strict 发送，服务端才能发现另一个请求已改变会话，拒绝用旧页面覆盖新状态。
 
 ```python
 # 目的：请求带上页面读到的 revision；范围改变时清空旧对话，防止后文残留。

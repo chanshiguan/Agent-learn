@@ -130,9 +130,11 @@ def answer(question, hits, history=None, strict=False):
 ```bash
 # 仍提供同一片段，但追问样本未标出的版本页码；预期承认不知道，不得编造数字。
 python -m companion manual --question "这段在原著哪一版的第几页？请给准确页码。"
+# 保存本次不足回答，避免下一次手动选材实验覆盖它。
+cp data/live/manual-context.json data/live/manual-page-question.json
 ```
 
-先复制前一份结果再运行，因为同名输出会被覆盖。合格示例是：“这份讲解稿未提供原著版本和页码，无法确定。”这是教师拟写的判断样例，不是模型运行记录。
+本次会覆盖工作文件 `manual-context.json`，上一单元已经另存的 `manual-context-900.json` 和 `manual-context-120.json` 仍保留。上面的复制命令把本次结果另存为 `manual-page-question.json`，后续可用同一题复查改进。合格示例是：“这份讲解稿未提供原著版本和页码，无法确定。”这是教师拟写的判断样例，不是模型运行记录。
 
 还要看 `insufficient` 是否为 `true`。本次课程审查中，真实模型曾在文字里承认没有页码，却把这个字段写成 `false`。引用了“没有页码”的说明，不代表回答准确页码的证据已经充分。提示词已补清这个区别，但字段是否符合实际仍须核对；不能只看 JSON 解析成功就打勾。
 

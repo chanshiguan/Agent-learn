@@ -73,7 +73,16 @@ docker compose --env-file .env -f deploy/compose.yaml up -d
 docker compose --env-file .env -f deploy/compose.yaml ps
 ```
 
-运行前在编辑器完成 `.env`，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。
+运行前在编辑器完成 `.env`，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。在 Docker Desktop for Mac 中，先用下面的检查确认容器能否访问该地址。Linux 的 host-gateway 只提供宿主地址，并不保证绑定在回环地址上的服务可达；本课没有提供远程模型服务器的网络配置步骤。若检查失败，保留主机上的本地调用结果，先用已经验证的线上路线完成本章。需要坚持本地路线时，应先完成仅允许应用宿主访问的模型服务网络配置，再回来重试；不要把这项尚未完成的工作记成部署通过。
+
+模型地址有问题时，先在项目根目录运行下面这条诊断。它只读取模型列表，不生成回答，也不打印密钥。线上路线不需要执行它。
+
+```bash
+# 从应用容器检查到宿主 Ollama 的实际连通性；预期返回 HTTP 200。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -c 'import httpx; r=httpx.get("http://host.docker.internal:11434/api/tags", timeout=10, trust_env=False); r.raise_for_status(); print("宿主模型列表可达：", r.status_code)'
+```
+
+如果主机调用成功而这里失败，故障在容器到宿主的网络路径；重复安装 Python 库不能解决。Mac 安装与宿主访问机制可按 [Docker 官方说明](https://docs.docker.com/desktop/features/networking/)核对。
 
 这些命令都在 `classics-reader/` 中执行。`--env-file .env` 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 `env_file: ../.env` 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 [Docker 官方说明](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)。
 
@@ -95,6 +104,14 @@ Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 `.env` �
 
 镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。
 
+
+## 对外代理是另一项需要验证的部署工作
+
+到这里应用仍只在本机端口可用，`Caddyfile.example` 只是给部署负责人看的样例。真正接入域名时还要配置 DNS、TLS、访问范围和可信代理，不能把保存样例当成已经完成 HTTPS 部署。
+
+第21章的登录保护按账号和来源地址计数。经过 Docker 与反向代理后，应用看到的来源可能只是代理地址；同一校园网络的读者也可能共享地址。当前阈值是每个来源5分钟10次登录尝试，成功登录同样计数，不适合直接假定为公司容量。
+
+上线前需要部署负责人验证：从两个独立网络登录时，应用能否区分来源；可信代理只包含实际代理地址；伪造的转发头不能冒充其他来源；同一网络多账号正常登录不会被错误阻断。若尚未完成，在第29章 `known_blockers` 中记录“代理来源与登录限额未验证”。不要用信任任意来源的设置来跳过这一检查。
 
 ## 本单元完成条件
 

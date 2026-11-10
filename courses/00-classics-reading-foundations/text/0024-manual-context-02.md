@@ -145,7 +145,18 @@ python -m companion manual --start 200 --chars 900
 
 ## 改一个条件，再观察
 
-保持问题不变，把 `--start` 改为 `0`、`--chars` 改为 `120`。这段可能只介绍背景，未必足以支持关系解释。预期不是“答案字数变少”，而是系统应承认依据不够，或只回答可证实的部分。若模型仍自信补全，把原回答与片段一起保留，下一单元处理它。
+这个命令每次都会覆盖 `manual-context.json`。先保存刚才 900 字符的结果，再改用 120 字符，才能把两次结果放在一起比较：
+
+```bash
+# 留下较长片段的真实回答；后面的同名输出不会覆盖这份对照记录。
+cp data/live/manual-context.json data/live/manual-context-900.json
+# 保持问题不变，只缩短提供的资料；预期暴露选材不足时的行为。
+python -m companion manual --start 0 --chars 120
+# 给短片段结果单独命名，下一单元再用 manual-context.json 运行其他问题。
+cp data/live/manual-context.json data/live/manual-context-120.json
+```
+
+现在并排查看 `manual-no-context.json`、`manual-context-900.json` 和 `manual-context-120.json`。120 字符可能只介绍背景，未必足以支持关系解释。预期不是“答案字数变少”，而是系统应承认依据不够，或只回答可证实的部分。若模型仍自信补全，把回答与对应片段一起保留，下一单元就用它检查证据边界。
 
 若提示没有文字，核对 JSON 路径与范围；若连接失败，回到第 4 章地址检查；若报 JSON 结构不符，说明模型没有遵守输出约定，不能把这类错误当作成功答案。
 

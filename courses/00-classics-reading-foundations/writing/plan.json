@@ -37,7 +37,7 @@
         "title": "把练习数据与凭据留在电脑上",
         "why": "自己的阅读资料、模型密钥和生成结果不应该随代码提交；这是项目起步就能处理的边界。",
         "expect": "Git 只跟踪你之后创建的程序；忽略规则不能删除已经提交过的历史。",
-        "concept": ""
+        "concept": "每一行是一种 Git 忽略规则。末尾的 / 表示目录，* 表示任意匹配文字；这些规则只影响 Git 是否纳入文件，不会阻止 Python 读取资料。"
       }
     ],
     "checks": [
@@ -107,7 +107,7 @@
         "title": "整理正文，并保留原段落位置",
         "why": "跳过空段，但不重新编号，后面引用仍能指回 Word 原来的位置。空正文应失败。",
         "expect": "用本页的 DOCX 与 JSON 两个路径参数运行，先打印已读取的非空段数 1；此时还没有写出 JSON。",
-        "concept": ""
+        "concept": "enumerate 从 1 开始保留 Word 中的位置；strip 去掉段落两端空白，if text 跳过空段。先在内存里收集字典列表，下一步再给整个结果补上来源。"
       },
       {
         "file": "read_docx.py",
@@ -117,7 +117,7 @@
         "title": "给结果补上来源卡",
         "why": "只保存正文会丢失出处。文件名、指纹、段落数和字符数一起保存，后续能识别换稿。",
         "expect": "再次运行，多显示待保存的来源文件名；JSON 仍要等下一步写入。相同输入指纹相同，它不是原著页码。",
-        "concept": ""
+        "concept": "result 是一个字典：既包含整份文件的来源字段，也包含刚得到的 paragraphs 列表。read_bytes 读取原始字节供 SHA-256 计算；正文来自 Document，两者用途不同。"
       },
       {
         "file": "read_docx.py",
@@ -127,7 +127,7 @@
         "title": "写入 JSON，再打印摘要",
         "why": "JSON 是后续程序可读取的中间结果；先保留中文和缩进，方便你人工核查。",
         "expect": "第一讲输出 1 段、1302 字，生成 data/output/first.json。",
-        "concept": ""
+        "concept": "json.dumps 将字典变成文本，write_text 才把文本写到磁盘。先创建输出文件夹，使第一次运行时也能保存；ensure_ascii=False 让中文保持可读。"
       }
     ],
     "checks": [
@@ -172,7 +172,7 @@
         "title": "先划清镜像的输入边界",
         "why": "Docker 构建只需要程序和依赖；不要把资料、虚拟环境与密钥交给镜像构建上下文。",
         "expect": "构建上下文排除 data、.env 与 .venv。",
-        "concept": ""
+        "concept": ".dockerignore 决定构建时哪些文件不送入 Docker 的构建上下文；.gitignore 决定 Git 忽略什么，两者不能互相代替。data/ 仍留在主机，运行容器时再挂载。"
       },
       {
         "file": "Dockerfile",
@@ -182,7 +182,7 @@
         "title": "把已做过的安装与运行写成配方",
         "why": "每次临时容器都安装库很难复现。先固定 Python 系列，再复制依赖和自己写出的读取程序。",
         "expect": "构建时安装依赖；启动时仍由你选择输入与输出路径。",
-        "concept": ""
+        "concept": "FROM 选择起始环境；COPY 和 RUN 在构建镜像时执行，ENTRYPOINT 在启动容器时执行。因此讲稿路径属于运行参数，不应写死在镜像里。"
       }
     ],
     "checks": [],
@@ -226,7 +226,7 @@
         "title": "只增加模型客户端依赖",
         "why": "继续使用同一个虚拟环境，先保存依赖清单，再安装；本地与线上路线共用客户端。",
         "expect": "安装后可以导入 openai，但还没有发送请求。",
-        "concept": ""
+        "concept": "这是另一份依赖清单，记录调用兼容接口所需的客户端库。安装它不会下载本地模型权重；模型服务仍由上一单元准备。"
       },
       {
         "file": "first_chat.py",
@@ -246,7 +246,7 @@
         "title": "组装一份明确的模型请求",
         "why": "客户端负责网络，messages 描述任务与问题。明确不附讲稿，避免把常识回答误认为知识库结果。",
         "expect": "这里只准备客户端与消息，尚未发送。写到下一步的 create 调用后，才发生网络请求。",
-        "concept": ""
+        "concept": "messages 是按顺序排列的消息列表：system 说明任务约束，user 放本次问题。request 此时只是 Python 字典；创建客户端和字典都还没有发送请求。"
       },
       {
         "file": "first_chat.py",
@@ -256,7 +256,7 @@
         "title": "发送请求，并区分三类网络错误",
         "why": "地址错误、超时和服务端拒绝需要不同排查步骤；不要直接打印可能带凭据的原始响应。",
         "expect": "能根据错误类型回到地址、负载或服务配置排查。",
-        "concept": ""
+        "concept": "**request 将字典中的字段作为命名参数传给 create。try 中发生的不同网络错误进入对应 except；非零退出码表示本次失败，不应继续保存成功记录。"
       },
       {
         "file": "first_chat.py",
@@ -266,7 +266,7 @@
         "title": "检查模型是否真的完成",
         "why": "返回 HTTP 响应并不代表有完整答案。检查 finish_reason，并记录实际用量与耗时。",
         "expect": "空内容或截断会记为未完成，不伪造成功。",
-        "concept": ""
+        "concept": "choices 是候选回复列表，先判断非空再取第一个。complete 同时检查有可见文字和 finish_reason 为 stop；仅拿到文字可能只是被截断的半个回答。"
       },
       {
         "file": "first_chat.py",
@@ -276,7 +276,7 @@
         "title": "保存这次调用的证据",
         "why": "把结果留下来供后面有资料与无资料的对照；记录里不能含 API key。",
         "expect": "data/output/model-run.json 有本次真实答案、用量和完成状态。",
-        "concept": ""
+        "concept": "记录先落盘，再判断是否以失败退出。这样截断也有可回查的结果；之后做有资料与无资料的比较时，应另存文件，避免覆盖这次记录。"
       },
       {
         "file": "Dockerfile.model",
@@ -286,7 +286,7 @@
         "title": "复用容器知识封装模型客户端",
         "why": "读取容器的 ENTRYPOINT 与模型程序不同；单独配方让程序职责清楚，环境变量在运行时传入。",
         "expect": "模型地址指向实际服务，不把密钥写进镜像。",
-        "concept": ""
+        "concept": "继续使用第3章的镜像配方，只把安装清单和入口脚本换成模型客户端。模型服务在容器外，地址和密钥必须在 docker run 时传入。"
       }
     ],
     "checks": [],
@@ -317,7 +317,7 @@
         "title": "建立一个可以逐渐扩展的包",
         "why": "几个脚本开始共用能力。把共用函数放进 companion，避免在每个命令里重复粘贴。",
         "expect": "文件存在后，Python 能识别这个包；里面还没有检索或账号实现。",
-        "concept": ""
+        "concept": "companion 是本节新建的文件夹，__init__.py 让它成为 Python 包。接下来几个文件能用相对导入共享读取和调用函数；本文件本身不发起模型请求。"
       },
       {
         "file": "companion/files.py",
@@ -784,10 +784,10 @@
         "action": "create",
         "old": null,
         "code": "[\n  {\n    \"id\": \"dev-01\",\n    \"question\": \"第一讲怎样解释文言文序言和白话日记的关系？\",\n    \"expected_document_prefixes\": [\"06 \"],\n    \"expected_quotes\": [\"文言文序言提供外部叙述，白话日记呈现人物的内部感受\"],\n    \"expected_insufficient\": false\n  },\n  {\n    \"id\": \"dev-02\",\n    \"question\": \"第三讲谈到吃人时，为什么提到徐锡麟？\",\n    \"expected_document_prefixes\": [\"08 \"],\n    \"expected_quotes\": [\"把古代故事、较近的名字和眼前听闻连成一条线\"],\n    \"expected_insufficient\": false\n  },\n  {\n    \"id\": \"dev-03\",\n    \"question\": \"第二讲借月亮怎样讲平等？\",\n    \"expected_document_prefixes\": [\"07 \"],\n    \"expected_quotes\": [\"平等在这里指每个人都值得被尊重\"],\n    \"expected_insufficient\": false\n  },\n  {\n    \"id\": \"dev-04\",\n    \"question\": \"这五份讲稿使用的原著版本的准确页码是多少？\",\n    \"expected_document_prefixes\": [],\n    \"expected_quotes\": [],\n    \"expected_insufficient\": true\n  }\n]\n",
-        "title": "把导学问题写成机器能遍历的题单",
+        "title": "先把四道示例问题写成可循环的题单",
         "why": "题目、目标讲次和证据短句分别保存；来源命中和答案正确是不同指标。",
         "expect": "四道开发题可以重复跑，其中页码题没有目标片段。",
-        "concept": ""
+        "concept": "最外层方括号是一组题，每个花括号是一题。id 用来对应报告；expected_document_prefixes 指预期讲稿，expected_quotes 是人工核对过的短句；expected_insufficient 标记资料是否不足。JSON 使用小写 true/false，不能加注释或末尾多余逗号。"
       },
       {
         "file": "eval/holdout.json",
@@ -797,7 +797,7 @@
         "title": "为最终评测留两道未调参题",
         "why": "先封存题目，调参期间只跑开发题，避免把记住题库当作泛化。",
         "expect": "本阶段不运行或根据保留题改实现。",
-        "concept": ""
+        "concept": "这份题集用同样的字段，但用途不同：开发时不根据它反复调参数。本页展示了全部内容，它只能用于演练冻结题集的流程；正式质量验收还需要由未参与调参的人另备未见题。"
       },
       {
         "file": "companion/evaluation.py",
@@ -856,8 +856,8 @@
     ],
     "checks": [
       {
-        "code": "from companion.evaluation import evaluate\nr=evaluate(\"eval/dev.json\")\nassert len(r[\"records\"])==4 and r[\"quality_passed\"] is None\nprint([(x[\"id\"],x[\"quote_hit\"]) for x in r[\"records\"]])\n",
-        "expected": "有答案开发题命中短句；无答案题为 None，质量尚未人工确认。"
+        "code": "import json\nfrom pathlib import Path\nfrom companion.evaluation import evaluate\ncases=json.loads(Path(\"eval/dev.json\").read_text(encoding=\"utf-8\"))\nr=evaluate(\"eval/dev.json\")\nassert [item[\"id\"] for item in r[\"records\"]]==[case[\"id\"] for case in cases]\nassert r[\"quality_passed\"] is None\nprint([(x[\"id\"],x[\"quote_hit\"]) for x in r[\"records\"]])\n",
+        "expected": "报告包含当前题单的每道题，包括新增问题；短句命中按实际结果记录，无目标短句为 None，质量尚未人工确认。"
       }
     ],
     "original": "0030-retrieval-baseline",
@@ -883,10 +883,10 @@
         "action": "replace",
         "old": "    if generate or reranking or rewriting:\n        raise ValueError(\"本阶段只运行检索基线。\")\n",
         "code": "",
-        "title": "在同一条记录中保留模型结果",
-        "why": "出错时只记录错误类型，人工字段仍留空，避免把协议成功当成文学正确。",
-        "expect": "每道题都有来源及真实响应或失败类型，等待人工逐项核对。",
-        "concept": "",
+        "title": "先移除只允许检索的临时限制",
+        "why": "上一章刻意拒绝生成调用，便于先看清检索结果。这节要接入生成，因此先删掉这两行；真正调用模型的代码在下一步加入。",
+        "expect": "删除后不再提前拒绝 generate；下一步接上实际回答逻辑后，再运行本页评测。",
+        "concept": "本步骤只删除定位框中的两行，不新增代码；下一步再接入新能力。",
         "exact": true
       },
       {
@@ -958,7 +958,7 @@
         "title": "记录真实编码器和向量客户端的依赖",
         "why": "先写清单再安装，权重首次下载另外耗时；库安装成功不代表权重已可用。",
         "expect": "可以导入客户端；首次编码仍需要取得真实模型权重。",
-        "concept": ""
+        "concept": "sentence-transformers 负责将文本编码成向量，qdrant-client 负责读写向量存储。pip 安装库与首次加载时下载模型权重是两个步骤；安装结束不代表权重已经可用。"
       },
       {
         "file": "companion/vectors.py",
@@ -1198,10 +1198,10 @@
         "action": "replace",
         "old": "    if strategy != \"fixed\":\n        raise ValueError(\"本阶段只实现固定切分。\")\n",
         "code": "",
-        "title": "加入按段落和标题的切分入口",
-        "why": "固定字符不是唯一单位；段落由 Word 结构提供，标题模式需要真实标题样式。",
-        "expect": "没有标题样式的文档不会凭空得到多个语义标题。",
-        "concept": "",
+        "title": "先移除只允许固定切块的临时限制",
+        "why": "前面只教固定字符切块，所以程序遇到其他策略会停止。现在要比较段落和标题切法，先删掉这两行；下一步再增加这两种策略的处理。",
+        "expect": "这里只移除了旧限制，还没有完成新策略。接着写完下面两步，再运行三组比较。",
+        "concept": "本步骤只删除定位框中的两行，不新增代码；下一步再接入新能力。",
         "exact": true
       },
       {
@@ -1642,7 +1642,7 @@
         "title": "写下网页服务需要的依赖",
         "why": "先增加 HTTP 接口，再增加页面；模型凭据仍只由后端读取。",
         "expect": "安装 FastAPI、Uvicorn 和 HTTP 测试客户端，不安装前端框架。",
-        "concept": ""
+        "concept": "FastAPI 定义接口，Uvicorn 运行服务，HTTPX 发起 HTTP 请求供接口检查使用。它们与生成模型是不同部件，不会替你启动模型服务。"
       },
       {
         "file": "companion/basic_app.py",
@@ -1662,7 +1662,7 @@
         "title": "把 Question 接入最小服务",
         "why": "先规定输入格式和长度，未知字段拒绝，减少把任意对象传进业务函数的风险。",
         "expect": "空问题和多余字段会得到 422。",
-        "concept": ""
+        "concept": "BaseModel 定义服务端接受的数据形状。Field 限制问题长度，extra=forbid 拒绝未声明字段；格式不符时先返回 422，不进入问答函数。"
       },
       {
         "file": "companion/basic_app.py",
@@ -1763,7 +1763,7 @@
         "title": "把调用者身份变成明确的数据",
         "why": "业务函数不从模型文字里推断读者；本章仅有本机虚构身份。",
         "expect": "每次数据库操作都明确带 tenant 和 user。",
-        "concept": ""
+        "concept": "Actor 把机构、账号和角色放在一个对象中传递。frozen=True 防止代码中途改身份；这不是登录认证，目前的身份只用于本机练习。"
       },
       {
         "file": "companion/state.py",
@@ -1779,10 +1779,10 @@
         "file": "companion/state.py",
         "action": "append",
         "old": "",
-        "code": "# 目的：一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。\n# 预期：此时库中只有 sessions，不会提前出现账号或审批表。\ndef initialize():\n    with connect() as db:\n        db.executescript(\"\"\"\n        CREATE TABLE IF NOT EXISTS sessions(\n          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,\n          book TEXT NOT NULL, history TEXT NOT NULL DEFAULT '[]',\n          revision INTEGER NOT NULL DEFAULT 0);\n        \"\"\")\n        if db.execute(\"PRAGMA user_version\").fetchone()[0] == 0:\n            db.execute(\"PRAGMA user_version=1\")\n",
+        "code": "# 目的：一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。\n# 预期：数据库中能查询到本节创建的 sessions 表，重复初始化不会清除已有会话。\ndef initialize():\n    with connect() as db:\n        db.executescript(\"\"\"\n        CREATE TABLE IF NOT EXISTS sessions(\n          id TEXT PRIMARY KEY, tenant TEXT NOT NULL, owner TEXT NOT NULL,\n          book TEXT NOT NULL, history TEXT NOT NULL DEFAULT '[]',\n          revision INTEGER NOT NULL DEFAULT 0);\n        \"\"\")\n        if db.execute(\"PRAGMA user_version\").fetchone()[0] == 0:\n            db.execute(\"PRAGMA user_version=1\")\n",
         "title": "只创建本章需要的会话表",
         "why": "一行会话属于一个机构和一个读者；history 保存最近对话，revision 用于发现同时修改。",
-        "expect": "此时库中只有 sessions，不会提前出现账号或审批表。",
+        "expect": "数据库中能查询到本节创建的 sessions 表，重复初始化不会清除已有会话。",
         "concept": ""
       },
       {
@@ -1856,7 +1856,12 @@
         "concept": ""
       }
     ],
-    "checks": [],
+    "checks": [
+      {
+        "code": "import os\nimport tempfile\nfrom companion import state\n\n# 临时目录让这次状态实验不留下学习会话；退出 with 后目录会自动清理。\nwith tempfile.TemporaryDirectory(prefix=\"reading-session-check-\") as directory:\n    os.environ[\"READING_DATA_DIR\"] = directory\n    state.initialize()\n    actor = state.Actor(\"demo\", \"practice-a\")\n    before = state.create_session(actor)\n    assert before[\"revision\"] == 0 and before[\"history\"] == []\n    # 这是一段明确虚构的对话，只验证存取，不冒充真实模型回答。\n    history = [{\"role\": \"user\", \"content\": \"我想讨论序言。\"}]\n    saved = state.update_session(actor, before, history=history)\n    reread = state.get_session(actor, before[\"id\"])\n    assert saved[\"revision\"] == reread[\"revision\"] == 1\n    assert reread[\"history\"] == history\n    # 再拿旧版本写入应失败；否则较慢请求可能覆盖新对话。\n    try:\n        state.update_session(actor, before, history=[])\n    except ValueError:\n        print(\"旧版本被拒绝；重新读取仍有刚保存的对话。\")\n    else:\n        raise AssertionError(\"旧版本不应覆盖新对话\")\n    assert state.get_session(actor, before[\"id\"])[\"history\"] == history\n    print(\"会话已保存并读回，revision 从 0 变为 1。\")\n",
+        "expected": "会话已保存并读回，revision 从 0 变为 1；旧版本被拒绝，主线学习库不变。"
+      }
+    ],
     "original": "0042-reader-sessions",
     "files": [
       "companion/state.py",
@@ -1892,7 +1897,7 @@
         "title": "定义 Input 输入约定",
         "why": "拒绝未约定字段，作品名由服务端检查是否存在。",
         "expect": "请求不能随意追加身份参数。",
-        "concept": ""
+        "concept": "Input 是后续请求类型共用的基础类。把 extra=forbid 放在这里，继承它的接口都会拒绝多余字段，避免每个接口各写一套规则。"
       },
       {
         "file": "companion/app.py",
@@ -1902,7 +1907,7 @@
         "title": "定义 NewSession 输入约定",
         "why": "拒绝未约定字段，作品名由服务端检查是否存在。",
         "expect": "请求不能随意追加身份参数。",
-        "concept": ""
+        "concept": "NewSession 继承刚才的 Input，再声明创建会话需要的 book。默认书名只减少输入，服务端仍要检查这部作品是否存在于资料库。"
       },
       {
         "file": "companion/app.py",
@@ -1912,7 +1917,7 @@
         "title": "为一次会话提问规定输入",
         "why": "会话 ID、请求 ID 和问题分别校验；本阶段不接受尚未实现的模式。",
         "expect": "错误格式在业务代码之前被拒绝。",
-        "concept": ""
+        "concept": "session_id 指已有会话，request_id 区分一次请求，两者不是同一个编号。Literal 只允许当前已经接通的 qa 模式；长度与格式检查先于模型调用。"
       },
       {
         "file": "companion/app.py",
@@ -2352,7 +2357,7 @@
         "title": "写进度输入与更新入口",
         "why": "请求带上页面读到的 revision；范围改变时清空旧对话，防止后文残留。",
         "expect": "旧 revision 返回 409，成功写入返回新版本。",
-        "concept": ""
+        "concept": "revision 是页面上次读到的会话版本。将它连同新的 progress 和 strict 发送，服务端才能发现另一个请求已改变会话，拒绝用旧页面覆盖新状态。"
       },
       {
         "file": "companion/app.py",
@@ -2704,7 +2709,7 @@
         "file": "companion/tools.py",
         "action": "create",
         "old": null,
-        "code": "# 目的：工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。\n# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。\nfrom .rag import retrieve, budget\nfrom .state import get_session\n",
+        "code": "# 目的：工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。\n# 预期：保存后只有导入和定义；导入它不会自动运行整个业务。\nfrom .rag import retrieve, budget\nfrom .state import get_session\nfrom .corpus import visible\nfrom .files import load\n",
         "title": "先写这个文件需要的导入",
         "why": "工具复用检索与状态，身份由服务端传入，模型参数不能另选读者。",
         "expect": "保存后只有导入和定义；导入它不会自动运行整个业务。",
@@ -2714,10 +2719,10 @@
         "file": "companion/tools.py",
         "action": "append",
         "old": "",
-        "code": "# 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。\n# 预期：程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。\nclass ReaderTools:\n    def __init__(self, actor, session_id, method=\"keyword\"):\n        self.actor, self.session_id, self.method = actor, session_id, method\n        self.seen = {}\n\n    def execute(self, name, arguments):\n        if not isinstance(arguments, dict):\n            raise ValueError(\"工具参数必须为对象。\")\n        session = get_session(self.actor, self.session_id)\n        if name == \"get_progress\":\n            if arguments:\n                raise ValueError(\"读取进度不接受用户身份参数。\")\n            return {\"book\": session[\"book\"], \"progress\": session[\"progress\"], \"strict\": bool(session[\"strict\"])}\n        if name == \"search_lectures\":\n            if set(arguments) != {\"query\"} or not isinstance(arguments[\"query\"], str) or not 1 <= len(arguments[\"query\"]) <= 500:\n                raise ValueError(\"检索只接受 1—500 字符的 query。\")\n            hits = budget(retrieve(arguments[\"query\"], self.actor.tenant, session[\"book\"], self.method,\n                                   session[\"progress\"] if session[\"strict\"] else None))\n            self.seen.update({c[\"id\"]: c for c in hits})\n            return hits\n        if name == \"read_source\":\n            if set(arguments) != {\"source_id\"} or not isinstance(arguments[\"source_id\"], str):\n                raise ValueError(\"读取来源只接受 source_id。\")\n            source = self.seen.get(arguments[\"source_id\"])\n            if source is None:\n                raise PermissionError(\"不能读取本次未检索到的来源。\")\n            return source\n        raise ValueError(\"没有登记这个工具；不会执行模型提供的代码或命令。\")\n",
+        "code": "# 目的：先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。\n# 预期：程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。\nclass ReaderTools:\n    def __init__(self, actor, session_id, method=\"keyword\"):\n        self.actor, self.session_id, self.method = actor, session_id, method\n        self.seen = {}\n\n    def execute(self, name, arguments):\n        if not isinstance(arguments, dict):\n            raise ValueError(\"工具参数必须为对象。\")\n        session = get_session(self.actor, self.session_id)\n        if name == \"get_progress\":\n            if arguments:\n                raise ValueError(\"读取进度不接受用户身份参数。\")\n            return {\"book\": session[\"book\"], \"progress\": session[\"progress\"], \"strict\": bool(session[\"strict\"])}\n        if name == \"search_lectures\":\n            if set(arguments) != {\"query\"} or not isinstance(arguments[\"query\"], str) or not 1 <= len(arguments[\"query\"]) <= 500:\n                raise ValueError(\"检索只接受 1—500 字符的 query。\")\n            hits = budget(retrieve(arguments[\"query\"], self.actor.tenant, session[\"book\"], self.method,\n                                   session[\"progress\"] if session[\"strict\"] else None))\n            self.seen.update({c[\"id\"]: c for c in hits})\n            return hits\n        if name == \"read_source\":\n            if set(arguments) != {\"source_id\"} or not isinstance(arguments[\"source_id\"], str):\n                raise ValueError(\"读取来源只接受 source_id。\")\n            source_id = arguments[\"source_id\"]\n            if source_id not in self.seen:\n                raise PermissionError(\"不能读取本次未检索到的来源。\")\n            # 已见过不等于现在仍可见；进度或资料更新后，不能把旧缓存再交给模型。\n            corpus = load(\"corpus.json\", {\"chunks\": []})\n            allowed = visible(corpus[\"chunks\"], self.actor.tenant, session[\"book\"],\n                              session[\"progress\"] if session[\"strict\"] else None)\n            source = next((item for item in allowed if item[\"id\"] == source_id), None)\n            if source is None:\n                raise PermissionError(\"当前阅读范围内没有此来源，请重新检索。\")\n            self.seen[source_id] = source\n            return source\n        raise ValueError(\"没有登记这个工具；不会执行模型提供的代码或命令。\")\n",
         "title": "把三项只读能力收进一个工具入口",
-        "why": "先验证参数，再按工具名分派；read_source 只读取本次见过的来源，不能任意访问资料库。",
-        "expect": "程序员可以调用查询进度、查讲稿和回查来源，未知工具被拒绝。",
+        "why": "先验证参数，再按工具名分派；read_source 既要确认本轮见过，也要按当前进度和资料快照重新核对。",
+        "expect": "合法工具可用；未见、已越过当前范围或已撤下的来源都被拒绝。",
         "concept": ""
       }
     ],
@@ -2743,7 +2748,7 @@
         "title": "为模型描述工具名与参数形状",
         "why": "JSON Schema 只说明能请求什么；真正的执行权限仍由 ReaderTools 检查。",
         "expect": "工具参数中没有 tenant 和 user，未知字段禁止。",
-        "concept": ""
+        "concept": "每份 Schema 描述一个工具名及允许的参数，required 列必填项，additionalProperties=False 拒绝额外字段。它供模型决定怎样请求工具，实际权限仍由执行函数检查。"
       }
     ],
     "checks": [
@@ -2896,9 +2901,9 @@
         "file": "companion/actions.py",
         "action": "append",
         "old": "",
-        "code": "# 目的：生成草稿不等于保存笔记；请求键防止重复生成同一动作。\n# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。\ndef draft(actor, kind, body, request_key, session_id=None):\n    if kind not in {\"note\", \"review_plan\"} or not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:\n        raise ValueError(\"只接受非空笔记或复习计划，最多 6000 字符。\")\n    hashed = digest([kind, body])\n    with connect() as db:\n        db.execute(\"BEGIN IMMEDIATE\")\n        # 草稿生成期间读者可能删除阅读；在同一写事务里复核，避免删除后又留下新草稿。\n        if session_id is not None and not db.execute(\"SELECT 1 FROM sessions WHERE id=? AND tenant=? AND owner=?\", (session_id, actor.tenant, actor.user)).fetchone():\n            raise PermissionError(\"阅读记录已删除，不再保存这份草稿。\")\n        existing = db.execute(\"SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?\", (actor.tenant, actor.user, request_key)).fetchone()\n        if existing:\n            if existing[\"digest\"] != hashed:\n                raise ValueError(\"同一幂等键不能用于不同内容，请生成新的请求键。\")\n            return dict(existing)\n        identity = uuid.uuid4().hex\n        db.execute(\"INSERT INTO actions(id,tenant,owner,request_key,kind,body,digest,expires) VALUES(?,?,?,?,?,?,?,?)\",\n                   (identity, actor.tenant, actor.user, request_key, kind, body, hashed, time.time() + 900))\n        return dict(db.execute(\"SELECT * FROM actions WHERE id=?\", (identity,)).fetchone())\n",
+        "code": "# 目的：生成草稿不等于保存笔记；请求键防止重复生成同一动作。\n# 预期：越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。\ndef draft(actor, kind, body, request_key, session_id=None, session_revision=None):\n    if kind not in {\"note\", \"review_plan\"} or not isinstance(body, str) or not 1 <= len(body.strip()) <= 6000:\n        raise ValueError(\"只接受非空笔记或复习计划，最多 6000 字符。\")\n    hashed = digest([kind, body])\n    with connect() as db:\n        db.execute(\"BEGIN IMMEDIATE\")\n        # 在写入事务里复核生成依据；删除、改进度或新增对话后，旧结果不能悄悄落库。\n        if session_id is not None:\n            session = db.execute(\"SELECT revision,strict FROM sessions WHERE id=? AND tenant=? AND owner=?\", (session_id, actor.tenant, actor.user)).fetchone()\n            if session is None:\n                raise PermissionError(\"阅读记录已删除，不再保存这份草稿。\")\n            if session[\"strict\"] or session[\"revision\"] != session_revision:\n                raise ValueError(\"阅读记录已改变，请重新打开后再生成草稿。\")\n        existing = db.execute(\"SELECT * FROM actions WHERE tenant=? AND owner=? AND request_key=?\", (actor.tenant, actor.user, request_key)).fetchone()\n        if existing:\n            if existing[\"digest\"] != hashed:\n                raise ValueError(\"同一幂等键不能用于不同内容，请生成新的请求键。\")\n            return dict(existing)\n        identity = uuid.uuid4().hex\n        db.execute(\"INSERT INTO actions(id,tenant,owner,request_key,kind,body,digest,expires) VALUES(?,?,?,?,?,?,?,?)\",\n                   (identity, actor.tenant, actor.user, request_key, kind, body, hashed, time.time() + 900))\n        return dict(db.execute(\"SELECT * FROM actions WHERE id=?\", (identity,)).fetchone())\n",
         "title": "写 draft() 的边界",
-        "why": "生成草稿不等于保存笔记；请求键防止重复生成同一动作。",
+        "why": "生成草稿不等于保存笔记；请求键防止重复动作，写入时还要核对生成所依据的会话版本。",
         "expect": "越权、过期或错误摘要不会写入笔记；重复批准返回同一结果。",
         "concept": ""
       },
@@ -2947,10 +2952,10 @@
         "file": "companion/service.py",
         "action": "append",
         "old": "",
-        "code": "# 目的：生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。\n# 预期：得到的是待确认草稿，不会自动变成正式笔记。\ndef make_draft(actor, session_id, kind, request_id):\n    existing = next((a for a in actions.pending(actor) if a[\"request_key\"] == request_id), None)\n    if existing:\n        return existing\n    session = get_session(actor, session_id)\n    if session[\"strict\"] or not session[\"history\"]:\n        raise ValueError(\"当前没有可整理的普通阅读对话；受限模式下请手动写笔记。\")\n    task = \"一份简短阅读笔记\" if kind == \"note\" else \"一份三次复习计划草稿，日期由读者确认\"\n    response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n    # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。\n    body = response[\"message\"].get(\"content\") or \"\"\n    return actions.draft(actor, kind, body, request_id, session_id=session_id)\n",
+        "code": "# 目的：保存时核对本人会话和生成时版本，避免阅读范围改变后又留下旧内容。\n# 预期：得到的是待确认草稿，不会自动变成正式笔记。\ndef make_draft(actor, session_id, kind, request_id):\n    existing = next((a for a in actions.pending(actor) if a[\"request_key\"] == request_id), None)\n    if existing:\n        return existing\n    session = get_session(actor, session_id)\n    if session[\"strict\"] or not session[\"history\"]:\n        raise ValueError(\"当前没有可整理的普通阅读对话；受限模式下请手动写笔记。\")\n    task = \"一份简短阅读笔记\" if kind == \"note\" else \"一份三次复习计划草稿，日期由读者确认\"\n    response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n    # 生成期间会话可能改变；保存函数会在事务内核对最初读取的版本。\n    body = response[\"message\"].get(\"content\") or \"\"\n    return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session[\"revision\"])\n",
         "title": "根据当前对话整理待确认内容",
-        "why": "生成前取本人会话，写草稿时再次检查会话还存在，避免读者删除后又留下内容。",
-        "expect": "得到的是待确认草稿，不会自动变成正式笔记。",
+        "why": "保存时核对本人会话和生成时版本，避免阅读范围改变后又留下旧内容。",
+        "expect": "得到待确认草稿；生成中若删除阅读、改进度或新增对话，本次旧结果会被拒绝。",
         "concept": ""
       },
       {
@@ -2990,7 +2995,7 @@
         "title": "增加 Draft 接口约定",
         "why": "分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。",
         "expect": "未确认的内容只在草稿列表中，不在正式笔记中。",
-        "concept": ""
+        "concept": "kind 只接受笔记和复习计划两种草稿；session_id 确定依据哪段阅读记录。这个请求只生成待确认内容，不包含正式写入的批准。"
       },
       {
         "file": "companion/app.py",
@@ -3000,7 +3005,7 @@
         "title": "增加 Confirmation 接口约定",
         "why": "分别验证预览、确认和正式读取，确认请求必须带具体版本与摘要。",
         "expect": "未确认的内容只在草稿列表中，不在正式笔记中。",
-        "concept": ""
+        "concept": "revision 和 digest 分别对应你看到的草稿版本与正文摘要。把它们与 confirmed 一起传回，服务端才能拒绝已修改的旧预览，不能只靠一个确认布尔值。"
       },
       {
         "file": "companion/app.py",
@@ -3158,7 +3163,7 @@
         "title": "接入草稿修改接口",
         "why": "只允许本人修改 pending 状态的内容，已经提交的笔记不通过此入口重写。",
         "expect": "编辑后需要重新预览。",
-        "concept": ""
+        "concept": "这个入口只接收新正文，不让页面自行指定批准状态。修改成功后服务端更新版本和摘要，原来的确认条件随之失效。"
       },
       {
         "file": "companion/app.py",
@@ -3178,7 +3183,7 @@
         "title": "开放编辑并要求先保存修改",
         "why": "页面文本变了但还没保存时不能点确认；保存后重新取得服务端版本与摘要。",
         "expect": "修改草稿后只能确认当前版本。",
-        "concept": "",
+        "concept": "本步骤只删除定位框中的两行，不新增代码；原来的提交改为调用已写好的批准函数。",
         "exact": true
       },
       {
@@ -3195,8 +3200,8 @@
     ],
     "checks": [
       {
-        "code": "from companion import state,actions\na=state.Actor(\"demo\",\"reader-a\")\nd=actions.draft(a,\"note\",\"旧正文\",\"revision-test\")\nn=actions.revise(a,d[\"id\"],\"新正文\")\ntry:\n    actions.approve(a,d[\"id\"],d[\"revision\"],d[\"digest\"],True);raise AssertionError(\"旧预览不应通过\")\nexcept ValueError:pass\nr=actions.approve(a,n[\"id\"],n[\"revision\"],n[\"digest\"],True)\nassert actions.approve(a,n[\"id\"],n[\"revision\"],n[\"digest\"],True)[\"replayed\"] is True\nprint(\"旧预览拒绝，重复批准不重复写入\")\n",
-        "expected": "确认内容与版本绑定，重放不会产生重复笔记。"
+        "code": "import os\nimport tempfile\nfrom companion import state, actions\n\n# 每次从独立空库开始，重复练习不会碰到上次已提交的草稿或修改自己的笔记。\nwith tempfile.TemporaryDirectory(prefix=\"reading-approval-check-\") as directory:\n    os.environ[\"READING_DATA_DIR\"] = directory\n    state.initialize()\n    actor = state.Actor(\"demo\", \"practice-a\")\n    old = actions.draft(actor, \"note\", \"旧正文\", \"revision-test\")\n    revised = actions.revise(actor, old[\"id\"], \"新正文\")\n    # 故意提交修改前的版本，预期明确拒绝，而不是批准页面没看过的新内容。\n    try:\n        actions.approve(actor, old[\"id\"], old[\"revision\"], old[\"digest\"], True)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"旧预览不应通过\")\n    actions.approve(actor, revised[\"id\"], revised[\"revision\"], revised[\"digest\"], True)\n    repeated = actions.approve(actor, revised[\"id\"], revised[\"revision\"], revised[\"digest\"], True)\n    assert repeated[\"replayed\"] is True and len(actions.notes(actor)) == 1\n    print(\"旧预览拒绝，重复批准只保存一条笔记；临时库将自动清理。\")\n",
+        "expected": "旧预览被拒绝，重复批准只保存一条笔记；重复运行也不会修改学习库。"
       }
     ],
     "original": "0053-approval-replays",
@@ -3249,7 +3254,7 @@
         "title": "现在才安装状态图与磁盘检查点",
         "why": "先理解手写批准和持久状态，再观察框架如何组织同一个流程。",
         "expect": "安装库不改变批准规则。",
-        "concept": ""
+        "concept": "langgraph 组织状态流转，sqlite 检查点包保存暂停位置。它们接在已有批准事务之上；安装框架不会自动提供身份隔离或确认权限。"
       },
       {
         "file": "companion/state.py",
@@ -3290,7 +3295,7 @@
         "title": "写 ReviewState 的状态边界",
         "why": "明确图中保存动作 ID 和结果，不能保存一份绕过权限的任意执行计划。",
         "expect": "重启后可恢复同一批准，旧版本、越权和重复恢复仍受原事务约束。",
-        "concept": ""
+        "concept": "TypedDict 说明图状态有哪些键，total=False 允许结果尚未产生时缺少 result。它不是运行时权限检查；恢复时仍须用 action_id 查询当前动作并复查归属。"
       },
       {
         "file": "companion/graph.py",
@@ -3536,7 +3541,7 @@
         "title": "连接 Login 登录入口",
         "why": "输入格式、账号校验和令牌撤销分别负责，错误不回显原口令。",
         "expect": "登录成功取得短期令牌，退出后令牌失效。",
-        "concept": ""
+        "concept": "tenant 与 username 定位账号，password 只用于本次校验。长度检查先挡住明显无效输入，真正的口令比较交给后面的登录函数，不能把口令写入日志。"
       },
       {
         "file": "companion/app.py",
@@ -3819,7 +3824,7 @@
         "title": "增加 Feedback 接口",
         "why": "所有入口复用已认证身份；删除说明当前业务库范围，不能声称远端备份同步消失。",
         "expect": "反馈返回回执，删除撤销令牌并清空当前个人内容。",
-        "concept": ""
+        "concept": "category 限定反馈类型，trace_id 让维护者找到相关请求。这里故意不收集完整对话正文，以减少反馈处理中额外保存的个人内容。"
       },
       {
         "file": "companion/app.py",
@@ -4046,8 +4051,8 @@
     ],
     "checks": [
       {
-        "code": "import subprocess,sys\nsubprocess.run([sys.executable,\"-m\",\"unittest\",\"discover\",\"-s\",\"tests\",\"-v\"],check=True)\n",
-        "expected": "当前六条自己编写的测试通过；它们不评价文学答案质量。"
+        "code": "import os\nimport subprocess\nimport sys\nimport tempfile\n\n# 每次回归使用全新数据库，避免测试读者和笔记混进正在练习的阅读记录。\nwith tempfile.TemporaryDirectory(prefix=\"reading-regression-\") as directory:\n    environment = dict(os.environ, READING_DATA_DIR=directory)\n    subprocess.run(\n        [sys.executable, \"-m\", \"unittest\", \"discover\", \"-s\", \"tests\", \"-v\"],\n        check=True,\n        env=environment,\n    )\n# 子进程失败会在上面报错；成功后临时数据库自动清理，主线 data/live 不变。\n",
+        "expected": "已编写的行为测试通过；它们不评价文学答案质量，数据写入临时目录。"
       }
     ],
     "original": "0062-regression-suite",
@@ -4071,7 +4076,7 @@
         "title": "先列出部署所需配置",
         "why": "样例不带密钥，实际值放 .env；UID/GID 对应宿主数据目录所有者。",
         "expect": "逐行解释后再启动；用状态、登录、问答和来源核对实际结果。",
-        "concept": ""
+        "concept": "这份样例每行是变量名=值；复制成 .env 并填写后，由 Compose 读取。空模型名表示尚未配置，不代表使用某个默认模型。"
       },
       {
         "file": "deploy/Dockerfile",
@@ -4081,7 +4086,7 @@
         "title": "把已写出的服务封装进镜像",
         "why": "依赖、业务代码和启动命令进入镜像，数据与密钥通过运行时提供。",
         "expect": "逐行解释后再启动；用状态、登录、问答和来源核对实际结果。",
-        "concept": ""
+        "concept": "沿用第3章的构建过程，入口换成 Uvicorn。USER 限制容器内权限，CMD 指定单进程服务；EXPOSE 只描述端口，真正开放哪些宿主端口由 Compose 决定。"
       },
       {
         "file": "deploy/compose.yaml",
@@ -4101,7 +4106,7 @@
         "title": "为真正对外访问准备 HTTPS 入口",
         "why": "域名与证书条件需要实际环境满足；示例不会替你获得公司上线批准。",
         "expect": "逐行解释后再启动；用状态、登录、问答和来源核对实际结果。",
-        "concept": ""
+        "concept": "域名块接收外部 HTTPS 请求，reverse_proxy 转给宿主机的本地应用端口。这个文件只是待配置样例，不会因为保存了它就自动拥有域名、证书或代理服务。"
       },
       {
         "file": "companion/app.py",
@@ -4181,10 +4186,10 @@
         "file": "companion/measure.py",
         "action": "create",
         "old": null,
-        "code": "# 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。\n# 预期：报告区分成功、拒绝和失败，不能只看平均速度。\n\"\"\"第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。\"\"\"\nimport argparse\nfrom concurrent.futures import ThreadPoolExecutor\nimport getpass\nimport json\nimport time\nimport uuid\nimport httpx\nfrom .files import save\nfrom .models import client\n\n\ndef stream_probe():\n    sdk, model = client(timeout=60)\n    start = time.monotonic()\n    first, size = None, 0\n    with sdk:\n        with sdk.chat.completions.create(model=model, messages=[{\"role\": \"user\", \"content\": \"用一句话解释什么是阅读笔记。\"}], max_tokens=80, stream=True) as stream:\n            for chunk in stream:\n                content = chunk.choices[0].delta.content if chunk.choices else None\n                if content:\n                    if first is None: first = time.monotonic() - start\n                    size += len(content)\n    if first is None: raise ValueError(\"没有收到实际内容片段，不能报告首字延迟。\")\n    result = {\"model\": model, \"first_content_seconds\": first, \"full_seconds\": time.monotonic() - start, \"characters\": size, \"scope\": \"模型流式接口；课程网页目前等完整回答后显示\"}\n    save(\"stream-measure.json\", result)\n    return result\n\n\ndef api_probe(url, concurrency, count):\n    if not (url.startswith(\"http://127.0.0.1:\") or url.startswith(\"https://\")):\n        raise ValueError(\"仅测试本机 HTTP 或受保护的 HTTPS 地址。\")\n    token = getpass.getpass(\"输入专用测试账号的访问令牌（不回显、不保存）：\")\n    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。\n    with httpx.Client(trust_env=url.startswith(\"https://\"), base_url=url, headers={\"Authorization\": \"Bearer \" + token}, timeout=130) as client:\n        sessions = []\n        try:\n            # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。\n            for _ in range(count):\n                response = client.post(\"/api/sessions\", json={\"book\": \"狂人日记\"})\n                response.raise_for_status(); sessions.append(response.json()[\"id\"])\n            def one(identity):\n                started = time.monotonic()\n                try:\n                    response = client.post(\"/api/ask\", json={\"session_id\": identity, \"request_id\": uuid.uuid4().hex, \"question\": \"讲稿怎样解释文言文序言？\", \"mode\": \"qa\"})\n                    return {\"status\": response.status_code, \"seconds\": time.monotonic() - started}\n                except httpx.HTTPError as error:\n                    return {\"status\": type(error).__name__, \"seconds\": time.monotonic() - started}\n            started = time.monotonic()\n            with ThreadPoolExecutor(max_workers=concurrency) as pool: records = list(pool.map(one, sessions))\n            elapsed = time.monotonic() - started\n        finally:\n            for identity in sessions: client.delete(\"/api/sessions/\" + identity)\n    successful = sorted(r[\"seconds\"] for r in records if r[\"status\"] == 200)\n    result = {\"concurrency\": concurrency, \"requests\": count, \"records\": records, \"elapsed_seconds\": elapsed,\n              \"successes_per_second\": len(successful) / elapsed, \"error_ratio\": 1 - len(successful) / count,\n              \"p95_success_seconds\": successful[min(len(successful) - 1, int(len(successful) * .95))] if successful else None,\n              \"scope\": \"仅此次小样本，不能当作稳定生产 P95\"}\n    save(f\"load-{concurrency}.json\", result)\n    return result\n\n\nif __name__ == \"__main__\":\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"mode\", choices=[\"stream\", \"api\"])\n    parser.add_argument(\"--url\", default=\"http://127.0.0.1:8000\")\n    parser.add_argument(\"--concurrency\", type=int, choices=range(1, 5), default=1)\n    parser.add_argument(\"--count\", type=int, choices=range(1, 21), default=4)\n    args = parser.parse_args()\n    print(json.dumps(stream_probe() if args.mode == \"stream\" else api_probe(args.url, args.concurrency, args.count), ensure_ascii=False, indent=2))\n",
+        "code": "# 目的：使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。\n# 预期：报告区分成功、拒绝和失败，不能只看平均速度。\n\"\"\"第 26 章测量：分别记录模型首个内容片段和应用完整响应，不混淆两者。\"\"\"\nimport argparse\nfrom concurrent.futures import ThreadPoolExecutor\nimport getpass\nimport json\nimport os\nimport time\nimport uuid\nimport httpx\nfrom .files import save\nfrom .models import client\n\n\ndef stream_probe():\n    sdk, model = client(timeout=60)\n    maximum = int(os.environ.get(\"LLM_MAX_TOKENS\", \"900\"))\n    if not 128 <= maximum <= 4096:\n        raise ValueError(\"LLM_MAX_TOKENS 需要在 128—4096 之间。\")\n    request = {\"model\": model, \"messages\": [{\"role\": \"user\", \"content\": \"用一句话解释什么是阅读笔记。\"}], \"max_tokens\": maximum, \"temperature\": 0, \"stream\": True}\n    effort = os.environ.get(\"LLM_REASONING_EFFORT\", \"\").strip()\n    if effort:\n        request[\"reasoning_effort\"] = effort\n    start = time.monotonic()\n    first, size, finish_reason = None, 0, None\n    with sdk:\n        with sdk.chat.completions.create(**request) as stream:\n            for chunk in stream:\n                if not chunk.choices:\n                    continue\n                choice = chunk.choices[0]\n                finish_reason = choice.finish_reason or finish_reason\n                content = choice.delta.content\n                if content:\n                    if first is None: first = time.monotonic() - start\n                    size += len(content)\n    if first is None: raise ValueError(\"没有收到实际内容片段，不能报告首字延迟。\")\n    # 有首字不代表完整回答；截断和中断必须失败，不能作为完整耗时样本。\n    if finish_reason != \"stop\":\n        raise ValueError(f\"流式回答未正常完成（{finish_reason}），不记录为完整响应。\")\n    result = {\"model\": model, \"first_content_seconds\": first, \"full_seconds\": time.monotonic() - start, \"characters\": size, \"finish_reason\": finish_reason, \"max_tokens\": maximum, \"reasoning_effort\": effort or None, \"scope\": \"模型流式接口；课程网页目前等完整回答后显示\"}\n    save(\"stream-measure.json\", result)\n    return result\n\n\ndef api_probe(url, concurrency, count):\n    if not (url.startswith(\"http://127.0.0.1:\") or url.startswith(\"https://\")):\n        raise ValueError(\"仅测试本机 HTTP 或受保护的 HTTPS 地址。\")\n    token = getpass.getpass(\"输入专用测试账号的访问令牌（不回显、不保存）：\")\n    # 本机测量直连，避免系统代理改变延迟或要求额外的 SOCKS 依赖。\n    with httpx.Client(trust_env=url.startswith(\"https://\"), base_url=url, headers={\"Authorization\": \"Bearer \" + token}, timeout=130) as client:\n        sessions = []\n        try:\n            # 每个请求使用独立会话，避免把乐观锁冲突误当作模型容量问题。\n            for _ in range(count):\n                response = client.post(\"/api/sessions\", json={\"book\": \"狂人日记\"})\n                response.raise_for_status(); sessions.append(response.json()[\"id\"])\n            def one(identity):\n                started = time.monotonic()\n                try:\n                    response = client.post(\"/api/ask\", json={\"session_id\": identity, \"request_id\": uuid.uuid4().hex, \"question\": \"讲稿怎样解释文言文序言？\", \"mode\": \"qa\"})\n                    return {\"status\": response.status_code, \"seconds\": time.monotonic() - started}\n                except httpx.HTTPError as error:\n                    return {\"status\": type(error).__name__, \"seconds\": time.monotonic() - started}\n            started = time.monotonic()\n            with ThreadPoolExecutor(max_workers=concurrency) as pool: records = list(pool.map(one, sessions))\n            elapsed = time.monotonic() - started\n        finally:\n            for identity in sessions: client.delete(\"/api/sessions/\" + identity)\n    successful = sorted(r[\"seconds\"] for r in records if r[\"status\"] == 200)\n    result = {\"concurrency\": concurrency, \"requests\": count, \"records\": records, \"elapsed_seconds\": elapsed,\n              \"successes_per_second\": len(successful) / elapsed, \"error_ratio\": 1 - len(successful) / count,\n              \"p95_success_seconds\": successful[min(len(successful) - 1, int(len(successful) * .95))] if successful else None,\n              \"scope\": \"仅此次小样本，不能当作稳定生产 P95\"}\n    save(f\"load-{concurrency}.json\", result)\n    return result\n\n\nif __name__ == \"__main__\":\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"mode\", choices=[\"stream\", \"api\"])\n    parser.add_argument(\"--url\", default=\"http://127.0.0.1:8000\")\n    parser.add_argument(\"--concurrency\", type=int, choices=range(1, 5), default=1)\n    parser.add_argument(\"--count\", type=int, choices=range(1, 21), default=4)\n    args = parser.parse_args()\n    print(json.dumps(stream_probe() if args.mode == \"stream\" else api_probe(args.url, args.concurrency, args.count), ensure_ascii=False, indent=2))\n",
         "title": "写一份小规模请求测量程序",
-        "why": "使用明确虚构账号与题目，记录真实状态码和耗时；先测1个，再增加少量并发。",
-        "expect": "报告区分成功、拒绝和失败，不能只看平均速度。",
+        "why": "沿用已经验证的模型参数，分别测首个内容片段与正常结束；截断回答不能记成完整响应。",
+        "expect": "只有正常 stop 的流写入完整测量报告；length 或缺少结束原因时明确失败。",
         "concept": ""
       }
     ],
@@ -4226,7 +4231,7 @@
         "title": "创建明确的并发名额和任务表",
         "why": "名额满了要拒绝，不无限排队；任务键包含机构、本人和请求ID。",
         "expect": "两个读者不能互相取消对方任务。",
-        "concept": ""
+        "concept": "BoundedSemaphore 限制这个 Python 进程同时运行的任务数；_jobs 把具体请求与取消状态关联。多个进程各有自己的名额，因此本课部署固定一个 worker。"
       },
       {
         "file": "companion/operations.py",
@@ -4242,17 +4247,17 @@
         "file": "companion/operations.py",
         "action": "append",
         "old": "",
-        "code": "# 目的：只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。\n# 预期：取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。\ndef cancel(actor, request_id):\n    with _lock:\n        flag = _jobs.get((actor.tenant, actor.user, request_id))\n        if flag is not None:\n            flag.set()\n    return {\"cancel_requested\": flag is not None, \"message\": \"已发送的模型请求可能仍在运行和计费；停止后不会继续调用工具。\"}\n",
-        "title": "实现 cancel 的资源边界",
-        "why": "只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。",
-        "expect": "取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。",
+        "code": "# 目的：只标记同一身份的当前任务，已发给供应商的请求可能仍运行与计费。\n# 预期：取消后不继续工具调用或保存迟到内容；未知请求不会假称已取消。\ndef cancel(actor, request_id):\n    with _lock:\n        flag = _jobs.get((actor.tenant, actor.user, request_id))\n        if flag is not None:\n            flag.set()\n    message = \"已请求取消；已发送的模型请求仍可能运行和计费，未提交的结果不会保存。\" if flag is not None else \"任务已提交或不存在，本次没有取消结果。\"\n    return {\"cancel_requested\": flag is not None, \"message\": message}\n\n# 目的：让取消与最终写入有明确先后；检查标记和提交必须是同一个短操作。\n# 预期：先取消就不落库；先提交则取消返回 false，不谎称能撤回已保存的结果。\n@contextmanager\ndef commit_job(actor, request_id):\n    key = (actor.tenant, actor.user, request_id)\n    # 锁内只放数据库提交，不放模型调用；其他请求不必陪着模型等待。\n    with _lock:\n        flag = _jobs.get(key)\n        if flag is None or flag.is_set():\n            raise ValueError(\"请求已取消，本次结果没有保存。\")\n        yield\n        # 保留请求键到 job 退出，避免旧任务清理时误删刚复用同一键的新任务。\n        _jobs[key] = None\n",
+        "title": "让取消与最终提交有明确先后",
+        "why": "取消和落库必须共用同一把锁：先取消就不保存，先进入提交则不能再声称已取消。锁里只放短数据库操作。",
+        "expect": "取消成功的结果不会落库；已提交或不存在的任务明确返回 cancel_requested=false。",
         "concept": ""
       },
       {
         "file": "companion/service.py",
         "action": "replace",
         "old": "from .operations import log_event\n",
-        "code": "from .operations import log_event, job\n",
+        "code": "from .operations import log_event, job, commit_job\n",
         "title": "让所有模型工作共享同一名额约束",
         "why": "普通问答、伴读、Agent 与草稿都不能各自绕过限制。",
         "expect": "每项工作在统一入口取得并归还资源。",
@@ -4263,9 +4268,9 @@
         "file": "companion/service.py",
         "action": "replace",
         "old": "    if mode not in {\"qa\",\"tutor\",\"agent\"}:\n        raise ValueError(\"当前只支持问答和固定伴读。\")\n    started=time.monotonic()\n    log_event(request_id,\"request\",method=method,input_chars=len(question))\n    session=get_session(actor,session_id)\n    if mode == \"tutor\":\n        result=teach_turn(actor,session_id,question,method)\n        updated=update_session(actor,session,**result.pop(\"state_changes\"))\n        return {**result,\"trace_id\":request_id,\"session_revision\":updated[\"revision\"]}\n    if mode == \"agent\":\n        result=run_agent(actor,session_id,question,method)\n    else:\n        hits=retrieve(question,actor.tenant,session[\"book\"],method,session[\"progress\"] if session[\"strict\"] else None)\n        result=answer(question,hits,[] if session[\"strict\"] else session[\"history\"],strict=bool(session[\"strict\"]))\n    history=[] if session[\"strict\"] else (session[\"history\"]+[{\"role\":\"user\",\"content\":question},{\"role\":\"assistant\",\"content\":result[\"answer\"]}])[-4:]\n    updated=update_session(actor,session,history=history)\n    log_event(request_id,\"answer\",seconds=round(time.monotonic()-started,3),source_count=len(result.get(\"sources\",[])))\n    return {**result,\"trace_id\":request_id,\"session_revision\":updated[\"revision\"]}\n",
-        "code": "    started = time.monotonic()\n    session = get_session(actor, session_id)\n    with job(actor, request_id) as flag:\n        if flag.is_set():\n            raise ValueError(\"请求已取消。\")\n        if mode == \"agent\":\n            result = run_agent(actor, session_id, question, method, cancelled=flag.is_set)\n        elif mode == \"tutor\":\n            result = teach_turn(actor, session_id, question, method)\n        else:\n            retrieved_at = time.monotonic()\n            # 防剧透开启时不带旧对话；每次用当前权限重新检索，不复用过去的来源。\n            hits = retrieve(question, actor.tenant, session[\"book\"], method, session[\"progress\"] if session[\"strict\"] else None)\n            log_event(request_id, \"retrieve\", seconds=round(time.monotonic() - retrieved_at, 3), source_count=len(hits), method=method)\n            generated_at = time.monotonic()\n            result = answer(question, hits, [] if session[\"strict\"] else session[\"history\"], strict=bool(session[\"strict\"]))\n            log_event(request_id, \"generate\", seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get(\"usage\") or {}).get(\"total_tokens\"), status=\"ok\")\n        if flag.is_set():\n            raise ValueError(\"请求已取消，本次结果没有写入阅读对话。\")\n        if mode == \"tutor\":\n            updated = update_session(actor, session, **result.pop(\"state_changes\"))\n        if mode != \"tutor\":\n            history = [] if session[\"strict\"] else (session[\"history\"] + [{\"role\": \"user\", \"content\": question}, {\"role\": \"assistant\", \"content\": result[\"answer\"]}])[-4:]\n            updated = update_session(actor, session, history=history)\n    for entry in result.get(\"trace\", []):\n        log_event(request_id, \"tool\", seconds=entry.get(\"seconds\"), status=entry.get(\"status\"))\n    usage = result.get(\"usage\")\n    total_tokens = (sum(u[\"total_tokens\"] for u in usage) if usage and all(u and u.get(\"total_tokens\") is not None for u in usage) else None) if isinstance(usage, list) else (usage or {}).get(\"total_tokens\")\n    log_event(request_id, \"answer\", seconds=round(time.monotonic() - started, 3), status=\"ok\", method=method,\n              input_chars=len(question), source_count=len(result.get(\"sources\", [])), tool_count=len(result.get(\"trace\", [])), tokens=total_tokens)\n    # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。\n    return {**result, \"trace_id\": request_id, \"session_revision\": updated[\"revision\"]}\n",
+        "code": "    started = time.monotonic()\n    log_event(request_id, \"request\", method=method, input_chars=len(question))\n    session = get_session(actor, session_id)\n    with job(actor, request_id) as flag:\n        if flag.is_set():\n            raise ValueError(\"请求已取消。\")\n        if mode == \"agent\":\n            result = run_agent(actor, session_id, question, method, cancelled=flag.is_set)\n        elif mode == \"tutor\":\n            result = teach_turn(actor, session_id, question, method)\n        else:\n            retrieved_at = time.monotonic()\n            # 防剧透开启时不带旧对话；每次用当前权限重新检索，不复用过去的来源。\n            hits = retrieve(question, actor.tenant, session[\"book\"], method, session[\"progress\"] if session[\"strict\"] else None)\n            log_event(request_id, \"retrieve\", seconds=round(time.monotonic() - retrieved_at, 3), source_count=len(hits), method=method)\n            generated_at = time.monotonic()\n            result = answer(question, hits, [] if session[\"strict\"] else session[\"history\"], strict=bool(session[\"strict\"]))\n            log_event(request_id, \"generate\", seconds=round(time.monotonic() - generated_at, 3), tokens=(result.get(\"usage\") or {}).get(\"total_tokens\"), status=\"ok\")\n        with commit_job(actor, request_id):\n            if mode == \"tutor\":\n                updated = update_session(actor, session, **result.pop(\"state_changes\"))\n            if mode != \"tutor\":\n                history = [] if session[\"strict\"] else (session[\"history\"] + [{\"role\": \"user\", \"content\": question}, {\"role\": \"assistant\", \"content\": result[\"answer\"]}])[-4:]\n                updated = update_session(actor, session, history=history)\n    for entry in result.get(\"trace\", []):\n        log_event(request_id, \"tool\", seconds=entry.get(\"seconds\"), status=entry.get(\"status\"))\n    usage = result.get(\"usage\")\n    total_tokens = (sum(u[\"total_tokens\"] for u in usage) if usage and all(u and u.get(\"total_tokens\") is not None for u in usage) else None) if isinstance(usage, list) else (usage or {}).get(\"total_tokens\")\n    log_event(request_id, \"answer\", seconds=round(time.monotonic() - started, 3), status=\"ok\", method=method,\n              input_chars=len(question), source_count=len(result.get(\"sources\", [])), tool_count=len(result.get(\"trace\", [])), tokens=total_tokens)\n    # 页面接收自己这次写入后的版本，下一次保存进度不必拿旧版本碰运气。\n    return {**result, \"trace_id\": request_id, \"session_revision\": updated[\"revision\"]}\n",
         "title": "在完整业务链前后检查取消与额度",
-        "why": "取得名额后才能调用模型，返回后还要检查取消，再决定是否保存状态；阶段日志分别记录耗时。",
+        "why": "模型调用占用任务名额；最终版本检查与保存由 commit_job 保护，避免取消确认后仍写入。",
         "expect": "取消后的迟到回答不会写入历史，成功时返回新 revision。",
         "concept": "",
         "exact": true
@@ -4273,10 +4278,10 @@
       {
         "file": "companion/service.py",
         "action": "replace",
-        "old": "    response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n    # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。\n    body = response[\"message\"].get(\"content\") or \"\"\n    return actions.draft(actor, kind, body, request_id, session_id=session_id)\n",
-        "code": "    with job(actor, request_id) as flag:\n        if flag.is_set():\n            raise ValueError(\"请求已取消。\")\n        response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n        # 供应商可能已完成响应，但取消后的结果不再写入读者的待确认区。\n        if flag.is_set():\n            raise ValueError(\"请求已取消，本次结果没有保存为草稿。\")\n        body = response[\"message\"].get(\"content\") or \"\"\n        return actions.draft(actor, kind, body, request_id, session_id=session_id)\n",
+        "old": "    response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n    # 生成期间会话可能改变；保存函数会在事务内核对最初读取的版本。\n    body = response[\"message\"].get(\"content\") or \"\"\n    return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session[\"revision\"])\n",
+        "code": "    with job(actor, request_id) as flag:\n        if flag.is_set():\n            raise ValueError(\"请求已取消。\")\n        response = complete([{\"role\": \"system\", \"content\": f\"依据当前对话整理{task}。只写草稿，不声称已经保存或改变进度。不补充对话之外的事实。\"}, *session[\"history\"]])\n        body = response[\"message\"].get(\"content\") or \"\"\n        # 取消和落库竞争时只允许一个先完成；随后还会在事务内复核会话版本。\n        with commit_job(actor, request_id):\n            return actions.draft(actor, kind, body, request_id, session_id=session_id, session_revision=session[\"revision\"])\n",
         "title": "草稿生成也遵守取消结果",
-        "why": "不能只让聊天支持停止，却让笔记继续在后台写入。",
+        "why": "草稿和问答共用取消与提交边界；进入短提交后再由数据库核对生成时的会话版本。",
         "expect": "取消后不新增待确认草稿。",
         "concept": "",
         "exact": true
@@ -4643,7 +4648,7 @@
         "title": "创建待填写的验收记录",
         "why": "保留未验证状态，只用自己的真实证据更新条目；格式不应替你虚构通过结论。",
         "expect": "能区分待完成事项、验证路径与真正的公司审批。",
-        "concept": ""
+        "concept": "null 表示待填写，不能当作通过；evidence 保存真实证据的位置，owners 保存确认过的负责人，known_blockers 列尚未解决的问题。这份 JSON 供人工评审，不会自动执行上线。"
       }
     ],
     "checks": [],

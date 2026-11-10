@@ -52,10 +52,14 @@
 <h2 id="section-3">运行并观察</h2>
 <pre><code class="language-bash"># 使用刚才的词面检索，再把候选证据交给真实模型；预期回答含可回查的引用。
 python -m companion ask &quot;讲稿怎样解释文言文序言与白话日记的关系？&quot;
+# 第一份回答保留作对照；下一条 ask 会覆盖工作文件 ask.json。
+cp data/live/ask.json data/live/ask-supported.json
 # 提问资料未提供的精确信息；预期明确不足，不借常识编造版本页码。
 python -m companion ask &quot;这五讲采用哪家出版社哪一版原著？请给出每讲的准确页码。&quot;
+# 单独留下不足回答，下一章建立评分规则时回看这两个案例。
+cp data/live/ask.json data/live/ask-insufficient.json
 </code></pre>
-<p>第一条结果保存为 <code>data/live/ask.json</code>。运行第二条前另存第一条。逐条核对 <code>citations</code> 和 <code>sources</code>：合法编号只是起点，还要检查对应片段是否真的支持回答。允许文学解读有差异，但不允许凭空添加证据。</p>
+<p>打开 <code>data/live/ask-supported.json</code> 和 <code>data/live/ask-insufficient.json</code>，逐条核对 <code>citations</code> 和 <code>sources</code>：合法编号只是起点，还要检查对应片段是否真的支持回答。允许文学解读有差异，但不允许凭空添加证据。</p>
 <h2 id="section-4">亲手拆开一条回答</h2>
 <p>用不同颜色标出：直接复述讲稿的句子、模型组织的解释、超出资料的内容。若一句话声称“鲁迅原文说”，回查它是否真的出现在已提供资料里；讲稿讲述者的说法不能自动升级为原著引文。</p>
 <p>下一次把同一个问题用 <code>--book &quot;三国演义&quot;</code> 运行。没有可见证据时，程序直接返回不足，不调用生成模型。这比“让模型随便答，再提醒可能不准”更容易验证。</p>

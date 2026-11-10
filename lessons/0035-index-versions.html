@@ -32,7 +32,9 @@
 </code></pre>
 <p>**写完后应当怎样：**重复建索引 new_embeddings=0；改正文后只为新文本重新编码。</p>
 <h2 id="section-3">运行并观察</h2>
-<pre><code class="language-bash"># 相同资料再次建索引；预期 new_embeddings 为 0，复用同一模型版本的文本向量缓存。
+<pre><code class="language-bash"># 上一节没有保存编码缓存；第一次运行新逻辑会建立缓存，new_embeddings 通常大于0。
+python -m companion index
+# 不改资料，再运行一次；这次预期 new_embeddings 为0，才证明缓存被复用。
 python -m companion index
 # 只改重叠长度，制造新的资料快照；这是可恢复的实验，不动原件。
 python -m companion ingest --size 80 --overlap 12
@@ -42,7 +44,13 @@ python -m companion search &quot;文言文序言&quot; --method semantic
 python -m companion index
 python -m companion search &quot;文言文序言&quot; --method semantic
 </code></pre>
-<p>实验后用 80/16 重新 ingest 和 index，恢复比较基线。缓存键包含实际模型提交版本及文本指纹，不能跨不同权重盲目复用。未变化的文本复用向量，新文本才编码；这里是“增量计算、整份快照发布”，不是逐条在线增删的完整服务。</p>
+<p>实验完成后，在同一终端恢复 80/16 并重建对应索引。下一单元要在相同资料起点比较切块，不能把本节的 80/12 实验状态带过去：</p>
+<pre><code class="language-bash"># 恢复第9章的小块基线；资料revision会回到这组参数对应的版本。
+python -m companion ingest --size 80 --overlap 16
+# 让活动索引与恢复后的资料一致，避免下一节查询因版本不符而失败。
+python -m companion index
+</code></pre>
+<p>缓存键包含实际模型提交版本及文本指纹，不能跨不同权重盲目复用。未变化的文本复用向量，新文本才编码；这里是“增量计算、整份快照发布”，不是逐条在线增删的完整服务。</p>
 <h2 id="section-4">更新和删除怎样落到索引</h2>
 <p>在第 6 章的实验目录撤下一份文件后导入，新集合只含新快照；活动指针切过去后，新查询不再用旧文件。旧集合暂留用于回滚，并未物理删除。正式删除必须把保留集合、缓存与备份也列入留存流程。</p>
 <p>本实现用 <code>index.json</code> 作为单实例活动指针，不是 Qdrant alias。构建期间资料与指针不一致会暂时拒绝查询；第 28 章用维护窗口发布，避免把它说成无中断切换。</p>

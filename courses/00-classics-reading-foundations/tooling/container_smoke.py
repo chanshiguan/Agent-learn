@@ -100,7 +100,32 @@ try:
             # 真正访问 Compose 内的 Qdrant 服务；固定向量只验证服务与 SDK 协议。
             run(compose + ["exec", "-T", "app", "python", "-c",
                 "from qdrant_client import QdrantClient,models; c=QdrantClient(url='http://qdrant:6333'); c.create_collection('ci_protocol',vectors_config=models.VectorParams(size=2,distance=models.Distance.COSINE)); c.upsert('ci_protocol',points=[models.PointStruct(id=1,vector=[1.0,0.0],payload={'tenant':'demo'})],wait=True); assert c.query_points('ci_protocol',query=[1.0,0.0]).points[0].id==1; c.close()"])
-            print(json.dumps({"docx_container": "passed", "compose_authenticated_api": "passed", "qdrant_service": "passed",
+            # Chapter 27: a visible, reversible title edit creates a second real image.
+            page = work / "companion/web/index.html"
+            original_page = page.read_text()
+            page.write_text(original_page.replace("一起读《狂人日记》</h1>", "一起读《狂人日记》 · 版本演练</h1>", 1))
+            run(["docker", "build", "-f", "deploy/Dockerfile", "-t", "classics-companion:review-ci-v2", "."])
+            page.write_text(original_page)
+            environment_file = work / ".env"
+            original_environment = environment_file.read_text()
+            for tag, expected_title in [("review-ci-v2", "一起读《狂人日记》 · 版本演练</h1>"),
+                                        ("review-ci", "一起读《狂人日记》</h1>")]:
+                environment_file.write_text(original_environment.replace("RELEASE_TAG=review-ci", "RELEASE_TAG=" + tag))
+                run(compose + ["up", "-d", "--no-build", "app"])
+                with httpx.Client(base_url="http://127.0.0.1:8000", trust_env=False, timeout=10) as api:
+                    ready = False
+                    for attempt in range(60):
+                        try:
+                            ready = api.get("/readyz").status_code == 200
+                            if ready:
+                                break
+                        except httpx.TransportError:
+                            pass
+                        time.sleep(1)
+                    assert ready, (tag, "切换后尚未就绪")
+                    assert expected_title in api.get("/").text, (tag, "没有显示对应镜像页面")
+            environment_file.write_text(original_environment)
+            print(json.dumps({"docx_container": "passed", "compose_authenticated_api": "passed", "qdrant_service": "passed", "two_image_rollback": "passed",
                               "model": "protocol_fixture_only", "scope": "Docker 构建、挂载、身份和服务连通；不评价生成质量"}, ensure_ascii=False))
         finally:
             subprocess.run(compose + ["logs", "--tail", "30"], cwd=work)

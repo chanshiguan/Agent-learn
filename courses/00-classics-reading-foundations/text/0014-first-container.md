@@ -19,6 +19,8 @@
 如果电脑已有 Homebrew，也可以用下面的安装命令；两种方式选一种即可：
 
 
+使用 Mac 时，安装前核对 [Docker 的系统要求](https://docs.docker.com/desktop/setup/install/mac-install/)：当前支持最新及前两个主要 macOS 版本，M1 选择 Apple silicon 安装包。能安装 Docker 不代表所有模型都能同时装入内存；模型容量到第4章再逐项观察。
+
 ## 运行并观察
 
 ```bash
@@ -61,9 +63,13 @@ docker run --rm python:3.12-slim python -c "print('容器里的 Python 已启动
 
 ## 对照主机与容器
 
-分别运行：
+安装 Docker 时如果重新开过终端，原来的项目目录和虚拟环境不会自动恢复。先进入项目并启用 `.venv`，再比较两边的 Python：
 
 ```bash
+# 回到第一章的项目；若当时放在别处，把这一行换成自己的项目路径。
+cd "$HOME/classics-reader"
+# 恢复主机的项目环境；容器不会因此使用这份环境，下面会观察这个区别。
+source .venv/bin/activate
 # 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
 python -c "import sys; print(sys.executable)"
 # 观察容器内的 Python 路径；它来自镜像，通常不同于主机的 .venv 路径。

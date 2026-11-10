@@ -50,7 +50,9 @@
 ## 运行并观察
 
 ```bash
-# 相同资料再次建索引；预期 new_embeddings 为 0，复用同一模型版本的文本向量缓存。
+# 上一节没有保存编码缓存；第一次运行新逻辑会建立缓存，new_embeddings 通常大于0。
+python -m companion index
+# 不改资料，再运行一次；这次预期 new_embeddings 为0，才证明缓存被复用。
 python -m companion index
 # 只改重叠长度，制造新的资料快照；这是可恢复的实验，不动原件。
 python -m companion ingest --size 80 --overlap 12
@@ -61,7 +63,16 @@ python -m companion index
 python -m companion search "文言文序言" --method semantic
 ```
 
-实验后用 80/16 重新 ingest 和 index，恢复比较基线。缓存键包含实际模型提交版本及文本指纹，不能跨不同权重盲目复用。未变化的文本复用向量，新文本才编码；这里是“增量计算、整份快照发布”，不是逐条在线增删的完整服务。
+实验完成后，在同一终端恢复 80/16 并重建对应索引。下一单元要在相同资料起点比较切块，不能把本节的 80/12 实验状态带过去：
+
+```bash
+# 恢复第9章的小块基线；资料revision会回到这组参数对应的版本。
+python -m companion ingest --size 80 --overlap 16
+# 让活动索引与恢复后的资料一致，避免下一节查询因版本不符而失败。
+python -m companion index
+```
+
+缓存键包含实际模型提交版本及文本指纹，不能跨不同权重盲目复用。未变化的文本复用向量，新文本才编码；这里是“增量计算、整份快照发布”，不是逐条在线增删的完整服务。
 
 ## 更新和删除怎样落到索引
 

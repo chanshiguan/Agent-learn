@@ -73,7 +73,31 @@ curl --fail http://127.0.0.1:8000/readyz
 docker compose --env-file .env -f deploy/compose.yaml logs --tail 40 app
 ```
 
-关闭模型服务，重复两个检查，再从页面提问；预期是 alive 仍可能成功、ready 失败、用户得到可理解错误。恢复模型后再验证可用。使用 hybrid 时，也试一次停止 Qdrant 后的行为。
+本地与线上路线都用同一个故障实验：先记下 `.env` 中已经验证的 LLM_MODEL，再暂改为 `course-model-does-not-exist`。这只改你自己的应用配置，不关闭任何共享服务。
+
+```bash
+# 让修改后的 .env 进入新应用容器；不需要重建代码镜像。
+docker compose --env-file .env -f deploy/compose.yaml up -d --no-deps --force-recreate app
+# 进程仍应能响应存活检查。
+curl --fail http://127.0.0.1:8000/healthz
+# 预期因模型不在列表中返回非成功状态；保留这一失败作为演练结果。
+curl --fail http://127.0.0.1:8000/readyz
+```
+
+再从页面提问，核对错误提示。然后把 `.env` 的 LLM_MODEL 改回记下的真实值，重复上面的重建容器命令和两项检查，直到就绪与问答都恢复。后续章节从恢复成功的状态继续。
+
+若正在使用 hybrid，再单独测试 Qdrant：
+
+```bash
+# 只停止这套练习项目的向量服务；应用进程保留，观察依赖故障与存活的区别。
+docker compose --env-file .env -f deploy/compose.yaml stop qdrant
+# 预期就绪失败；不要把这次故意失败算成安装损坏。
+curl --fail http://127.0.0.1:8000/readyz
+# 恢复同一命名卷上的 Qdrant，数据不因 stop 被删除。
+docker compose --env-file .env -f deploy/compose.yaml up -d qdrant
+```
+
+等待向量服务启动后重新检查 readyz 和同一个问题，确认恢复，再进入下一节。keyword 路线不依赖向量服务，此项可跳过。
 
 ## 真正对外访问前补哪条连接
 
