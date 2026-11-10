@@ -13,18 +13,19 @@ mkdir -p data/live
 id -u
 id -g
 # 在编辑器填完 .env 的真实模型 ID、地址和路线后构建；本命令不把 .env COPY 进镜像。
-docker compose -f deploy/compose.yaml build
+docker compose --env-file .env -f deploy/compose.yaml build
 # 启动应用和向量库，先测试 keyword 路线，减少首次排错变量。
-docker compose -f deploy/compose.yaml up -d
+docker compose --env-file .env -f deploy/compose.yaml up -d
 # 查看服务状态，检查应用进程是否存活。
-docker compose -f deploy/compose.yaml ps
+docker compose --env-file .env -f deploy/compose.yaml ps
 </code></pre>
 <p>运行前在编辑器完成 <code>.env</code>，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。</p>
+<p>这些命令都在 <code>examples/</code> 中执行。<code>--env-file .env</code> 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 <code>env_file: ../.env</code> 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。</p>
 <p>Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：</p>
 <pre><code class="language-bash"># 在同一挂载数据与 Compose 网络内构建索引；首次可能下载 CPU 编码器权重。
-docker compose -f deploy/compose.yaml run --rm app python -m companion index
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
 </code></pre>
-<p>成功后再把 <code>.env</code> 的 RETRIEVAL 改为 hybrid，执行 up -d 使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，使用 compose run --rm app python -m companion create-user 创建管理员安排的测试账号。</p>
+<p>成功后再把 <code>.env</code> 的 RETRIEVAL 改为 hybrid，执行 up -d 使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，运行 <code>docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user</code>，创建管理员安排的测试账号。</p>
 <p>Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 <code>.env</code> 中的 <code>APP_UID</code>、<code>APP_GID</code> 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。</p>
 <p>镜像先安装 CPU 版 PyTorch，再安装其余依赖，因为本课程的编码器明确使用 CPU。这样不会为 Linux 镜像下载用不到的 CUDA 运行库；它也没有把 Mac 的 Metal 加速能力搬进 Linux 容器。</p>
 <h2 id="section-2">对照完整实现</h2>

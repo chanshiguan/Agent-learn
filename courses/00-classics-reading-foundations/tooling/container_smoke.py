@@ -58,8 +58,11 @@ try:
         def run(command):
             return subprocess.run(command, cwd=work, check=True)
         project = "classics-ci-" + uuid.uuid4().hex[:8]
-        compose = ["docker", "compose", "--project-name", project, "-f", "deploy/compose.yaml"]
+        compose = ["docker", "compose", "--env-file", ".env", "--project-name", project, "-f", "deploy/compose.yaml"]
         try:
+            # env_file 给容器传值，--env-file 则参与 Compose 的 UID/镜像变量替换；两层都要核对。
+            resolved = json.loads(subprocess.check_output(compose + ["config", "--format", "json"], cwd=work))
+            assert resolved["services"]["app"]["user"] == f"{os.getuid()}:{os.getgid()}"
             # 前三章：真正构建读取镜像、挂载输入，检查容器写出的 JSON。
             run(["docker", "build", "-t", "classics-reader:review-ci", "."])
             first = sorted((work / "data/input").glob("06*.docx"))[0]

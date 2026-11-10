@@ -12,15 +12,15 @@
 
 ```bash
 # 停止应用接收请求，Qdrant 仍保持运行；等待正在处理的请求结束后再继续维护。
-docker compose -f deploy/compose.yaml stop app
+docker compose --env-file .env -f deploy/compose.yaml stop app
 # 先保存变更前快照；目标目录必须尚不存在，避免覆盖一份可恢复备份。
 python -m companion backup data/backups/before-update-01
 # 教学演练先用原五份样本重建同样的快照；真实更新时改成已审核的候选目录。
-docker compose -f deploy/compose.yaml run --rm app python -m companion ingest --size 80 --overlap 16
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion ingest --size 80 --overlap 16
 # 在 Compose 网络里构建新索引，完成数量检查后才发布活动指针。
-docker compose -f deploy/compose.yaml run --rm app python -m companion index
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
 # 启动应用并验证就绪，然后用固定题集检查资料引用。
-docker compose -f deploy/compose.yaml up -d app
+docker compose --env-file .env -f deploy/compose.yaml up -d app
 curl --fail http://127.0.0.1:8000/readyz
 ```
 

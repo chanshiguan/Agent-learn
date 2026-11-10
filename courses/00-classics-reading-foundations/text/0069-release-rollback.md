@@ -10,7 +10,7 @@
 # 将当前 candidate 镜像标记为一个明确的练习版本；它不推送到任何远程仓库。
 docker tag classics-companion:candidate classics-companion:trial-v1
 # 使用该版本启动受控试用，仍只开放本机端口；不要加 --build 覆盖选定旧产物。
-RELEASE_TAG=trial-v1 docker compose -f deploy/compose.yaml up -d --no-build
+RELEASE_TAG=trial-v1 docker compose --env-file .env -f deploy/compose.yaml up -d --no-build
 # 检查依赖就绪后，再人工做登录、问答、来源和笔记批准的冒烟检查。
 curl --fail http://127.0.0.1:8000/readyz
 ```

@@ -12,7 +12,7 @@ python -m unittest discover -s ../tests -v
 # 记录当前依赖与资料/索引指纹；输出不包含模型密钥。
 python -m companion manifest
 # 若候选运行在 Compose 中，再记录容器里的实际依赖；它可能与主机环境不同。
-docker compose -f deploy/compose.yaml run --rm app python -m companion manifest
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion manifest
 # 保存实际解析后的依赖版本，便于在相同平台重建；跨平台仍要重新安装验证。
 python -m pip freeze > data/live/requirements-resolved.txt
 # 记录候选镜像的实际标识，不只写容易被覆盖的 candidate 标签。

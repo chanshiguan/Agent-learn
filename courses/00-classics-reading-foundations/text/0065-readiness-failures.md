@@ -12,7 +12,7 @@ curl --fail http://127.0.0.1:8000/healthz
 # 检查依赖就绪；缺资料、索引或模型时应非成功状态。
 curl --fail http://127.0.0.1:8000/readyz
 # 查看有限的服务日志定位启动问题；不要把含凭据的配置完整贴给他人。
-docker compose -f deploy/compose.yaml logs --tail 40 app
+docker compose --env-file .env -f deploy/compose.yaml logs --tail 40 app
 ```
 
 关闭模型服务，重复两个检查，再从页面提问；预期是 alive 仍可能成功、ready 失败、用户得到可理解错误。恢复模型后再验证可用。使用 hybrid 时，也试一次停止 Qdrant 后的行为。
