@@ -26,7 +26,7 @@ docker compose --env-file .env -f deploy/compose.yaml ps
 
 运行前在编辑器完成 `.env`，空模型 ID 会使就绪检查失败。默认本地地址使用 host.docker.internal；它指宿主机，不是应用容器自己。若宿主模型只接受回环连接且 Docker 无法访问，按第 4 章模型服务说明配置受保护的可达地址，或先选择线上路线；不要为了连通随意向公网开放模型端口。
 
-这些命令都在 `examples/` 中执行。`--env-file .env` 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 `env_file: ../.env` 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。
+这些命令都在 `examples/` 中执行。`--env-file .env` 明确指定 Compose 替换 UID、GID 和镜像标签时读取哪个文件；配置中的 `env_file: ../.env` 负责给容器内程序传值，两者作用不同。省略前者时，工作目录与 Compose 文件目录的差异可能让用户编号回到默认值，造成数据目录不可写。具体查找规则可选读 [Docker 官方说明](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)。
 
 Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。选择 hybrid 前需在这套服务里重建索引：
 
@@ -35,7 +35,12 @@ Compose 的 Qdrant 使用新命名卷，与第 10 章单独启动的卷不同。
 docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion index
 ```
 
-成功后再把 `.env` 的 RETRIEVAL 改为 hybrid，执行 up -d 使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，运行 `docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user`，创建管理员安排的测试账号。
+成功后再把 `.env` 的 RETRIEVAL 改为 hybrid，重新执行上面的 `up -d` 命令使环境配置生效。登录使用 reading.sqlite3 中已有账号；若全新安装，按下面的命令创建测试读者，账号已存在时跳过：
+
+```bash
+# 在相同挂载数据库中创建测试读者；交互输入两次至少 12 字符的口令，口令不放进命令历史。
+docker compose --env-file .env -f deploy/compose.yaml run --rm app python -m companion create-user student-a
+```
 
 Dockerfile 默认使用 UID=1000 的非 root 账号；Compose 可以按 `.env` 中的 `APP_UID`、`APP_GID` 使用你自己的宿主用户编号。将上面两个命令的结果填入即可，通常不需要改变数据目录的所有者。使用普通开发账号运行，不要填写 root 的 0。若仍不可写，核对挂载目录是否属于当前用户，不要给整个项目开放 777 权限。
 
