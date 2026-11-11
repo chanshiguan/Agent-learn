@@ -4,7 +4,7 @@
 
 接着上一单元[《确认程序和资料没有绑死在一起》](0019-image-boundaries.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
 
-按当前 [Ollama macOS 要求](https://docs.ollama.com/macos)，应用需要 macOS 14 或更新版本，Apple M 系列可使用 CPU 和 GPU。先在实际练习电脑的“关于本机”确认系统；这不是针对课程编写电脑的检查。还要为模型权重、Python 环境与 Docker 镜像留出磁盘空间，下载前按各项显示的大小估算。
+继续使用第1章准备好的 Homebrew 和全局 Python 3.12。本节增加一个模型服务，Python客户端仍使用原解释器。提前为模型权重留出磁盘空间；下载大小、运行内存和响应速度要分别观察。
 
 ## 先认识这三个角色
 
@@ -12,32 +12,26 @@
 
 课程以新准备的开发环境为起点，不使用任何预设的个人模型。M1 16 GB 的练习先从指定资料中使用的小模型 `qwen2.5:3b` 开始，限制为单次请求和短输出。它是起步候选，不是对速度或复杂任务效果的保证。
 
-## 安装并启动 Ollama
+## 用 Brew 安装并管理 Ollama
 
-在实际学习的 Mac 上安装 Ollama 的 macOS 应用，启动后新开一个终端。如果使用 Homebrew，可以选择下面的方式；不要重复安装多个版本：
-
-
-## 运行并观察
+本课统一使用 [Homebrew 的 Ollama 命令行版本](https://formulae.brew.sh/formula/ollama)，由 `brew services` 管理后台服务。若你已经有可用的 Ollama，先执行 `ollama list`，成功则沿用现有服务，不再重复启动。
 
 ```bash
-# 通过已有的 Homebrew 安装本地模型服务应用；此步骤还不会下载模型权重。
-brew install --cask ollama
-# 启动本地模型服务；后续客户端才能向它发送请求。
-open -a Ollama
-# 确认 Ollama 命令可找到；预期显示版本，模型是否下载另用 list 检查。
+# 安装模型服务程序；这一步尚未下载任何聊天模型权重。
+brew install ollama
+# 在后台启动服务并设置登录时启动，当前终端可以继续输入其他命令。
+brew services start ollama
+# 检查 Brew 管理的服务状态，预期显示已启动。
+brew services info ollama
+# 查看客户端版本，确认命令可以找到。
 ollama --version
-```
-
-没有 Homebrew 时，用 macOS 图形安装包完成安装即可；Homebrew 不作为课程的必学内容。Ollama 的软件入口收录在本节末的指定资料中。
-
-检查服务：
-
-```bash
-# 向本地服务查询已下载模型；下载后应看到 qwen2.5:3b，空列表表示尚无模型。
+# 查询服务中的模型；新安装时空列表是正常的。
 ollama list
 ```
 
-服务可用但列表为空时，只说明尚未下载模型。如果提示连接失败，先启动 Ollama 应用。也可在一个单独终端执行 `ollama serve`；该终端保持运行，其他操作用第二个终端。如果提示端口已占用，先检查应用是否已经启动，不要再启动第二个服务。
+`brew services` 管理后台进程，模型权重由后面的 `ollama pull` 下载。列表为空说明还没有模型；连接失败时先查看服务状态。若提示11434端口已被占用，检查是否已有Ollama应用或旧服务在运行，保留一个服务即可。
+
+以后需要暂停或重新启动自己这套服务时，分别用 `brew services stop ollama`、`brew services start ollama`。不要同时再开一个 `ollama serve`。本节让服务保持启动，下一单元的客户端会连接它。
 
 ## 下载这次要用的模型
 

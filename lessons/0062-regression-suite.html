@@ -50,9 +50,10 @@ if __name__==&quot;__main__&quot;:
     unittest.main()
 </code></pre>
 <p>**写完后应当怎样：**一旦以后改坏事务或版本检查，测试会失败。</p>
+<p>课堂检查仍使用主机的全局Python3.12。临时目录只隔离测试数据，不安装另一份解释器或依赖。</p>
 <h2 id="section-3">运行并观察</h2>
-<pre><code class="language-bash"># 安装固定版本清单中的项目依赖，让当前虚拟环境能导入测试涉及的模块。
-python -m pip install -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
+<pre><code class="language-bash"># 安装固定版本清单中的项目依赖，让同一个全局3.12能导入测试涉及的模块。
+python -m pip install --user --break-system-packages -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
 # 在全新临时库中运行自己写的测试，结束后清理，避免污染主线会话。
 python - &lt;&lt;&#39;PY&#39;
 import os
@@ -117,5 +118,5 @@ PY
 </code></pre>
 <p>**预期：**已写的六条测试和你新增的断言通过；失败时根据具体测试名定位，测试数据不写入主线学习库。它们不评价文学答案质量。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
-<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0062-regression-suite"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0061-latency-cost.html"><small>上一单元</small>把一次模型调用拆成时间和用量</a><a href="0063-release-quality.html"><small>下一单元</small>冻结题集，用真实模型和人工复核 →</a></nav></main></div>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。主机统一使用全局 Python 3.12；新终端核对版本，并重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0062-regression-suite"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/evaluation-design.html" data-knowledge-link>评测、观测与容量怎么分工<span>10—12 分钟 · 答案好不好、哪里失败、能接多少请求，分别怎样看。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/agent-boundaries.html" data-knowledge-link>工具、权限、批准与恢复<span>10—12 分钟 · 模型会调用，不表示它有权执行。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0061-latency-cost.html"><small>上一单元</small>把一次模型调用拆成时间和用量</a><a href="0063-release-quality.html"><small>下一单元</small>冻结题集，用真实模型和人工复核 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

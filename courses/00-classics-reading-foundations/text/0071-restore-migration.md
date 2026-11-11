@@ -66,9 +66,9 @@ READING_DATA_DIR=data/restored-01 python -m companion.migrate
 READING_DATA_DIR=data/restored-01 python -m companion.migrate
 ```
 
-现在备份和恢复目录已经分开。接下来用停止服务前留下的记录检查恢复副本。
+恢复副本与主应用使用同一个全局Python3.12；分开的只是数据目录和监听端口。现在备份和恢复目录已经分开。接下来用停止服务前留下的记录检查恢复副本。
 
-在第二个终端进入同一个项目并启用 `.venv`，沿用第4章已经验证的模型配置，然后启动恢复副本。下面这一行只为该进程设置数据目录和端口，不会把主应用指向副本：
+在第二个终端进入同一个项目，核对全局 Python 仍为3.12，沿用第4章已经验证的模型配置，然后启动恢复副本。下面这一行只为该进程设置数据目录和端口，不会把主应用指向副本：
 
 ```bash
 # 用隔离目录和端口启动恢复副本；authenticated 要求登录，development 允许本机 HTTP 演练。

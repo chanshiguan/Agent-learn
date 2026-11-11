@@ -34,7 +34,7 @@ httpx==0.28.1
 
 ```bash
 # 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-web.txt
+python -m pip install --user --break-system-packages -r requirements-web.txt
 ```
 
 ### 第 2 步：先写这个文件需要的导入
@@ -121,8 +121,8 @@ def health():
 ## 运行并观察
 
 ```bash
-# 安装网页服务依赖，复用已有虚拟环境；不需要另学一套前端框架。
-python -m pip install -r requirements-web.txt
+# 安装网页服务依赖，沿用全局3.12及其用户包目录；不需要另学一套前端框架。
+python -m pip install --user --break-system-packages -r requirements-web.txt
 # 启动本章最小服务，只监听本机；终端会持续运行，用 Ctrl+C 停止。
 python -m uvicorn companion.basic_app:app --host 127.0.0.1 --port 8000
 ```

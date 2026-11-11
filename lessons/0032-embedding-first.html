@@ -18,7 +18,7 @@ qdrant-client==1.15.1
 </code></pre>
 <p>**写完后应当怎样：**可以导入客户端；首次编码仍需要取得真实模型权重。</p>
 <pre><code class="language-bash"># 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-rag.txt
+python -m pip install --user --break-system-packages -r requirements-rag.txt
 </code></pre>
 <h3>第 2 步：先写这个文件需要的导入</h3>
 <p>固定编码器提交，避免同名模型后来变化时无法重现；生成模型与编码器职责不同。</p>
@@ -116,8 +116,8 @@ from .corpus import visible
 </code></pre>
 <p>**写完后应当怎样：**旧命令仍可运行，新命令调用你刚完成的函数。</p>
 <h2 id="section-3">运行并观察</h2>
-<pre><code class="language-bash"># 安装真实文本编码与 Qdrant 客户端；预期装进已激活的虚拟环境，首次下载可能较慢。
-python -m pip install -r requirements-rag.txt
+<pre><code class="language-bash"># 安装真实文本编码与 Qdrant 客户端；预期装进全局3.12的用户包目录，首次下载可能较慢。
+python -m pip install --user --break-system-packages -r requirements-rag.txt
 # 将当前五份讲稿切成适合入门编码器的小块；片段 ID 和资料 revision 会随参数变化。
 python -m companion ingest --size 80 --overlap 16
 # 第一次会下载 Embedding 权重；真实编码后，在内存里计算相似度，不需要 Qdrant 服务。
@@ -158,5 +158,5 @@ PY
 </code></pre>
 <p>**预期：**切块适配编码器窗口；此检查本身没有执行 Embedding。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
-<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0032-embedding-first"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0031-answer-rubric.html"><small>上一单元</small>给模型回答打分，也保留不通过</a><a href="0033-embedding-comparison.html"><small>下一单元</small>检验向量有没有帮到你的失败题 →</a></nav></main></div>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。主机统一使用全局 Python 3.12；新终端核对版本，并重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0032-embedding-first"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/rag-hybrid.html" data-knowledge-link>混合检索：同时照顾原词与意思<span>6—8 分钟 · 关键词检索和向量检索为什么常常一起用？</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0031-answer-rubric.html"><small>上一单元</small>给模型回答打分，也保留不通过</a><a href="0033-embedding-comparison.html"><small>下一单元</small>检验向量有没有帮到你的失败题 →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

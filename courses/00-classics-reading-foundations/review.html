@@ -1,7 +1,7 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>课程审查记录 · 名著伴读实战</title><link rel="stylesheet" href="../../assets/classics.css"></head><body class="page-resources">
 <a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">读</span><span>名著伴读<span class="brand-caption">AI 开发实战课</span></span></a><nav class="global-nav" aria-label="课程主要入口"><a href="index.html">课程地图</a><a href="knowledge/index.html">知识拓展 · 选读</a><a href="resources.html" aria-current="page">资料与工具</a></nav></div></header>
 <div class="site-shell"><nav class="breadcrumbs" aria-label="当前位置"><a href="index.html">课程首页</a><span>/</span><span>资料与工具</span><span>/</span><span>课程审查记录</span></nav><div class="wide-layout"><main id="main-content" tabindex="-1"><div class="article-only"><h1>课程审查与修复记录</h1>
-<p>2026-11-10，对当前公开课程进行代码和教学两条线的审查。核对章节前置条件、命令、实际实现、完成条件，以及验证记录是否符合实际。审查后保留章节、题目和两条模型路线，修复以下可复现问题。</p>
+<p>2026-11-10，对当前公开课程进行代码和教学两条线的审查。核对章节前置条件、命令、实际实现、完成条件，以及验证记录是否符合实际。审查后保留章节、题目和两条模型路线，修复以下可复现问题。下表保留当时的处理过程；2026-11-11按用户新选择统一为全局Python3.12，旧版uv建环境步骤已退出主线。</p>
 <table>
 <thead>
 <tr>
@@ -149,6 +149,7 @@
 </tbody></table>
 <p>逐步写成的实现仍是同一个项目，不增加代码包前置。此次重放包括36组课堂检查，另模拟新增第5题再检查一次，共37次；作者41项Python回归和4项页面异步回归通过。部署工作流另验证真实镜像构建、Compose和两个镜像间的切换。最新结果和边界以<a href="verification.html">验证记录</a>为准。</p>
 <h2>章节是否连得起来</h2>
+<p>本轮环境调整覆盖首次安装、后续依赖安装、重开终端、速查、选读和每节运行提示。Python、Docker Desktop与Ollama优先通过Brew安装；主机各章沿用全局3.12，测试仍只分开数据目录。<code>python:3.12-slim</code>保留在Docker练习中，并在首次使用前解释镜像与主机解释器的关系。主机pip的用户目录参数不照搬进Dockerfile或GitHub的检查任务，那里使用各自的3.12运行位置。</p>
 <p>导学先说明资料边界；第 1—4 章解决文件、程序、容器和模型；随后从手工给证据到自动检索，再做向量、产品交互、Agent、权限、部署和恢复。同一份程序逐步开放能力，没有要求先学完整框架才能完成早期练习。依赖随对应章节安装，本地与线上生成路线汇合后使用同一套业务代码。</p>
 <p>主线任选一条模型路线约 57—77 小时，与章节用时总和一致；首次下载、排错和公司审核另计。终点是能运行、能检验、能准备上线评审的项目，公司验收仍需要真实业务证据。</p>
 <h2>如何看待这次结果</h2>

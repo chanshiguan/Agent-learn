@@ -7,7 +7,7 @@
 | 词语 | 本课程中的意思 | 容易混淆的地方 |
 |---|---|---|
 | 工作目录 | 终端当前所在的文件夹，使用 `pwd` 查看 | 相对路径从这里起算，不一定从脚本文件所在位置起算 |
-| 虚拟环境 | 项目单独使用的 Python 和包目录 | 主机 `.venv` 不会自动进入 Docker |
+| 全局Python3.12 | 主机各章共用的解释器 | 用户包目录保存库，不是另一套解释器；容器有自己的包目录 |
 | 依赖 | 程序需要的第三方包 | 安装名 `python-docx` 对应导入名 `docx` |
 | 正文段落 | Word 文档中实际的段落结构 | 自动换行、讲次和原著章回都不是同一概念 |
 | JSON | 可以保存字典、列表等结构的文本格式 | 文件存在不代表内容正确，要回查源文件 |
@@ -16,17 +16,19 @@
 ```bash
 # 确认终端当前目录；预期路径末尾是 classics-reader，避免在其他目录运行练习。
 pwd
-# 让当前终端优先使用项目环境的 Python 和依赖；随后检查解释器路径。
-source .venv/bin/activate
-# 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
+# 核对全局解释器版本，预期为3.12，无需执行激活命令。
+python --version
+# 记录当前解释器路径，用于排查包装给了其他版本的情况。
 python -c "import sys; print(sys.executable)"
-# 按清单将 DOCX 读取依赖装入当前 Python 环境；成功后可导入 docx，不会下载模型。
-python -m pip install -r requirements.txt
+# 将库装进全局3.12的用户包目录；后一参数允许本次越过Brew外部管理限制。
+python -m pip install --user --break-system-packages -r requirements.txt
 # 查看读取脚本所需参数；只显示帮助，不读取或改写讲稿。
 python read_docx.py --help
 ```
 
 ## Docker
+
+`python:3.12-slim` 是容器内的3.12精简Linux镜像。它不改变主机Python；镜像按同一依赖清单安装自己的库。
 
 | 词语 | 本课程中的意思 |
 |---|---|

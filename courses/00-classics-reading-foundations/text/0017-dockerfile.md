@@ -11,14 +11,13 @@
 
 ### 第 1 步：先划清镜像的输入边界
 
-Docker 构建只需要程序和依赖；不要把资料、虚拟环境与密钥交给镜像构建上下文。
+Docker 构建只需要程序和依赖；不要把资料与密钥交给镜像构建上下文。
 
 **写在哪里：**项目根目录下的 `.dockerignore`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
 
 **先理解：**.dockerignore 决定构建时哪些文件不送入 Docker 的构建上下文；.gitignore 决定 Git 忽略什么，两者不能互相代替。data/ 仍留在主机，运行容器时再挂载。
 
 ```text
-.venv/
 __pycache__/
 data/
 .env
@@ -26,7 +25,7 @@ data/
 *.log
 ```
 
-**写完后应当怎样：**构建上下文排除 data、.env 与 .venv。
+**写完后应当怎样：**构建上下文排除 data 与 .env。
 
 ### 第 2 步：把已做过的安装与运行写成配方
 
@@ -46,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# 明确复制程序，不把讲稿、虚拟环境和个人配置带进镜像。
+# 明确复制程序，不把讲稿和个人配置带进镜像。
 COPY read_docx.py ./
 # 容器从命令行接收资料路径，下一次可以处理另一份讲稿而不重建镜像。
 ENTRYPOINT ["python", "read_docx.py"]
@@ -74,7 +73,7 @@ ENTRYPOINT ["python", "read_docx.py"]
 
 ## 哪些内容不应进入镜像
 
-`COPY read_docx.py ./` 只复制程序，没有复制讲稿。再回看本节第 1 步的 `.dockerignore`：`data/` 排除资料与输出，`.venv/` 排除主机环境，`.env` 与 `.env.*` 排除之后可能使用的个人配置。
+`COPY read_docx.py ./` 只复制程序，没有复制讲稿。再回看本节第 1 步的 `.dockerignore`：`data/` 排除资料与输出，`.env` 与 `.env.*` 排除之后可能使用的个人配置。
 
 这能让镜像专注于程序。以后换知识库时，不用重新发布包含整套资料的镜像。目前你只写了一份 `Dockerfile`，它封装的是读取程序。下一节先构建并运行它；模型客户端镜像到第 4 章再创建。
 
@@ -100,7 +99,7 @@ ENTRYPOINT ["python", "read_docx.py"]
 
 **讲稿什么时候进去？** 运行时通过绑定挂载提供，不在构建时复制进镜像。换成第二讲只改运行参数；改了已复制进镜像的程序，则要重新构建。
 
-**通过证据：**能在 Dockerfile 找到上述职责，在 `.dockerignore` 找到数据、虚拟环境和配置文件排除项。固定直接依赖版本有助于复现，但不等于基础镜像和所有间接依赖都已完全锁定。
+**通过证据：**能在 Dockerfile 找到上述职责，在 `.dockerignore` 找到数据和配置文件排除项。固定直接依赖版本有助于复现，但不等于基础镜像和所有间接依赖都已完全锁定。
 
 </details>
 

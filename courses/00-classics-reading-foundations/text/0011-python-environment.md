@@ -1,60 +1,67 @@
-# 给伴读项目准备独立的 Python 环境
+# 统一使用全局 Python 3.12
 
-本单元预计 **35—50 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
+本单元预计 **35—50 分钟**，包括环境核对、编写依赖清单、安装库与一次排错；软件下载等待另计。
 
-接着上一单元[《先留下问题，后面才能判断有没有进步》](0010-baseline.html)继续。使用同一个 `classics-reader/` 项目，保留此前文件与输入资料。
+上一节已经保存了五份讲稿，并记录了电脑能否找到 Python。现在为读取讲稿准备工具：主机统一使用全局 Python 3.12，后续各章继续使用它。无需创建或激活项目虚拟环境。
 
 ## 先确认在哪台机器、哪个目录操作
 
-整套课程以一台新准备的开发电脑为起点。命令使用 macOS 的终端；你的 M1 Mac 可以作为这台电脑，也可以将本地模型部署在它上面、以后再学习远程连接。本阶段先让客户端和模型位于同一台机器，避免同时处理局域网配置。我们不假设它已经装好任何工具。
+本版安装步骤针对你实际练习的 Mac 和默认 zsh 终端，M1 也按同样步骤操作。下面只配置这台学习电脑，不依赖课程编写时使用的机器。应用和模型先放在同一台电脑上，等学到部署再处理网络连接。
 
-沿用导学创建的 `classics-reader`。下面假设它放在主目录；如果你选了别处，只改第一条 cd。macOS 和 Linux 的 shell 可以使用本课命令；Windows 使用 Linux 开发环境，原生 PowerShell 语法不在本版范围内。
+打开终端，进入导学创建的项目。下面假设它在主目录；如果你放在别处，第一行使用自己的实际位置。
 
 ```bash
-# 进入你自己创建的项目；后面所有相对路径都从这里开始。
+# 进入已经创建的项目，后面的相对文件路径都从这里开始。
 cd "$HOME/classics-reader"
-# 核对当前位置，预期最后一段为 classics-reader。
+# 预期路径末尾是 classics-reader，避免把文件写到别处。
 pwd
-# 核对导学创建的项目卡、题单和 data 目录是否在当前位置。
+# 核对导学保存的项目卡、题单和 data 文件夹。
 ls
 ```
 
-## 选择 Python 3.12
+## 用 Homebrew 准备软件
 
-这套新课程以 Python 3.12 为练习环境，与后面容器中的版本一致。已有其他项目的虚拟环境继续保留。
-
-```bash
-# 确认 Python 3.12 已可调用；预期显示 Python 3.12.x。
-python3.12 --version
-```
-
-若提示找不到命令，先安装 Python 3.12。新 Mac 可以从 Python 的 macOS 安装入口选择 3.12 系列安装包，按安装向导完成后重开终端；再次运行 `python3.12 --version`。已有 Homebrew 时，也可以运行 `brew install python@3.12`。这些安装方式选一种，不要求你先掌握包管理器。
-
-如果安装后重新打开了终端，先再次执行本页开头的 `cd` 和 `pwd`，确认已回到 `classics-reader`，再创建下面的 `.venv`。否则它会建在新终端默认的目录，而不是项目里。
-
-如果你已经使用 `uv`，还有下面这条可选路径。它不是课程的前置要求：
+Homebrew 的命令是 `brew`。本课程用它安装 Python、Docker Desktop 和 Ollama；本节只需要 Python，另外两个学到时再装。
 
 ```bash
-# 通过已有的 uv 准备 Python 3.12；下载完成后才能创建指定版本的环境。
-uv python install 3.12
-# 用 Python 3.12 建立项目专用环境，并放入 pip；这样后面的 python -m pip 才能运行。
-uv venv --python 3.12 --seed .venv
+# 查看 Homebrew 是否已可用；显示版本号就直接继续，不必重装。
+brew --version
 ```
 
-如果 `python3.12` 已经能运行，使用 Python 自带方式即可，不必两种都做：
+若提示找不到命令，先按 [Homebrew 官方入口](https://brew.sh/)安装。当前官方支持的 macOS 起点为15，安装前在“关于本机”核对系统要求。安装命令如下；已有 brew 的电脑跳过这一段：
 
 ```bash
-# 使用 Python 自带的 venv 创建项目独立环境；预期生成 .venv，不会修改其他项目。
-python3.12 -m venv .venv
+# 下载并运行 Homebrew 官方安装器；阅读它列出的改动，按提示完成初次安装。
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-[`venv` 虚拟环境](../courses/00-classics-reading-foundations/knowledge/python-environments.html)创建项目自己的包目录；`.venv` 是目录名。它不会把这台电脑所有 Python 都切换成 3.12。创建完后，在当前终端启用它：
+安装器结束后会给出 **Next steps**，执行其中为你的机器生成的 `brew shellenv` 配置，再运行 `brew --version`。这一步让终端找到 brew；不要略过它直接输入下一条命令。如果中途重开终端，先重新进入项目目录。
+
+## 让全课的 python 都指向 3.12
+
+如果你已经把全局 Python 配好了，先执行本节末的版本检查，通过后直接进入“现在动手写”。尚未配置时按下面两步完成：
 
 ```bash
-# 在写依赖文件前先启用刚创建的环境；后续安装就进入本项目。
-source .venv/bin/activate
+# 安装3.12系列，不使用会随默认版本变化的 brew install python。
+brew install python@3.12
+# 让当前终端先找到3.12的 python/python3 命令；不会覆盖 macOS 自带文件。
+export PATH="$(brew --prefix python@3.12)/libexec/bin:$PATH"
 ```
 
+`PATH` 是终端查找命令的目录列表，把3.12目录放在最前面，后面的 `python` 就会选中它。为了重开终端仍然生效，用文本编辑器打开 `~/.zshrc`（不存在就新建），把上面的 `export PATH=...` **整行原样**写到末尾并保存；已有相同行时不重复添加。`~` 表示你的用户主目录，这个文件不放在练习项目里。[Homebrew 的3.12说明](https://formulae.brew.sh/formula/python@3.12)给出了这一命令目录。
+
+现在核对实际选择：
+
+```bash
+# 预期显示 Python 3.12.x；最后一位补丁版本可以不同。
+python --version
+# 查看解释器路径，并确认没有处于项目虚拟环境；预期版本为(3, 12)，最后一项为True。
+python -c "import sys; print(sys.executable); print(sys.version_info[:2]); print(sys.prefix == sys.base_prefix)"
+# 确认 pip 属于同一个解释器；输出末尾应标明 python 3.12。
+python -m pip --version
+```
+
+若版本不对，先用 `type -a python` 查看是否有旧别名或环境管理工具接管了命令，修正终端配置后再检查。若最后一项是 `False`，当前终端仍在旧虚拟环境中，重新打开不自动激活它的终端再继续。不要在版本没对齐时安装依赖。
 
 ## 现在动手写
 
@@ -62,7 +69,7 @@ source .venv/bin/activate
 
 ### 第 1 步：亲手写第一份依赖清单
 
-虚拟环境隔离项目，依赖清单记录本项目需要什么。先不安装模型、网页或向量库。
+全课沿用同一个全局 Python 3.12。依赖清单记录项目需要的库，学到哪项功能再安装对应依赖。
 
 **写在哪里：**项目根目录下的 `requirements.txt`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
 
@@ -76,8 +83,8 @@ python-docx==1.2.0
 **写完后应当怎样：**保存后文件只有注释和一个库名；执行安装命令后可以导入 docx。
 
 ```bash
-# 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements.txt
+# 用当前全局3.12安装读取库到当前账号的包目录；两个参数的作用见下文，不会自动运行项目。
+python -m pip install --user --break-system-packages -r requirements.txt
 ```
 
 ### 第 2 步：把练习数据与凭据留在电脑上
@@ -89,7 +96,6 @@ python -m pip install -r requirements.txt
 **先理解：**每一行是一种 Git 忽略规则。末尾的 / 表示目录，* 表示任意匹配文字；这些规则只影响 Git 是否纳入文件，不会阻止 Python 读取资料。
 
 ```text
-.venv/
 __pycache__/
 *.pyc
 .env
@@ -99,46 +105,53 @@ data/
 
 **写完后应当怎样：**Git 只跟踪你之后创建的程序；忽略规则不能删除已经提交过的历史。
 
+## 为什么安装命令多了两个参数
+
+`brew` 管理解释器和应用；程序里导入的 Python 库仍由同一解释器的 pip 按清单安装。比如本节用 `python-docx` 读取 Word，不能用一个不对应本课程版本的 Brew 软件包来替换它。
+
+Homebrew 的 Python 会标记为外部管理，直接 pip 安装可能出现 `externally-managed-environment`。按你选定的“全局3.12、不建虚拟环境”方式，本课主机安装命令统一带两个参数：
+
+- `--user`：把库装入当前账号的 Python 用户包目录，供这一账号的全局3.12使用。
+- `--break-system-packages`：明确允许**这次命令**越过外部管理限制；它不创建新环境，也不需要永久改 pip 配置。
+
+这些库会被同一账号的其他3.12程序共享，因此本课继续用固定依赖清单。不要用 `sudo pip` 或删掉管理标记来解决报错。安装机制见 [Homebrew说明](https://docs.brew.sh/Language-Runtimes-and-Packages)与 [pip参数文档](https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-break-system-packages)。
+
+```bash
+# 查看库实际装到哪里；这是全局3.12的用户包目录，不是新的解释器。
+python -m site --user-site
+# 真正导入读取库；成功后显示提示与库的位置，下一节就用它读讲稿。
+python -c "import docx; print('读取库可以使用'); print(docx.__file__)"
+```
+
 ## 重新打开终端时怎么办
 
-虚拟环境只对当前终端生效。下次继续时，先 `cd` 到练习目录，再运行 `source .venv/bin/activate`。不用每次重建环境或重装依赖。运行 `deactivate` 可以退出，但不会删除目录。
+下次继续时，进入 `classics-reader`，核对 `python --version` 为3.12即可。已写入 `~/.zshrc` 的路径设置会随新终端生效，无需重装库或执行激活命令。模型地址等变量到第4章再设置，它们与 Python 解释器的选择是两回事。
+
+关闭终端，重新打开，进入项目后重新执行版本、pip与docx导入检查。把解释器路径、用户包目录和检查结果记入 `project-card.md`。以后出现“库明明装过却找不到”，先对照这两个位置，再决定是否重新安装。
 
 <details><summary>遇到 No module named docx</summary>
 
-先运行 `python -c "import sys; print(sys.executable)"`。如果路径不在本项目的 `.venv`，重新启用环境；如果在，再运行 `python -m pip install -r requirements.txt`。先核对解释器，能避免在错误环境里反复安装。
+先核对 `python --version`、`python -m pip --version` 是否都对应3.12，再用 `python -m pip show python-docx` 查看是否已装。确实缺少时，在项目根目录重跑上面带 `--user --break-system-packages` 的清单安装命令；不要另装一套 Python。
 
 </details>
 
-**动手验收：**关闭终端，重新打开，先按本页开头的方式进入 `classics-reader` 并启用 `.venv`，再执行下面三条检查：
-
-```bash
-# 确认现在用的仍是课程选定版本；预期为 Python 3.12.x。
-python --version
-# 找出实际解释器；路径应包含当前项目的 .venv，用户名和磁盘位置可以不同。
-python -c "import sys; print(sys.executable)"
-# 真正导入读取库；成功后打印提示，下一节才能用它读取 Word。
-python -c "from docx import Document; print('读取库可以使用')"
-```
-
-把解释器路径与这次检查结果记到 `project-card.md`。以后出现“库明明装了却找不到”时，先与这条记录比较，不必重新安装所有东西。下一节继续使用这个终端，新建第一份读取程序。
-
 ## 本单元验收与参考答案
 
-先完成上面的操作，再用自己的话回答。下面是核对思路和结果的参考，不要求背原句。
+<details class="answer-key"><summary>先回答，再展开核对</summary>
 
-<details class="answer-key"><summary>查看参考答案与通过标准</summary>
+**为什么用 python -m pip？** 让当前选定的 Python 运行 pip，避免单独的 pip 命令碰巧对应另一版本。
 
-**`python -m pip install -r requirements.txt` 在做什么？** 用当前 Python 的 pip，读取依赖清单并安装其中列出的包。本课安装的是 DOCX 读取库；它不会读取讲稿或安装模型。
+**--user 是另一套环境吗？** 不是。解释器仍是同一个全局3.12，只指定第三方库存放在当前账号的包目录，不创建项目虚拟环境。
 
-**重新打开终端，正确恢复顺序是什么？** 进入 `classics-reader/` → 启用 `.venv` → 检查 Python 版本和 `sys.executable` → 导入 `Document`。包已经装好时，不用重建环境。
+**为什么需要 --break-system-packages？** Homebrew Python 的外部管理标记默认会阻止此类安装。本课选择全局解释器，用该参数允许本次用户目录安装；它不负责选择Python版本。
 
-**通过证据：**版本为 Python 3.12.x；解释器路径包含当前项目的 `.venv`；导入检查输出“读取库可以使用”。路径中的用户名和磁盘位置可以不同。若出现 `No module named docx`，先核对解释器，再在同一环境安装依赖。
+**通过证据：**新终端中版本仍为3.12；`sys.prefix == sys.base_prefix` 为True；pip显示python3.12；docx可以导入，并已记录实际路径。下一节继续用同一个解释器写读取程序。
 
 </details>
 
 ## 资料依据
 
-[Hello-Agents 环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md)介绍独立环境与依赖管理；[Stage 0](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md)提供 Python 和终端前置。本项目将它们用于 DOCX 读取任务。
+[Stage 0](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md)与[Hello-Agents环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md)提供终端与依赖管理背景。本课程按你的选择使用全局3.12；上游的虚拟环境步骤无需照做。关于解释器、包目录和容器的区别，可选读[Python、pip与统一环境](../courses/00-classics-reading-foundations/knowledge/python-environments.html)。
 
 ## 用小检查核对自己的实现
 

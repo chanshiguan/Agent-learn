@@ -52,7 +52,7 @@ python -m uvicorn companion.app:app --host 127.0.0.1 --port 8000
 
 ```bash
 # 安装本课程固定的图框架与 SQLite 检查点依赖；业务数据仍由原来的 actions 表负责。
-python -m pip install -r requirements-graph.txt
+python -m pip install --user --break-system-packages -r requirements-graph.txt
 # 新建一份未确认草稿，记下 ID，避免拿已经提交的动作混淆实验。
 python -m companion action draft --text "通过状态图恢复的阅读笔记，请先核对这段具体内容。"
 # 输入该 ID，流程暂停并写检查点；命令退出后仍能恢复。

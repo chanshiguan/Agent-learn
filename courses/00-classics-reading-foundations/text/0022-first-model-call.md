@@ -2,7 +2,7 @@
 
 本单元预计 **70—85 分钟**。用时包括阅读、输入代码、运行与一次排错；下载、模型等待及公司评审另计。
 
-到这里，你应已完成[本地路线](0020-local-model.html)或[线上路线](0021-cloud-model.html)其中一种，并在当前终端设置了对应模型变量。接下来两条路线共用同一个程序，不需要另一种路线也做一遍。继续使用 `classics-reader/` 和已启用的 `.venv`；如果换过终端，先恢复环境，再按自己所选路线重新设置变量。
+到这里，你应已完成[本地路线](0020-local-model.html)或[线上路线](0021-cloud-model.html)其中一种，并在当前终端设置了对应模型变量。接下来两条路线共用同一个程序，不需要另一种路线也做一遍。继续在 `classics-reader/` 使用全局 Python 3.12；如果换过终端，先核对版本，再按自己所选路线重新设置模型变量。
 
 ## 让读取项目第一次向模型发请求
 
@@ -16,7 +16,7 @@
 
 ### 第 1 步：只增加模型客户端依赖
 
-继续使用同一个虚拟环境，先保存依赖清单，再安装；本地与线上路线共用客户端。
+继续使用同一个全局 Python 3.12，先保存依赖清单，再安装；本地与线上路线共用客户端。
 
 **写在哪里：**项目根目录下的 `requirements-model.txt`。 先在编辑器新建文件；父目录没有时先建目录。不要把代码正文当成终端命令执行。
 
@@ -31,7 +31,7 @@ openai==3.37.0
 
 ```bash
 # 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-model.txt
+python -m pip install --user --break-system-packages -r requirements-model.txt
 ```
 
 ### 第 2 步：先读取配置并检查地址
@@ -219,7 +219,7 @@ ENTRYPOINT ["python", "first_chat.py"]
 
 ```bash
 # 把模型接口客户端安装到当前 Python 环境；成功后 first_chat.py 才能导入所需 SDK。
-python -m pip install -r requirements-model.txt
+python -m pip install --user --break-system-packages -r requirements-model.txt
 ```
 
 这次新增的是兼容接口客户端。它负责把 Python 参数发成 HTTP 请求，并把响应解析回来；它不会自动替你下载模型或把讲稿加入知识库。

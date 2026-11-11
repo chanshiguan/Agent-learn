@@ -1,0 +1,11 @@
+{
+  "python": "3.12.14",
+  "global_interpreter": true,
+  "externally_managed": true,
+  "installed_in_temporary_user_site": true,
+  "public_docx_read": 5,
+  "without_override": "blocked_as_expected",
+  "with_user_and_override": "passed",
+  "interpreter_provider": "uv-managed existing Python, not Homebrew",
+  "scope": "PEP 668 and user-site installation only; Homebrew installation not executed"
+}

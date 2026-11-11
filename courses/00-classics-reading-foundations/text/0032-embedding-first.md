@@ -33,7 +33,7 @@ qdrant-client==1.15.1
 
 ```bash
 # 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-rag.txt
+python -m pip install --user --break-system-packages -r requirements-rag.txt
 ```
 
 ### 第 2 步：先写这个文件需要的导入
@@ -182,8 +182,8 @@ from .corpus import visible
 ## 运行并观察
 
 ```bash
-# 安装真实文本编码与 Qdrant 客户端；预期装进已激活的虚拟环境，首次下载可能较慢。
-python -m pip install -r requirements-rag.txt
+# 安装真实文本编码与 Qdrant 客户端；预期装进全局3.12的用户包目录，首次下载可能较慢。
+python -m pip install --user --break-system-packages -r requirements-rag.txt
 # 将当前五份讲稿切成适合入门编码器的小块；片段 ID 和资料 revision 会随参数变化。
 python -m companion ingest --size 80 --overlap 16
 # 第一次会下载 Embedding 权重；真实编码后，在内存里计算相似度，不需要 Qdrant 服务。

@@ -1,7 +1,7 @@
 [
   {
     "slug": "python-environments",
-    "title": "Python、pip 与虚拟环境",
+    "title": "Python、pip 与统一环境",
     "description": "装的是库，为什么换个终端就找不到？",
     "minutes": "8—10",
     "group": "跟着实战查概念",

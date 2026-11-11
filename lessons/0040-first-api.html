@@ -19,7 +19,7 @@ httpx==0.28.1
 </code></pre>
 <p>**写完后应当怎样：**安装 FastAPI、Uvicorn 和 HTTP 测试客户端，不安装前端框架。</p>
 <pre><code class="language-bash"># 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-web.txt
+python -m pip install --user --break-system-packages -r requirements-web.txt
 </code></pre>
 <h3>第 2 步：先写这个文件需要的导入</h3>
 <p>把终端已经跑通的 retrieve 和 answer 接到 HTTP，先不引入会话与账号。</p>
@@ -75,8 +75,8 @@ def health():
 </code></pre>
 <p>**写完后应当怎样：**GET /healthz 返回 alive；它不承诺模型已经就绪。</p>
 <h2 id="section-3">运行并观察</h2>
-<pre><code class="language-bash"># 安装网页服务依赖，复用已有虚拟环境；不需要另学一套前端框架。
-python -m pip install -r requirements-web.txt
+<pre><code class="language-bash"># 安装网页服务依赖，沿用全局3.12及其用户包目录；不需要另学一套前端框架。
+python -m pip install --user --break-system-packages -r requirements-web.txt
 # 启动本章最小服务，只监听本机；终端会持续运行，用 Ctrl+C 停止。
 python -m uvicorn companion.basic_app:app --host 127.0.0.1 --port 8000
 </code></pre>
@@ -118,5 +118,5 @@ PY
 </code></pre>
 <p>**预期：**空输入被拒绝；此检查未调用生成模型。</p>
 <p>遇到问题时，可以带着本单元名称、写到的文件、预期和实际结果继续问我。不要附密钥；也不用为了继续往后走而跳过失败。</p>
-<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。继续使用前面创建的虚拟环境；新终端需重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0040-first-api"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0039-query-rewrite.html"><small>上一单元</small>检验改写有没有改变原问题</a><a href="0041-source-page.html"><small>下一单元</small>让来源和错误都能看见（1/2：把本节能力连起来） →</a></nav></main></div>
+<p class="reading-note">运行位置：你从导学开始创建的 <code>classics-reader/</code> 项目根目录。主机统一使用全局 Python 3.12；新终端核对版本，并重新设置所选模型路线的环境变量。</p><label class="study-check"><input type="checkbox" data-study-check="0040-first-api"><span><strong>我已完成操作，并能解释结果</strong><small>手动标记保存在当前浏览器；换电脑后不自动同步。</small></span></label><section class="optional-box" id="optional-reading" aria-label="本单元选读"><span class="tag">选读</span><strong>想多了解一点</strong><p>现在跳过也能继续主线，不需要额外安装软件。</p><div class="optional-links"><a href="../courses/00-classics-reading-foundations/knowledge/model-interfaces.html" data-knowledge-link>本地与线上模型，哪些相同，哪些不同<span>10—12 分钟 · 分清模型、服务、SDK、token 和 Embedding。</span></a><a href="../courses/00-classics-reading-foundations/knowledge/service-boundaries.html" data-knowledge-link>从本机 API 到真实账号<span>8—10 分钟 · 认证、授权、输入校验各自解决什么。</span></a></div></section><nav class="next-prev" aria-label="相邻学习单元"><a href="0039-query-rewrite.html"><small>上一单元</small>检验改写有没有改变原问题</a><a href="0041-source-page.html"><small>下一单元</small>让来源和错误都能看见（1/2：把本节能力连起来） →</a></nav></main></div>
 <footer class="site-footer"><p>名著 AI 伴读助手 · 从基础练习到上线评审</p><p>主线按顺序练习，拓展按需阅读。用自己的操作和解释验收，阅读与打勾不代表已经掌握。</p><p><a href="../courses/00-classics-reading-foundations/sources.html">资料来源</a><a href="../courses/00-classics-reading-foundations/verification.html">验证范围</a><a href="../courses/00-classics-reading-foundations/index.html">返回课程地图</a></p><p>卡住时，记录单元、预期结果和实际报错；分享命令前去掉密钥。课程以新准备的学习环境为起点。</p></footer></div><script src="../assets/classics.js"></script></body></html>

@@ -10,38 +10,39 @@
 
 可以先记住这三个关系：Dockerfile 是构建说明，镜像是构建出的环境，容器是用这个环境运行程序的一次实例。一个镜像可以创建多个容器。容器也有自己的文件位置，宿主机上的讲稿不会自动出现在里面。
 
-## 在 M1 Mac 上准备 Docker Desktop
+## 用 Brew 安装 Docker Desktop
 
-先运行 `docker --version`。如果已经有客户端，再运行 `docker info`；后者能检查后台服务是否可用。只有版本号并不能证明容器已经能启动。
-
-还没有安装时，可以使用 Docker Desktop 的 Mac Apple Silicon 安装包：打开安装包，将 Docker 拖入“应用程序”，启动 Docker，按安装向导完成必要设置，等待界面显示引擎已运行。请核对安装器支持你的 macOS 版本，不要选 Intel 包。
-
-如果电脑已有 Homebrew，也可以用下面的安装命令；两种方式选一种即可：
-
-
-使用 Mac 时，安装前核对 [Docker 的系统要求](https://docs.docker.com/desktop/setup/install/mac-install/)：当前支持最新及前两个主要 macOS 版本，M1 选择 Apple silicon 安装包。能安装 Docker 不代表所有模型都能同时装入内存；模型容量到第4章再逐项观察。
-
-## 运行并观察
+沿用第1章准备的 Homebrew。已有 Docker 时先运行 `docker --version` 和 `docker info`，两项都成功就跳过安装；只显示版本号还不能证明后台引擎已运行。
 
 ```bash
-# 通过已有的 Homebrew 安装 Docker Desktop；安装完成后还需要启动应用。
-brew install --cask docker
-# 启动 Docker Desktop 的后台容器服务；等引擎就绪后再做 docker info 检查。
+# 安装 Docker Desktop，包含客户端与 Mac 上运行容器所需的后台引擎。
+brew install --cask docker-desktop
+# 打开后台引擎；按首次启动提示完成设置，等待它就绪。
 open -a Docker
 ```
 
-安装完成后，重新打开终端，检查：
+`--cask` 表示安装桌面应用。这里选择完整的 Docker Desktop；只安装名为 docker 的命令行工具，不一定已经具备可运行的引擎。包名以 [Homebrew 官方条目](https://formulae.brew.sh/cask/docker-desktop)为准。
 
 ```bash
-# 检查 Docker 客户端是否可找到；看到版本号还不能证明后台引擎可用。
+# 确认终端找得到 Docker 客户端。
 docker --version
-# 向 Docker 引擎查询状态；成功返回服务信息才表示可以继续运行容器。
+# 查询后台引擎；成功返回服务信息后才继续本节。
 docker info
 ```
 
-前者找不到命令时，检查安装和终端路径；后者提示连接不上 daemon 时，先看 Docker Desktop 是否启动。daemon 是负责创建和运行容器的后台服务。它和你输入的 `docker` 客户端不是同一个进程。
+`docker info` 若提示无法连接 daemon，先检查 Docker Desktop 是否启动。daemon 指后台负责创建和运行容器的服务。它不是 Python 虚拟环境，也不会改变主机的全局 Python。安装前还应满足 [Docker 的 Mac 系统要求](https://docs.docker.com/desktop/setup/install/mac-install/)。
 
-软件可从指定资料中的 Docker 入口获取；本课程的概念与练习均在本地讲解，不要求先读完整 Docker 官方手册。
+## 先读懂 python:3.12-slim
+
+这个名字写在 `docker run` 后，指的是一个**容器镜像**，不是需要在 Mac 上另装的 Python 软件。
+
+| 名字的一部分 | 含义 |
+|---|---|
+| `python` | Docker 官方 Python 镜像 |
+| `3.12` | 容器里使用Python3.12系列，与主机选择一致 |
+| `slim` | 镜像的Linux系统内容经过精简，不是另一门语言或另一种Python环境管理工具 |
+
+日常写代码和运行练习继续使用主机的全局3.12。学Docker时，用容器验证同一份程序能否换个运行位置继续工作。容器里的解释器和库由镜像提供，不会直接使用Mac上的安装目录；两边沿用同一份代码与依赖清单。补丁版本可能不同，后面的发布清单会记录实际版本。[镜像说明](https://hub.docker.com/_/python)列出了各标签含义。
 
 ## 第一条容器命令
 
@@ -63,20 +64,18 @@ docker run --rm python:3.12-slim python -c "print('容器里的 Python 已启动
 
 ## 对照主机与容器
 
-安装 Docker 时如果重新开过终端，原来的项目目录和虚拟环境不会自动恢复。先进入项目并启用 `.venv`，再比较两边的 Python：
+如果安装后重开了终端，先回到项目目录。无需激活任何环境，直接比较两边的解释器：
 
 ```bash
-# 回到第一章的项目；若当时放在别处，把这一行换成自己的项目路径。
+# 回到已有项目；放在其他位置时使用自己的实际路径。
 cd "$HOME/classics-reader"
-# 恢复主机的项目环境；容器不会因此使用这份环境，下面会观察这个区别。
-source .venv/bin/activate
-# 查看实际运行的 Python 路径；在主机上应指向本项目 .venv，用于排查包装错环境。
-python -c "import sys; print(sys.executable)"
-# 观察容器内的 Python 路径；它来自镜像，通常不同于主机的 .venv 路径。
-docker run --rm python:3.12-slim python -c "import sys; print(sys.executable)"
+# 主机应显示3.12，以及全局解释器位置。
+python -c "import sys; print(sys.version); print(sys.executable)"
+# 容器也应显示3.12，但路径属于镜像中的Linux文件系统。
+docker run --rm python:3.12-slim python -c "import sys; print(sys.version); print(sys.executable)"
 ```
 
-两次路径通常不同。第一条来自当前主机环境，第二条来自镜像。主机启用了 `.venv`，不代表容器也会使用它。下一单元会显式把程序和资料交给容器。
+版本系列一致、路径不同是预期结果。Mac里的读取库不会自动进容器，所以下一节先演示在容器内安装它，再读同一份讲稿；第3章把安装步骤写进Dockerfile，以后由构建完成。
 
 **本单元完成条件：**运行成功，并解释为何容器执行完会退出。若安装仍未完成，就把 Docker 状态记为待完成，不用跳到第三章假装已经跑过。
 
@@ -90,7 +89,9 @@ docker run --rm python:3.12-slim python -c "import sys; print(sys.executable)"
 
 **`--rm` 删除了什么？** 删除本次结束的容器，不删除 Python 镜像。下次仍可从同一镜像创建新容器。
 
-**主机启用 `.venv` 后，容器也会用它吗？** 不会。容器运行镜像里的 Python；可用两次 `sys.executable` 输出看见区别。
+**slim 是另一个Python版本吗？** 不是。它表示精简的Linux镜像；主机和容器都选3.12系列，但各自有解释器和依赖目录。
+
+**为什么容器还要安装读取库？** 容器不会直接使用Mac的用户包目录。相同的依赖清单告诉两个运行位置需要哪些库，Dockerfile负责镜像内的安装。
 
 **通过证据：**`docker info` 能连接引擎；临时容器打印“容器里的 Python 已启动”；能保留并说明两次解释器路径。仅看到客户端版本号还不够。
 

@@ -21,7 +21,7 @@
     "file": "0011-python-environment",
     "chapter": 1,
     "minutes": "35—50",
-    "title": "给伴读项目准备独立的 Python 环境"
+    "title": "统一使用全局 Python 3.12"
   },
   {
     "file": "0012-read-document",

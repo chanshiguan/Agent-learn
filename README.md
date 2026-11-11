@@ -55,3 +55,5 @@ python -m unittest discover -s tests -v
 ```
 
 技术主线依据 [awesome-agentic-ai-zh](https://github.com/WenyuChiou/awesome-agentic-ai-zh) 和 [Hello-Agents](https://github.com/datawhalechina/hello-agents)，文学核对与选读另在来源页列明。没有把第三方项目、文库或依赖的许可改为本项目许可；公开可见也不等于所有第三方材料可任意再分发。
+
+主机环境统一为全局Python3.12，软件优先用Homebrew安装，各章不创建项目虚拟环境。Python库用同一解释器的pip安装到当前账号；Docker练习使用3.12系列镜像，运行位置与包目录的区别在第2章说明。

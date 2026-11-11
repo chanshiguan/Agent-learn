@@ -69,11 +69,13 @@ if __name__=="__main__":
 
 **写完后应当怎样：**一旦以后改坏事务或版本检查，测试会失败。
 
+课堂检查仍使用主机的全局Python3.12。临时目录只隔离测试数据，不安装另一份解释器或依赖。
+
 ## 运行并观察
 
 ```bash
-# 安装固定版本清单中的项目依赖，让当前虚拟环境能导入测试涉及的模块。
-python -m pip install -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
+# 安装固定版本清单中的项目依赖，让同一个全局3.12能导入测试涉及的模块。
+python -m pip install --user --break-system-packages -r requirements-web.txt -r requirements-rag.txt -r requirements-graph.txt
 # 在全新临时库中运行自己写的测试，结束后清理，避免污染主线会话。
 python - <<'PY'
 import os

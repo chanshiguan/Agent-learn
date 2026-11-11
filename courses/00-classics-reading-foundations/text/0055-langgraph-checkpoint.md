@@ -31,7 +31,7 @@ langgraph-checkpoint-sqlite==3.1.3
 
 ```bash
 # 按刚亲手保存的清单安装本节所需依赖；只安装库，不会自动运行项目。
-python -m pip install -r requirements-graph.txt
+python -m pip install --user --break-system-packages -r requirements-graph.txt
 ```
 
 ### 第 2 步：为跨进程状态操作准备文件锁

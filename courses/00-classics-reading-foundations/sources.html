@@ -7,7 +7,7 @@
 <li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md">awesome-agentic-ai-zh Stage 0</a>：终端、Python、文件、JSON 与可观察结果；用于导学和第 1 章。</li>
 <li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md">awesome-agentic-ai-zh Stage 1</a>：本地模型、消息、延迟、用量与连接错误；用于第 4 章。</li>
 <li><a href="https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md">awesome-agentic-ai-zh FastAPI 与 Docker 练习</a>：Dockerfile、运行参数及宿主 Ollama 连接；先拆为第 2—3 章的纯文件实验，第 13、25 章再引入 Web 与组合部署。</li>
-<li><a href="https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md">Hello-Agents Extra07 环境配置</a>：独立环境和依赖安装；用于第 1 章。</li>
+<li><a href="https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md">Hello-Agents Extra07 环境配置</a>：选读依赖管理背景；第1章实际操作沿用全局3.12，不执行上游的环境创建步骤。</li>
 <li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7">Hello-Agents 第七章</a>：统一模型客户端、本地与线上服务的配置；用于第 4 章。</li>
 <li><a href="https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8">Hello-Agents 第八章</a>：文档进入检索流程的背景；用于第 5—12 章资料、检索、Embedding 和 Qdrant。</li>
 </ul>
@@ -15,7 +15,7 @@
 <p>可以通过两个仓库的公开讨论与问题记录了解其他学习者的卡点。参与讨论不是课程验收要求；分享报错时去掉密钥和私人讲稿。不把未经复现的单条讨论当作确定结论。</p>
 <h2>本课程新增的编排</h2>
 <p>同一组《狂人日记》讲稿贯穿主机读取、容器读取和镜像运行；先对照可确定的 JSON，再观察有波动的模型回答。Docker 入门和 DOCX 程序是围绕既有资料任务拆解出的桥接实验，不声称上游原文已经逐字提供这套伴读课程。</p>
-<p>课堂代码固定直接依赖 <code>python-docx==1.2.0</code>、<code>openai==3.37.0</code>，在独立 Python 3.12 环境做安装检查。镜像使用 <code>python:3.12-slim</code>；标签及间接依赖仍可能变化，更严格的可重现发布留到后续阶段。具体验证状态另见验证记录。</p>
+<p>课堂代码固定直接依赖 <code>python-docx==1.2.0</code>、<code>openai==3.37.0</code>。主机使用同一个全局 Python 3.12，库安装到当前账号的包目录。镜像使用 <code>python:3.12-slim</code>；标签及间接依赖仍可能变化，更严格的可重现发布留到后续阶段。作者安装检查的实际条件另见验证记录，不把作者环境当成学员前置。</p>
 <h2>Gaps</h2>
 <ul>
 <li>课程没有本次目标 M1 16 GB 机器的速度和容量实测；不得把其他机器的结果作为保证。</li>
@@ -24,9 +24,10 @@
 <li>主线与选读分开：外部拓展文章不是章节验收前置，不以厂商文章中的实验数字保证本项目效果。</li>
 </ul>
 <h2>新增选读来源</h2>
-<p>查阅日期：2026-11-10。知识拓展每页都标出相关来源和建议阅读段落。方法对比是原理与适用问题的比较，不是使用率或热度排名。</p>
+<p>查阅日期：2026-11-10；Homebrew与全局Python安装规则于2026-11-11复核。知识拓展每页都标出相关来源和建议阅读段落。方法对比是原理与适用问题的比较，不是使用率或热度排名。</p>
 <ul>
-<li><a href="https://docs.python.org/3.12/tutorial/venv.html">Python 3.12 虚拟环境教程</a>：补充解释 Python、pip 与独立环境。</li>
+<li><a href="https://formulae.brew.sh/formula/python@3.12">Homebrew的Python3.12条目</a>：核对全局解释器与命令路径。</li>
+<li><a href="https://pip.pypa.io/en/stable/cli/pip_install/">pip安装参数</a>：解释本课主机安装使用的用户目录与外部管理参数。</li>
 <li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">Docker 容器概念</a>：对照容器与虚拟机。</li>
 <li><a href="https://docs.ollama.com/api/openai-compatibility">Ollama 接口兼容说明</a>：说明兼容范围与本地连接角色。</li>
 <li><a href="https://qdrant.tech/articles/hybrid-search/">Qdrant Hybrid Search</a>：词项检索、稠密检索与融合的取舍。</li>

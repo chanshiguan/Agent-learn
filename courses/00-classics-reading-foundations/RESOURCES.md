@@ -7,7 +7,7 @@
 - [awesome-agentic-ai-zh Stage 0](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/00-foundations.zh-Hans.md)：终端、Python、文件、JSON 与可观察结果；用于导学和第 1 章。
 - [awesome-agentic-ai-zh Stage 1](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/stages/01-llm-basics.zh-Hans.md)：本地模型、消息、延迟、用量与连接错误；用于第 4 章。
 - [awesome-agentic-ai-zh FastAPI 与 Docker 练习](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/examples/stage-7/05-deploy/README.zh-Hans.md)：Dockerfile、运行参数及宿主 Ollama 连接；先拆为第 2—3 章的纯文件实验，第 13、25 章再引入 Web 与组合部署。
-- [Hello-Agents Extra07 环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md)：独立环境和依赖安装；用于第 1 章。
+- [Hello-Agents Extra07 环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE.md)：选读依赖管理背景；第1章实际操作沿用全局3.12，不执行上游的环境创建步骤。
 - [Hello-Agents 第七章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7)：统一模型客户端、本地与线上服务的配置；用于第 4 章。
 - [Hello-Agents 第八章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8)：文档进入检索流程的背景；用于第 5—12 章资料、检索、Embedding 和 Qdrant。
 
@@ -19,7 +19,7 @@
 
 同一组《狂人日记》讲稿贯穿主机读取、容器读取和镜像运行；先对照可确定的 JSON，再观察有波动的模型回答。Docker 入门和 DOCX 程序是围绕既有资料任务拆解出的桥接实验，不声称上游原文已经逐字提供这套伴读课程。
 
-课堂代码固定直接依赖 `python-docx==1.2.0`、`openai==3.37.0`，在独立 Python 3.12 环境做安装检查。镜像使用 `python:3.12-slim`；标签及间接依赖仍可能变化，更严格的可重现发布留到后续阶段。具体验证状态另见验证记录。
+课堂代码固定直接依赖 `python-docx==1.2.0`、`openai==3.37.0`。主机使用同一个全局 Python 3.12，库安装到当前账号的包目录。镜像使用 `python:3.12-slim`；标签及间接依赖仍可能变化，更严格的可重现发布留到后续阶段。作者安装检查的实际条件另见验证记录，不把作者环境当成学员前置。
 
 ## Gaps
 
@@ -30,9 +30,10 @@
 
 ## 新增选读来源
 
-查阅日期：2026-11-10。知识拓展每页都标出相关来源和建议阅读段落。方法对比是原理与适用问题的比较，不是使用率或热度排名。
+查阅日期：2026-11-10；Homebrew与全局Python安装规则于2026-11-11复核。知识拓展每页都标出相关来源和建议阅读段落。方法对比是原理与适用问题的比较，不是使用率或热度排名。
 
-- [Python 3.12 虚拟环境教程](https://docs.python.org/3.12/tutorial/venv.html)：补充解释 Python、pip 与独立环境。
+- [Homebrew的Python3.12条目](https://formulae.brew.sh/formula/python@3.12)：核对全局解释器与命令路径。
+- [pip安装参数](https://pip.pypa.io/en/stable/cli/pip_install/)：解释本课主机安装使用的用户目录与外部管理参数。
 - [Docker 容器概念](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/)：对照容器与虚拟机。
 - [Ollama 接口兼容说明](https://docs.ollama.com/api/openai-compatibility)：说明兼容范围与本地连接角色。
 - [Qdrant Hybrid Search](https://qdrant.tech/articles/hybrid-search/)：词项检索、稠密检索与融合的取舍。

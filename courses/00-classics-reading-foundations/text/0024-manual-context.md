@@ -8,7 +8,7 @@
 
 第 4 章的模型已经能回答，但它没有读过你的讲稿。今天只接一条线：把第一讲里的一小段文字和问题放进同一个请求。先别装向量库，也别一次发送五份全文。
 
-所有新命令都在你自建的 `classics-reader/` 中运行，并启用前面建好的 `.venv`。新终端需要重新设置第 4 章的模型环境变量。后续结果统一放在 `data/live/`；`data/output/first.json` 是第一章读稿结果，原始 DOCX 始终留在 `data/input/`。`python -m companion` 表示运行 `companion` 这个包的入口，不是安装一个新软件。
+所有新命令都在你自建的 `classics-reader/` 中运行，并沿用前面配置的全局 Python 3.12。新终端需要重新设置第 4 章的模型环境变量。后续结果统一放在 `data/live/`；`data/output/first.json` 是第一章读稿结果，原始 DOCX 始终留在 `data/input/`。`python -m companion` 表示运行 `companion` 这个包的入口，不是安装一个新软件。
 
 ## 先理解请求里的三种内容
 

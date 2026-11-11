@@ -9,7 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# 明确复制程序，不把讲稿、虚拟环境和个人配置带进镜像。
+# 明确复制程序，不把讲稿和个人配置带进镜像。
 COPY read_docx.py ./
 # 容器从命令行接收资料路径，下一次可以处理另一份讲稿而不重建镜像。
 ENTRYPOINT [&quot;python&quot;, &quot;read_docx.py&quot;]
